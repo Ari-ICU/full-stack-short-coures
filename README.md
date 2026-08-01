@@ -16,7 +16,11 @@ The curriculum is divided into comprehensive modules, with a specific focus on e
 
 Current modules include:
 - **Course Overview:** Introduction to the client-server model, HTTP/HTTPS, REST APIs, and development environment setup.
-- **Web Design:** HTML structure, semantic tags, forms, tables, and CSS styling.
+- **Web Design:** 
+  - **HTML:** Semantic structure, attributes, forms, and tables.
+  - **CSS:** Selectors, specificity, box model, Flexbox/Grid, positioning, modern units, and animations.
+  - **Bootstrap:** 12-column grid layout, UI components (Cards, Navbar, Modals), and utility classes.
+  - **JavaScript:** Variables & Scope, DOM manipulation, array methods, modern ES6 syntax, and API Fetching.
 - **Git & GitHub:** Version control fundamentals, branching, merging, stashing, and conflict resolution.
 - **TypeScript:** Typing fundamentals, generics, utility types, and strict mode.
 - **RDBMS (PostgreSQL):** Database design, ERD diagrams, Normalization, SQL fundamentals, Joins, and JSONB.
@@ -82,4 +86,5 @@ The platform supports **Mermaid.js** for rendering charts and diagrams (e.g., En
 
 ## 🚀 Deployment
 
-The easiest way to deploy this Next.js platform is to use [Vercel](https://vercel.com/) directly from your GitHub repository. It will automatically build and optimize the MDX files into static pages.
+This platform is configured for **Static Export** (`output: "export"`) and is automatically deployed to **GitHub Pages** via GitHub Actions (`.github/workflows/nextjs.yml`). 
+Any pushes to the `main` branch will trigger a build and publish the latest MDX content directly to your GitHub Pages URL.
