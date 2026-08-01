@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Full Stack Web Development Curriculum
 
-## Getting Started
+This repository contains an interactive, modern curriculum platform for teaching Full Stack Web Development. It is built with **Next.js (App Router)** and uses **MDX (Markdown + JSX)** to render high-quality, localized course content.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Content Rendering:** MDX (`react-markdown`, `remark-gfm`)
+- **Styling:** Tailwind CSS 4 & Tailwind Typography (`@tailwindcss/typography`)
+- **Diagrams:** Mermaid.js (Client-side rendering)
+- **Language:** TypeScript
+
+## 📚 Curriculum Structure
+
+The curriculum is divided into comprehensive modules, with a specific focus on explaining concepts in Khmer while strictly maintaining technical terminology in English.
+
+Current modules include:
+- **Course Overview:** Introduction to the client-server model, HTTP/HTTPS, REST APIs, and development environment setup.
+- **Web Design:** HTML structure, semantic tags, forms, tables, and CSS styling.
+- **Git & GitHub:** Version control fundamentals, branching, merging, stashing, and conflict resolution.
+- **TypeScript:** Typing fundamentals, generics, utility types, and strict mode.
+- **RDBMS (PostgreSQL):** Database design, ERD diagrams, Normalization, SQL fundamentals, Joins, and JSONB.
+- **Frontend Engineering:** React fundamentals, Hooks (`useState`, `useEffect`), State Management (Redux Toolkit), Routing, Forms (Zod + React Hook Form), and Axios API Integration.
+- **Next.js (Optional):** App Router, Server vs Client Components, Data Fetching, and Vercel Deployment.
+
+## 🛠️ Getting Started
+
+First, install the dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to explore the curriculum platform.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📝 Editing Content
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Course contents are stored in the `src/courses/` directory. Each lesson is written in `.mdx` format. 
+To create or modify a lesson:
+1. Navigate to the relevant module inside `src/courses/`.
+2. Edit or create an `.mdx` file.
+3. Ensure the YAML frontmatter includes `title`, `description`, `objectives`, `module`, and `order`.
+4. (Optional) You can include a `quiz` block in the frontmatter to test the student's understanding.
 
-## Learn More
+### Example Frontmatter
 
-To learn more about Next.js, take a look at the following resources:
+```yaml
+---
+title: "Lesson Title"
+description: "A brief description in Khmer."
+objectives:
+  - "Objective 1"
+  - "Objective 2"
+module: module-1-name
+order: 1
+quiz:
+  - question: "Question text?"
+    options:
+      - "Option 1"
+      - "Option 2"
+    correctAnswer: 1
+    explanation: "Explanation text."
+---
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗺️ Diagrams (Mermaid)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The platform supports **Mermaid.js** for rendering charts and diagrams (e.g., Entity Relationship Diagrams). Just use a standard markdown code block with the `mermaid` language tag:
 
-## Deploy on Vercel
+```markdown
+    ```mermaid
+    erDiagram
+        USERS ||--o{ ORDERS : "places"
+    ```
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The easiest way to deploy this Next.js platform is to use [Vercel](https://vercel.com/) directly from your GitHub repository. It will automatically build and optimize the MDX files into static pages.
