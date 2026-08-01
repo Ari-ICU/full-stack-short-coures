@@ -162,8 +162,8 @@ const COURSE_ORDER = [
   "web-design",
   "typescript",
   "git",
-  "rdbms",
   "frontend-engineering",
+  "rdbms",
   "backend-architecture"
 ];
 
