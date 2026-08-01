@@ -1,0 +1,87 @@
+---
+title: "File Upload Handling"
+description: "ស្វែងយល់ពីរបៀបទទួល File (ដូចជារូបភាព) ពីអ្នកប្រើប្រាស់ និងការរក្សាទុកដោយប្រើប្រាស់បណ្ណាល័យ Multer។"
+objectives:
+  - "យល់ពីទម្រង់ទិន្នន័យ `multipart/form-data`"
+  - "រៀនប្រើប្រាស់ `multer` សម្រាប់ទទួល File ក្នុង Express"
+  - "ស្វែងយល់ពីជម្រើសនៃការរក្សាទុក File (Local ទល់នឹង Cloud)"
+module: module-4-security-and-advanced
+order: 3
+quiz:
+  - question: "ដើម្បីអាចបញ្ជូន File (រូបភាព ឬឯកសារ) ពី HTML Form ទៅកាន់ Server បាន តើយើងត្រូវកំណត់ Attribute អ្វីនៅក្នុង Form?"
+    options:
+      - "method=\"upload\""
+      - "enctype=\"multipart/form-data\""
+      - "type=\"file\""
+      - "data-type=\"binary\""
+    correctAnswer: 1
+    explanation: "តាមស្តង់ដាររបស់ Web ដើម្បីបញ្ជូនទិន្នន័យជាប្រភេទ File យើងដាច់ខាតត្រូវតែកំណត់ `enctype=\"multipart/form-data\"` នៅលើ Form បើមិនដូច្នេះទេ Server នឹងមិនអាចអាន File នោះបានឡើយ។"
+---
+
+## 📁 ហេតុអ្វីការ Upload File មានភាពស្មុគស្មាញ?
+
+តាមធម្មតា នៅពេលអ្នកប្រើប្រាស់បញ្ជូនឈ្មោះ ឬអុីមែល ទិន្នន័យនោះមកជាទម្រង់អក្សរ (JSON ឬ Text ធម្មតា)។ ប៉ុន្តែនៅពេលពួកគេបញ្ជូនរូបភាព វាជា **Binary Data (ទិន្នន័យកូដម៉ាស៊ីន)**។ 
+
+ដើម្បីអាចផ្ញើ Binary Data នេះបាន Frontend ត្រូវប្រើទម្រង់មួយហៅថា `multipart/form-data`។ ជាអកុសល Express ធម្មតាមិនយល់ពីទម្រង់នេះទេ យើងត្រូវការអ្នកបកប្រែដែលនោះគឺបណ្ណាល័យ **Multer**។
+
+---
+
+## 🛠️ ការប្រើប្រាស់ Multer សម្រាប់ Upload
+
+**១. ដំឡើងកញ្ចប់ `multer`:**
+```bash
+npm install multer
+```
+
+**២. ការកំណត់កន្លែងរក្សាទុក (Storage) និង Upload:**
+
+យើងនឹងបង្កើត Middleware មួយសម្រាប់ទទួល File និងរក្សាទុកក្នុង Folder ឈ្មោះ `uploads/` នៅក្នុងកុំព្យូទ័រ Server។
+
+```javascript
+const express = require('express');
+const multer  = require('multer');
+const path = require('path');
+const app = express();
+
+// ការកំណត់កន្លែងទុក និងឈ្មោះ File ថ្មី
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // ប្រាប់អោយទុកក្នុង folder 'uploads'
+    cb(null, 'uploads/') 
+  },
+  filename: function (req, file, cb) {
+    // ដូរឈ្មោះ File អោយមានម៉ោង ដើម្បីកុំអោយជាន់ឈ្មោះគ្នា
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, uniqueSuffix + path.extname(file.originalname))
+  }
+})
+
+const upload = multer({ storage: storage })
+
+// ប្រើប្រាស់ Middleware នេះក្នុង Route
+// 'profile_pic' ត្រូវតែដូចគ្នានឹង name field ក្នុង HTML Form
+app.post('/api/upload-profile', upload.single('profile_pic'), (req, res) => {
+  if (!req.file) {
+      return res.status(400).send("គ្មាន File ត្រូវបានបញ្ចូលទេ");
+  }
+  
+  // req.file មានផ្ទុកព័ត៌មានរបស់ File នោះ
+  res.json({
+      message: "អាប់ឡូតជោគជ័យ!",
+      filename: req.file.filename,
+      size: req.file.size
+  });
+});
+```
+
+---
+
+## ☁️ ការរក្សាទុកនៅលើ Cloud (AWS S3, Cloudinary)
+
+ការរក្សាទុករូបភាពនៅក្នុង Server ផ្ទាល់ខ្លួន (Local Storage) ជាជម្រើសងាយស្រួល តែវាមិនសូវល្អទេនៅពេលកម្មវិធីអ្នកមានអ្នកប្រើប្រាស់ច្រើន ព្រោះ Storage កុំព្យូទ័រអ្នកអាចនឹងពេញ ហើយពេលអ្នក Deploy ឡើងវិញ រូបភាពអាចនឹងបាត់បង់។
+
+**ជម្រើសល្អបំផុត (Best Practice):** ក្រុមហ៊ុនធំៗតែងតែរក្សាទុករូបភាពនៅលើសេវាកម្ម Cloud Storage ដូចជា៖
+- **AWS S3 (Amazon Web Services):** មានសុវត្ថិភាពខ្ពស់ និងថោក។
+- **Cloudinary:** ស្រួលប្រើ និងមានមុខងារកាត់តរូបភាព (Crop, Resize) ស្វ័យប្រវត្តិ។
+
+នៅពេលអ្នកប្រើប្រាស់ Cloud Storage, អ្នកគ្រាន់តែប្រើ Multer ដើម្បីទទួល File បណ្តោះអាសន្ន រួចបញ្ជូនវាទៅកាន់ AWS S3។ បន្ទាប់មក S3 នឹងផ្តល់ URL របស់រូបភាពនោះមកវិញ ហើយអ្នកគ្រាន់តែរក្សាទុក URL នោះនៅក្នុង Database ប៉ុណ្ណោះ។

@@ -1,0 +1,74 @@
+---
+title: "API Testing with Postman"
+description: "រៀនពីរបៀបធ្វើតេស្ត (Test) API របស់អ្នកដោយប្រើប្រាស់កម្មវិធី Postman មុននឹងបញ្ជូនអោយ Frontend ប្រើប្រាស់។"
+objectives:
+  - "ស្វែងយល់ពីអត្ថប្រយោជន៍របស់កម្មវិធី Postman"
+  - "រៀនពីរបៀបផ្ញើ GET, POST, PUT, DELETE requests"
+  - "យល់ពីការបញ្ជូនទិន្នន័យក្នុង Body (JSON) និងការកំណត់ Headers"
+module: module-2-express-and-rest
+order: 4
+quiz:
+  - question: "នៅពេលធ្វើការតេស្ត POST Request ដើម្បីបញ្ជូនទិន្នន័យជា JSON នៅក្នុង Postman តើយើងត្រូវចូលទៅកាន់ Tab មួយណា?"
+    options:
+      - "Params"
+      - "Headers"
+      - "Body -> raw -> JSON"
+      - "Authorization"
+    correctAnswer: 2
+    explanation: "ដើម្បីបញ្ជូនទិន្នន័យ JSON ទៅកាន់ Server យើងត្រូវជ្រើសរើសផ្ទាំង Body, យកប្រភេទ raw, ហើយជ្រើសរើសទម្រង់ JSON នៅលើ Postman។"
+---
+
+## 🧪 ហេតុអ្វីត្រូវធ្វើតេស្ត API?
+
+ក្នុងនាមជា Backend Developer នៅពេលដែលយើងសរសេរ API រួច (ឧទាហរណ៍ `/api/users`) យើងមិនទាន់មានផ្ទាំង UI (Frontend) ដើម្បីសាកល្បងចុចបញ្ចូលទិន្នន័យនោះទេ។
+
+ប្រសិនបើយើងប្រើ Browser ធម្មតាដើម្បីតេស្ត គឺវាអាចធ្វើបានតែ **GET Request** ប៉ុណ្ណោះ។ យើងមិនអាចផ្ញើ **POST, PUT, DELETE** ឬបញ្ជូនទិន្នន័យ JSON តាម Browser ធម្មតាបានទេ។
+
+នោះហើយជាមូលហេតុដែលយើងត្រូវការកម្មវិធីពិសេសហៅថា **Postman** (ឬ Insomnia, Thunder Client) ដើម្បីដើរតួជា "អ្នកប្រើប្រាស់សិប្បនិម្មិត" ក្នុងការសាកល្បង API របស់យើង។
+
+---
+
+## 🚀 ការប្រើប្រាស់ Postman ជាមូលដ្ឋាន
+
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/c/c2/Postman_%28software%29.png" alt="Postman Logo" width="120" />
+</div>
+
+អ្នកអាចទាញយក Postman ពី [postman.com](https://www.postman.com/) និងដំឡើងនៅលើកុំព្យូទ័ររបស់អ្នក។ បន្ទាប់ពីបើកកម្មវិធី នេះគឺជារបៀបធ្វើតេស្ត Request សំខាន់ៗ៖
+
+### ១. ការធ្វើតេស្ត GET Request (ទាញយកទិន្នន័យ)
+- ជ្រើសរើស Method **GET**
+- បញ្ចូល URL: `http://localhost:3000/api/users`
+- ចុចប៊ូតុង **Send** ពណ៌ខៀវ
+- មើលលទ្ធផលតប (Response) នៅប្រអប់ផ្នែកខាងក្រោម។ ប្រសិនបើជោគជ័យ អ្នកនឹងឃើញ Status Code `200 OK` និងទិន្នន័យ JSON។
+
+### ២. ការធ្វើតេស្ត POST Request (បញ្ជូនទិន្នន័យថ្មី)
+ដើម្បីសាកល្បងបង្កើតអ្នកប្រើប្រាស់ថ្មី យើងត្រូវបញ្ជូនទិន្នន័យទៅឱ្យ Server តាមរយៈ **Body**។
+
+- ជ្រើសរើស Method **POST**
+- បញ្ចូល URL: `http://localhost:3000/api/users`
+- នៅក្រោមរបារ URL ជ្រើសរើស Tab **Body**
+- ជ្រើសរើសយក **raw** 
+- នៅចុងខាងស្តាំនៃពាក្យ raw ដូរពី Text ទៅជា **JSON**
+- សរសេរកូដ JSON ដែលចង់បញ្ជូន៖
+```json
+{
+    "username": "sokha",
+    "email": "sokha@example.com",
+    "age": 25
+}
+```
+- ចុចប៊ូតុង **Send**។ អ្នកគួរតែទទួលបាន `201 Created` ពី Server ប្រសិនបើ API ដំណើរការត្រឹមត្រូវ។
+
+### ៣. ការផ្ញើ Headers (ឧទាហរណ៍ Token)
+ពេលខ្លះ API ទាមទារអោយយើងមានសោរ (Token) ទើបអនុញ្ញាតអោយប្រើបាន។
+- ចូលទៅកាន់ Tab **Headers**
+- បញ្ចូល Key `Authorization` និង Value ឧទាហរណ៍ `Bearer eyJhbGciOi...` 
+
+---
+
+## 📂 ការរក្សាទុក Requests (Collections)
+
+នៅពេលគម្រោងកាន់តែធំ អ្នកនឹងមាន API រាប់សិប។ Postman អនុញ្ញាតអោយអ្នកបង្កើត **Collection** ដែលប្រៀបបាននឹង Folder ដើម្បីរក្សាទុក (Save) រាល់ Requests ទាំងនោះទុកប្រើនៅថ្ងៃក្រោយ ឬអាចចែករំលែក (Share) ទៅកាន់សមាជិកក្រុម (Frontend Developers) អោយពួកគេដឹងពីរបៀបហៅ API របស់អ្នកផងដែរ។ 
+
+នេះគឺជាជំនាញដ៏សំខាន់ដែលក្រុមហ៊ុនអភិវឌ្ឍន៍សូហ្វវែរទាមទារអោយ Backend Developer ចេះស្ទាត់ជំនាញ!

@@ -1,0 +1,97 @@
+---
+title: "PostgreSQL Integration (Raw)"
+description: "របៀបភ្ជាប់កូដ Node.js របស់អ្នកទៅកាន់មូលដ្ឋានទិន្នន័យ PostgreSQL និងការសរសេរកូដ SQL បែប Raw ដើម្បីទាញយកទិន្នន័យផ្ទាល់។"
+objectives:
+  - "យល់ពីការប្រើប្រាស់បណ្ណាល័យ `pg` (node-postgres)"
+  - "រៀនពីរបៀបភ្ជាប់ (Connect) ទៅកាន់ Database"
+  - "សរសេរកូដ SQL បែប Raw ក្នុង Node.js"
+module: module-3-database-integration
+order: 1
+quiz:
+  - question: "នៅពេលសរសេរ Raw SQL ជាមួយបណ្ណាល័យ `pg` តើយើងការពារការវាយប្រហារបែប SQL Injection យ៉ាងដូចម្តេច?"
+    options:
+      - "ប្រើ Regex ដើម្បីលុបសញ្ញា ' ចេញ"
+      - "ប្រើ Parameterized Queries ដូចជា `$1, $2` ជំនួសឱ្យការបូកបញ្ចូលអក្សរផ្ទាល់"
+      - "ប្រើ HTTPS សម្រាប់ការភ្ជាប់"
+      - "ការពារដោយមិនអោយអ្នកប្រើប្រាស់វាយសញ្ញាពិសេស"
+    correctAnswer: 1
+    explanation: "ការប្រើប្រាស់ Parameterized Queries (ឧទាហរណ៍ ដាក់ $1 ក្នុងកូដ SQL រួចបញ្ជូនទិន្នន័យជា Array តាមក្រោយ) គឺជាវិធីសាស្ត្រស្តង់ដារ និងមានសុវត្ថិភាពបំផុតដើម្បីការពារ SQL Injection។"
+---
+
+## 🐘 ការភ្ជាប់ទៅកាន់ PostgreSQL
+
+បន្ទាប់ពីអ្នកបានរចនាមូលដ្ឋានទិន្នន័យរបស់អ្នកនៅក្នុង PostgreSQL រួចរាល់ ជំហានបន្ទាប់គឺត្រូវយកកម្មវិធី Node.js/Express របស់អ្នកទៅភ្ជាប់ជាមួយវា។
+
+យើងនឹងប្រើប្រាស់បណ្ណាល័យដ៏ល្បីឈ្មោះមួយគឺ **`pg` (node-postgres)** ដែលអាចអោយយើងសរសេរកូដ SQL ផ្ទាល់ៗបាន។
+
+### ១. ការដំឡើង និងរៀបចំ Configuration
+
+ដំបូងត្រូវដំឡើងកញ្ចប់ `pg`:
+```bash
+npm install pg
+```
+
+បន្ទាប់មក យើងបង្កើត File មួយ (ឧ. `db.js`) ដើម្បីរក្សាការភ្ជាប់នេះ៖
+
+```javascript
+// db.js
+const { Pool } = require('pg');
+
+// បង្កើតអាង (Pool) ស្តុកទុកការភ្ជាប់
+// Pool ជួយអោយការទាញទិន្នន័យច្រើនដងមានល្បឿនលឿន 
+// ព្រោះវាមិនបាច់បិទបើក Connection រាល់ដង
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'my_shop_db',
+  password: 'my_secret_password',
+  port: 5432,
+});
+
+module.exports = {
+  query: (text, params) => pool.query(text, params),
+};
+```
+
+---
+
+## 📝 ការសរសេរ Raw SQL (Parameterized Queries)
+
+ឥឡូវយើងអាចយក `db.js` មកប្រើនៅក្នុង Express Route របស់យើងបានហើយ។ យើងនឹងប្រើ **Parameterized Queries** ($1, $2) ដើម្បីការពារការវាយប្រហារ (SQL Injection)។
+
+```javascript
+const express = require('express');
+const db = require('./db'); // នាំចូលការភ្ជាប់
+const app = express();
+app.use(express.json());
+
+// ឧទាហរណ៍ទី១: ការទាញយកអ្នកប្រើប្រាស់ទាំងអស់ (SELECT)
+app.get('/users', async (req, res, next) => {
+  try {
+    const result = await db.query('SELECT id, username, email FROM users');
+    res.json(result.rows); // result.rows គឺជា Array ដែលមានទិន្នន័យពិតប្រាកដ
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ឧទាហរណ៍ទី២: ការបញ្ចូលទិន្នន័យថ្មី (INSERT)
+app.post('/users', async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    // ចំណាំ៖ ការសរសេរ $1, $2, $3 ជា Parameterized Query ដើម្បីសុវត្ថិភាព
+    // "RETURNING *" ប្រាប់អោយ Postgres ផ្តល់ទិន្នន័យដែលទើបតែបញ្ចូលរួចមកវិញ
+    const text = 'INSERT INTO users(username, email, password) VALUES($1, $2, $3) RETURNING id, username, email';
+    const values = [username, email, password];
+    
+    const result = await db.query(text, values);
+    
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+```
+
+ការសរសេរ Raw SQL បែបនេះគឺលឿន និងច្បាស់លាស់ ប៉ុន្តែនៅពេលដែលគម្រោងមានទំហំធំ ហើយតារាងមានទំនាក់ទំនងគ្នាស្មុគស្មាញ (Join ច្រើន) កូដអាចនឹងប្រែជាវែង និងពិបាកថែទាំ។ ដូច្នេះហើយ ទើបក្រុមហ៊ុនភាគច្រើនប្តូរទៅប្រើ **ORM (Object-Relational Mapping)** ដូចជា **TypeORM** ឬ Prisma នៅក្នុងមេរៀនបន្ទាប់។
