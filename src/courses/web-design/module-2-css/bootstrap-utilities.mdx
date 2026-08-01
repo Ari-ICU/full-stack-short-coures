@@ -1,0 +1,112 @@
+---
+title: "Bootstrap Utilities"
+description: "ស្វែងយល់ពីរបៀបប្រើប្រាស់ Utility Classes របស់ Bootstrap ដើម្បីកែប្រែគម្លាត, ពណ៌, នឹង Layout យ៉ាងរហ័សដោយមិនបាច់សរសេរ CSS។"
+objectives:
+  - "យល់ និងចេះប្រើ Spacing Utilities (Margin នឹង Padding)"
+  - "ចេះប្រើប្រាស់ Display Utilities សម្រាប់លាក់ ឬបង្ហាញ Elements"
+  - "ចេះតម្រៀប Elements តាមរយៈ Flex Utilities"
+module: module-2-css
+order: 12
+quiz:
+  - question: "តើ Class មួយណាដែលត្រូវបានប្រើសម្រាប់រុញ Margin អោយនៅចំកណ្តាល (Center) ដោយស្វ័យប្រវត្តិ (Margin X Auto)?"
+    options:
+      - ".mx-auto"
+      - ".m-auto"
+      - ".mt-auto"
+      - ".margin-center"
+    correctAnswer: 0
+    explanation: "`.mx-auto` (Margin X-axis Auto) ត្រូវបានប្រើប្រាស់ជាទូទៅបំផុតដើម្បីរុញ Element (ដែលមាន Display ជា Block) អោយមកនៅចំកណ្តាលអេក្រង់។"
+---
+
+## ⚡ អ្វីទៅជា Bootstrap Utilities?
+
+ជំនួសអោយការបង្កើត Class ថ្មីនៅក្នុង CSS ដើម្បីដាក់ Margin ឬប្តូរពណ៌ Bootstrap បានផ្តល់នូវ **Utility Classes** រាប់រយពាក្យដែលអាចអោយអ្នកកែប្រែអ្វីៗបានភ្លាមៗពីក្នុងកូដ HTML តែម្តង។
+
+---
+
+## 📏 1. Spacing Utilities (គម្លាត)
+
+ការកំណត់គម្លាត Margin នឹង Padding គឺជារឿងដែលយើងប្រើញឹកញាប់បំផុត។ Bootstrap តំណាងអោយវាដោយអក្សរកាត់៖
+
+**អក្សរទី ១ (ប្រភេទគម្លាត):**
+- `m` = margin (គម្លាតក្រៅ)
+- `p` = padding (គម្លាតក្នុង)
+
+**អក្សរទី ២ (ទិសដៅ):**
+- `t` = top (លើ)
+- `b` = bottom (ក្រោម)
+- `s` = start (ឆ្វេង / left)
+- `e` = end (ស្តាំ / right)
+- `x` = ឆ្វេង នឹង ស្តាំ (x-axis)
+- `y` = លើ នឹង ក្រោម (y-axis)
+- *(គ្មានអក្សរទី២)* = គ្រប់ជ្រុងទាំង ៤
+
+**លេខកន្ទុយ (ទំហំពី 0 ដល់ 5):**
+- ឧទាហរណ៍ 0, 1, 2, 3, 4, 5 ឫ `auto`។
+
+**ឧទាហរណ៍ជាក់ស្តែង:**
+- `.mt-3` (Margin Top ទំហំទី 3)
+- `.px-4` (Padding ឆ្វេងនិងស្តាំ ទំហំទី 4)
+- `.p-5` (Padding គ្រប់ជ្រុង ទំហំទី 5)
+- `.mx-auto` (រុញអោយនៅចំកណ្តាលអេក្រង់)
+
+```html
+<div class="p-4 mb-3 bg-light">
+  ប្រអប់នេះមាន Padding ធំល្មម ហើយមាន Margin ខាងក្រោមដើម្បីរុញគម្លាត។
+</div>
+```
+
+---
+
+## 🖥️ 2. Display Utilities (ការបង្ហាញ)
+
+យើងអាចប្តូរ `display` របស់ Element មួយបានយ៉ាងងាយស្រួល និងអាចកំណត់វាទៅតាមទំហំអេក្រង់ថែមទៀតផង។
+
+- `.d-none`: លាក់បាត់ (display: none)
+- `.d-block`: បង្ហាញជា Block (display: block)
+- `.d-inline`: បង្ហាញជា Inline
+- `.d-flex`: បង្ហាញជា Flexbox
+
+**Responsive Display (សំខាន់ណាស់):**
+ពេលខ្លះយើងចង់លាក់ Menu ធម្មតានៅលើទូរស័ព្ទដៃ ហើយបង្ហាញវាវិញនៅលើកុំព្យូទ័រ។
+```html
+<!-- លាក់ជានិច្ច ប៉ុន្តែបើអេក្រង់ធំ (lg ឡើងទៅ) វានឹងបង្ហាញជា Block -->
+<div class="d-none d-lg-block">
+  ខ្ញុំនឹងលេចចេញមកតែនៅលើកុំព្យូទ័រប៉ុណ្ណោះ!
+</div>
+```
+
+---
+
+## 🔀 3. Flex Utilities (ការតម្រៀប)
+
+ប្រសិនបើអ្នកចង់តម្រៀបរបស់របរអោយមានរបៀបរៀបរយ អ្នកគ្រាន់តែប្រើ Class `.d-flex` ហើយបូកផ្សំជាមួយ Utilities ខាងក្រោម៖
+
+**តម្រៀបតាមជួរដេក (Justify Content):**
+- `.justify-content-start` (នៅខាងឆ្វេង - លំនាំដើម)
+- `.justify-content-center` (នៅចំកណ្តាល)
+- `.justify-content-end` (នៅខាងស្តាំ)
+- `.justify-content-between` (រុញទៅសងខាង)
+
+**តម្រៀបតាមជួរឈរ (Align Items):**
+- `.align-items-start` (នៅខាងលើ)
+- `.align-items-center` (នៅចំកណ្តាល)
+- `.align-items-end` (នៅខាងក្រោម)
+
+**ឧទាហរណ៍: ការដាក់អក្សរនៅចំកណ្តាលប្រអប់ទាំងស្រុង (Center of the Universe)**
+```html
+<div class="d-flex justify-content-center align-items-center" style="height: 200px; border: 1px solid black;">
+  <p class="mb-0">ខ្ញុំនៅចំកណ្តាលជានិច្ច!</p>
+</div>
+```
+
+---
+
+## 🎨 4. ពណ៌ និងអក្សរ (Colors & Text)
+
+- **Text Colors:** `.text-primary` (ខៀវ), `.text-danger` (ក្រហម), `.text-success` (បៃតង), `.text-muted` (ប្រផេះ), `.text-white`
+- **Backgrounds:** `.bg-primary`, `.bg-dark`, `.bg-light`, `.bg-warning`
+- **Text Align:** `.text-center`, `.text-start`, `.text-end`
+- **Font Weight:** `.fw-bold`, `.fw-normal`, `.fw-light`
+
+**សន្និដ្ឋាន:** ការចេះប្រកប Utility Classes បញ្ចូលគ្នា គឺជាជំនាញដ៏មានអំណាចបំផុតនៅក្នុង Bootstrap ព្រោះវាអនុញ្ញាតអោយអ្នកបង្កើតរចនាបថរាប់ពាន់ប្រភេទដោយមិនចាំបាច់សរសេរកូដ CSS ខ្លួនឯងសូម្បីមួយជួរ។
