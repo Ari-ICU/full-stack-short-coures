@@ -1,34 +1,34 @@
 ---
-title: សេចក្តីផ្តើមអំពី CSS
-description: រៀនពីរបៀបរចនា HTML elements របស់អ្នកដោយប្រើប្រាស់ Cascading Style Sheets (CSS)។
+title: Introduction to CSS
+description: រៀនពីរបៀបរចនា HTML Elements របស់អ្នកដោយប្រើប្រាស់ Cascading Style Sheets (CSS)។
 objectives:
-  - ស្វែងយល់ពីតួនាទីរបស់ CSS ក្នុងការរចនាគេហទំព័រ
-  - រៀនពីវាក្យសម្ព័ន្ធ CSS (selectors, properties, និង values)
+  - ស្វែងយល់ពីតួនាទីរបស់ CSS ក្នុងការរចនា Website
+  - រៀនពីវាក្យសម្ព័ន្ធ CSS (Selectors, Properties, និង Values)
   - ស្វែងយល់ពីរបៀបផ្សេងៗក្នុងការបន្ថែម CSS ទៅកាន់ HTML
 module: module-2-css
 order: 1
 quiz:
-  - question: តើ HTML attribute មួយណាត្រូវបានប្រើដើម្បីកំណត់ inline styles?
+  - question: តើ HTML Attribute មួយណាត្រូវបានប្រើដើម្បីកំណត់ Inline Styles?
     options:
       - class
       - styles
       - style
       - css
     correctAnswer: 2
-    explanation: "'style' attribute ត្រូវបានប្រើដើម្បីអនុវត្ត inline CSS ដោយផ្ទាល់ទៅកាន់ HTML element។"
+    explanation: "'style' Attribute ត្រូវបានប្រើដើម្បីអនុវត្ត Inline CSS ដោយផ្ទាល់ទៅកាន់ HTML Element។"
 ---
 
-## 🎨 ការតុបតែងគេហទំព័រ
+## 🎨 ការតុបតែង Website
 
-ប្រសិនបើ HTML គឺជាគ្រោងឆ្អឹងនៃគេហទំព័រ **CSS (Cascading Style Sheets)** គឺជាស្បែក សក់ និងសម្លៀកបំពាក់។ វាទទួលខុសត្រូវចំពោះរូបរាង និងសោភ័ណភាពនៃគេហទំព័ររបស់អ្នក។
+ប្រសិនបើ HTML គឺជាគ្រោងឆ្អឹងនៃ Website **CSS (Cascading Style Sheets)** គឺជាស្បែក សក់ និងសម្លៀកបំពាក់។ វាទទួលខុសត្រូវចំពោះរូបរាង និងសោភ័ណភាពនៃ Website របស់អ្នក។
 
-បើគ្មាន CSS ទេ គេហទំព័រនឹងមើលទៅគួរឱ្យធុញទ្រាន់ ដោយមានត្រឹមតែអក្សរពណ៌ខ្មៅនៅលើផ្ទៃពណ៌សប៉ុណ្ណោះ។
+បើគ្មាន CSS ទេ Website នឹងមើលទៅគួរឱ្យធុញទ្រាន់ ដោយមានត្រឹមតែ Text ពណ៌ខ្មៅនៅលើផ្ទៃពណ៌សប៉ុណ្ណោះ។
 
 ---
 
 ## 🧱 រចនាសម្ព័ន្ធនៃ CSS Rule
 
-CSS rule មួយមាន **selector** និង **declaration block**។
+CSS Rule មួយមាន **Selector** និង **Declaration Block**។
 
 ```css
 h1 {
@@ -37,19 +37,19 @@ h1 {
 }
 ```
 
-- **Selector (`h1`)**: ចង្អុលទៅកាន់ HTML element ដែលអ្នកចង់រចនា។
-- **Declaration Block (`{ ... }`)**: មានផ្ទុកមួយ ឬច្រើន declarations ដែលខណ្ឌដោយសញ្ញា (;)។
+- **Selector (`h1`)**: ចង្អុលទៅកាន់ HTML Element ដែលអ្នកចង់រចនា។
+- **Declaration Block (`{ ... }`)**: មានផ្ទុកមួយ ឬច្រើន Declarations ដែលខណ្ឌដោយសញ្ញា (;)។
 - **Property (`color`)**: អ្វីដែលអ្នកចង់ផ្លាស់ប្តូរ (ឧ. ពណ៌)។
-- **Value (`blue`)**: លទ្ធផលថ្មីនៃ property (ឧ. ពណ៌ខៀវ)។
+- **Value (`blue`)**: លទ្ធផលថ្មីនៃ Property (ឧ. ពណ៌ខៀវ)។
 
 ---
 
 ## 🎯 CSS Selectors
 
-Selectors គឺជារបៀបដែលអ្នកកំណត់គោលដៅលើ HTML elements ជាក់លាក់ណាមួយ។
+Selectors គឺជារបៀបដែលអ្នកកំណត់គោលដៅលើ HTML Elements ជាក់លាក់ណាមួយ។
 
 ### 1. Element Selector
-កំណត់គោលដៅលើគ្រប់ elements នៃប្រភេទជាក់លាក់មួយ។
+កំណត់គោលដៅលើគ្រប់ Elements នៃប្រភេទជាក់លាក់មួយ។
 ```css
 p {
   line-height: 1.5;
@@ -57,7 +57,7 @@ p {
 ```
 
 ### 2. Class Selector (`.`)
-កំណត់គោលដៅលើ elements ដែលមាន `class` attribute ជាក់លាក់។ នេះគឺជារបៀបដែលគេនិយមប្រើបំផុត ព្រោះវាអាចប្រើប្រាស់ឡើងវិញបានយ៉ាងងាយស្រួល។
+កំណត់គោលដៅលើ Elements ដែលមាន `class` Attribute ជាក់លាក់។ នេះគឺជារបៀបដែលគេនិយមប្រើបំផុត ព្រោះវាអាចប្រើប្រាស់ឡើងវិញបានយ៉ាងងាយស្រួល។
 ```html
 <div class="card">សួស្តី</div>
 ```
@@ -69,7 +69,7 @@ p {
 ```
 
 ### 3. ID Selector (`#`)
-កំណត់គោលដៅលើ element តែមួយគត់ដែលមាន `id` attribute ជាក់លាក់។ (គួរចៀសវាងការប្រើ ID សម្រាប់ការរចនា; គួរប្រើ class វិញ)។
+កំណត់គោលដៅលើ Element តែមួយគត់ដែលមាន `id` Attribute ជាក់លាក់។ (គួរចៀសវាងការប្រើ ID សម្រាប់ការរចនា; គួរប្រើ Class វិញ)។
 ```html
 <nav id="main-nav"></nav>
 ```
@@ -86,7 +86,7 @@ p {
 មាន ៣ របៀបក្នុងការអនុវត្ត CSS ទៅកាន់ឯកសារ HTML របស់អ្នក។
 
 ### 1. External CSS (ណែនាំឱ្យប្រើ)
-អ្នកសរសេរ CSS នៅក្នុងឯកសារ `.css` ផ្សេងមួយ ហើយភ្ជាប់វានៅក្នុង HTML `<head>`។ វិធីនេះធ្វើឱ្យកូដរបស់អ្នកមានសណ្តាប់ធ្នាប់ និងអាចឱ្យអ្នកប្រើ stylesheet តែមួយសម្រាប់ទំព័រជាច្រើនបាន។
+អ្នកសរសេរ CSS នៅក្នុងឯកសារ `.css` ផ្សេងមួយ ហើយភ្ជាប់វានៅក្នុង HTML `<head>`។ វិធីនេះធ្វើឱ្យកូដរបស់អ្នកមានសណ្តាប់ធ្នាប់ និងអាចឱ្យអ្នកប្រើ Stylesheet តែមួយសម្រាប់ទំព័រជាច្រើនបាន។
 ```html
 <head>
   <link rel="stylesheet" href="styles.css">
@@ -94,7 +94,7 @@ p {
 ```
 
 ### 2. Internal CSS
-អ្នកដាក់ CSS នៅក្នុង `<style>` tag ខាងក្នុង `<head>` នៃឯកសារ HTML។ ជាទូទៅប្រើសម្រាប់ទំព័រដែលមានរចនាប័ទ្មតែមួយគត់។
+អ្នកដាក់ CSS នៅក្នុង `<style>` Tag ខាងក្នុង `<head>` នៃឯកសារ HTML។ ជាទូទៅប្រើសម្រាប់ទំព័រដែលមាន Style តែមួយគត់។
 ```html
 <head>
   <style>
@@ -104,7 +104,7 @@ p {
 ```
 
 ### 3. Inline CSS
-អ្នកអនុវត្ត styles ដោយផ្ទាល់ទៅកាន់ HTML element ដោយប្រើ `style` attribute។ ជាទូទៅ វិធីនេះមិនត្រូវបានគេចាត់ទុកថាជាការអនុវត្តល្អទេសម្រាប់កម្មវិធីធំៗ ព្រោះវាលាយឡំរចនាសម្ព័ន្ធជាមួយការរចនា។
+អ្នកអនុវត្ត Styles ដោយផ្ទាល់ទៅកាន់ HTML Element ដោយប្រើ `style` Attribute។ ជាទូទៅ វិធីនេះមិនត្រូវបានគេចាត់ទុកថាជាការអនុវត្តល្អទេសម្រាប់កម្មវិធីធំៗ ព្រោះវាលាយឡំរចនាសម្ព័ន្ធជាមួយការរចនា។
 ```html
 <h1 style="color: blue; text-align: center;">សួស្តីពិភពលោក</h1>
 ```
@@ -113,13 +113,13 @@ p {
 
 ## 📦 CSS Box Model
 
-រាល់ element ទាំងអស់នៅលើគេហទំព័រត្រូវបានចាត់ទុកថាជាប្រអប់ (box) មួយ។ CSS Box Model កំណត់ពីរបៀបដែលប្រអប់ទាំងនេះមានទំហំ និងគម្លាត។
+រាល់ Element ទាំងអស់នៅលើ Website ត្រូវបានចាត់ទុកថាជាប្រអប់ (Box) មួយ។ CSS Box Model កំណត់ពីរបៀបដែល Box ទាំងនេះមានទំហំ និងគម្លាត។
 
-ពីខាងក្នុងទៅក្រៅ box model រួមមាន៖
-1. **Content**: អត្ថបទ ឬរូបភាពជាក់ស្តែង។
-2. **Padding**: លំហអាកាសថ្លា *ខាងក្នុង* border, ជុំវិញ content។
-3. **Border**: ខ្សែបន្ទាត់ដែលរុំព័ទ្ធ padding និង content។
-4. **Margin**: លំហអាកាសថ្លា *ខាងក្រៅ* border, រុញ elements ផ្សេងៗឱ្យឆ្ងាយចេញ។
+ពីខាងក្នុងទៅក្រៅ Box Model រួមមាន៖
+1. **Content**: Text ឬ Image ជាក់ស្តែង។
+2. **Padding**: លំហអាកាសថ្លា *ខាងក្នុង* Border, ជុំវិញ Content។
+3. **Border**: ខ្សែបន្ទាត់ដែលរុំព័ទ្ធ Padding និង Content។
+4. **Margin**: លំហអាកាសថ្លា *ខាងក្រៅ* Border, រុញ Elements ផ្សេងៗឱ្យឆ្ងាយចេញ។
 
 ```css
 .box {

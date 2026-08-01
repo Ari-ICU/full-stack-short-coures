@@ -1,6 +1,6 @@
 ---
-title: ការប្រើប្រាស់ CSS Framework (Bootstrap)
-description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ Bootstrap ដែលជា CSS Framework ដ៏ពេញនិយមបំផុតដើម្បីរចនាគេហទំព័រឱ្យបានរហ័ស និងមានភាព Responsive។
+title: CSS Framework (Bootstrap)
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ Bootstrap ដែលជា CSS Framework ដ៏ពេញនិយមបំផុតដើម្បីរចនា Website ឱ្យបានរហ័ស និងមានភាព Responsive។
 objectives:
   - យល់ពីអត្ថប្រយោជន៍នៃការប្រើប្រាស់ CSS Framework
   - របៀបតភ្ជាប់ (Link) Bootstrap ទៅក្នុង HTML តាមរយៈ CDN
@@ -13,15 +13,15 @@ quiz:
     options:
       - Flexbox System
       - Table System
-      - Grid System (ដែលមាន ១២ ជួរឈរ)
+      - Grid System (ដែលមាន ១២ Columns)
       - Float System
     correctAnswer: 2
-    explanation: Bootstrap ប្រើប្រាស់ Grid System ដែលមាន ១២ ជួរឈរ (12-column grid system) ដែលជួយឱ្យការរៀបចំ Layout មានភាពងាយស្រួល និង Responsive ទៅតាមទំហំអេក្រង់ផ្សេងៗ។
+    explanation: Bootstrap ប្រើប្រាស់ Grid System ដែលមាន ១២ ជួរឈរ (12-column grid system) ដែលជួយឱ្យការរៀបចំ Layout មានភាពងាយស្រួល និង Responsive ទៅតាម Screen Size ផ្សេងៗ។
 ---
 
 ## 🚀 អ្វីទៅជា CSS Framework?
 
-នៅពេលរចនាគេហទំព័រញឹកញាប់ យើងសង្កេតឃើញថាមានកូដ CSS មួយចំនួនដែលយើងតែងតែសរសេរដដែលៗ (ឧទាហរណ៍៖ ការបង្កើតប៊ូតុង កាត ឬម៉ឺនុយ)។ **CSS Framework** គឺជាកញ្ចប់កូដ CSS ដែលគេបានសរសេររួចជាស្រេច ដើម្បីឱ្យយើងយកមកប្រើប្រាស់ដោយងាយស្រួល ចំណេញពេលវេលា និងធានាបាននូវភាពស្រស់ស្អាត។
+នៅពេលរចនា Website ញឹកញាប់ យើងសង្កេតឃើញថាមានកូដ CSS មួយចំនួនដែលយើងតែងតែសរសេរដដែលៗ (ឧទាហរណ៍៖ ការបង្កើត Buttons, Cards, ឬ Menus)។ **CSS Framework** គឺជាកញ្ចប់កូដ CSS ដែលគេបានសរសេររួចជាស្រេច ដើម្បីឱ្យយើងយកមកប្រើប្រាស់ដោយងាយស្រួល ចំណេញពេលវេលា និងធានាបាននូវភាពស្រស់ស្អាត។
 
 **Bootstrap** គឺជា CSS Framework មួយដែលពេញនិយមបំផុតក្នុងលោក ដែលត្រូវបានបង្កើតឡើងដំបូងដោយក្រុមការងារ Twitter។
 
@@ -55,22 +55,22 @@ quiz:
 Bootstrap Grid System គឺជាប្រព័ន្ធមួយដែលបែងចែកអេក្រង់ជា **១២ ជួរឈរ (12 Columns)**។ 
 
 ដើម្បីប្រើប្រាស់ប្រព័ន្ធនេះបាន គេត្រូវប្រើ Class ចំនួន ៣ សំខាន់ៗ៖
-1. `.container`: ជាប្រអប់ធំសម្រាប់ផ្ទុកអ្វីៗទាំងអស់ (មានគម្លាតសងខាង)។
-2. `.row`: ជាជួរដេក ដែលត្រូវនៅខាងក្នុង container។
-3. `.col-*`: ជាជួរឈរ ដែលត្រូវនៅខាងក្នុង row (ទំហំសរុបនៃជួរឈរក្នុងមួយជួរដេកត្រូវស្មើ ១២)។
+1. `.container`: ជាប្រអប់ធំសម្រាប់ផ្ទុកអ្វីៗទាំងអស់ (មាន Padding សងខាង)។
+2. `.row`: ជា Row ដែលត្រូវនៅខាងក្នុង Container។
+3. `.col-*`: ជា Column ដែលត្រូវនៅខាងក្នុង Row (ទំហំសរុបនៃ Columns ក្នុងមួយ Row ត្រូវស្មើ ១២)។
 
 **ឧទាហរណ៍៖**
 
 ```html
 <div class="container">
   <div class="row">
-    <!-- យកទំហំ ៦ ជួរឈរ (ពាក់កណ្តាលអេក្រង់) -->
+    <!-- យកទំហំ ៦ Columns (ពាក់កណ្តាលអេក្រង់) -->
     <div class="col-6" style="background-color: lightblue;">
-      ជួរឈរទី ១ (ពាក់កណ្តាល)
+      Column ទី ១ (ពាក់កណ្តាល)
     </div>
-    <!-- យកទំហំ ៦ ជួរឈរ (ពាក់កណ្តាលអេក្រង់ទៀត) -->
+    <!-- យកទំហំ ៦ Columns (ពាក់កណ្តាលអេក្រង់ទៀត) -->
     <div class="col-6" style="background-color: lightgreen;">
-      ជួរឈរទី ២ (ពាក់កណ្តាល)
+      Column ទី ២ (ពាក់កណ្តាល)
     </div>
   </div>
 </div>
@@ -80,20 +80,20 @@ Bootstrap Grid System គឺជាប្រព័ន្ធមួយដែលប�
 
 ## 🎨 ភាព Responsive នៅក្នុង Bootstrap
 
-Bootstrap ក៏បានបែងចែកទំហំអេក្រង់ជាច្រើនកម្រិត ដើម្បីជួយឱ្យគេហទំព័រយើងមានភាព Responsive៖
-- `col-` (សម្រាប់ទូរស័ព្ទតូចខ្លាំង)
-- `col-sm-` (សម្រាប់ទូរស័ព្ទធម្មតា ≥576px)
-- `col-md-` (សម្រាប់ថេប្លេត ≥768px)
-- `col-lg-` (សម្រាប់កុំព្យូទ័រ ≥992px)
-- `col-xl-` (សម្រាប់អេក្រង់កុំព្យូទ័រធំ ≥1200px)
+Bootstrap ក៏បានបែងចែក Screen Size ជាច្រើនកម្រិត ដើម្បីជួយឱ្យ Website យើងមានភាព Responsive៖
+- `col-` (សម្រាប់ Mobile តូចខ្លាំង)
+- `col-sm-` (សម្រាប់ Mobile ធម្មតា ≥576px)
+- `col-md-` (សម្រាប់ Tablet ≥768px)
+- `col-lg-` (សម្រាប់ Desktop ≥992px)
+- `col-xl-` (សម្រាប់អេក្រង់ Desktop ធំ ≥1200px)
 
 **ឧទាហរណ៍នៃការបត់បែនតាមអេក្រង់៖**
 ```html
-<!-- លើទូរស័ព្ទ (sm) វាមានទំហំ 12 (ពេញអេក្រង់) -->
-<!-- លើថេប្លេត (md) វាមានទំហំ 6 (ពាក់កណ្តាលអេក្រង់) -->
-<!-- លើកុំព្យូទ័រ (lg) វាមានទំហំ 4 (មួយភាគបីអេក្រង់) -->
+<!-- លើ Mobile (sm) វាមានទំហំ 12 (ពេញអេក្រង់) -->
+<!-- លើ Tablet (md) វាមានទំហំ 6 (ពាក់កណ្តាលអេក្រង់) -->
+<!-- លើ Desktop (lg) វាមានទំហំ 4 (មួយភាគបីអេក្រង់) -->
 <div class="col-12 col-md-6 col-lg-4">
-  ខ្លឹមសាររបស់អ្នក
+  Content របស់អ្នក
 </div>
 ```
 
@@ -103,29 +103,29 @@ Bootstrap ក៏បានបែងចែកទំហំអេក្រង់ជ�
 
 Bootstrap មាន Components ស្រស់ស្អាតជាច្រើនដែលងាយស្រួលប្រើ៖
 
-**១. ប៊ូតុង (Buttons):**
+**១. Buttons:**
 ```html
-<button class="btn btn-primary">ប៊ូតុងពណ៌ខៀវ</button>
-<button class="btn btn-danger">ប៊ូតុងពណ៌ក្រហម (លុប)</button>
-<button class="btn btn-success">ប៊ូតុងពណ៌បៃតង (យល់ព្រម)</button>
+<button class="btn btn-primary">Button ពណ៌ខៀវ</button>
+<button class="btn btn-danger">Button ពណ៌ក្រហម (លុប)</button>
+<button class="btn btn-success">Button ពណ៌បៃតង (យល់ព្រម)</button>
 ```
 
-**២. កាត (Cards):**
+**២. Cards:**
 ```html
 <div class="card" style="width: 18rem;">
   <img src="រូបភាព.jpg" class="card-img-top" alt="...">
   <div class="card-body">
-    <h5 class="card-title">ចំណងជើងកាត</h5>
-    <p class="card-text">ការពណ៌នាសង្ខេបៗអំពីអ្វីមួយ។</p>
+    <h5 class="card-title">Card Title</h5>
+    <p class="card-text">Description ឬការពណ៌នាសង្ខេបៗអំពីអ្វីមួយ។</p>
     <a href="#" class="btn btn-primary">ចុចទីនេះ</a>
   </div>
 </div>
 ```
 
 **៣. Utility Classes (សម្រាប់រុញគម្លាត និងពណ៌):**
-- **Margin:** `mt-3` (រុញខាងលើ), `mb-3` (រុញខាងក្រោម), `my-3` (រុញលើក្រោម)
-- **Padding:** `pt-3`, `pb-3`, `px-3` (រុញសងខាង), `p-3` (រុញគ្រប់ជ្រុង)
-- **ពណ៌អក្សរ:** `text-primary`, `text-muted`, `text-danger`
-- **ពណ៌ផ្ទៃ:** `bg-light`, `bg-dark`, `bg-warning`
+- **Margin:** `mt-3` (Margin Top), `mb-3` (Margin Bottom), `my-3` (Margin Y-axis)
+- **Padding:** `pt-3`, `pb-3`, `px-3` (Padding X-axis), `p-3` (Padding គ្រប់ជ្រុង)
+- **Text Color:** `text-primary`, `text-muted`, `text-danger`
+- **Background Color:** `bg-light`, `bg-dark`, `bg-warning`
 
-ការប្រើប្រាស់ Bootstrap ជួយសន្សំពេលវេលាបានយ៉ាងច្រើនក្នុងការរចនាគេហទំព័រ!
+ការប្រើប្រាស់ Bootstrap ជួយសន្សំពេលវេលាបានយ៉ាងច្រើនក្នុងការរចនា Website!
