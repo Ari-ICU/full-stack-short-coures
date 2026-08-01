@@ -6,13 +6,13 @@ import { Course, Module, Lesson, LessonFrontmatter } from "@/types";
 const COURSES_DIR = path.join(process.cwd(), "src", "courses");
 
 const COURSE_TITLES: Record<string, string> = {
-  "course-overview": "ទិដ្ឋភាពទូទៅ Full Stack",
-  "git": "ការគ្រប់គ្រងកូដជាមួយ Git & GitHub",
-  "web-design": "មូលដ្ឋានគ្រឹះ Web Design",
-  "typescript": "មូលដ្ឋានគ្រឹះ TypeScript",
-  "frontend-engineering": "Frontend Engineering ជាមួយ React",
-  "backend-architecture": "Backend Architecture ជាមួយ Node.js",
-  "rdbms": "មូលដ្ឋានទិន្នន័យ Relational Database (RDBMS)",
+  "course-overview": "Course Overview",
+  "git": "Git & GitHub",
+  "web-design": "Web Design",
+  "typescript": "TypeScript",
+  "frontend-engineering": "Frontend Engineering",
+  "backend-architecture": "Backend Architecture",
+  "rdbms": "Relational Database (RDBMS)",
 };
 
 const COURSE_DESCRIPTIONS: Record<string, string> = {
@@ -26,16 +26,17 @@ const COURSE_DESCRIPTIONS: Record<string, string> = {
 };
 
 const MODULE_TITLES: Record<string, string> = {
-  "module-1-introduction": "Module 1 — សេចក្តីផ្តើម Full Stack",
-  "module-1-git": "Module 1 — មូលដ្ឋានគ្រឹះ Git",
+  "module-1-introduction": "Module 1 — Introduction to Full Stack",
+  "module-1-git": "Module 1 — Git Fundamentals",
   "module-2-advanced-git": "Module 2 — Advanced Git & Workflows",
   "module-1-html": "Module 1 — HTML & Semantic Web",
   "module-2-css": "Module 2 — Modern CSS Layouts",
-  "module-3-js": "Module 3 — JavaScript Fundamentals",
-  "module-1-typescript": "Module 1 — មូលដ្ឋានគ្រឹះ TypeScript",
+  "module-3-bootstrap": "Module 3 — Bootstrap Framework",
+  "module-4-js": "Module 4 — JavaScript Fundamentals",
+  "module-1-typescript": "Module 1 — TypeScript Fundamentals",
   "module-2-advanced-typescript": "Module 2 — Advanced TypeScript",
-  "module-1-react": "Module 1 — មូលដ្ឋានគ្រឹះ React",
-  "module-1-nodejs": "Module 1 — សេចក្តីផ្តើមអំពី Node.js",
+  "module-1-react": "Module 1 — React Fundamentals",
+  "module-1-nodejs": "Module 1 — Introduction to Node.js",
   "module-1-database-design": "Module 1 — Database Design & SQL",
 };
 
