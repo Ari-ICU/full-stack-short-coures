@@ -1,0 +1,102 @@
+---
+title: "Box Model, Display & Overflow"
+description: "ស្វែងយល់ពីរបៀបដែល HTML Elements ទាញយកទំហំ (Box Model) ការផ្លាស់ប្តូរទម្រង់បង្ហាញ (Display) និងការគ្រប់គ្រងខ្លឹមសារដែលហៀរចេញ (Overflow)។"
+objectives:
+  - "យល់ច្បាស់ពី Box Model (Content, Padding, Border, Margin)"
+  - "ដឹងពីមូលហេតុដែលត្រូវប្រើ `box-sizing: border-box`"
+  - "យល់ពីភាពខុសគ្នារវាង `block`, `inline`, នឹង `inline-block`"
+  - "ចេះគ្រប់គ្រងខ្លឹមសារដែលហៀរចេញដោយប្រើ `overflow` និងការដាក់ស្រមោល (Shadows)"
+module: module-2-css
+order: 4
+quiz:
+  - question: "តើ Property មួយណាដែលធ្វើអោយ Padding និង Border គិតបញ្ចូលទៅក្នុង Width សរុបរបស់ Element ដើម្បីកុំអោយវារីកធំជាងមុន?"
+    options:
+      - "display: block;"
+      - "box-sizing: border-box;"
+      - "overflow: hidden;"
+      - "margin: auto;"
+    correctAnswer: 1
+    explanation: "`box-sizing: border-box;` គឺជាច្បាប់មាសនៅក្នុង CSS ដើម្បីកុំអោយទំហំ (Width/Height) របស់ប្រអប់រីកធំនៅពេលដែលយើងបន្ថែម Padding ឬ Border។"
+---
+
+## 📦 CSS Box Model (ទ្រឹស្តីប្រអប់) ⭐⭐⭐⭐⭐
+
+នៅក្នុង CSS, រាល់ HTML Element ទាំងអស់សុទ្ធតែត្រូវបានចាត់ទុកថាជា **"ប្រអប់ (Box)"**។ ការយល់ពី Box Model គឺជារឿងសំខាន់បំផុតសម្រាប់ការរៀបចំ Layout។ 
+
+ប្រអប់មួយមានសមាសធាតុ ៤ ជាន់ (ពីក្នុងទៅក្រៅ)៖
+1. **Content:** ផ្ទៃកណ្តាលបំផុត ជាកន្លែងដែលអក្សរ ឬរូបភាពស្ថិតនៅ។
+2. **Padding:** គម្លាតពី Content ទៅកាន់ស៊ុម (Border)។ វាប្រៀបដូចជាអេប៉ុងការពារខាងក្នុង។
+3. **Border:** ស៊ុមព័ទ្ធជុំវិញ។
+4. **Margin:** គម្លាតពីស៊ុម (Border) ទៅកាន់ Elements ផ្សេងទៀត (គម្លាតខាងក្រៅ)។
+
+```css
+div {
+  width: 300px;
+  padding: 20px;
+  border: 5px solid black;
+  margin: 10px;
+}
+```
+
+### បញ្ហាទី ១ របស់ CSS នឹងដំណោះស្រាយ (`box-sizing`)
+តាមលំនាំដើម ប្រសិនបើអ្នកអោយ `width: 300px` ហើយបន្ថែម `padding: 20px` នោះទំហំប្រអប់សរុបនឹងកើនឡើងដល់ 340px (300 + 20 ឆ្វេង + 20 ស្តាំ)។ នេះធ្វើអោយ Layout យើងងាយនឹងបែក។
+
+**ដំណោះស្រាយ:** ប្រើ `box-sizing: border-box;` ដើម្បីអោយវាគិត Padding និង Border បញ្ចូលទៅក្នុង 300px នោះតែម្តង។
+
+```css
+/* ច្បាប់មាសដែលគេតែងតែសរសេរនៅខាងលើគេបង្អស់នៃកូដ CSS */
+* {
+  box-sizing: border-box;
+}
+```
+
+---
+
+## 🖥️ Display Property
+
+Elements នីមួយៗមានទម្រង់បង្ហាញខុសៗគ្នា។ អ្នកអាចប្តូរវាបានតាមរយៈ `display`៖
+
+- `display: block;`
+  - ចាប់យកទំហំពេញ 100% នៃបន្ទាត់ (ដូចជា `<div>`, `<h1>`, `<p>`)។
+  - រុញ Elements ផ្សេងទៀតទៅបន្ទាត់ថ្មីខាងក្រោម។
+- `display: inline;`
+  - ចាប់យកទំហំតូចបំផុតត្រឹម Content របស់វា (ដូចជា `<span>`, `<a>`)។
+  - មិនអាចកំណត់ Width និង Height បានទេ!
+- `display: inline-block;`
+  - ដូច `inline` ដែរ វានៅលើបន្ទាត់តែមួយជាមួយគេ។
+  - ប៉ុន្តែវាអនុញ្ញាតអោយយើងកំណត់ Width និង Height បាន។ (ស័ក្តិសមសម្រាប់ធ្វើប៊ូតុង)
+- `display: none;`
+  - លាក់ Element នោះបាត់ឈឹងពីអេក្រង់ (វាលែងចាប់យកទំហំអ្វីទាំងអស់)។
+
+*(ចំណាំ៖ `display: flex;` នឹង `display: grid;` នឹងមានលម្អិតនៅក្នុងមេរៀនក្រោយដោយឡែក)*
+
+---
+
+## 🌊 ការគ្រប់គ្រងការហៀរ (Overflow)
+
+ពេលខ្លះ Content (អក្សរ ឬ រូបភាព) ធំជាងទំហំប្រអប់ដែលអ្នកបានកំណត់ នោះវានឹងហៀរចេញមកក្រៅ។
+
+- `overflow: hidden;` កាត់ចោលផ្នែកដែលហៀរចេញ (លាក់មិនអោយឃើញ)។
+- `overflow: scroll;` បង្កើតរបារអូស (Scrollbar) ជានិច្ច ទោះមានការហៀរឬក៏អត់។
+- `overflow: auto;` បង្កើត Scrollbar តែនៅពេលណាដែលចាំបាច់ (មានការហៀរ) ប៉ុណ្ណោះ។
+
+---
+
+## 🌑 ការដាក់ស្រមោល (Shadows)
+
+ការដាក់ស្រមោលជួយអោយការរចនាមើលទៅមានទម្រង់ 3D និងលេចធ្លោ (Premium)។
+
+### Box Shadow (ស្រមោលប្រអប់)
+```css
+.card {
+  /* x-offset | y-offset | blur-radius | color */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+```
+
+### Text Shadow (ស្រមោលអក្សរ)
+```css
+h1 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+```
