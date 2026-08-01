@@ -1,0 +1,99 @@
+---
+title: Utility Types (ប្រភេទជំនួយ)
+description: រៀនពីរបៀបប្រើប្រាស់ Utility Types ដែលមានស្រាប់នៅក្នុង TypeScript ដូចជា Partial, Required, Pick និង Omit ដើម្បីបំប្លែង Types ឲ្យលឿនជាងមុន។
+objectives:
+  - ស្គាល់ Utility Types សំខាន់ៗដែលមានស្រាប់ក្នុង TypeScript
+  - យល់ពីរបៀបប្រើប្រាស់ `Partial` និង `Required`
+  - ដឹងពីរបៀបប្រើប្រាស់ `Pick` និង `Omit` ដើម្បីជ្រើសរើស ឬ ដកចេញ Properties
+module: module-2-advanced-typescript
+order: 3
+quiz:
+  - question: ប្រសិនបើអ្នកមាន `interface User` ហើយអ្នកចង់បង្កើត Type ថ្មីមួយដែលយកតែ `name` និង `email` ចេញពី `User` តើអ្នកគួរប្រើ Utility Type មួយណា?
+    options:
+      - `Partial<User>`
+      - `Omit<User, "name" | "email">`
+      - `Pick<User, "name" | "email">`
+      - `Required<User>`
+    correctAnswer: 2
+    explanation: "`Pick` ត្រូវបានប្រើសម្រាប់ជ្រើសរើសយក Properties ជាក់លាក់ណាមួយ (ឧទាហរណ៍ `name` និង `email`) ចេញពី Type ដើម ដើម្បីបង្កើតជា Type ថ្មីមួយ។"
+---
+
+## 🧰 អ្វីទៅជា Utility Types?
+
+ជួនកាលអ្នកមាន Type មួយរួចទៅហើយ ប៉ុន្តែអ្នកចង់បាន Type ថ្មីមួយទៀតដែលមានរាងស្រដៀងគ្នា ដោយគ្រាន់តែកែប្រែបន្តិចបន្តួចប៉ុណ្ណោះ។ TypeScript បានផ្តល់ជូននូវ **Utility Types** ជាច្រើនដែលមានស្រាប់ ដើម្បីជួយសម្រួលការងារនេះ ដោយមិនចាំបាច់សរសេរ Type ថ្មីពីដំបូងឡើយ។
+
+ឧបមាថាយើងមាន Interface គោលមួយ៖
+
+```typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age?: number; // Optional
+}
+```
+
+---
+
+## 1. `Partial<Type>` (ធ្វើឲ្យ Properties ទាំងអស់ក្លាយជា Optional)
+
+`Partial` គឺប្រើដើម្បីបំប្លែង Properties ទាំងអស់នៅក្នុង Type មួយ ឲ្យទៅជា Optional (មានក៏បាន អត់ក៏បាន `?`) ទាំងអស់។ វាមានប្រយោជន៍ខ្លាំងណាស់ ពេលធ្វើការជាមួយទិន្នន័យសម្រាប់ Update (ដែលយើងអាច Update តែមួយផ្នែក)។
+
+```typescript
+// ទោះមិនដាក់ name ក៏មិន Error ដែរ ព្រោះវាបានក្លាយជា Optional អស់ហើយ
+let userToUpdate: Partial<User> = {
+  email: "new@email.com" 
+};
+```
+
+---
+
+## 2. `Required<Type>` (ធ្វើឲ្យ Properties ទាំងអស់ក្លាយជា ចាំបាច់ត្រូវតែមាន)
+
+ផ្ទុយពី `Partial`, `Required` នឹងធ្វើឲ្យ Properties ទាំងអស់នៅក្នុង Type មួយ ក្លាយជាចាំបាច់ (Required) ទោះបីជាដើមឡើយវាជា Optional ក៏ដោយ។
+
+```typescript
+// ត្រូវតែបញ្ជាក់ age ទោះបីជាដើមឡើយវានៅក្នុង User ជា Optional (?) ក៏ដោយ
+let completeUser: Required<User> = {
+  id: 1,
+  name: "Sok",
+  email: "sok@email.com",
+  age: 25 // ❌ បើមិនដាក់ age នឹង Error ភ្លាម
+};
+```
+
+---
+
+## 3. `Pick<Type, Keys>` (រើសយកតែ Properties ដែលចង់បាន)
+
+ប្រសិនបើ Type មួយមាន Properties ច្រើនពេក ហើយអ្នកចង់បង្កើត Type ថ្មីមួយដែលយកតែ ២ ឬ ៣ Properties ពីវា អ្នកអាចប្រើ `Pick`។
+
+```typescript
+// បង្កើត Type ថ្មី ដែលមានតែ name និង email ប៉ុណ្ណោះ
+type UserContactInfo = Pick<User, "name" | "email">;
+
+let contact: UserContactInfo = {
+  name: "Dara",
+  email: "dara@email.com"
+  // មិនអាចដាក់ id ឬ age បានទេ
+};
+```
+
+---
+
+## 4. `Omit<Type, Keys>` (ដក Properties ដែលមិនចង់បានចេញ)
+
+ផ្ទុយពី `Pick`, `Omit` គឺប្រើសម្រាប់បង្កើត Type ថ្មីមួយ ដោយ **ដកចេញ** នូវ Properties ណាមួយដែលអ្នកមិនចង់បានពី Type ដើម។
+
+```typescript
+// យកគ្រប់យ៉ាងពី User លើកលែងតែ email និង age 
+type PublicUserProfile = Omit<User, "email" | "age">;
+
+let profile: PublicUserProfile = {
+  id: 1,
+  name: "Sok"
+  // មិនអាចដាក់ email ចូលបានទេ ព្រោះយើងបាន Omit វាចេញហើយ
+};
+```
+
+ការចេះប្រើប្រាស់ Utility Types ទាំងនេះនឹងជួយឲ្យអ្នកសរសេរកូដ TypeScript បានលឿន មានភាពស្អាត និងមិនមានការសរសេរជាន់គ្នា (DRY - Don't Repeat Yourself)!

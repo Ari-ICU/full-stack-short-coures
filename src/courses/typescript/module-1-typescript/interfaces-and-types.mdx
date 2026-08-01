@@ -1,0 +1,126 @@
+---
+title: Interfaces និង Types
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ Interface និង Type Aliases ដើម្បីបង្កើតឈ្មោះថ្មីសម្រាប់ប្រភេទទិន្នន័យ (Custom Types) នៅក្នុងគម្រោងរបស់អ្នក។
+objectives:
+  - យល់ពីរបៀបបង្កើត Type Aliases និង Interfaces 
+  - ដឹងពីភាពខុសគ្នារវាង Type និង Interface
+  - ចេះប្រើប្រាស់ការត្រួតបន្ត (Extending/Intersection) ដើម្បីប្រើ Type ឡើងវិញ
+module: module-1-typescript
+order: 3
+quiz:
+  - question: តើចំនុចខុសគ្នាសំខាន់មួយរវាង `type` និង `interface` គឺជាអ្វី?
+    options:
+      - `interface` អាចប្រើបានតែជាមួយ Number ប៉ុណ្ណោះ
+      - `type` អាចប្រើដើម្បីកំណត់ប្រភេទទិន្នន័យដូចជា Union (ឧទាហរណ៍ `type ID = string | number`) ចំណែក `interface` ភាគច្រើនប្រើសម្រាប់កំណត់ទម្រង់ Object
+      - `interface` ធ្វើឲ្យកូដរត់លឿនជាងមុន
+      - មិនមានអ្វីខុសគ្នាទាល់តែសោះ
+    correctAnswer: 1
+    explanation: "`type` មានភាពបត់បែនជាង ដោយវាអាចប្រើសម្រាប់ Union types, primitives ជាដើម ខណៈដែល `interface` ត្រូវប្រើប្រាស់សម្រាប់តែការកំណត់ទម្រង់ (shape) របស់ Object ប៉ុណ្ណោះ។"
+---
+
+## 🏷️ អ្វីទៅជា Type Aliases?
+
+នៅក្នុងមេរៀនមុន យើងបានសរសេរ Object Type ផ្ទាល់ទៅនឹងអថេរតែម្តង។ ប៉ុន្តែប្រសិនបើយើងចង់ប្រើ Object នោះច្រើនកន្លែង យើងត្រូវសរសេរវាឡើងវិញច្រើនដង។ ដើម្បីដោះស្រាយបញ្ហានេះ យើងអាចប្រើ `type` alias (ឈ្មោះហៅក្រៅ) សម្រាប់ប្រភេទទិន្នន័យនោះ។
+
+```typescript
+// 1. បង្កើត Type មួយឈ្មោះថា User
+type User = {
+  name: string;
+  age: number;
+  email?: string; // ជា Optional
+};
+
+// 2. យកវាមកប្រើ
+let user1: User = {
+  name: "Sok",
+  age: 20
+};
+
+let user2: User = {
+  name: "Dara",
+  age: 25,
+  email: "dara@email.com"
+};
+```
+
+ក្រៅពី Object អ្នកអាចប្រើ `type` ជាមួយអ្វីក៏បាន ដូចជា Primitive types ធម្មតា៖
+```typescript
+type ID = string | number; // ID អាចជាអក្សរ ឬ លេខ
+let myId: ID = 123;
+myId = "A001";
+```
+
+---
+
+## 🏗️ អ្វីទៅជា Interfaces?
+
+**Interface** គឺជាវិធីមួយទៀតនៅក្នុង TypeScript ដើម្បីកំណត់ទម្រង់ (Shape) របស់ Object។ ជាទូទៅ វាស្រដៀងគ្នាទៅនឹង `type` ដែរ (ពេលប្រើជាមួយ Object) ប៉ុន្តែវាមានអត្ថប្រយោជន៍មួយចំនួនក្នុងការសរសេរកម្មវិធីបែប Object-Oriented។
+
+```typescript
+// បង្កើត Interface
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+let item: Product = {
+  id: 1,
+  name: "iPhone",
+  price: 999
+};
+```
+
+---
+
+## 🔄 ការត្រួតបន្ត (Extending)
+
+នៅពេលអ្នកមាន Object ដែលស្រដៀងៗគ្នា អ្នកអាចយកវាមក **បន្ត** (Extend) ពីគ្នាទៅវិញទៅមកបាន ដើម្បីកុំឲ្យសរសេរកូដជាន់គ្នា។
+
+### ការ Extend ដោយប្រើ Interface
+យើងអាចប្រើពាក្យ `extends` ដើម្បីយក Properties ពី Interface មួយ ទៅ Interface មួយទៀត៖
+
+```typescript
+interface Animal {
+  name: string;
+  age: number;
+}
+
+// Dog មានទាំង name, age និងមានបន្ថែម breed ទៀត
+interface Dog extends Animal {
+  breed: string;
+}
+
+let myDog: Dog = {
+  name: "Kik",
+  age: 3,
+  breed: "Husky"
+};
+```
+
+### ការ Extend ដោយប្រើ Type (Intersection)
+ប្រសិនបើអ្នកប្រើ `type` អ្នកអាចប្រើសញ្ញា `&` ដើម្បីផ្គុំ Types បញ្ចូលគ្នា៖
+
+```typescript
+type Employee = {
+  id: number;
+  name: string;
+};
+
+type Manager = Employee & {
+  department: string;
+};
+
+let myManager: Manager = {
+  id: 1,
+  name: "Sok",
+  department: "IT"
+};
+```
+
+## 📝 តើគួរប្រើមួយណា? Type ឬ Interface?
+
+- **ប្រើ `interface`** នៅពេលអ្នកចង់កំណត់ទម្រង់ Object ជាពិសេសប្រសិនបើអ្នកសរសេរ Library ឬ ចង់អោយអ្នកដទៃអាចងាយស្រួល Extend តាមក្រោយ។
+- **ប្រើ `type`** នៅពេលអ្នកត្រូវការបត់បែនខ្ពស់ ដូចជាការកំណត់ Union Types (`string | number`), Primitives ឬ ក្បួន Types ស្មុគស្មាញផ្សេងៗ។
+
+ជាទូទៅ នៅក្នុង React ឬ គម្រោងធម្មតា អ្នកអាចប្រើមួយណាក៏បាន ឲ្យតែមានឯកភាពគ្នាពេញមួយគម្រោង (Consistency)។

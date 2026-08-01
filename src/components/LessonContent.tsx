@@ -17,7 +17,7 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
         remarkPlugins={[remarkGfm]}
         components={{
           img({ src, alt, ...props }) {
-            const isSvg = typeof src === "string" && src.endsWith(".svg");
+            const isSvg = typeof src === "string" && (src.endsWith(".svg") || src.includes("simpleicons.org"));
             return (
               // eslint-disable-next-line @next/next/no-img-element
               <img

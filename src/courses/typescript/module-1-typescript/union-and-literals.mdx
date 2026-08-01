@@ -1,0 +1,83 @@
+---
+title: Union និង Literal Types
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ Union Types ដើម្បីអោយអថេរមួយអាចផ្ទុកទិន្នន័យបានច្រើនប្រភេទ និង Literal Types ដើម្បីកំណត់តម្លៃអោយជាក់លាក់។
+objectives:
+  - យល់ពីការប្រើប្រាស់ Union Types
+  - ដឹងពីរបៀបប្រើប្រាស់ Literal Types
+  - យល់ពីការបង្រួមប្រភេទ (Type Narrowing) ជាមួយ Union Types
+module: module-1-typescript
+order: 4
+quiz:
+  - question: ប្រសិនបើយើងចង់ឲ្យអថេរ `status` មានតម្លៃតែ "success", "error" ឬ "loading" តែប៉ុណ្ណោះ តើយើងគួរប្រើអ្វី?
+    options:
+      - ប្រើ `string` ធម្មតា
+      - ប្រើ `any` type
+      - ប្រើ Union ជាមួយ Literal Types ដូចជា `"success" | "error" | "loading"`
+      - ប្រើ `boolean`
+    correctAnswer: 2
+    explanation: "ការប្រើប្រាស់ Union រួមជាមួយ Literal Types (`\"success\" | \"error\" | \"loading\"`) ជួយធានាថាអថេរនោះអាចមានតម្លៃតែមួយក្នុងចំនោមតម្លៃដែលយើងបានកំណត់ប៉ុណ្ណោះ។"
+---
+
+## 🔀 Union Types
+
+ជួនកាលយើងចង់ឲ្យអថេរមួយអាចផ្ទុកទិន្នន័យច្រើនជាងមួយប្រភេទ។ យើងអាចប្រើសញ្ញា `|` (បញ្ឈរ) ដែលតំណាងអោយពាក្យ "ឬ (OR)" ដើម្បីបង្កើត **Union Type**។
+
+```typescript
+// អថេរ id អាចជា លេខ ក៏បាន ឬ ជាអក្សរ ក៏បាន
+let id: number | string;
+
+id = 101;       // ✅ ត្រឹមត្រូវ
+id = "ABC-202"; // ✅ ត្រឹមត្រូវ
+id = true;      // ❌ Error: Type 'boolean' is not assignable to type 'string | number'.
+```
+
+នេះមានប្រយោជន៍ខ្លាំងណាស់នៅពេលដែលទិន្នន័យដែលយើងទទួលបានអាចមានទម្រង់ច្រើនជាងមួយ ឧទាហរណ៍ដូចជាតម្លៃពី API ឬ ការកំណត់ Parameter ក្នុង Function។
+
+```typescript
+function printId(id: number | string) {
+  // ដោយសារ id អាចជាអក្សរ ឬ លេខ, TypeScript ការពារមិនអោយយើងហៅ function ដែលខុស
+  // ឧទាហរណ៍ យើងមិនអាចហៅ id.toUpperCase() បានទេ ព្រោះ id អាចជាលេខ
+  
+  if (typeof id === "string") {
+    // នៅក្នុង block នេះ TypeScript ដឹងច្បាស់ថា id ជាអក្សរ (Type Narrowing)
+    console.log("ID របស់អ្នកគឺ:", id.toUpperCase());
+  } else {
+    // ទីនេះវាដឹងថា id ជាលេខ
+    console.log("ID លេខគឺ:", id);
+  }
+}
+```
+
+---
+
+## 🎯 Literal Types
+
+**Literal Type** គឺជាការកំណត់ប្រភេទទិន្នន័យឲ្យ **ច្បាស់លាស់ទៅលើតម្លៃណាមួយ** តែម្តង ជាជាងកំណត់ថាវាជា `string` ឬ `number` ទូទៅ។
+
+```typescript
+let exactName: "Sok";
+exactName = "Sok"; // ✅
+exactName = "Dara"; // ❌ Error: Type '"Dara"' is not assignable to type '"Sok"'.
+
+let theNumberOne: 1 = 1;
+```
+
+ស្តាប់ទៅវាហាក់ដូចជាគ្មានប្រយោជន៍ទេ ប៉ុន្តែនៅពេលដែលយើងយក Literal Types មកផ្គុំគ្នាជាមួយនឹង Union Types វានឹងក្លាយជាមុខងារដ៏មានឥទ្ធិពលបំផុតមួយ!
+
+### Union + Literal Types
+
+ឧបមាថាយើងមាន Function មួយសម្រាប់ប្តូរពណ៌ Theme របស់ Web App យើង។ ពណ៌នោះអាចមានតែ `light`, `dark` ឬ `system` តែប៉ុណ្ណោះ។
+
+```typescript
+// យើងអាចប្រើ Type Alias ងាយស្រួលហៅ
+type Theme = "light" | "dark" | "system";
+
+function setTheme(theme: Theme) {
+  console.log("Changing theme to:", theme);
+}
+
+setTheme("dark"); // ✅ ត្រឹមត្រូវ
+setTheme("blue"); // ❌ Error: Argument of type '"blue"' is not assignable to parameter of type 'Theme'.
+```
+
+អត្ថប្រយោជន៍នៃការប្រើប្រាស់វិធីនេះ គឺនៅពេលដែលអ្នកវាយអក្សរក្នុង VS Code (ឧទាហរណ៍ `setTheme(`) វានឹងលោត (Autocomplete) បង្ហាញជម្រើស "light", "dark", និង "system" ឲ្យអ្នកជ្រើសរើសដោយស្វ័យប្រវត្តិ! វាកាត់បន្ថយកំហុសបានយ៉ាងច្រើន។
