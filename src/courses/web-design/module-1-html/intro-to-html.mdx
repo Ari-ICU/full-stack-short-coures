@@ -1,11 +1,11 @@
 ---
-title: សេចក្តីផ្តើមអំពី HTML5
-description: រៀនពីមូលដ្ឋានគ្រឹះនៃ web។ តើអ្វីទៅជា HTML, ដំណើរការរបស់វា, និងហេតុអ្វីបានជាវាចាំបាច់សម្រាប់ web design?
+title: Introduction to HTML5
+description: រៀនពីមូលដ្ឋានគ្រឹះនៃ Web។ តើអ្វីទៅជា HTML, ដំណើរការរបស់វា, និងហេតុអ្វីបានជាវាចាំបាច់សម្រាប់ Web Design?
 objectives:
-  - ស្វែងយល់ពីតួនាទីរបស់ HTML ក្នុងការអភិវឌ្ឍន៍ web
+  - ស្វែងយល់ពីតួនាទីរបស់ HTML ក្នុងការអភិវឌ្ឍន៍ Web
   - បង្កើតឯកសារ HTML ដំបូងរបស់អ្នក
-  - រៀនពី HTML tags ជាមូលដ្ឋានដូចជា headings, paragraphs, និង lists
-  - ស្វែងយល់ពី HTML attributes និងរបៀបប្រើពួកវា
+  - រៀនពី HTML Tags ជាមូលដ្ឋានដូចជា Headings, Paragraphs, និង Lists
+  - ស្វែងយល់ពី HTML Attributes និងរបៀបប្រើពួកវា
   - រៀនពី Semantic HTML និងសារៈសំខាន់របស់វា
 module: module-1-html
 order: 1
@@ -17,29 +17,29 @@ quiz:
       - Hyper Transfer Markup Language
       - Home Tool Markup Language
     correctAnswer: 0
-    explanation: HTML តំណាងឱ្យ Hyper Text Markup Language ដែលត្រូវបានប្រើដើម្បីរៀបចំរចនាសម្ព័ន្ធមាតិកានៅលើ web។
-  - question: តើ tag មួយណាប្រើសម្រាប់ navigation links?
+    explanation: HTML តំណាងឱ្យ Hyper Text Markup Language ដែលត្រូវបានប្រើដើម្បីរៀបចំរចនាសម្ព័ន្ធ Content នៅលើ Web។
+  - question: តើ Tag មួយណាប្រើសម្រាប់ Navigation Links?
     options:
       - <div>
       - <nav>
       - <link>
       - <menu>
     correctAnswer: 1
-    explanation: <nav> គឺជា semantic tag ដែលប្រើសម្រាប់រុំ navigation links ដើម្បីជួយ screen readers និង SEO។
+    explanation: <nav> គឺជា Semantic Tag ដែលប្រើសម្រាប់រុំ Navigation Links ដើម្បីជួយ Screen Readers និង SEO។
 ---
 
 ## 🌐 ឆ្អឹងខ្នងនៃ Web
 
 រាល់គេហទំព័រដែលអ្នកចូលមើល ពី Google ដល់ Netflix គឺត្រូវបានបង្កើតឡើងនៅលើ **HTML (Hyper Text Markup Language)**។
 
-HTML មិនមែនជាភាសាសរសេរកូដ (programming language) ទេ; វាគឺជា **markup language**។ វាប្រាប់កម្មវិធីរុករក (browser) ពីរបៀបរៀបចំ និងបង្ហាញមាតិកា។
+HTML មិនមែនជាភាសាសរសេរកូដ (Programming Language) ទេ; វាគឺជា **Markup Language**។ វាប្រាប់ **Browser** ពីរបៀបរៀបចំ និងបង្ហាញ Content។
 
 ### តើ HTML ធ្វើអ្វីខ្លះ?
 
 HTML គ្រប់គ្រងផ្នែកទាំងនេះនៃគេហទំព័រ៖
-- **រចនាសម្ព័ន្ធ (Structure)**: ការរៀបចំមាតិកាជា headings, paragraphs, lists
-- **មាតិកា (Content)**: អត្ថបទ, រូបភាព, វីដេអូ, តំណភ្ជាប់
-- **អត្ថន័យ (Semantics)**: ប្រាប់ browser ថាមាតិកានីមួយៗ *គឺជាអ្វី* (navigation, article, footer)
+- **រចនាសម្ព័ន្ធ (Structure)**: ការរៀបចំ Content ជា Headings, Paragraphs, Lists
+- **មាតិកា (Content)**: Text, រូបភាព, វីដេអូ, Links
+- **អត្ថន័យ (Semantics)**: ប្រាប់ Browser ថា Content នីមួយៗ *គឺជាអ្វី* (Navigation, Article, Footer)
 
 ចូរគិតពីការសាងសង់ផ្ទះមួយ៖
 - **HTML** គឺជារចនាសម្ព័ន្ធ (ជញ្ជាំង, កម្រាល, បន្ទប់)។
@@ -48,7 +48,7 @@ HTML គ្រប់គ្រងផ្នែកទាំងនេះនៃគេ
 
 ### ប្រវត្តិខ្លីៗ
 
-HTML ត្រូវបានបង្កើតឡើងដោយ **Tim Berners-Lee** នៅឆ្នាំ 1991។ ដំបូងវាមាន tags ចំនួន 18 តែប៉ុណ្ណោះ! សព្វថ្ងៃ HTML5 គឺជា version ចុងក្រោយបង្អស់ ដែលមាន tags ជាង 100។
+HTML ត្រូវបានបង្កើតឡើងដោយ **Tim Berners-Lee** នៅឆ្នាំ 1991។ ដំបូងវាមាន Tags ចំនួន 18 តែប៉ុណ្ណោះ! សព្វថ្ងៃ HTML5 គឺជា Version ចុងក្រោយបង្អស់ ដែលមាន Tags ជាង 100។
 
 ---
 
@@ -75,7 +75,7 @@ HTML ត្រូវបានបង្កើតឡើងដោយ **Tim Berners-
         </nav>
     </header>
     <main>
-        <p>នេះគឺជាកថាខណ្ឌ (paragraph) នៃអត្ថបទ។</p>
+        <p>នេះគឺជា Paragraph នៃ Text។</p>
     </main>
     <footer>
         <p>&copy; 2024 My Website</p>
@@ -88,49 +88,49 @@ HTML ត្រូវបានបង្កើតឡើងដោយ **Tim Berners-
 
 | Tag | មុខងារ |
 |-----|--------|
-| `<!DOCTYPE html>` | ប្រាប់ browser ថានេះគឺជាឯកសារ HTML5 |
-| `<html lang="km">` | ឫសគល់ដែលរុំមាតិកាទាំងអស់។ `lang` attribute ប្រាប់ browser ពីភាសា |
-| `<head>` | ព័ត៌មាន metadata (ចំណងជើង, charset, viewport, stylesheets) |
-| `<meta charset="UTF-8">` | កំណត់ encoding អក្សរ — ចាំបាច់សម្រាប់អក្សរខ្មែរ |
-| `<meta name="viewport">` | ធ្វើឱ្យទំព័រ responsive នៅលើ mobile |
-| `<body>` | មាតិកាទាំងអស់ដែលអាចមើលឃើញនៅលើគេហទំព័រ |
-| `<header>` | ផ្នែកខាងលើនៃទំព័រ |
-| `<main>` | មាតិកាសំខាន់ៗ |
-| `<footer>` | ផ្នែកខាងក្រោមនៃទំព័រ |
+| `<!DOCTYPE html>` | ប្រាប់ Browser ថានេះគឺជាឯកសារ HTML5 |
+| `<html lang="km">` | ឫសគល់ដែលរុំ Content ទាំងអស់។ `lang` Attribute ប្រាប់ Browser ពីភាសា |
+| `<head>` | ព័ត៌មាន Metadata (Title, Charset, Viewport, Stylesheets) |
+| `<meta charset="UTF-8">` | កំណត់ Encoding អក្សរ — ចាំបាច់សម្រាប់អក្សរខ្មែរ |
+| `<meta name="viewport">` | ធ្វើឱ្យទំព័រ Responsive នៅលើ Mobile |
+| `<body>` | Content ទាំងអស់ដែលអាចមើលឃើញនៅលើគេហទំព័រ |
+| `<header>` | ផ្នែក Header នៃទំព័រ |
+| `<main>` | Content សំខាន់ៗ (Main Content) |
+| `<footer>` | ផ្នែក Footer នៃទំព័រ |
 
-> 💡 **គន្លឹះ៖** ចាំថា `<head>` គឺជា metadata (មើលមិនឃើញ) ហើយ `<header>` គឺជាផ្នែកខាងលើទំព័រ (មើលឃើញ)។ កុំច្រឡំ!
+> 💡 **គន្លឹះ៖** ចាំថា `<head>` គឺជា Metadata (មើលមិនឃើញ) ហើយ `<header>` គឺជាផ្នែកខាងលើទំព័រ (មើលឃើញ)។ កុំច្រឡំ!
 
 ---
 
 ## 🏷️ HTML Tags សំខាន់ៗ
 
-HTML ប្រើប្រាស់ **tags** ដើម្បីកំណត់ធាតុ (elements)។ tag ភាគច្រើនមាន opening tag និង closing tag។
+HTML ប្រើប្រាស់ **Tags** ដើម្បីកំណត់ **Elements**។ Tag ភាគច្រើនមាន Opening Tag និង Closing Tag។
 
-### Headings (ចំណងជើង)
+### Headings 
 
-HTML មាន 6 កម្រិតនៃ headings៖
+HTML មាន 6 កម្រិតនៃ Headings៖
 
 ```html
-<h1>ចំណងជើងធំបំផុត (ប្រើតែ 1 ក្នុងទំព័រ)</h1>
-<h2>ចំណងជើងអនុផ្នែក</h2>
-<h3>ចំណងជើងរង</h3>
-<h4>ចំណងជើងតូច</h4>
-<h5>ចំណងជើងតូចជាង</h5>
-<h6>ចំណងជើងតូចបំផុត</h6>
+<h1>Heading ធំបំផុត (ប្រើតែ 1 ក្នុងទំព័រ)</h1>
+<h2>Heading អនុផ្នែក</h2>
+<h3>Heading រង</h3>
+<h4>Heading តូច</h4>
+<h5>Heading តូចជាង</h5>
+<h6>Heading តូចបំផុត</h6>
 ```
 
-> ⚠️ **សំខាន់៖** ប្រើ headings ឱ្យមានលំដាប់ត្រឹមត្រូវ (h1 → h2 → h3)។ កុំប្រើ h3 មុន h2! នេះជួយ SEO និង screen readers។
+> ⚠️ **សំខាន់៖** ប្រើ Headings ឱ្យមានលំដាប់ត្រឹមត្រូវ (h1 → h2 → h3)។ កុំប្រើ h3 មុន h2! នេះជួយ SEO និង Screen Readers។
 
-### Paragraphs & Text Formatting (អត្ថបទ)
+### Paragraphs & Text Formatting
 
 ```html
-<p>នេះគឺជាកថាខណ្ឌធម្មតា។</p>
+<p>នេះគឺជា Paragraph ធម្មតា។</p>
 
-<p>អ្នកអាចធ្វើ <strong>អក្សរដិត</strong> និង <em>អក្សរទ្រេត</em> បាន។</p>
+<p>អ្នកអាចធ្វើ <strong>Bold</strong> និង <em>Italic</em> បាន។</p>
 
-<p>ដើម្បីបន្ទាត់ថ្មី ប្រើ <br> tag។<br>នេះនៅបន្ទាត់ថ្មី។</p>
+<p>ដើម្បីចុះបន្ទាត់ថ្មី ប្រើ <br> Tag។<br>នេះនៅបន្ទាត់ថ្មី។</p>
 
-<p>ដើម្បី <mark>highlight អត្ថបទ</mark> ប្រើ mark tag។</p>
+<p>ដើម្បី <mark>Highlight Text</mark> ប្រើ mark Tag។</p>
 
-<p>អត្ថបទ <small>តូចជាង</small> ប្រើ small tag។</p>
+<p>Text <small>តូចជាង</small> ប្រើ small Tag។</p>
 ```

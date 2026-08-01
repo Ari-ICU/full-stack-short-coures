@@ -1,53 +1,53 @@
 ---
-title: ទម្រង់ និង Input ផ្សេងៗ (Forms & Inputs)
-description: រៀនពីរបៀបប្រមូលទិន្នន័យអ្នកប្រើប្រាស់ដោយប្រើទម្រង់ HTML, input fields, និងប៊ូតុង។
+title: Forms & Inputs
+description: រៀនពីរបៀបប្រមូល User Data ដោយប្រើ HTML Forms, Input Fields, និង Buttons។
 objectives:
-  - ស្វែងយល់ពីគោលបំណងនៃ tag <form>
-  - បង្កើតប្រភេទ input fields ផ្សេងៗ
-  - រៀនពី attributes របស់ form ដូចជា action និង method
+  - ស្វែងយល់ពីគោលបំណងនៃ Tag <form>
+  - បង្កើតប្រភេទ Input Fields ផ្សេងៗ
+  - រៀនពី Attributes របស់ Form ដូចជា Action និង Method
 module: module-1-html
 order: 2
 quiz:
-  - question: តើ input មួយណាត្រូវបានប្រើសម្រាប់បញ្ជី dropdown?
+  - question: តើ Input មួយណាត្រូវបានប្រើសម្រាប់បញ្ជី Dropdown?
     options:
       - <input type="dropdown">
       - <select>
       - <list>
       - <input type="list">
     correctAnswer: 1
-    explanation: ធាតុ <select> ត្រូវបានប្រើរួមជាមួយ tag <option> ដើម្បីបង្កើតបញ្ជី dropdown។
+    explanation: Element <select> ត្រូវបានប្រើរួមជាមួយ Tag <option> ដើម្បីបង្កើតបញ្ជី Dropdown។
 ---
 
-## 📝 ការប្រមូលទិន្នន័យអ្នកប្រើប្រាស់
+## 📝 ការប្រមូល User Data
 
-HTML forms គឺជារឿងចាំបាច់សម្រាប់អន្តរកម្ម។ មិនថាវាជាអេក្រង់ចូលគណនី (login), ទំព័របង់ប្រាក់, ឬទម្រង់ទំនាក់ទំនងធម្មតា, ធាតុ `<form>` គឺជាឆ្អឹងខ្នងនៃការបញ្ចូលទិន្នន័យ។
+HTML Forms គឺជារឿងចាំបាច់សម្រាប់អន្តរកម្ម។ មិនថាវាជាអេក្រង់ Login, ទំព័រ Checkout, ឬទម្រង់ទំនាក់ទំនង (Contact Form) ធម្មតា, Element `<form>` គឺជាឆ្អឹងខ្នងនៃការបញ្ចូលទិន្នន័យ។
 
-ទម្រង់គឺជាប្រអប់ (container) សម្រាប់ប្រភេទ input ផ្សេងៗ ដូចជា text, checkboxes, radio buttons, និង submit buttons។
+Form គឺជាប្រអប់ (Container) សម្រាប់ប្រភេទ Input ផ្សេងៗ ដូចជា Text, Checkboxes, Radio Buttons, និង Submit Buttons។
 
 ---
 
-## 🏗️ ធាតុ `<form>`
+## 🏗️ Element `<form>`
 
-រាល់ form ទាំងអស់ត្រូវចាប់ផ្តើម និងបញ្ចប់ដោយ `<form>` tags។
+រាល់ Form ទាំងអស់ត្រូវចាប់ផ្តើម និងបញ្ចប់ដោយ `<form>` Tags។
 
 ```html
 <form action="/submit-data" method="POST">
-    <!-- Input fields ដាក់នៅទីនេះ -->
+    <!-- Input Fields ដាក់នៅទីនេះ -->
 </form>
 ```
 
 ### Attributes សំខាន់ៗ៖
-- **`action`**: បញ្ជាក់ទីកន្លែងដែលត្រូវបញ្ជូនទិន្នន័យនៅពេល form ត្រូវបាន submit (ជាធម្មតាទៅកាន់ server)។
-- **`method`**: បញ្ជាក់ពីរបៀបបញ្ជូនទិន្នន័យ (HTTP method)។ ទូទៅបំផុតគឺ `GET` និង `POST`។
+- **`action`**: បញ្ជាក់ទីកន្លែងដែលត្រូវបញ្ជូនទិន្នន័យនៅពេល Form ត្រូវបាន Submit (ជាធម្មតាទៅកាន់ Server)។
+- **`method`**: បញ្ជាក់ពីរបៀបបញ្ជូនទិន្នន័យ (HTTP Method)។ ទូទៅបំផុតគឺ `GET` និង `POST`។
 
 ---
 
 ## ⌨️ ប្រភេទ Inputs
 
-Tag `<input>` គឺជាធាតុ form ដែលអាចប្រើបានច្រើនយ៉ាង។ សកម្មភាពរបស់វាផ្លាស់ប្តូរទាំងស្រុងទៅតាម `type` attribute របស់វា។
+Tag `<input>` គឺជា Form Element ដែលអាច অন্ততប្រើបានច្រើនយ៉ាង។ សកម្មភាពរបស់វាផ្លាស់ប្តូរទាំងស្រុងទៅតាម `type` Attribute របស់វា។
 
 ### 1. Text Input
-ប្រើសម្រាប់អត្ថបទខ្លីៗ ដូចជាឈ្មោះ។
+ប្រើសម្រាប់ Text ខ្លីៗ ដូចជាឈ្មោះ។
 ```html
 <label for="username">Username:</label>
 <input type="text" id="username" name="username" placeholder="បញ្ចូល username របស់អ្នក">
@@ -61,14 +61,14 @@ Tag `<input>` គឺជាធាតុ form ដែលអាចប្រើបា
 ```
 
 ### 3. Email Input
-ផ្ទៀងផ្ទាត់ដោយស្វ័យប្រវត្តិថាការបញ្ចូលគឺជាទម្រង់អ៊ីមែលត្រឹមត្រូវ។
+ផ្ទៀងផ្ទាត់ (Validate) ដោយស្វ័យប្រវត្តិថាការបញ្ចូលគឺជាទម្រង់ Email ត្រឹមត្រូវ។
 ```html
 <label for="email">Email:</label>
 <input type="email" id="email" name="email" required>
 ```
 
 ### 4. Radio Buttons
-អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស តែមួយ ជម្រើសគត់ពីបញ្ជី។ radio buttons ទាំងអស់ក្នុងក្រុមតែមួយត្រូវតែមាន `name` attribute ដូចគ្នា។
+អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស តែមួយ ជម្រើសគត់ពីបញ្ជី។ Radio Buttons ទាំងអស់ក្នុងក្រុមតែមួយត្រូវតែមាន `name` Attribute ដូចគ្នា។
 ```html
 <p>ជ្រើសរើសវគ្គសិក្សារបស់អ្នក៖</p>
 <input type="radio" id="frontend" name="course" value="frontend">
@@ -89,7 +89,7 @@ Tag `<input>` គឺជាធាតុ form ដែលអាចប្រើបា
 
 ## 🔘 Dropdowns & Textareas
 
-### បញ្ជី Dropdown (`<select>`)
+### Dropdown List (`<select>`)
 ប្រើនៅពេលអ្នកមានជម្រើសវែងៗច្រើន។
 ```html
 <label for="country">ប្រទេស៖</label>
@@ -100,8 +100,8 @@ Tag `<input>` គឺជាធាតុ form ដែលអាចប្រើបា
 </select>
 ```
 
-### អត្ថបទច្រើនបន្ទាត់ (`<textarea>`)
-ប្រើសម្រាប់អត្ថបទវែងៗ ដូចជាមតិយោបល់ ឬសារ។
+### Multi-line Text (`<textarea>`)
+ប្រើសម្រាប់ Text វែងៗ ដូចជាមតិយោបល់ ឬសារ។
 ```html
 <label for="message">សារ៖</label>
 <textarea id="message" name="message" rows="4" cols="50"></textarea>
@@ -109,12 +109,12 @@ Tag `<input>` គឺជាធាតុ form ដែលអាចប្រើបា
 
 ---
 
-## 🚀 ការបញ្ជូន Form (Submit)
+## 🚀 ការ Submit Form
 
-ចុងក្រោយ អ្នកត្រូវការប៊ូតុងមួយដើម្បីបញ្ជូនទិន្នន័យពី form ទៅកាន់ server។
+ចុងក្រោយ អ្នកត្រូវការ Button មួយដើម្បីបញ្ជូនទិន្នន័យពី Form ទៅកាន់ Server។
 
 ```html
 <button type="submit">Submit Form</button>
 ```
 
-*គន្លឹះ៖ គួរប្រើ `<label>` tags ជានិច្ច និងភ្ជាប់វាទៅកាន់ input របស់វាដោយប្រើ `for` attribute និង `id` របស់ input។ នេះគឺសំខាន់ណាស់សម្រាប់ screen readers និង web accessibility!*
+*គន្លឹះ៖ គួរប្រើ `<label>` Tags ជានិច្ច និងភ្ជាប់វាទៅកាន់ Input របស់វាដោយប្រើ `for` Attribute និង `id` របស់ Input។ នេះគឺសំខាន់ណាស់សម្រាប់ Screen Readers និង Web Accessibility!*
