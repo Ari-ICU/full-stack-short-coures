@@ -1,0 +1,83 @@
+---
+title: "Basic Docker"
+description: "ស្វែងយល់ពី Docker និងអត្ថប្រយោជន៍របស់វាក្នុងការវេចខ្ចប់កម្មវិធី (Containerization) ដើម្បីឱ្យដំណើរការបានគ្រប់កុំព្យូទ័រ។"
+objectives:
+  - "យល់ពីបញ្ហា \"It works on my machine\""
+  - "ស្វែងយល់ពីគំនិតមូលដ្ឋានរបស់ Containers ធៀបនឹង Virtual Machines"
+  - "រៀនពី Dockerfile និងការបង្កើត Image"
+module: module-1-deployment
+order: 2
+quiz:
+  - question: "តើអ្វីទៅជាអត្ថប្រយោជន៍ចម្បងរបស់ Docker Containers បើប្រៀបធៀបទៅនឹង Virtual Machines (VMs)?"
+    options:
+      - "Containers ដើរលឿនជាង ស្រាលជាង និងមិនទាមទារការចម្លងប្រព័ន្ធប្រតិបត្តិការ (OS) ទាំងមូលឡើយ"
+      - "Containers អាចដំណើរការបានតែនៅលើ Windows ប៉ុណ្ណោះ"
+      - "Containers ផ្តល់នូវ UI (User Interface) ស្អាតជាង"
+      - "Containers អាចការពារការវាយប្រហារ DDOS បាន ១០០%"
+    correctAnswer: 0
+    explanation: "VM នីមួយៗទាមទារអោយមាន Guest OS ដាច់ដោយឡែកពីគ្នា ដែលធ្វើអោយវាធ្ងន់ និងស៊ីមេម៉ូរីច្រើន។ ចំណែក Docker Containers ប្រើប្រាស់ OS កណ្តាលរួមគ្នា (Host OS Kernel) ទើបធ្វើអោយវាស្រាល ស៊ីមេម៉ូរីតិច និងចាប់ផ្តើមដំណើរការលឿនជាង។"
+---
+
+## 🐳 បញ្ហា "It works on my machine"
+
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker Logo" width="150" />
+</div>
+
+តើអ្នកធ្លាប់ជួបបញ្ហាដែលកូដរបស់អ្នករត់យ៉ាងរលូននៅលើកុំព្យូទ័រខ្លួនឯង ប៉ុន្តែពេលយកទៅអោយមិត្តភក្តិ ឬដាក់លើ Server វាបែរជា Error រត់លែងចេញដែរឬទេ?
+បញ្ហានេះច្រើនតែកើតឡើងដោយសារ **បរិស្ថានខុសគ្នា (Different Environments)** ដូចជា៖ OS ផ្សេងគ្នា, Node.js ជំនាន់ (Version) ខុសគ្នា, ឬភ្លេចដំឡើងបណ្ណាល័យណាមួយ។
+
+**Docker** គឺជាអ្នកដែលមកដោះស្រាយបញ្ហានេះ!
+
+---
+
+## 📦 អ្វីទៅជា Docker និង Container?
+
+គិតទៅដល់ **ទូកុងតឺន័រ (Container)** ដឹកទំនិញតាមកប៉ាល់។ មិនថាទំនិញនៅខាងក្នុងជារថយន្ត អាវយឺត ឬគ្រឿងអេឡិចត្រូនិកទេ សំបកកុងតឺន័រខាងក្រៅមានទំហំនិងទម្រង់ស្តង់ដារដូចគ្នា ដែលធ្វើអោយកប៉ាល់ រថភ្លើង និងឡានដឹកទំនិញទូទាំងពិភពលោកអាចលើកវាបានដោយងាយស្រួល។
+
+**Docker** ក៏ដូចគ្នាដែរ! វាអនុញ្ញាតអោយអ្នក **វេចខ្ចប់ (Package)** កូដកម្មវិធីរបស់អ្នក រួមជាមួយនឹងបណ្ណាល័យ (Libraries) និង Node.js Version ដែលកូដនោះត្រូវការ ចូលទៅក្នុងប្រអប់មួយហៅថា **Container**។
+
+នៅពេលដែលអ្នកមាន Container នេះហើយ អ្នកអាចយកវាទៅរត់នៅលើកុំព្យូទ័រណាក៏បាន, លើ Server ណាក៏បាន (Mac, Windows, Linux) ឱ្យតែមានដំឡើង Docker នោះវានឹងដំណើរការដូចគ្នា **១០០%**។
+
+---
+
+## 🏗️ Dockerfile និង Image
+
+ដើម្បីបង្កើត Container យើងត្រូវការប្លង់មេមួយសិន ដែលហៅថា **Dockerfile**។ វាគ្រាន់តែជា File អក្សរធម្មតាដែលប្រាប់ Docker ពីរបៀបបង្កើតបរិស្ថាន។
+
+ឧទាហរណ៍ Dockerfile សម្រាប់កម្មវិធី Node.js របស់យើង៖
+
+```dockerfile
+# ១. ទាញយកប្រព័ន្ធប្រតិបត្តិការដែលមាន Node.js ស្រាប់
+FROM node:18-alpine
+
+# ២. កំណត់ទីតាំងធ្វើការក្នុង Container
+WORKDIR /app
+
+# ៣. ចម្លង file package.json ចូល
+COPY package*.json ./
+
+# ៤. ដំឡើងបណ្ណាល័យ (Dependencies)
+RUN npm install
+
+# ៥. ចម្លងកូដទាំងអស់របស់យើងចូលទៅក្នុង Container
+COPY . .
+
+# ៦. បើកច្រក 3000
+EXPOSE 3000
+
+# ៧. បញ្ជាឱ្យរត់កូដ
+CMD ["npm", "start"]
+```
+
+នៅពេលដែលអ្នកមាន `Dockerfile` អ្នកអាចបញ្ជាឱ្យ Docker សាងសង់វាអោយក្លាយជា **Image** (ប្រៀបដូចជាការ Install File `.exe`)។ បន្ទាប់មកអ្នកអាចយក Image នោះទៅរត់ (Run) ដើម្បីបង្កើតជា **Container** ជាក់ស្តែង។
+
+```bash
+# សាងសង់ Image
+docker build -t my-node-app .
+
+# រត់ Image បង្កើតជា Container
+docker run -p 3000:3000 my-node-app
+```
+
+ទោះបីជាក្នុងវគ្គនេះយើងនឹងមិនប្រើប្រាស់ Docker ស៊ីជម្រៅសម្រាប់ការ Deploy ក៏ដោយ ក៏ការស្វែងយល់ពីរបៀបដែល Container ធ្វើការ គឺជាមូលដ្ឋានគ្រឹះដ៏សំខាន់សម្រាប់ការ Deploy កម្មវិធីទំនើបៗនាពេលអនាគត (ដូចជា Kubernetes ជាដើម)។

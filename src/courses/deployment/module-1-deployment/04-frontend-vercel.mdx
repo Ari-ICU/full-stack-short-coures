@@ -1,0 +1,81 @@
+---
+title: "Deploy Frontend to Vercel"
+description: "របៀបបង្ហោះកូដ React ឬ Next.js (Frontend) ទៅកាន់ Vercel អោយដំណើរការដោយរលូន និងមានល្បឿនលឿន។"
+objectives:
+  - "រៀបចំ Project Frontend មុនពេល Deploy"
+  - "យល់ពីការភ្ជាប់ API Link ចូលក្នុង Frontend ពេលនៅតំណាក់កាល Production"
+  - "Deploy កូដតាមរយៈ Vercel"
+module: module-1-deployment
+order: 4
+quiz:
+  - question: "តើហេតុអ្វីបានជាយើងមិនអាចសរសេរ URL របស់ Backend API ទទេៗ (ឧទាហរណ៍ `fetch('http://localhost:3000/api')`) នៅក្នុងកូដ Frontend ដែលរៀបនឹង Deploy?"
+    options:
+      - "ព្រោះ Vercel មិនគាំទ្រលេខ Port 3000"
+      - "ព្រោះនៅលើអុីនធឺណិត (Production) Backend មិនបានស្ថិតនៅលើ `localhost` ទៀតទេ វាស្ថិតនៅលើ Domain ផ្សេង (ឧ. Render URL)"
+      - "ព្រោះការសរសេរអក្សរផ្ទាល់ៗធ្វើអោយកូដដើរយឺត"
+      - "ព្រោះ Browser នឹងប្លុកពាក្យ localhost ដោយស្វ័យប្រវត្តិ"
+    correctAnswer: 1
+    explanation: "ពាក្យ `localhost` សំដៅទៅលើកុំព្យូទ័រផ្ទាល់ខ្លួន។ ពេលមានអ្នកប្រើប្រាស់ពីខាងក្រៅចូលមើលវេបសាយអ្នក ប្រសិនបើវាទាញ API ពី `localhost` វានឹងព្យាយាមរក Backend នៅក្នុងទូរសព្ទ ឬកុំព្យូទ័ររបស់ពួកគេផ្ទាល់ (ដែលប្រាកដជាគ្មាន)។ ដូច្នេះអ្នកត្រូវដូរវាទៅជា URL របស់ Backend ជាក់ស្តែង (ឧទាហរណ៍ `https://my-api.onrender.com`)។"
+---
+
+## ⚡ ហេតុអ្វី Vercel?
+
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Vercel_logo_black.svg" alt="Vercel Logo" width="150" />
+</div>
+
+សម្រាប់ផ្នែក Backend យើងបានប្រើប្រាស់ Render។ ចំណែកឯផ្នែក Frontend វិញ ជម្រើសដ៏ល្អបំផុត និងពេញនិយមបំផុតនាពេលបច្ចុប្បន្ន (ជាពិសេសសម្រាប់គម្រោង React និង Next.js) គឺ **Vercel**។ 
+
+Vercel គឺជាវេទិកា Cloud ដែលបង្កើតឡើងដោយក្រុមហ៊ុនផ្ទាល់របស់ Next.js ដែលធ្វើឱ្យការ Deploy កម្មវិធី Frontend កាន់តែមានភាពងាយស្រួល លឿន និងមិនគិតថ្លៃសម្រាប់គម្រោងផ្ទាល់ខ្លួន (Hobby)។
+
+---
+
+## ⚙️ ជំហានទី ១: រៀបចំកូដ Frontend 
+
+មុននឹងបញ្ជូនកូដទៅ Vercel ចំណុចសំខាន់បំផុតគឺការផ្លាស់ប្តូរ **API URL**។
+
+ពេលអ្នកសរសេរកូដនៅលើកុំព្យូទ័រ អ្នកប្រហែលជាទាញទិន្នន័យ (Fetch) បែបនេះ៖
+```javascript
+// កូដពេលកំពុងសរសេរ (Development)
+const response = await fetch('http://localhost:3000/api/users');
+```
+
+ប៉ុន្តែនៅពេល Deploy អ្នកមិនអាចប្រើ `localhost` ទៀតទេ ព្រោះ Backend របស់អ្នកឥឡូវនេះស្ថិតនៅលើ Render ទៅហើយ។ ដើម្បីដោះស្រាយបញ្ហានេះ យើងត្រូវប្រើប្រាស់ **Environment Variables**។
+
+បង្កើត File `.env` នៅក្នុង Frontend:
+```text
+NEXT_PUBLIC_API_URL=https://my-api-abcd.onrender.com
+```
+
+បន្ទាប់មកនៅក្នុងកូដ React/Next.js អ្នកត្រូវដូរមកសរសេរជា៖
+```javascript
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+const response = await fetch(`${apiUrl}/api/users`);
+```
+
+ក្រោយពីរៀបចំរួចរាល់ សូម Push កូដ Frontend របស់អ្នកទៅកាន់ GitHub Repository ដាច់ដោយឡែកមួយ។
+
+---
+
+## 🚀 ជំហានទី ២: ការ Deploy ទៅកាន់ Vercel
+
+ការ Deploy លើ Vercel គឺងាយស្រួលមែនទែន ដោយចំណាយពេលត្រឹមតែប៉ុន្មាននាទីប៉ុណ្ណោះ៖
+
+1. ចូលទៅកាន់ [vercel.com](https://vercel.com) រួចបង្កើតគណនីដោយចុះឈ្មោះតាមរយៈ GitHub។
+2. ចុចប៊ូតុង **"Add New"** > **"Project"**។
+3. Vercel នឹងបង្ហាញបញ្ជី Repositories ពី GitHub របស់អ្នក។ សូមស្វែងរក Repository របស់ Frontend រួចចុចប៊ូតុង **"Import"**។
+4. នៅក្នុងផ្ទាំង Configure Project:
+   - Framework Preset: វានឹងស្គាល់ដោយស្វ័យប្រវត្តិថាវាជា Next.js ឬ Create React App។
+   - ចុចបើកផ្ទាំង **Environment Variables**។
+   - បញ្ចូល Name: `NEXT_PUBLIC_API_URL` និង Value: `https://my-api-abcd.onrender.com` (Link របស់ Render)។ រួចចុច Add។
+5. ចុចប៊ូតុង **Deploy** ពណ៌ខ្មៅ។
+
+---
+
+## 🎉 អបអរសាទរ!
+
+រង់ចាំប្រមាណ ២ ទៅ ៣ នាទី Vercel នឹងធ្វើការ Build (ចងក្រងកូដអោយតូច) វានឹងបង្ហាញផ្ទាំងអបអរសាទរ (Confetti) ពេលដែលជោគជ័យ!
+
+អ្នកនឹងទទួលបាន Link មួយ (ឧ. `https://my-frontend.vercel.app`) ដែលអ្នកអាចផ្ញើទៅអោយមិត្តភក្តិ គ្រូបង្រៀន ឬដាក់ក្នុង CV របស់អ្នកអោយគេមើលបានហើយ។ 
+
+មកដល់ចំណុចនេះ កម្មវិធី Full Stack (រួមមាន Frontend, Backend និង Database) របស់អ្នកគឺបានមានវត្តមានជាផ្លូវការនៅលើអុីនធឺណិតហើយ!

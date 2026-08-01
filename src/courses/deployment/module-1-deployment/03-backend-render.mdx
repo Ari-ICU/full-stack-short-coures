@@ -1,0 +1,89 @@
+---
+title: "Deploy Backend & DB to Render"
+description: "មគ្គុទ្ទេសក៍ក្នុងការដាក់អោយដំណើរការ (Deploy) Node.js API និង PostgreSQL ទៅកាន់សេវាកម្ម Render ដោយឥតគិតថ្លៃ។"
+objectives:
+  - "រៀនពីរបៀបបង្កើត PostgreSQL Database លើ Cloud"
+  - "យល់ពីរបៀបភ្ជាប់ GitHub ជាមួយ Render"
+  - "Deploy Node.js/Express Server និងកំណត់អថេរបរិស្ថាន (Environment Variables)"
+module: module-1-deployment
+order: 3
+quiz:
+  - question: "នៅពេល Deploy កម្មវិធី Node.js តើយើងត្រូវកំណត់អថេរអី្វខ្លះនៅក្នុង Environment Variables (.env) លើ Render ដើម្បីឱ្យវាអាចភ្ជាប់ទៅកាន់ Database បាន?"
+    options:
+      - "PORT និង NODE_ENV"
+      - "DATABASE_URL (Link ភ្ជាប់ទៅ DB)"
+      - "GITHUB_TOKEN"
+      - "NPM_VERSION"
+    correctAnswer: 1
+    explanation: "នៅលើម៉ាស៊ីន Server (Render) យើងមិនអាចប្រើ `localhost` សម្រាប់ Database ទៀតទេ ព្រោះ Database ស្ថិតនៅកន្លែងផ្សេង។ ដូច្នេះយើងត្រូវកំណត់ `DATABASE_URL` (ឬអថេរស្រដៀងនេះ) ដែលផ្ទុក Link ភ្ជាប់ទៅកាន់ Cloud Database របស់យើងទើប API អាចទាញទិន្នន័យបាន។"
+---
+
+## 🚀 ការប្រើប្រាស់សេវាកម្ម Render
+
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/e/e8/Render_logo.svg" alt="Render Logo" width="120" />
+</div>
+
+បន្ទាប់ពីអ្នកសរសេរ API និងសាកល្បងនៅលើកុំព្យូទ័រ (localhost) រួចរាល់ ជំហានបន្ទាប់គឺត្រូវបង្ហោះវាឡើងទៅលើអុីនធឺណិត។ 
+
+យើងនឹងប្រើប្រាស់ [Render.com](https://render.com) ព្រោះវាមានភាពងាយស្រួល និងផ្តល់សេវាកម្មឥតគិតថ្លៃ (Free Tier) ទាំងសម្រាប់ **Node.js Web Service** និង **PostgreSQL Database**។
+
+---
+
+## 🐘 ជំហានទី ១: បង្កើត Cloud Database (PostgreSQL)
+
+មុននឹង Deploy កូដ យើងត្រូវមាន Database សិន៖
+1. បង្កើតគណនីនៅលើ Render.com (ណែនាំអោយ Login ជាមួយ GitHub)។
+2. ចុចប៊ូតុង **"New"** រួចជ្រើសរើសយក **"PostgreSQL"**។
+3. ដាក់ឈ្មោះអោយ Database របស់អ្នក (ឧ. `my_shop_db`)។
+4. ជ្រើសរើសជម្រើស Free រួចចុច **Create Database**។
+5. រង់ចាំបន្តិចរហូតដល់វា Status លោតពាក្យ `Available`។ 
+6. ចម្លង (Copy) **Internal Database URL** ឬ **External Database URL** ទុកសិន។
+
+---
+
+## ⚙️ ជំហានទី ២: រៀបចំកូដ Node.js មុនពេល Deploy
+
+មុននឹងបញ្ជូនកូដទៅ GitHub សូមប្រាកដថាកូដអ្នកបានរៀបចំចំណុចទាំងនេះ៖
+
+១. នៅក្នុង `package.json` ត្រូវមានពាក្យបញ្ជា (Script) សម្រាប់ start:
+```json
+"scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js"
+}
+```
+
+២. ត្រូវប្រាកដថា `PORT` ត្រូវបានអានពី Environment Variable ព្រោះ Render នឹងផ្តល់ Port អោយដោយស្វ័យប្រវត្តិ មិនមែន 3000 ទៀតទេ៖
+```javascript
+// ក្នុង server.js ឬ index.js
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+```
+
+៣. កូដភ្ជាប់ Database ត្រូវប្រើ `process.env.DATABASE_URL`។
+៤. បញ្ជូន (Push) កូដរបស់អ្នកទាំងអស់ទៅកាន់ GitHub Repository ថ្មីមួយ។
+
+---
+
+## 🚀 ជំហានទី ៣: Deploy Node.js (Web Service)
+
+1. ត្រឡប់មកផ្ទាំង Render វិញ ចុចប៊ូតុង **"New"** រួចជ្រើសរើសយក **"Web Service"**។
+2. ជ្រើសរើស **"Build and deploy from a Git repository"**។
+3. ភ្ជាប់គណនី GitHub របស់អ្នក ហើយជ្រើសរើស Repository ដែលមានកូដ Backend នោះ។
+4. បំពេញព័ត៌មាន៖
+   - Name: `my-api`
+   - Language: `Node`
+   - Build Command: `npm install`
+   - Start Command: `npm start`
+5. រមូរចុះក្រោម ជ្រើសរើស Free Tier។
+6. ចុចប៊ូតុង **Advanced** រួចចុច **Add Environment Variable**:
+   - ដាក់ឈ្មោះ Key ថា `DATABASE_URL`
+   - ចម្លង (Paste) លីង Database URL ដែលយើងបាន Copy ទុកពីជំហានទី ១ មកដាក់ត្រង់ Value។
+7. ចុច **Create Web Service**។
+
+រង់ចាំប្រមាណ ២ ទៅ ៣ នាទី អោយ Render ដំឡើងកញ្ចប់ឯកសារ និងបញ្ឆេះ Server។ 
+
+ពេលលោតអក្សរ **"Your service is live 🎉"** នោះមានន័យថា Backend API របស់អ្នកបានជោគជ័យហើយ! អ្នកនឹងទទួលបាន Link មួយ (ឧទាហរណ៍ `https://my-api-abcd.onrender.com`) ដែលអ្នកអាចយកទៅប្រើក្នុងកម្មវិធី Frontend របស់អ្នកបាន។

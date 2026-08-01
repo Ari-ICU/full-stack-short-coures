@@ -1,0 +1,68 @@
+---
+title: "Basic Linux Commands"
+description: "ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃប្រព័ន្ធប្រតិបត្តិការ Linux និងបញ្ជា (Commands) សំខាន់ៗសម្រាប់ការគ្រប់គ្រង Server។"
+objectives:
+  - "យល់ពីមូលហេតុដែល Server ភាគច្រើនប្រើប្រាស់ Linux"
+  - "រៀនបញ្ជាមូលដ្ឋាន (ls, cd, pwd, mkdir)"
+  - "ស្វែងយល់ពីការគ្រប់គ្រង File និងសិទ្ធិប្រើប្រាស់ (Permissions)"
+module: module-1-deployment
+order: 1
+quiz:
+  - question: "តើ Command មួយណានៅក្នុង Linux ដែលប្រើសម្រាប់បង្ហាញបញ្ជីឈ្មោះ File និង Folder ទាំងអស់នៅក្នុងទីតាំងបច្ចុប្បន្ន?"
+    options:
+      - "cd"
+      - "pwd"
+      - "ls"
+      - "mkdir"
+    correctAnswer: 2
+    explanation: "`ls` (មកពីពាក្យ list) ត្រូវបានប្រើសម្រាប់បង្ហាញបញ្ជី File និង Folder។ ចំណែក `cd` ប្រើសម្រាប់ផ្លាស់ប្តូរទីតាំង `pwd` បង្ហាញទីតាំងបច្ចុប្បន្ន និង `mkdir` ប្រើសម្រាប់បង្កើត Folder ថ្មី។"
+---
+
+## 🐧 ហេតុអ្វី Server ត្រូវប្រើប្រាស់ Linux?
+
+<div align="center">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" alt="Linux Logo" width="100" />
+</div>
+
+នៅលើកុំព្យូទ័រផ្ទាល់ខ្លួន អ្នកប្រហែលជាប្រើប្រាស់ Windows ឬ macOS ប៉ុន្តែនៅពេលនិយាយដល់ Server ភាគច្រើនលើសលប់ (ជាង 90%) នៅលើពិភពលោកគឺប្រើប្រាស់ **Linux** (ដូចជា Ubuntu, Debian, CentOS ជាដើម)។
+
+មូលហេតុចម្បងគឺដោយសារតែ Linux៖
+- **ឥតគិតថ្លៃ (Open Source):** មិនបាច់ទិញ License ដូច Windows
+- **មានសុវត្ថិភាព និងស្ថេរភាពខ្ពស់:** មិនសូវមានមេរោគ និងកម្រគាំង
+- **ស្រាល:** មិនត្រូវការផ្ទាំងក្រាហ្វិក (UI) ធ្ងន់ៗ ដើរតាមរយៈផ្ទាំងកូដ (Terminal) សុទ្ធសាធ។
+
+---
+
+## 💻 បញ្ជា (Commands) ដែលត្រូវដឹង
+
+ដោយសារ Server ដើរតាមរយៈផ្ទាំង Terminal ការចេះប្រើប្រាស់ Command គឺជាជំនាញចាំបាច់បំផុតមុននឹងយើង Deploy កម្មវិធី។
+
+### ១. ការរុករក (Navigation)
+- `pwd` (Print Working Directory): បង្ហាញប្រាប់ថាឥឡូវអ្នកកំពុងឈរនៅ Folder ណា (ឧ. `/home/user/app`)
+- `ls` (List): បង្ហាញបញ្ជី File និង Folder។ ប្រើ `ls -la` ដើម្បីមើលទាំង File លាក់ និងសិទ្ធិប្រើប្រាស់។
+- `cd` (Change Directory): ផ្លាស់ប្តូរទីតាំង។ 
+  - `cd /var/www` (ចូលទៅកាន់ /var/www)
+  - `cd ..` (ថយក្រោយមួយកម្រិត)
+
+### ២. ការគ្រប់គ្រង File និង Folder
+- `mkdir folder_name`: បង្កើត Folder ថ្មី
+- `touch file.txt`: បង្កើត File ថ្មីទទេស្អាត
+- `rm file.txt`: លុប File។ បើចង់លុប Folder ទាំងមូលត្រូវប្រើ `rm -rf folder_name`
+- `cp source destination`: ចម្លង (Copy)
+- `mv source destination`: ផ្លាស់ទី (Move) ឬ ប្តូរឈ្មោះ (Rename)
+
+### ៣. ការអាន និងកែប្រែ File ផ្ទាល់លើ Server
+- `cat file.txt`: អាន និងបង្ហាញខ្លឹមសារក្នុង File
+- `nano file.txt`: បើកកម្មវិធីកែអត្ថបទ (Text Editor) សាមញ្ញមួយនៅក្នុង Terminal ដើម្បីសរសេរកូដ។ ពេលកែរួច ចុច `Ctrl + O` រួច `Enter` ដើម្បី Save នឹង `Ctrl + X` ដើម្បីចេញ។
+
+---
+
+## 🔐 សិទ្ធិប្រើប្រាស់ (Permissions)
+
+នៅក្នុង Linux គ្រប់ File ទាំងអស់មានម្ចាស់ និងសិទ្ធិប្រើប្រាស់យ៉ាងតឹងរ៉ឹង។ ប្រសិនបើអ្នកព្យាយាមតំឡើងកម្មវិធី ឬកែប្រែ File សំខាន់ៗ អ្នកនឹងជួបកំហុស **Permission Denied**។
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងប្រើប្រាស់ពាក្យ `sudo` (SuperUser DO) នៅពីមុខ Command។ វាប្រៀបបាននឹងការ Run as Administrator នៅលើ Windows ដែរ។
+
+ឧទាហរណ៍៖ `sudo apt update` (ធ្វើបច្ចុប្បន្នភាពប្រព័ន្ធ)
+
+ការចេះមូលដ្ឋានទាំងនេះ នឹងជួយអោយអ្នកយល់បានងាយស្រួល នៅក្នុងមេរៀនបន្ទាប់ ពេលដែលយើងរៀនអំពី Docker និងការ Deploy។
