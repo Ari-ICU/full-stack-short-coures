@@ -1,21 +1,12 @@
 ---
-title: Lists, Tables & Attributes
-description: ស្វែងយល់ពីរបៀបរៀបចំទិន្នន័យជាទម្រង់បញ្ជី (Lists) តារាង (Tables) ព្រមទាំងការប្រើប្រាស់ Attributes ដូចជា Links និង Images។
+title: Lists & Tables
+description: ស្វែងយល់ពីរបៀបរៀបចំទិន្នន័យជាទម្រង់បញ្ជី (Lists) និងតារាង (Tables)។
 objectives:
   - បង្កើតបញ្ជីមានលេខរៀង និងគ្មានលេខរៀង (Ordered & Unordered Lists)
   - រៀបចំទិន្នន័យក្នុងទម្រង់តារាង (Tables) ឱ្យបានត្រឹមត្រូវ
-  - ស្វែងយល់ពីរបៀបប្រើប្រាស់ HTML Attributes សម្រាប់ Links និង Images
 module: module-1-html
-order: 2
+order: 3
 quiz:
-  - question: តើ Attribute មួយណាដែលចាំបាច់បំផុតសម្រាប់ Tag <img> ដើម្បីបង្ហាញរូបភាព?
-    options:
-      - href
-      - link
-      - src
-      - path
-    correctAnswer: 2
-    explanation: Attribute `src` (Source) ត្រូវបានប្រើដើម្បីបញ្ជាក់ពីទីតាំង ឬ URL នៃរូបភាពដែលត្រូវបង្ហាញ។
   - question: តើ Tag អ្វីត្រូវបានប្រើប្រាស់ដើម្បីបង្កើតជួរដេក (Row) នៅក្នុង Table?
     options:
       - <td>
@@ -24,34 +15,6 @@ quiz:
       - <table>
     correctAnswer: 1
     explanation: Tag `<tr>` តំណាងឱ្យ "Table Row" ដែលត្រូវបានប្រើសម្រាប់បង្កើតជួរដេកនីមួយៗនៅក្នុងតារាង។
----
-
-## 🔗 ការប្រើប្រាស់ Attributes (Links និង Images)
-
-**Attributes** គឺត្រូវបានប្រើប្រាស់ដើម្បីផ្តល់ព័ត៌មានបន្ថែមទៅកាន់ HTML Tags។ ពួកវាតែងតែត្រូវបានសរសេរនៅក្នុង Opening Tag ជានិច្ច។
-
-### 1. Links (តំណភ្ជាប់)
-
-យើងប្រើ Tag `<a>` (Anchor) ដើម្បីបង្កើតតំណភ្ជាប់។ វាទាមទារនូវ Attribute `href` ជាដាច់ខាត ដើម្បីប្រាប់ថាត្រូវលោតទៅណា។
-
-```html
-<!-- ប្រើ href ដើម្បីចង្អុលទៅកាន់ Website ផ្សេង -->
-<a href="https://google.com">ទៅកាន់ Google</a>
-
-<!-- បន្ថែម target="_blank" ដើម្បីបើកក្នុង Tab ថ្មី -->
-<a href="https://facebook.com" target="_blank">ទៅកាន់ Facebook</a>
-```
-
-### 2. Images (រូបភាព)
-
-Tag `<img>` មិនមាន Closing Tag ទេ។ វាទាមទារនូវ Attribute ពីរយ៉ាងតិច៖ 
-- `src` (Source): ប្រភពនៃរូបភាព (URL ឬ ទីតាំង File)។
-- `alt` (Alternative Text): អក្សរជំនួសពេលរូបភាពមិនដើរ ឬសម្រាប់ Screen Readers អានឱ្យជនពិការភ្នែកស្តាប់។
-
-```html
-<img src="profile.jpg" alt="រូបថតប្រវត្តិរូបរបស់ខ្ញុំ" width="200">
-```
-
 ---
 
 ## 📝 ការបង្កើត Lists (បញ្ជី)

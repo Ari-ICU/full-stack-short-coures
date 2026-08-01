@@ -1,0 +1,103 @@
+---
+title: HTML Attributes
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ HTML Attributes ដើម្បីផ្តល់ព័ត៌មានបន្ថែម និងកំណត់មុខងារផ្សេងៗដល់ HTML Elements។
+objectives:
+  - យល់ពីគំនិតជាមូលដ្ឋាននៃ HTML Attributes
+  - ប្រើប្រាស់ Attributes សម្រាប់ Links (href, target) និង Images (src, alt)
+  - ស្គាល់ Global Attributes សំខាន់ៗ (id, class, style, title)
+module: module-1-html
+order: 2
+quiz:
+  - question: តើ Attribute មួយណាដែលចាំបាច់បំផុតសម្រាប់ Tag <img> ដើម្បីបង្ហាញរូបភាព?
+    options:
+      - href
+      - link
+      - src
+      - path
+    correctAnswer: 2
+    explanation: Attribute `src` (Source) ត្រូវបានប្រើដើម្បីបញ្ជាក់ពីទីតាំង ឬ URL នៃរូបភាពដែលត្រូវបង្ហាញ។
+  - question: តើ Global Attribute មួយណាដែលត្រូវបានប្រើដើម្បីដាក់ឈ្មោះកំណត់សម្គាល់ (Identifier) តែមួយគត់ដល់ Element?
+    options:
+      - class
+      - id
+      - style
+      - title
+    correctAnswer: 1
+    explanation: Attribute `id` ត្រូវបានប្រើដើម្បីផ្តល់ឈ្មោះសម្គាល់តែមួយគត់ (Unique) ដល់ Element ដែលមិនអាចជាន់គ្នាជាមួយ Element ដទៃក្នុងទំព័រតែមួយបានទេ។
+---
+
+## 🏷️ អ្វីទៅជា HTML Attributes?
+
+**Attributes** គឺជាពាក្យបញ្ជាបន្ថែមដែលយើងដាក់ចូលទៅក្នុង HTML Tags ដើម្បីផ្តល់ព័ត៌មាន ឬផ្លាស់ប្តូរអាកប្បកិរិយារបស់វា។ 
+
+**ច្បាប់ទូទៅនៃការប្រើប្រាស់ Attributes៖**
+1. វាតែងតែត្រូវបានសរសេរនៅក្នុង **Opening Tag** ជានិច្ច។
+2. វាច្រើនតែមកជាទម្រង់គូ **name="value"** (ឈ្មោះ="តម្លៃ")។
+
+---
+
+## 🔗 Attributes សំខាន់ៗសម្រាប់ Links 
+
+យើងប្រើ Tag `<a>` (Anchor) ដើម្បីបង្កើតតំណភ្ជាប់។ ប៉ុន្តែ Tag `<a>` ទទេមិនអាចធ្វើអ្វីបានទេ លុះត្រាតែមាន Attributes ទាំងនេះ៖
+
+- **`href` (Hypertext Reference):** ប្រាប់ពីអាសយដ្ឋាន URL ដែលត្រូវលោតទៅកាន់ពេលចុចលើ Link នោះ។
+- **`target`:** កំណត់ពីរបៀបដែល Link គួរតែបើក (ឧទាហរណ៍ `target="_blank"` គឺសម្រាប់បើកទំព័រថ្មីក្នុង Tab ថ្មី)។
+
+```html
+<!-- បើកទំព័រ Google ក្នុង Tab តែមួយ -->
+<a href="https://google.com">ទៅកាន់ Google</a>
+
+<!-- បើកទំព័រ Facebook ក្នុង Tab ថ្មី -->
+<a href="https://facebook.com" target="_blank">ទៅកាន់ Facebook</a>
+```
+
+---
+
+## 🖼️ Attributes សំខាន់ៗសម្រាប់ Images
+
+Tag `<img>` មិនមាន Closing Tag ទេ ដូច្នេះវាពឹងផ្អែកទាំងស្រុងទៅលើ Attributes ដើម្បីបង្ហាញរូបភាព។
+
+- **`src` (Source):** ប្រភពនៃរូបភាព (URL នៃរូបភាពនៅលើអ៊ីនធឺណិត ឬ ទីតាំង File ក្នុងកុំព្យូទ័រ)។
+- **`alt` (Alternative Text):** អក្សរជំនួសដែលនឹងបង្ហាញឡើងក្នុងករណីដែលអ៊ិនធឺណិតខ្សោយរូបភាពដើរមិនចេញ ឬសម្រាប់កម្មវិធី Screen Readers អានឱ្យជនពិការភ្នែកស្តាប់។ នេះគឺសំខាន់ខ្លាំងណាស់សម្រាប់ SEO!
+- **`width` និង `height`:** កំណត់ប្រវែង និងកម្ពស់រូបភាព (គិតជា pixels)។
+
+```html
+<img src="profile.jpg" alt="រូបថតប្រវត្តិរូបរបស់ខ្ញុំ" width="200" height="200">
+```
+
+---
+
+## 🌍 Global Attributes
+
+Global Attributes គឺជា Attributes ដែលអ្នកអាចយកទៅប្រើប្រាស់ជាមួយ HTML Elements **ណាមួយក៏បាន** (ដូចជា `<p>`, `<h1>`, `<div>` ជាដើម)។
+
+### 1. `id` Attribute
+ប្រើសម្រាប់ផ្តល់ឈ្មោះសម្គាល់ **តែមួយគត់ (Unique)** ដល់ Element មួយ។ វាមិនអាចមាន Elements ពីរដែលមាន `id` ដូចគ្នាក្នុងទំព័រតែមួយបានទេ។ វាមានប្រយោជន៍ពេលយើងចង់ប្រើ CSS ឬ JavaScript ដើម្បីបញ្ជាលើ Element នោះតែម្តង។
+
+```html
+<h1 id="main-title">ចំណងជើងធំបំផុត</h1>
+```
+
+### 2. `class` Attribute
+ប្រើសម្រាប់ចាត់ថ្នាក់ Elements។ ខុសពី `id`, អ្នកអាចប្រើ `class` ឈ្មោះដូចគ្នាទៅកាន់ Elements ច្រើនក្នុងពេលតែមួយបាន។ វាមានប្រយោជន៍ខ្លាំងណាស់ក្នុងការកំណត់ Style ដូចៗគ្នាដោយប្រើ CSS។
+
+```html
+<p class="warning-text">សូមប្រយ័ត្ន! ទិន្នន័យនេះមិនអាចលុបបានទេ។</p>
+<span class="warning-text">ការព្រមានមួយទៀត។</span>
+```
+
+### 3. `style` Attribute
+ប្រើសម្រាប់សរសេរកូដ CSS (Inline CSS) ដោយផ្ទាល់ទៅលើ Element ណាមួយ ដើម្បីប្តូរពណ៌ ទំហំ ឬរូបរាងរបស់វា។
+
+```html
+<p style="color: red; font-size: 20px;">អត្ថបទនេះមានពណ៌ក្រហម។</p>
+```
+
+### 4. `title` Attribute
+ប្រើសម្រាប់ផ្តល់ព័ត៌មានបន្ថែមអំពី Element នោះ។ ពេលដែលអ្នកយក Mouse ទៅដាក់ពីលើ Element នោះ (Hover) វានឹងលោតជាប្រអប់អត្ថបទតូចមួយ (Tooltip) បង្ហាញពាក្យដែលអ្នកសរសេរ។
+
+```html
+<p title="នេះគឺជាអត្ថបទដែលលោតចេញពេលអ្នកដាក់ Mouse ពីលើ">សូមដាក់ Mouse ពីលើទីនេះ</p>
+```
+
+ការយល់ដឹងពីការប្រើប្រាស់ Attributes នឹងជួយឱ្យអ្នកអាចគ្រប់គ្រង និងតុបតែង HTML Elements បានកាន់តែល្អប្រសើរ!
