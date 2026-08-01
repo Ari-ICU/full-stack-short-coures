@@ -4,19 +4,67 @@ description: "ស្វែងយល់ពីរបៀបដែល Web Applicatio
 objectives:
   - "យល់ពីសមាសធាតុសំខាន់ៗនៃ Web App"
   - "យល់ពីរបៀបដែល Frontend និង Backend ធ្វើការជាមួយគ្នា"
+  - "ដឹងពីអត្ថប្រយោជន៍នៃការបែងចែក Architecture ជាផ្នែកៗ"
 module: module-1-introduction
 order: 4
+quiz:
+  - question: នៅក្នុង Three-Tier Architecture តើផ្នែកណាដែលមានតួនាទីទទួលខុសត្រូវក្នុងការគណនា (Logic) និងដំណើរការទិន្នន័យមុននឹងបញ្ជូនទៅកាន់អ្នកប្រើប្រាស់?
+    options:
+      - Presentation Tier (Frontend)
+      - Application Tier (Backend)
+      - Data Tier (Database)
+      - Network Tier (Internet)
+    correctAnswer: 2
+    explanation: "Application Tier (Backend) គឺជាខួរក្បាលរបស់កម្មវិធី ដែលទទួលបន្ទុកគណនា ដំណើរការទិន្នន័យ និងសម្រេចចិត្តថាតើទិន្នន័យអ្វីគួរត្រូវបានបញ្ជូនត្រឡប់ទៅកាន់ Presentation Tier វិញ។"
 ---
 
-## 🏗️ Web Architecture ជាអ្វី?
+## 🏗️ តើ Web Architecture ជាអ្វី?
 
-**Web Architecture** សំដៅលើការរៀបចំ និងរបៀបដែលផ្នែកផ្សេងៗនៃប្រព័ន្ធវិប (Client, Server, Database) ទំនាក់ទំនងគ្នាដើម្បីឱ្យកម្មវិធីមួយដំណើរការបានត្រឹមត្រូវ។
+**Web Architecture** (ស្ថាបត្យកម្មវិប) សំដៅលើការរៀបចំ និងរបៀបដែលផ្នែកផ្សេងៗនៃប្រព័ន្ធ (Client, Server, Database) ទំនាក់ទំនងគ្នាដើម្បីឱ្យកម្មវិធីមួយដំណើរការបានត្រឹមត្រូវ និងមានប្រសិទ្ធភាព។
 
-### សមាសធាតុគោលទាំង ៣ (Three-Tier Architecture)
+ដើម្បីងាយយល់ អ្នកអាចប្រៀបធៀបវាទៅនឹង **ភោជនីយដ្ឋានមួយ**៖
+- **កន្លែងទទួលភ្ញៀវ (Frontend):** ជាកន្លែងដែលភ្ញៀវអង្គុយ មើលម៉ឺនុយ និងកុម្ម៉ង់ម្ហូប (UI/UX)។
+- **ផ្ទះបាយ (Backend):** ជាកន្លែងដែលចុងភៅទទួលការកុម្ម៉ង់ ចម្អិនម្ហូប និងរៀបចំអាហារ (Logic & Processing)។
+- **ឃ្លាំងស្តុកវត្ថុធាតុដើម (Database):** ជាកន្លែងរក្សាទុកសាច់ បន្លែ គ្រឿងផ្សំ ដើម្បីអោយចុងភៅយកមកប្រើប្រាស់ (Data Storage)។
 
-1. **Presentation Tier (Frontend):** 
-   - ជាអ្វីដែលអ្នកប្រើប្រាស់មើលឃើញ និងធ្វើអន្តរកម្ម។ បង្កើតឡើងដោយ ![HTML5](https://cdn.simpleicons.org/html5/E34F26) HTML, ![CSS3](https://cdn.simpleicons.org/css3/1572B6) CSS, ![JavaScript](https://cdn.simpleicons.org/javascript/F7DF1E) JavaScript (![React](https://cdn.simpleicons.org/react/61DAFB) React/![Next.js](https://cdn.simpleicons.org/nextdotjs/000000) Next.js).
-2. **Application Tier (Backend):**
-   - ជាកន្លែងផ្ទុក logic របស់កម្មវិធី។ វាទទួលសំណើ (requests) ពី Frontend ដំណើរការវា និងបញ្ជូនលទ្ធផលត្រឡប់ទៅវិញ។ បង្កើតឡើងដោយ ![Node.js](https://cdn.simpleicons.org/nodedotjs/5FA04E) Node.js, ![Express](https://cdn.simpleicons.org/express/000000) Express.js.
-3. **Data Tier (Database):**
-   - ជាកន្លែងរក្សាទុកទិន្នន័យ។ ឧទាហរណ៍៖ ការប្រើប្រាស់ ![PostgreSQL](https://cdn.simpleicons.org/postgresql/4169E1) PostgreSQL ដើម្បីរក្សាទុកព័ត៌មានអ្នកប្រើប្រាស់។
+---
+
+## 🏢 សមាសធាតុគោលទាំង ៣ (Three-Tier Architecture)
+
+កម្មវិធី Web ទំនើបភាគច្រើនត្រូវបានរចនាឡើងដោយបែងចែកជា ៣ ស្រទាប់ធំៗ ដែលហៅថា **Three-Tier Architecture**៖
+
+### 1. Presentation Tier (Frontend)
+- **តួនាទី:** ជាអ្វីដែលអ្នកប្រើប្រាស់មើលឃើញ និងធ្វើអន្តរកម្មដោយផ្ទាល់ (User Interface)។ វាមានតួនាទីបង្ហាញព័ត៌មាន និងទទួលការបញ្ជាពីអ្នកប្រើប្រាស់។
+- **បច្ចេកវិទ្យាប្រើប្រាស់:** 
+  - ![HTML5](https://cdn.simpleicons.org/html5/E34F26) **HTML** សម្រាប់រចនាសម្ព័ន្ធ
+  - ![CSS3](https://cdn.simpleicons.org/css3/1572B6) **CSS** (ដូចជា Tailwind) សម្រាប់តុបតែង
+  - ![JavaScript](https://cdn.simpleicons.org/javascript/F7DF1E) **JavaScript** (![React](https://cdn.simpleicons.org/react/61DAFB) React/![Next.js](https://cdn.simpleicons.org/nextdotjs/000000) Next.js) សម្រាប់ភាពរស់រវើក។
+
+### 2. Application Tier (Backend)
+- **តួនាទី:** ជាខួរក្បាល ឬកន្លែងផ្ទុក Business Logic របស់កម្មវិធី។ វាទទួលសំណើ (Requests) ពី Frontend ធ្វើការគណនា ពិនិត្យសុវត្ថិភាព និងទាញយកទិន្នន័យដែលត្រឹមត្រូវ។
+- **បច្ចេកវិទ្យាប្រើប្រាស់:** 
+  - ![Node.js](https://cdn.simpleicons.org/nodedotjs/5FA04E) **Node.js** និង ![Express](https://cdn.simpleicons.org/express/000000) **Express.js** សម្រាប់បង្កើត API។
+
+### 3. Data Tier (Database)
+- **តួនាទី:** ជាកន្លែងរក្សាទុកទិន្នន័យជាអចិន្ត្រៃយ៍។ រាល់ព័ត៌មានរបស់អ្នកប្រើប្រាស់ ការបញ្ជាទិញទំនិញ ឬអត្ថបទផ្សេងៗ ត្រូវបានរក្សាទុកនៅទីនេះ។
+- **បច្ចេកវិទ្យាប្រើប្រាស់:** 
+  - ប្រព័ន្ធទិន្នន័យដូចជា ![PostgreSQL](https://cdn.simpleicons.org/postgresql/4169E1) **PostgreSQL**, MySQL, ឬ MongoDB។
+
+---
+
+## 🔄 របៀបដែលពួកវាធ្វើការជាមួយគ្នា (Data Flow)
+
+នៅពេលដែលអ្នកចុចប៊ូតុង "ចូលគណនី (Login)" នៅលើគេហទំព័រ៖
+1. **Frontend (Presentation):** ទទួលយកឈ្មោះ (Username) និងលេខសម្ងាត់ (Password) របស់អ្នក រួចផ្ញើវាទៅកាន់ Backend។
+2. **Backend (Application):** ទទួលទិន្នន័យនោះ ហើយសួរទៅកាន់ Database ថា *"តើមានអ្នកប្រើប្រាស់ឈ្មោះនេះ និងលេខសម្ងាត់នេះដែរឬទេ?"*
+3. **Database (Data):** ស្វែងរកក្នុងបញ្ជីទិន្នន័យ ហើយឆ្លើយតបទៅ Backend វិញ (ឧទាហរណ៍៖ មាន!)។
+4. **Backend (Application):** បង្កើតសិទ្ធិចូលប្រើ (Token/Session) ហើយផ្ញើការអនុញ្ញាតត្រឡប់ទៅកាន់ Frontend វិញ។
+5. **Frontend (Presentation):** ផ្លាស់ប្តូរទំព័រទៅកាន់ Dashboard របស់អ្នកប្រើប្រាស់។
+
+---
+
+## 🌟 ហេតុអ្វីបានជាយើងត្រូវបែងចែកវាជា ៣ ផ្នែក?
+
+- **ងាយស្រួលក្នុងការអភិវឌ្ឍ (Separation of Concerns):** អ្នកសរសេរកូដ Frontend អាចធ្វើការដោយឯករាជ្យពីអ្នកសរសេរកូដ Backend ដោយមិនចាំបាច់រង់ចាំគ្នា។
+- **សុវត្ថិភាពខ្ពស់ (Security):** អ្នកប្រើប្រាស់មិនអាចទាក់ទងជាមួយ Database ដោយផ្ទាល់បានទេ ពួកគេត្រូវឆ្លងកាត់ Backend ជាមុនសិន ដែលជាកន្លែងត្រួតពិនិត្យសុវត្ថិភាពយ៉ាងតឹងរ៉ឹង។
+- **ភាពងាយស្រួលក្នុងការធ្វើមាត្រដ្ឋាន (Scalability):** ប្រសិនបើមានអ្នកចូលមើលគេហទំព័រច្រើន យើងអាចបង្កើនថាមពលតែទៅលើផ្នែក Backend ដោយមិនប៉ះពាល់ដល់ផ្នែកផ្សេងៗទៀត។
