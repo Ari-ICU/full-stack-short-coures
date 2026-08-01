@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Lesson } from "../types";
 import { CodeBlock } from "./CodeBlock";
+import { Mermaid } from "./Mermaid";
 
 interface LessonContentProps {
   lesson: Lesson;
@@ -42,6 +43,10 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
                   {children}
                 </code>
               );
+            }
+
+            if (lang === "mermaid") {
+              return <Mermaid chart={String(children).replace(/\n$/, "")} />;
             }
 
             return (
