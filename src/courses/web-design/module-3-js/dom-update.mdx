@@ -1,5 +1,5 @@
 ---
-title: ការបន្ថែម និងលុប Elements (DOM Update)
+title: DOM Update
 description: ស្ទាត់ជំនាញបច្ចេកទេសកម្រិតខ្ពស់ក្នុងការកែប្រែ Document Object Model (DOM) ដោយការបង្កើត, បន្ថែម, និងលុប nodes។
 objectives:
   - បង្កើត DOM Nodes ដោយប្រើ JavaScript
@@ -18,7 +18,7 @@ quiz:
     explanation: "`document.createElement()` គឺជា method ត្រឹមត្រូវដើម្បីបង្កើត HTML element ថ្មី។"
 ---
 
-## ⚙️ ការអាប់ដេត DOM (Advanced DOM Updating)
+## ⚙️ Advanced DOM Updating
 
 នៅក្នុងមេរៀនមុន (DOM Manipulation) យើងបានរៀនពីរបៀប Select និងកែប្រែ Elements ដែលមានស្រាប់។ ឥឡូវនេះ យើងនឹងរៀនពីការ **បង្កើត (Create)**, **បន្ថែម (Append)**, និង **លុប (Remove)** Elements ថ្មីៗទៅក្នុង DOM តែម្តង! 
 
@@ -26,7 +26,7 @@ quiz:
 
 ---
 
-## 1. ការបង្កើត Elements ថ្មី (Creating Nodes)
+## 1. Creating Nodes
 
 អ្នកអាចបង្កើត HTML Element ថ្មីបានគ្រប់ប្រភេទ (ដូចជា `div`, `p`, `li`) ដោយប្រើ `document.createElement()`។ វានឹងបង្កើត Element នេះនៅក្នុង Memory ប៉ុន្តែមិនទាន់បង្ហាញនៅលើគេហទំព័រនៅឡើយទេ។
 
@@ -45,7 +45,7 @@ newButton.className = "btn btn-success";
 
 ---
 
-## 2. ការបន្ថែម Elements ចូលទៅក្នុង DOM (Appending Nodes)
+## 2. Appending Nodes
 
 បន្ទាប់ពីបង្កើតរួចរាល់ អ្នកត្រូវបញ្ជូនវាទៅបង្ហាញនៅលើគេហទំព័រ។ អ្នកត្រូវ Select ទីតាំងណាមួយ (Parent Node) ដើម្បីដាក់វាចូល។
 
@@ -79,7 +79,7 @@ container.insertBefore(newBox, oldBox);
 
 ---
 
-## 3. ការលុប Elements (Removing Nodes)
+## 3. Removing Nodes
 
 ដើម្បីលុប Element ណាមួយចេញពី DOM យើងអាចប្រើ Method `remove()` (Modern Way) ឬ `removeChild()` (Old Way)។
 
@@ -104,7 +104,7 @@ ul.removeChild(firstLi);
 
 ---
 
-## 4. ការជំនួស Elements (Replacing Nodes)
+## 4. Replacing Nodes
 
 យើងក៏អាចជំនួស Element ចាស់ដោយ Element ថ្មីបានផងដែរ តាមរយៈ `replaceChild()`។
 
