@@ -8,12 +8,12 @@ objectives:
 module: module-2-advanced-typescript
 order: 1
 quiz:
-  - question: ប្រសិនបើយើងចង់ពិនិត្យមើលថា object មួយមាន property ឈ្មោះ `role` ដែរឬទេ (ដើម្បីបង្រួម type) តើយើងគួរប្រើអ្វី?
+  - question: "ប្រសិនបើយើងចង់ពិនិត្យមើលថា object មួយមាន property ឈ្មោះ `role` ដែរឬទេ (ដើម្បីបង្រួម type) តើយើងគួរប្រើអ្វី?"
     options:
-      - ប្រើ `typeof role === "object"`
-      - ប្រើ `"role" in objectName`
-      - ប្រើ `objectName instanceof role`
-      - ប្រើ `objectName.has("role")`
+      - "ប្រើ `typeof role === \"object\"`"
+      - "ប្រើ `\"role\" in objectName`"
+      - "ប្រើ `objectName instanceof role`"
+      - "ប្រើ `objectName.has(\"role\")`"
     correctAnswer: 2
     explanation: "ការប្រើប្រាស់ `in` operator ដូចជា `\"role\" in user` គឺជាវិធីដ៏ល្អបំផុតក្នុងការត្រួតពិនិត្យ (Type Guard) ថា object មួយមាន property នោះឬអត់ នៅក្នុង TypeScript។"
 ---
