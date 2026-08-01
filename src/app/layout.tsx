@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Outfit, Noto_Sans_Khmer } from "next/font/google";
+import { Outfit } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -8,9 +9,8 @@ const outfit = Outfit({
   display: "swap",
 });
 
-const notoSansKhmer = Noto_Sans_Khmer({
-  subsets: ["khmer"],
-  weight: ["400", "500", "600", "700"],
+const khmerFont = localFont({
+  src: "./fonts/KhmerOSSiemreap-Regular.ttf",
   variable: "--font-khmer",
   display: "swap",
 });
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="km" className={`${outfit.variable} ${notoSansKhmer.variable}`} suppressHydrationWarning>
+    <html lang="km" className={`${outfit.variable} ${khmerFont.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning className="flex flex-col min-h-screen antialiased">
         {/* Global Header */}
         <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
