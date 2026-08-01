@@ -10,10 +10,10 @@ order: 3
 quiz:
   - question: ប្រសិនបើអ្នកមាន `interface User` ហើយអ្នកចង់បង្កើត Type ថ្មីមួយដែលយកតែ `name` និង `email` ចេញពី `User` តើអ្នកគួរប្រើ Utility Type មួយណា?
     options:
-      - `Partial<User>`
-      - `Omit<User, "name" | "email">`
-      - `Pick<User, "name" | "email">`
-      - `Required<User>`
+      - "`Partial<User>`"
+      - "`Omit<User, \"name\" | \"email\">`"
+      - "`Pick<User, \"name\" | \"email\">`"
+      - "`Required<User>`"
     correctAnswer: 2
     explanation: "`Pick` ត្រូវបានប្រើសម្រាប់ជ្រើសរើសយក Properties ជាក់លាក់ណាមួយ (ឧទាហរណ៍ `name` និង `email`) ចេញពី Type ដើម ដើម្បីបង្កើតជា Type ថ្មីមួយ។"
 ---
