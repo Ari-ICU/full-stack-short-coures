@@ -1,5 +1,5 @@
 ---
-title: ការប្រើប្រាស់ Branch កម្រិតខ្ពស់
+title: Advanced Branching
 description: ស្វែងយល់ពីបច្ចេកទេសគ្រប់គ្រង Branch ដូចជាការប្រើប្រាស់ git rebase, git stash និង git cherry-pick។
 objectives:
   - យល់ពីភាពខុសគ្នារវាង git merge និង git rebase
@@ -18,7 +18,7 @@ quiz:
     explanation: "`git stash` ត្រូវបានប្រើដើម្បីរក្សាទុកការងារដែលមិនទាន់បាន commit ជាបណ្តោះអាសន្ន ដើម្បីអោយ Working Directory ស្អាត និងអាចប្តូរទៅកាន់ Branch ផ្សេងបានដោយសុវត្ថិភាព។"
 ---
 
-## 🌿 ការគ្រប់គ្រង Branch កម្រិតខ្ពស់
+## 🌿 Advanced Branch Management
 
 បន្ទាប់ពីអ្នកចេះប្រើ `git branch` និង `git merge` រួចមក យើងនឹងស្វែងយល់ពីបញ្ជាបន្ថែមមួយចំនួនទៀត ដែលជួយអោយការធ្វើការជាមួយ Branch កាន់តែមានប្រសិទ្ធភាព និងរៀបរយ។
 
@@ -40,7 +40,7 @@ git rebase main
 
 ---
 
-## 📦 រក្សាទុកការងារបណ្តោះអាសន្ន (`git stash`)
+## 📦 `git stash`
 
 ឧបមាថាអ្នកកំពុងសរសេរកូដនៅក្នុង `feature` Branch ស្រាប់តែមេរបស់អ្នកប្រាប់អោយជួសជុលកំហុស (Bug) បន្ទាន់នៅលើ `main` Branch។ អ្នកមិនអាច `git checkout main` បានទេ ព្រោះអ្នកកំពុងមានកូដដែលមិនទាន់បាន Commit។
 
@@ -65,7 +65,7 @@ git stash pop
 
 ---
 
-## 🍒 ជ្រើសរើសយក Commit ជាក់លាក់ (`git cherry-pick`)
+## 🍒 `git cherry-pick`
 
 ពេលខ្លះ អ្នកប្រហែលជាចង់យកការផ្លាស់ប្តូរតែមួយគត់ពី Branch ផ្សេង ដោយមិនចាំបាច់ Merge Branch ទាំងមូលនោះទេ។ ឧទាហរណ៍ នរណាម្នាក់បានជួសជុល Bug មួយនៅក្នុង Branch មួយទៀត ហើយអ្នកត្រូវការវា។
 
