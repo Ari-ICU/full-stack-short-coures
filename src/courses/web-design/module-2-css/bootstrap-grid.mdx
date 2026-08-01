@@ -1,0 +1,105 @@
+---
+title: "Bootstrap Grid & Layout"
+description: "ស្វែងយល់ពីរបៀបរៀបចំរចនាសម្ព័ន្ធវេបសាយ (Layout) ឱ្យបានរហ័ស និងមានភាព Responsive ដោយប្រើប្រាស់ប្រព័ន្ធ Grid របស់ Bootstrap។"
+objectives:
+  - "យល់ពីការប្រើប្រាស់ `.container` នឹង `.container-fluid`"
+  - "ចេះបែងចែក Layout តាមរយៈ `.row` និង `.col` (12-Column System)"
+  - "ចេះប្រើប្រាស់ Breakpoints (`sm`, `md`, `lg`, `xl`) ដើម្បីធ្វើឱ្យ Responsive"
+module: module-2-css
+order: 10
+quiz:
+  - question: "តើ Class មួយណារបស់ Bootstrap ដែលជួយឱ្យប្រអប់នោះមានទទឹង 100% នៃអេក្រង់ជានិច្ច ទោះបីជាអេក្រង់នោះធំប៉ុណ្ណាក៏ដោយ?"
+    options:
+      - ".container"
+      - ".container-fluid"
+      - ".row"
+      - ".col-12"
+    correctAnswer: 2
+    explanation: "`.container-fluid` គឺប្រើសម្រាប់ទាញ Width អោយពេញ 100% នៃអេក្រង់គ្រប់កាលៈទេសៈ ខណៈដែល `.container` ធម្មតានឹងមានគម្លាតសងខាង (Max-width) នៅពេលអេក្រង់ធំ។"
+---
+
+## 🚀 ស្គាល់ Bootstrap និងការភ្ជាប់ (CDN)
+
+**Bootstrap** គឺជា CSS Framework មួយដែលពេញនិយមបំផុត ដែលមានកញ្ចប់កូដ CSS និង JS រួចជាស្រេច ដើម្បីអោយយើងរចនាវេបសាយបានលឿន និង Responsive។
+
+ដើម្បីប្រើប្រាស់ Bootstrap អ្នកគ្រាន់តែចម្លងកូដ `<link>` នេះទៅដាក់នៅក្នុង `<head>` នៃឯកសារ HTML របស់អ្នក៖
+
+```html
+<!-- ដាក់ក្នុង <head> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+```
+
+---
+
+## 📐 Containers (ប្រអប់ផ្ទុក)
+
+នៅក្នុង Bootstrap រាល់មាតិកាទាំងអស់គួរតែត្រូវបានខ្ចប់នៅក្នុង Container ដើម្បីអោយមានភាពរៀបរយ។
+
+1. **`.container`**៖ ជាប្រអប់ដែលមានទំហំអតិបរមា (Max-width) ជាក់លាក់ និងនៅចំកណ្តាលអេក្រង់។
+2. **`.container-fluid`**៖ ជាប្រអប់ដែលមានទំហំពេញអេក្រង់ (100% Width) ជានិច្ច។
+
+```html
+<div class="container">
+  <!-- ខ្លឹមសាររបស់អ្នកនឹងនៅចំកណ្តាល ហើយមានគម្លាតសងខាងលើអេក្រង់កុំព្យូទ័រ -->
+</div>
+
+<div class="container-fluid">
+  <!-- ខ្លឹមសាររបស់អ្នកនឹងលាតសន្ធឹងពេញអេក្រង់ជានិច្ច -->
+</div>
+```
+
+---
+
+## 🧩 ប្រព័ន្ធ Grid System (12 ជួរឈរ)
+
+Bootstrap ប្រើប្រព័ន្ធ **12-Column Grid** ដែលអនុញ្ញាតអោយយើងបែងចែកអេក្រង់ជា ១២ ចំណែកស្មើៗគ្នា។ យើងត្រូវប្រើ `.row` សម្រាប់តំណាងជួរដេក នឹង `.col-*` សម្រាប់ជួរឈរ។
+
+```html
+<div class="container">
+  <!-- បង្កើតជួរដេកមួយ -->
+  <div class="row">
+    <!-- យក ៦ ចំណែក (ស្មើពាក់កណ្តាលអេក្រង់) -->
+    <div class="col-6">Column 1</div>
+    <!-- យក ៦ ចំណែកទៀត (ស្មើពាក់កណ្តាលអេក្រង់ទៀត) -->
+    <div class="col-6">Column 2</div>
+  </div>
+</div>
+```
+*(បញ្ជាក់៖ ផលបូកនៃលេខ `.col-*` ក្នុង `.row` មួយ មិនគួរលើសពី ១២ ទេ ប្រសិនបើលើស វានឹងធ្លាក់ទៅបន្ទាត់ថ្មីដោយស្វ័យប្រវត្តិ។)*
+
+អ្នកក៏អាចប្រើ `.col` ទទេ (មិនដាក់លេខ) ដើម្បីអោយវាបែងចែកទំហំស្មើៗគ្នាដោយស្វ័យប្រវត្តិផងដែរ។
+
+```html
+<div class="row">
+  <div class="col">ស្មើគ្នា (1/3)</div>
+  <div class="col">ស្មើគ្នា (1/3)</div>
+  <div class="col">ស្មើគ្នា (1/3)</div>
+</div>
+```
+
+---
+
+## 📱 Breakpoints (ការបត់បែនតាមអេក្រង់)
+
+នេះគឺជាចំណុចខ្លាំងបំផុតរបស់ Bootstrap! អ្នកអាចកំណត់ទំហំ Column អោយប្រែប្រួលទៅតាមប្រភេទអេក្រង់បាន (Mobile, Tablet, Desktop)។
+
+Bootstrap មាន Breakpoints សំខាន់ៗចំនួន ៥ ថ្នាក់៖
+- **គ្មានអក្សរ** (`col-12`)៖ សម្រាប់ទូរស័ព្ទដៃតូចៗ (<576px)
+- **`sm`** (`col-sm-6`)៖ សម្រាប់ទូរស័ព្ទដៃធំ (≥576px)
+- **`md`** (`col-md-4`)៖ សម្រាប់ Tablets (≥768px)
+- **`lg`** (`col-lg-3`)៖ សម្រាប់ Desktop (≥992px)
+- **`xl`** (`col-xl-2`)៖ សម្រាប់ Desktop ធំ (≥1200px)
+
+**ឧទាហរណ៍ជាក់ស្តែង៖ ការបង្កើត Card Layout ដ៏ពេញនិយម**
+```html
+<div class="row">
+  <!-- លើ Mobile វាមានទំហំ 12 (ពេញ ១ជួរ) -->
+  <!-- លើ Tablet (md) វាមានទំហំ 6 (២ ក្នុង១ជួរ) -->
+  <!-- លើ Desktop (lg) វាមានទំហំ 4 (៣ ក្នុង១ជួរ) -->
+  <div class="col-12 col-md-6 col-lg-4">Product 1</div>
+  <div class="col-12 col-md-6 col-lg-4">Product 2</div>
+  <div class="col-12 col-md-6 col-lg-4">Product 3</div>
+</div>
+```
+
+**សន្និដ្ឋាន:** ជាមួយនឹងប្រព័ន្ធ Grid នេះ អ្នកអាចបង្កើត Layout ដ៏ស្មុគស្មាញ និង Responsive បានយ៉ាងលឿន ដោយមិនបាច់សរសេរកូដ CSS ខ្លួនឯងនោះទេ។ នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនប្រើប្រាស់ Components ស្រស់ស្អាតដែល Bootstrap បានរចនាទុកជាស្រេច។
