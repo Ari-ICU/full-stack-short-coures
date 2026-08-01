@@ -1,34 +1,93 @@
 ---
 title: "Development Environment"
-description: "ការដំឡើងកម្មវិធីចាំបាច់ដើម្បីចាប់ផ្តើមសរសេរកូដក្នុងវគ្គសិក្សានេះ។"
+description: "ការរៀបចំ និងដំឡើងកម្មវិធីចាំបាច់ ដើម្បីផ្លាស់ប្តូរកុំព្យូទ័ររបស់អ្នកទៅជាម៉ាស៊ីនសរសេរកូដ Full Stack ដ៏ពិតប្រាកដ។"
 objectives:
-  - "ដំឡើង Visual Studio Code"
-  - "ដំឡើង Node.js សម្រាប់ Backend"
-  - "រៀបចំ PostgreSQL សម្រាប់ Database"
+  - "ដំឡើង និងរៀបចំ Visual Studio Code ជាមួយ Extensions ចាំបាច់"
+  - "ដំឡើង Node.js និងស្វែងយល់ពីរបៀបពិនិត្យមើល Version"
+  - "រៀបចំ PostgreSQL Server និង Database Client (DBeaver/pgAdmin)"
+  - "ដំឡើង Git សម្រាប់ការគ្រប់គ្រងកំណែកូដ"
 module: module-1-introduction
 order: 8
+quiz:
+  - question: តើ Command មួយណាដែលអ្នកត្រូវវាយបញ្ចូលក្នុង Terminal ដើម្បីពិនិត្យមើលថា Node.js ត្រូវបានដំឡើងជោគជ័យឬនៅ?
+    options:
+      - node --check
+      - npm install node
+      - node -v
+      - node version
+    correctAnswer: 2
+    explanation: វាយ Command `node -v` នៅក្នុង Terminal វានឹងបង្ហាញនូវលេខ Version របស់ Node.js ប្រសិនបើវាត្រូវបានដំឡើងត្រឹមត្រូវ។
+  - question: តើភាពខុសគ្នារវាង PostgreSQL និង DBeaver/pgAdmin គឺជាអ្វី?
+    options:
+      - ពួកវាគឺតែមួយ គ្រាន់តែឈ្មោះខុសគ្នា
+      - PostgreSQL គឺជា Database Server ចំណែកឯ DBeaver/pgAdmin គឺជាកម្មវិធី Database Client សម្រាប់មើលទិន្នន័យ
+      - DBeaver គឺជា Database Server ចំណែកឯ PostgreSQL គឺជា Client
+      - ទាំងពីរគឺជាភាសាសរសេរកូដ
+    correctAnswer: 1
+    explanation: PostgreSQL គឺជាប្រព័ន្ធ Database Server (រត់នៅពីក្រោយ) រីឯ DBeaver ឬ pgAdmin គឺជាកម្មវិធី (GUI) ដែលភ្ជាប់ទៅកាន់ PostgreSQL ដើម្បីអោយយើងងាយស្រួលមើល និងរៀបចំទិន្នន័យ។
 ---
 
-## ⚙️ Development Environment
+## ⚙️ ការរៀបចំ Development Environment
 
-ដើម្បីចាប់ផ្តើមការងារជា Full Stack Developer អ្នកត្រូវការកម្មវិធីជាមូលដ្ឋានមួយចំនួននៅលើកុំព្យូទ័ររបស់អ្នក។
+ដើម្បីចាប់ផ្តើមការងារជា Full Stack Developer អ្នកត្រូវផ្លាស់ប្តូរកុំព្យូទ័រធម្មតារបស់អ្នក អោយក្លាយទៅជា "ម៉ាស៊ីនផលិតកម្មវិធី"។ ខាងក្រោមនេះគឺជាកម្មវិធីចាំបាច់ទាំង ៤ ដែលអ្នកត្រូវដំឡើង។
+
+---
 
 ### 1. ![VS Code](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg) Visual Studio Code (VS Code)
-VS Code គឺជា Code Editor ដ៏មានប្រជាប្រិយភាពបំផុត។ វាលឿន ងាយស្រួលប្រើ និងមាន Extensions រាប់ពាន់។
-- **ទាញយក:** [code.visualstudio.com](https://code.visualstudio.com/)
-- **Extensions ដែលណែនាំ:** Prettier (សម្រាប់តម្រឹមកូដ), ESLint, និង Tailwind CSS IntelliSense។
 
-### 2. ![Node.js](https://cdn.simpleicons.org/nodedotjs/5FA04E) Node.js 
-Node.js អនុញ្ញាតឱ្យយើងដំណើរការកូដ JavaScript នៅក្រៅ Browser (ប្រើសម្រាប់ Backend)។ វាក៏ភ្ជាប់មកជាមួយ `npm` សម្រាប់គ្រប់គ្រងកញ្ចប់កូដ (Packages)។
-- **ទាញយក:** [nodejs.org](https://nodejs.org/) (ជ្រើសរើសជំនាន់ LTS)។
+**Visual Studio Code** (ហៅកាត់ថា VS Code) គឺជា Code Editor ដ៏មានប្រជាប្រិយភាពបំផុតក្នុងលោកដែលបង្កើតដោយក្រុមហ៊ុន Microsoft។ វាលឿន ឥតគិតថ្លៃ និងមាន Plugins (Extensions) រាប់ម៉ឺន។
 
-### 3. ![PostgreSQL](https://cdn.simpleicons.org/postgresql/4169E1) PostgreSQL
-PostgreSQL គឺជាប្រព័ន្ធគ្រប់គ្រងទិន្នន័យ (Database) ប្រភេទ Relational ដ៏ខ្លាំងក្លា និងមានស្ថេរភាព។
-- **ទាញយក:** [postgresql.org](https://www.postgresql.org/download/)
-- យើងនឹងប្រើប្រាស់វាដើម្បីរក្សាទុកទិន្នន័យទាំងអស់នៃគម្រោងរបស់យើង។
+* **ទីតាំងទាញយក:** [code.visualstudio.com](https://code.visualstudio.com/)
+* **Extensions ដែលអ្នកគួរដំឡើង:**
+  * **Prettier - Code formatter:** ជួយតម្រឹមកូដរបស់អ្នកអោយមានរបៀបរៀបរយដោយស្វ័យប្រវត្តិ។
+  * **ESLint:** ជួយរកកំហុស (Errors) នៅក្នុងកូដ JavaScript របស់អ្នកពេលកំពុងសរសេរ។
+  * **Tailwind CSS IntelliSense:** ជួយទាយឈ្មោះ Class របស់ Tailwind CSS អោយលោតចេញមកដោយស្វ័យប្រវត្តិ។
+  * **Prisma:** ជំនួយសម្រាប់ការសរសេរកូដ Database Schema នៅវគ្គក្រោយៗ។
 
-### 4. ![Git](https://cdn.simpleicons.org/git/F05032) Git 
-Git គឺជាប្រព័ន្ធសម្រាប់គ្រប់គ្រងកំណែកូដ (Version Control System) ការពារការបាត់បង់ និងងាយស្រួលធ្វើការងារជាក្រុម។
-- **ទាញយក:** [git-scm.com](https://git-scm.com/)
+---
 
-**ត្រៀមខ្លួនរួចរាល់ហើយ!** ឥឡូវនេះយើងអាចចាប់ផ្តើមសរសេរកូដបានហើយ! 🚀
+### 2. ![Node.js](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg) Node.js & npm
+
+**Node.js** គឺជាកម្មវិធីដែលអនុញ្ញាតឱ្យយើងដំណើរការកូដ JavaScript នៅលើកុំព្យូទ័រ (ក្រៅ Browser)។ វាគឺជាបេះដូងសម្រាប់ការបង្កើត Backend Server និងជាអ្នកដំណើរការ Tools របស់ Frontend ដូចជា React ឬ Next.js ជាដើម។
+វាតែងតែមកភ្ជាប់ជាមួយ **npm (Node Package Manager)** ដែលជាកន្លែងទាញយកកូដរបស់អ្នកដទៃមកប្រើ (Libraries)។
+
+* **ទីតាំងទាញយក:** [nodejs.org](https://nodejs.org/) (សូមជ្រើសរើសយកជំនាន់ **LTS** - Long Term Support)។
+* **របៀបផ្ទៀងផ្ទាត់ (Verification):** បន្ទាប់ពីដំឡើងរួច សូមបើក Terminal (ឬ Command Prompt) ហើយវាយពាក្យ៖
+  ```bash
+  node -v
+  npm -v
+  ```
+  *(ប្រសិនបើវាលោតចេញជាលេខ Version ឧទាហរណ៍ `v20.10.0` មានន័យថាវាជោគជ័យ)*
+
+---
+
+### 3. ![PostgreSQL](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg) PostgreSQL & Database Client
+
+យើងប្រើប្រាស់ **PostgreSQL** ជាឃ្លាំងផ្ទុកទិន្នន័យ (Database) ព្រោះវាមានស្ថេរភាព និងសុវត្ថិភាពខ្ពស់បំផុត។
+
+* **ក. Database Server (PostgreSQL):**
+  * **ទីតាំងទាញយក:** [postgresql.org/download/](https://www.postgresql.org/download/)
+  * *ចំណាំ៖ ពេលដំឡើង សូមកត់ត្រាទុកនូវ Password របស់គណនី `postgres` ដែលអ្នកបានបញ្ចូល។*
+
+* **ខ. Database Client (GUI):**
+  * PostgreSQL ដើរនៅពីក្រោយ (Background) គ្មានផ្ទាំងរូបភាពទេ។ ដើម្បីងាយស្រួលមើលទិន្នន័យ អ្នកត្រូវដំឡើងកម្មវិធី Client ដូចជា **pgAdmin** (ភ្ជាប់មកស្រាប់ពេលដំឡើង Postgres) ឬ **DBeaver** (កម្មវិធីដែលងាយស្រួលប្រើ និងគាំទ្រ Database ច្រើនប្រភេទ)។
+  * **ទាញយក DBeaver:** [dbeaver.io](https://dbeaver.io/download/)
+
+---
+
+### 4. ![Git](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg) Git & GitHub
+
+**Git** គឺជាប្រព័ន្ធគ្រប់គ្រងកំណែកូដ (Version Control System)។ វាប្រៀបដូចជាកន្លែង Save ហ្គេមអញ្ចឹងដែរ បើកូដខូច អ្នកអាចត្រឡប់ទៅវគ្គមុនបាន។ វាចាំបាច់បំផុតសម្រាប់ការធ្វើការងារជាក្រុម។
+ចំណែកឯ **GitHub** គឺជា Website សម្រាប់ផ្ទុកកូដរបស់អ្នកនៅលើអ៊ិនធឺណិត។
+
+* **ទីតាំងទាញយក:** [git-scm.com/downloads](https://git-scm.com/downloads)
+* **សម្រាប់ Windows Users:** ការដំឡើង Git នឹងផ្តល់ជូនកម្មវិធី **Git Bash** ដែលជា Terminal ដ៏ល្អបំផុតសម្រាប់ប្រើប្រាស់ជំនួស Command Prompt ចាស់ៗ។
+* **របៀបផ្ទៀងផ្ទាត់:**
+  ```bash
+  git --version
+  ```
+
+---
+
+**ត្រៀមខ្លួនរួចរាល់ហើយ!** 🎉 
+ឥឡូវនេះ កុំព្យូទ័ររបស់អ្នកមានអាវុធគ្រប់គ្រាន់ក្នុងការប្រយុទ្ធហើយ។ នៅក្នុងម៉ូឌុលបន្ទាប់ៗ យើងនឹងចាប់ផ្តើមសរសេរកូដនៅលើវាទាំងអស់គ្នា! 🚀
