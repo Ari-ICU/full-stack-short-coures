@@ -13,6 +13,7 @@ const COURSE_TITLES: Record<string, string> = {
   "frontend-engineering": "Frontend Engineering",
   "backend-architecture": "Backend Architecture",
   "rdbms": "Relational Database (RDBMS)",
+  "deployment": "Deployment & Final Project",
 };
 
 const COURSE_DESCRIPTIONS: Record<string, string> = {
@@ -23,6 +24,7 @@ const COURSE_DESCRIPTIONS: Record<string, string> = {
   "frontend-engineering": "បង្កើតកម្មវិធី web (single-page applications) ដ៏ទំនើបដោយប្រើប្រាស់ React frameworks។",
   "backend-architecture": "រៀនពីការរៀបចំ Server-side, ការគ្រប់គ្រងទិន្នន័យ និង API ជាមួយ Node.js។",
   "rdbms": "ស្វែងយល់ពីការរចនាមូលដ្ឋានទិន្នន័យ (Database Design), SQL, និងទំនាក់ទំនងទិន្នន័យ។",
+  "deployment": "រៀនពីការដាក់អោយដំណើរការ (Deploy) ទាំង Frontend និង Backend ព្រមទាំងការបង្ហាញគម្រោងចុងក្រោយ។",
 };
 
 const MODULE_TITLES: Record<string, string> = {
@@ -41,6 +43,8 @@ const MODULE_TITLES: Record<string, string> = {
   "module-3-database-integration": "Module 3 — Database Integration",
   "module-4-security-and-advanced": "Module 4 — Security & Advanced Concepts",
   "module-1-database-design": "Module 1 — Database Design & SQL",
+  "module-1-deployment": "Module 1 — App Deployment",
+  "module-2-final-project": "Module 2 — Final Project Demo",
 };
 
 export function getModuleTitle(slug: string): string {
@@ -168,7 +172,8 @@ const COURSE_ORDER = [
   "git",
   "frontend-engineering",
   "rdbms",
-  "backend-architecture"
+  "backend-architecture",
+  "deployment"
 ];
 
 export function getAllCourses(): Course[] {
