@@ -1,0 +1,74 @@
+---
+title: "JOIN & Aggregate Functions"
+description: "រៀនពីការភ្ជាប់តារាងបញ្ចួលគ្នា (JOINs) និងការប្រើប្រាស់អនុគមន៍បូកសរុបទិន្នន័យ។"
+objectives:
+  - "យល់ពីរបៀបប្រើប្រាស់ JOIN (INNER, LEFT, RIGHT)"
+  - "ប្រើប្រាស់ Aggregate Functions ជាមួយ GROUP BY"
+  - "ប្រើប្រាស់ JSON_AGG របស់ PostgreSQL"
+module: module-1-database-design
+order: 6
+---
+
+## 🤝 ការភ្ជាប់តារាងបញ្ចូលគ្នា (JOINs)
+
+ដោយសារតែ RDBMS បែងចែកទិន្នន័យទៅជាតារាងផ្សេងៗគ្នា (Normalization) ដូច្នេះនៅពេលយើងចង់ទាញយកទិន្នន័យមកប្រើប្រាស់ យើងត្រូវភ្ជាប់តារាងទាំងនោះបញ្ចូលគ្នាវិញដោយប្រើ **JOIN**។
+
+ប្រភេទ JOIN សំខាន់ៗ៖
+1. **`INNER JOIN`:** ទាញយកតែទិន្នន័យណាដែលមានទំនាក់ទំនងគ្នានៅក្នុងតារាងទាំងសងខាងប៉ុណ្ណោះ។
+2. **`LEFT JOIN`:** ទាញយកទិន្នន័យទាំងអស់ពីតារាងខាងឆ្វេង (តារាងទីមួយ) ទោះបីជាមិនមានទំនាក់ទំនងក្នុងតារាងខាងស្តាំក៏ដោយ (វាចេញជា `NULL`)។
+3. **`RIGHT JOIN`:** ផ្ទុយពី LEFT JOIN។
+4. **`FULL OUTER JOIN`:** ទាញយកទិន្នន័យទាំងអស់ពីតារាងទាំងពីរ មិនថាមានការផ្គូផ្គង ឬអត់នោះទេ។
+
+**ឧទាហរណ៍ INNER JOIN:** ស្វែងរកឈ្មោះអ្នកទិញ និងតម្លៃសរុបនៃការបញ្ជាទិញរបស់គាត់។
+```sql
+SELECT users.name, orders.total_price
+FROM users
+INNER JOIN orders ON users.id = orders.user_id;
+```
+
+---
+
+## 📊 អនុគមន៍បូកសរុប (Aggregate Functions)
+
+នៅពេលដែលយើងចង់ធ្វើការគណនាទិន្នន័យជាក្រុម (ឧទាហរណ៍៖ រាប់ចំនួន, បូកសរុបតម្លៃ) យើងប្រើប្រាស់ Aggregate Functions រួមជាមួយ `GROUP BY`។
+
+- `COUNT(*)`: រាប់ចំនួនជួរ (Rows)
+- `SUM(column)`: បូកតម្លៃបញ្ចួលគ្នា
+- `AVG(column)`: រកមធ្យមភាគ
+- `MAX(column)` / `MIN(column)`: រកតម្លៃធំបំផុត / តូចបំផុត
+
+**ឧទាហរណ៍៖** ចង់ដឹងថាតើអ្នកប្រើប្រាស់ម្នាក់ៗ បានចំណាយប្រាក់សរុបប៉ុន្មាន?
+```sql
+SELECT users.name, SUM(orders.total_price) AS grand_total
+FROM users
+LEFT JOIN orders ON users.id = orders.user_id
+GROUP BY users.id, users.name;
+```
+
+---
+
+## 🚀 PostgreSQL Advanced Aggregation: `JSON_AGG` និង `STRING_AGG`
+
+ជារឿយៗអ្នកប្រហែលជាចង់ទាញយកទិន្នន័យ ដែលតារាងមួយមានកូនចៅច្រើន (One-to-Many) អោយចេញមកជា Array តែម្តង ដើម្បីងាយស្រួលបោះទៅអោយ Frontend (Frontend developer ចូលចិត្ត Array!)។ 
+
+PostgreSQL មាន Functions ដ៏មានអំណាចសម្រាប់រឿងនេះ៖
+
+**ការប្រើប្រាស់ `STRING_AGG`:**
+```sql
+SELECT users.name, 
+       STRING_AGG(orders.status, ', ') AS order_statuses
+FROM users
+JOIN orders ON users.id = orders.user_id
+GROUP BY users.name;
+```
+*(លទ្ធផល៖ វានឹងរៀបចំ Status បញ្ចូលគ្នាជាអក្សរតែមួយជួរ ឧទាហរណ៍ "pending, shipped, paid")*
+
+**ការប្រើប្រាស់ `JSON_AGG`:**
+```sql
+SELECT users.name, 
+       JSON_AGG(orders) AS order_history
+FROM users
+JOIN orders ON users.id = orders.user_id
+GROUP BY users.name;
+```
+*(លទ្ធផល៖ វានឹងប្រមូលរាល់ Object របស់ Order ទៅជា JSON Array `[...]` ដែលស័ក្តិសមបំផុតសម្រាប់ប្រើប្រាស់ជាមួយ Node.js Backend API!)*

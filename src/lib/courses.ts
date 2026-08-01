@@ -12,6 +12,7 @@ const COURSE_TITLES: Record<string, string> = {
   "typescript": "មូលដ្ឋានគ្រឹះ TypeScript",
   "frontend-engineering": "Frontend Engineering ជាមួយ React",
   "backend-architecture": "Backend Architecture ជាមួយ Node.js",
+  "rdbms": "មូលដ្ឋានទិន្នន័យ Relational Database (RDBMS)",
 };
 
 const COURSE_DESCRIPTIONS: Record<string, string> = {
@@ -21,6 +22,7 @@ const COURSE_DESCRIPTIONS: Record<string, string> = {
   "typescript": "រៀនពីការសរសេរ JavaScript ដែលមាន Static Typing ដើម្បីកាត់បន្ថយបញ្ហា និងងាយស្រួលថែទាំ។",
   "frontend-engineering": "បង្កើតកម្មវិធី web (single-page applications) ដ៏ទំនើបដោយប្រើប្រាស់ React frameworks។",
   "backend-architecture": "រៀនពីការរៀបចំ Server-side, ការគ្រប់គ្រងទិន្នន័យ និង API ជាមួយ Node.js។",
+  "rdbms": "ស្វែងយល់ពីការរចនាមូលដ្ឋានទិន្នន័យ (Database Design), SQL, និងទំនាក់ទំនងទិន្នន័យ។",
 };
 
 const MODULE_TITLES: Record<string, string> = {
@@ -34,6 +36,7 @@ const MODULE_TITLES: Record<string, string> = {
   "module-2-advanced-typescript": "Module 2 — Advanced TypeScript",
   "module-1-react": "Module 1 — មូលដ្ឋានគ្រឹះ React",
   "module-1-nodejs": "Module 1 — សេចក្តីផ្តើមអំពី Node.js",
+  "module-1-database-design": "Module 1 — Database Design & SQL",
 };
 
 export function getModuleTitle(slug: string): string {
@@ -159,6 +162,7 @@ const COURSE_ORDER = [
   "web-design",
   "typescript",
   "git",
+  "rdbms",
   "frontend-engineering",
   "backend-architecture"
 ];

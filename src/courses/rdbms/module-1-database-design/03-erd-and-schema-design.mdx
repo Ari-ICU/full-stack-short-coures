@@ -1,0 +1,60 @@
+---
+title: "ERD & Schema Design"
+description: "ស្វែងយល់ពីការរចនាមូលដ្ឋានទិន្នន័យ (Database Design) ភាគទី ៣។"
+objectives:
+  - "យល់ពីការគូសវាស ERD (Entity Relationship Diagram)"
+  - "អនុវត្តការរចនា Schema សម្រាប់គម្រោងជាក់ស្តែង"
+module: module-1-database-design
+order: 3
+---
+
+## 🗺️ អ្វីទៅជា ERD?
+
+**ERD (Entity Relationship Diagram)** គឺជាការគូសវាសប្លង់ (Diagram) ដែលបង្ហាញពីទម្រង់តារាង (Entities) និងទំនាក់ទំនង (Relationships) របស់វានៅក្នុង Database។ មុននឹងសរសេរកូដបង្កើត Database ការគូស ERD គឺជាជំហានដំបូងដ៏សំខាន់បំផុត ដើម្បីចៀសវាងការខុសឆ្គងទៅថ្ងៃក្រោយ។
+
+នៅក្នុង ERD មានសមាសធាតុ ៣ សំខាន់៖
+1. **Entity (តារាង):** តំណាងអោយវត្ថុ ឬមនុស្ស (ឧទាហរណ៍៖ `users`, `products`, `orders`)។
+2. **Attributes (ជួរឈរ):** ជាលក្ខណៈរបស់ Entity (ឧទាហរណ៍៖ `name`, `price`, `created_at`)។
+3. **Relationship (ទំនាក់ទំនង):** បង្ហាញពីរបៀបដែល Entity មួយទាក់ទងទៅ Entity មួយទៀត។
+
+---
+
+## 🛒 Case Study: ការរចនា Database សម្រាប់ E-Commerce
+
+ដើម្បីងាយយល់ យើងនឹងធ្វើការរចនា Database សម្រាប់ប្រព័ន្ធលក់ទំនិញអនឡាញ (E-Commerce) សាមញ្ញមួយ ដោយប្រើប្រាស់ PostgreSQL Schema។
+
+យើងត្រូវការតារាង ៣ សំខាន់ៗ៖
+- **`users`**: សម្រាប់ផ្ទុកព័ត៌មានអ្នកទិញ
+- **`products`**: សម្រាប់ផ្ទុកព័ត៌មានទំនិញ
+- **`orders`**: សម្រាប់ផ្ទុកព័ត៌មាននៃការបញ្ជាទិញ
+
+### តារាង Users
+| Column Name | Data Type | លក្ខណៈពិសេស |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key |
+| `username` | `VARCHAR(50)` | មិនអាចជាន់គ្នា (Unique) |
+| `email` | `VARCHAR(100)`| មិនអាចជាន់គ្នា (Unique) |
+| `password_hash` | `TEXT` | លាក់ការសម្ងាត់ |
+| `created_at` | `TIMESTAMPTZ` | កាលបរិច្ឆេទបង្កើត |
+
+### តារាង Products
+| Column Name | Data Type | លក្ខណៈពិសេស |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key |
+| `name` | `VARCHAR(100)`| ឈ្មោះទំនិញ |
+| `description` | `TEXT` | ការពណ៌នា |
+| `price` | `NUMERIC(10,2)`| តម្លៃទំនិញ (ដុល្លារ) |
+| `stock` | `INT` | ចំនួននៅក្នុងស្តុក |
+
+### តារាង Orders
+ដើម្បីភ្ជាប់ Users និង Products យើងត្រូវការតារាង Orders។ ទំនាក់ទំនងនេះគឺជា **One-to-Many** (User ម្នាក់អាចទិញបានច្រើនដង)។
+
+| Column Name | Data Type | លក្ខណៈពិសេស |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key |
+| `user_id` | `UUID` | Foreign Key ភ្ជាប់ទៅតារាង `users` |
+| `total_price` | `NUMERIC(10,2)`| តម្លៃសរុប |
+| `status` | `VARCHAR(20)` | `pending`, `paid`, ឫ `shipped` |
+| `created_at` | `TIMESTAMPTZ` | កាលបរិច្ឆេទបញ្ជាទិញ |
+
+> 💡 **ចំណាំ:** នៅក្នុងការអនុវត្តជាក់ស្តែង យើងក៏ត្រូវការតារាង `order_items` មួយទៀតដើម្បីផ្ទុកទំនិញជាច្រើននៅក្នុងការកម្ម៉ង់តែមួយ (Many-to-Many)។

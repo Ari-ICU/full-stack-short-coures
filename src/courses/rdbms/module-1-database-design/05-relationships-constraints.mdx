@@ -1,0 +1,49 @@
+---
+title: "Relationships & Constraints"
+description: "ស្វែងយល់ពីទំនាក់ទំនងទិន្នន័យ (Relationships) និងលក្ខខណ្ឌកំណត់ (Constraints)។"
+objectives:
+  - "យល់ពី Primary Key និង Foreign Key"
+  - "ស្គាល់ពីឥទ្ធិពលនៃ ON DELETE CASCADE នៅក្នុង PostgreSQL"
+module: module-1-database-design
+order: 5
+---
+
+## 🔒 អ្វីទៅជា Constraints?
+
+**Constraints** គឺជាលក្ខខណ្ឌ ឬច្បាប់ដែលយើងដាក់កំណត់ទៅលើ Column ដើម្បីធានាថាទិន្នន័យដែលបញ្ចូលទៅក្នុង Database មានភាពត្រឹមត្រូវ មិនជាន់គ្នា និងមិនបាត់បង់ (Data Integrity)។
+
+Constraints សំខាន់ៗមានដូចជា៖
+1. **PRIMARY KEY:** កំណត់ថា Column នេះជាលេខសម្គាល់តែមួយគត់សម្រាប់ Record នីមួយៗ (មិនអោយមានទិន្នន័យស្ទួន និងមិនអាចទទេរ `NULL` បានទេ)។
+2. **UNIQUE:** កំណត់ថាទិន្នន័យក្នុង Column នេះមិនអាចជាន់គ្នាបានទេ (ឧទាហរណ៍៖ លេខទូរស័ព្ទ, Email)។
+3. **NOT NULL:** កំណត់ថា Column នេះចាំបាច់ត្រូវតែមានទិន្នន័យ មិនអាចទុកចោលទទេរបានទេ។
+4. **CHECK:** កំណត់លក្ខខណ្ឌជាក់លាក់ (ឧទាហរណ៍៖ អាយុត្រូវតែធំជាងសូន្យ `CHECK (age > 0)`)។
+5. **FOREIGN KEY:** ជាចំណងភ្ជាប់ទំនាក់ទំនងរវាងតារាងមួយ ទៅតារាងមួយទៀត។
+
+---
+
+## 🔗 ការភ្ជាប់ទំនាក់ទំនង (Foreign Keys)
+
+**Foreign Key (កូនសោរបរទេស)** ត្រូវបានប្រើប្រាស់ដើម្បីចង្អុលទៅកាន់ **Primary Key** របស់តារាងមួយទៀត។
+
+ឧទាហរណ៍៖ អ្នកប្រើប្រាស់ម្នាក់ (User) អាចបង្កើតការបញ្ជាទិញ (Orders) ជាច្រើន។
+```sql
+CREATE TABLE orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    total_price NUMERIC(10, 2) NOT NULL,
+    
+    -- កំណត់ Foreign Key
+    CONSTRAINT fk_user
+      FOREIGN KEY(user_id) 
+      REFERENCES users(id)
+      ON DELETE CASCADE
+);
+```
+
+### ឥទ្ធិពលនៃ ON DELETE (CASCADE vs RESTRICT)
+
+នៅពេលដែលយើងលុប User ម្នាក់ចេញពី Database តើគួរមានរឿងអ្វីកើតឡើងចំពោះ Orders របស់គាត់? នៅក្នុង PostgreSQL យើងអាចកំណត់ច្បាប់ទាំងនេះតាមរយៈ Foreign Key៖
+
+- **`ON DELETE RESTRICT` (លំនាំដើម):** ការពារមិនអោយអ្នកលុប User នោះទេ ប្រសិនបើគាត់មាន Orders នៅក្នុងប្រព័ន្ធ (រារាំងកុំអោយបាត់បង់ទិន្នន័យដោយអចេតនា)។ អ្នកត្រូវលុប Orders របស់គាត់ចោលសិន ទើបអាចលុប User បាន។
+- **`ON DELETE CASCADE`:** ប្រសិនបើអ្នកលុប User នោះ **PostgreSQL** នឹងលុបរាល់ Orders ទាំងអស់របស់គាត់ចោលដោយស្វ័យប្រវត្តិ (លុបសម្អាតដល់ឫសគល់)។ ប្រើប្រាស់វាដោយប្រុងប្រយ័ត្ន!
+- **`ON DELETE SET NULL`:** វានឹងមិនលុប Orders ចោលទេ តែវានឹងប្តូរ `user_id` ទៅជា `NULL` វិញ (រក្សាប្រវត្តិបញ្ជាទិញ ទោះបីអតិថិជនលុបគណនីក៏ដោយ)។
