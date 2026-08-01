@@ -1,0 +1,88 @@
+---
+title: "Building a CRUD Interface"
+description: "គម្រោងខ្នាតតូច (Mini Project): បញ្ចូលចំណេះដឹង React ទាំងអស់បញ្ចូលគ្នាដើម្បីបង្កើតប្រព័ន្ធគ្រប់គ្រងទិន្នន័យ (CRUD) ពេញលេញមួយ។"
+objectives:
+  - "យល់ពីយន្តការនៃប្រតិបត្តិការ CRUD (Create, Read, Update, Delete)"
+  - "ចេះរៀបចំទម្រង់កូដ (Project Structure) សម្រាប់កម្មវិធីខ្នាតមធ្យម"
+  - "អនុវត្តការផ្គុំ Components, State, React Hook Form, និង Axios ចូលគ្នា"
+module: module-1-react
+order: 8
+quiz:
+  - question: តើអក្សរកាត់ C-R-U-D នៅក្នុងការអភិវឌ្ឍន៍ Software តំណាងអោយពាក្យអ្វីខ្លះ?
+    options:
+      - Create, Read, Update, Delete
+      - Copy, Run, Undo, Deploy
+      - Code, Review, Understand, Debug
+      - Create, Run, Update, Download
+    correctAnswer: 1
+    explanation: CRUD គឺជាប្រតិបត្តិការមូលដ្ឋានបំផុតនៃ Database រួមមាន៖ Create (បង្កើត), Read (អាន/មើល), Update (កែប្រែ), និង Delete (លុប)។ គ្រប់ប្រព័ន្ធ Management សុទ្ធតែផ្អែកលើមុខងារទាំង ៤ នេះ។
+---
+
+## 🏆 បញ្ចប់ម៉ូឌុលដោយការបង្កើតគម្រោង
+
+សូមអបអរសាទរ! អ្នកបានឈានមកដល់មេរៀនចុងក្រោយនៃម៉ូឌុល React នេះហើយ។ វិធីដែលល្អបំផុតដើម្បីបញ្ជាក់ថាអ្នកពិតជាយល់ពីអ្វីដែលបានរៀន គឺការយកវាមកអនុវត្តជាក់ស្តែង។ 
+
+នៅក្នុងមេរៀននេះ យើងនឹងពិភាក្សាពីរបៀបសាងសង់ **ប្រព័ន្ធគ្រប់គ្រងអ្នកប្រើប្រាស់ (User Management Dashboard)** ដែលមានមុខងារ CRUD ពេញលេញ។
+
+---
+
+## 🧩 អ្វីទៅជា CRUD?
+
+CRUD គឺជាកាតព្វកិច្ចចម្បងដែល Frontend Engineer ត្រូវធ្វើនៅពេលធ្វើការជាមួយ Backend។
+1. **Create (C):** ការបង្កើតទិន្នន័យថ្មី (ប្រើ **POST** request + Form)
+2. **Read (R):** ការអានទិន្នន័យមកបង្ហាញ (ប្រើ **GET** request + Table/List)
+3. **Update (U):** ការកែប្រែទិន្នន័យ (ប្រើ **PUT** ឬ **PATCH** request + Form ដែលមានទិន្នន័យចាស់ស្រាប់)
+4. **Delete (D):** ការលុបទិន្នន័យ (ប្រើ **DELETE** request + Confirmation Button)
+
+---
+
+## 🗂️ ការរៀបចំរចនាសម្ព័ន្ធ Folder ដ៏ល្អ
+
+មុននឹងសរសេរកូដ យើងត្រូវរៀបចំផ្ទះរបស់យើងអោយមានសណ្តាប់ធ្នាប់សិន៖
+
+```text
+src/
+ ├── api/           # ផ្ទុកការកំណត់ Axios (axios.js) និង Functions ហៅ API
+ ├── components/    # Reusable UI (ឧ. Button, Input, Modal, Table)
+ ├── pages/         # Components តំណាងអោយទំព័រនីមួយៗរបស់ Router (ឧ. Dashboard.jsx, FormPage.jsx)
+ ├── store/         # (បើមាន) Redux files
+ ├── App.jsx        # កន្លែងរៀបចំ Routes របស់ React Router
+ └── main.jsx       # ចំណុចចាប់ផ្តើម (Entry point)
+```
+
+---
+
+## 📐 គម្រោងគំរូ (The Blueprint)
+
+ដើម្បីបង្កើតប្រព័ន្ធនេះ អ្នកត្រូវបែងចែកការងារជា ៣ ផ្នែកធំៗ៖
+
+### ផ្នែកទី ១៖ ទំព័រតារាងបង្ហាញទិន្នន័យ (Read & Delete)
+
+ទំព័រនេះ (ឧ. `Dashboard.jsx`) គឺជាកន្លែងដែលអ្នកប្រើប្រាស់ `useEffect` និង Axios (GET) ដើម្បីទាញយកទិន្នន័យអ្នកប្រើប្រាស់ពី Backend មកបង្ហាញក្នុងទម្រង់ជាតារាង (Table)។ 
+
+- រាល់ជួរនីមួយៗ (Row) ត្រូវមានប៊ូតុង "កែប្រែ (Edit)" និង "លុប (Delete)"។
+- ពេលចុច **ប៊ូតុងលុប**: អ្នកត្រូវហៅ Axios (DELETE) ហើយបើជោគជ័យ ត្រូវលុបឈ្មោះនោះចេញពី `users` State របស់អ្នក (ដើម្បីកុំអោយចាំបាច់ Refresh វេបសាយ)។
+- ពេលចុច **ប៊ូតុងកែប្រែ**: ត្រូវប្តូរទំព័រ (`useNavigate`) ទៅកាន់ទំព័រ Form ដោយភ្ជាប់ ID ទៅជាមួយ (ឧ. `/users/edit/123`)។
+
+### ផ្នែកទី ២៖ ទំព័របង្កើត និងកែប្រែ (Create & Update)
+
+ជាទូទៅ ការ "បង្កើត" និង "កែប្រែ" ច្រើនតែប្រើប្រាស់ Component Form តែមួយ (ឧ. `UserForm.jsx`) ដើម្បីសន្សំកូដ។
+
+- អ្នកត្រូវប្រើប្រាស់ **React Hook Form** ជាមួយ **Zod** ដើម្បីទទួលយកទិន្នន័យ។
+- បើអ្នកឃើញ URL មានពាក្យ `edit` និង `ID` (ប្រើ `useParams`), អ្នកត្រូវហៅ API (GET) យកទិន្នន័យចាស់របស់គេមកដាក់ក្នុង Form (ហៅថា `defaultValues`) ជាមុនសិន។
+- ពេល Submit:
+  - បើជាការ **បង្កើតថ្មី**: ហៅ Axios (POST)។
+  - បើជាការ **កែប្រែ**: ហៅ Axios (PUT/PATCH)។
+  - ពេលជោគជ័យ ប្រើ `useNavigate` ត្រលប់ទៅកាន់ទំព័រ Dashboard វិញ។
+
+### ផ្នែកទី ៣៖ ការប្រើប្រាស់ State & UI
+
+- គ្រប់ពេលមានការហៅ API កុំភ្លេចប្រើ State `isLoading` ដើម្បីបង្ហាញសញ្ញារង្វិល (Spinner) អោយអតិថិជនបានដឹង។
+- ប្រើប្រាស់ **Tailwind CSS** ដើម្បីតុបតែងតារាង និង Form អោយមើលទៅមានភាពរៀបរយ។
+
+---
+
+**កិច្ចការផ្ទះ (Challenge):**
+ឥឡូវនេះ អ្នកមានចំណេះដឹងគ្រប់គ្រាន់ហើយ! សូមសាកល្បងបង្កើតគម្រោងនេះដោយខ្លួនឯង ដោយប្រើប្រាស់ Fake API ឥតគិតថ្លៃឈ្មោះថា [JSONPlaceholder](https://jsonplaceholder.typicode.com/) (ប្រើ `/users` endpoint) សម្រាប់ការសាកល្បង។
+
+**សូមសំណាងល្អនៅក្នុងការធ្វើដំណើរជា Frontend Engineer របស់អ្នក! 🚀**

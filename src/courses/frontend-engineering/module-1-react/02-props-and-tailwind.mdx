@@ -1,0 +1,141 @@
+---
+title: Props និង Tailwind CSS
+description: ស្វែងយល់ពីរបៀបបញ្ជូនទិន្នន័យរវាង Components តាមរយៈ Props និងការរចនា UI ដោយប្រើប្រាស់ Tailwind CSS នៅក្នុង React។
+objectives:
+  - យល់ពីគោលការណ៍របស់ Props សម្រាប់ការបញ្ជូនទិន្នន័យ
+  - ចេះបង្កើត Reusable Components ជាមួយ Props ថាមវន្ត (Dynamic)
+  - យល់ពីរបៀបធ្វើសមាហរណកម្ម និងប្រើប្រាស់ Tailwind CSS ក្នុង React
+module: module-1-react
+order: 2
+quiz:
+  - question: តើ Props នៅក្នុង React មានលក្ខណៈពិសេសយ៉ាងដូចម្តេច?
+    options:
+      - ពួកវាអាចត្រូវបានកែប្រែ (Modify) បានដោយ Child Component
+      - ពួកវាអាចធ្វើដំណើរពីក្រោម (Child) ឡើងទៅលើ (Parent) បានដោយស្វ័យប្រវត្តិ
+      - ពួកវាមានលក្ខណៈ Read-Only (មិនអាចកែប្រែបាន) ហើយធ្វើដំណើរតែមួយទិស គឺពី Parent ទៅ Child
+      - ពួកវាប្រើសម្រាប់ទាញយកទិន្នន័យពី Database ដោយផ្ទាល់
+    correctAnswer: 3
+    explanation: Props (Properties) មានលក្ខណៈ Read-Only។ មានន័យថា Child Component ដែលទទួល Props មិនអាចផ្លាស់ប្តូរតម្លៃវាបានទេ។ ទិន្នន័យហូរពី Parent ចុះមក Child ជានិច្ច (One-way data flow)។
+---
+
+## 🎁 អ្វីទៅជា Props?
+
+**Props** (មកពីពាក្យ Properties) គឺជាមធ្យោបាយដែល React ប្រើសម្រាប់បញ្ជូនទិន្នន័យពី Component មេ (Parent) ទៅកាន់ Component កូន (Child)។ វាមានដំណើរការដូចគ្នានឹងការបញ្ជូនទិន្នន័យ (Arguments) ទៅអោយ Function ធម្មតាដែរ។
+
+គោលបំណងសំខាន់បំផុតរបស់ Props គឺការបង្កើត **Reusable Components** (Components ដែលអាចប្រើឡើងវិញបានជាមួយទិន្នន័យផ្សេងៗគ្នា)។
+
+### ការបញ្ជូន និងទទួល Props
+
+ឧបមាថាយើងមាន Component មួយឈ្មោះថា `Greeting`៖
+
+```jsx
+// 1. Child Component ទទួល Props តាមរយៈ Parameter (ជាធម្មតាដាក់ឈ្មោះថា props)
+function Greeting(props) {
+  return <h1>សួស្តី, {props.name}!</h1>;
+}
+
+// 2. Parent Component ជាអ្នកបញ្ជូនទិន្នន័យទៅអោយ
+export default function App() {
+  return (
+    <div>
+      <Greeting name="រដ្ឋា" />
+      <Greeting name="សីហា" />
+      <Greeting name="កញ្ញា" />
+    </div>
+  );
+}
+```
+
+### ការប្រើប្រាស់ Destructuring (វិធីដែលពេញនិយម)
+
+ដើម្បីអោយកូដខ្លី និងងាយអាន អ្នកសរសេរកូដភាគច្រើនចូលចិត្តពង្រាយ (Destructure) Object `props` តែម្តង៖
+
+```jsx
+// Destructure យកឈ្មោះ prop ដោយផ្ទាល់
+function UserCard({ name, age, role }) {
+  return (
+    <div className="card">
+      <h2>ឈ្មោះ: {name}</h2>
+      <p>អាយុ: {age}</p>
+      <p>តួនាទី: {role}</p>
+    </div>
+  );
+}
+
+export default function App() {
+  return <UserCard name="សុខ" age={25} role="Developer" />;
+}
+```
+
+---
+
+## 🎨 ការរចនាជាមួយ Tailwind CSS ក្នុង React
+
+**Tailwind CSS** គឺជា Utility-First CSS Framework ដែលអនុញ្ញាតអោយយើងសរសេរក្បួនរចនា (Styles) ចូលទៅក្នុង HTML (ឬ JSX) ដោយផ្ទាល់តាមរយៈ Class names។ វាស័ក្តិសមបំផុតជាមួយ React Components។
+
+*(ចំណាំ៖ ការដំឡើង Tailwind ក្នុង Vite + React អាចធ្វើទៅបានយ៉ាងងាយស្រួលដោយធ្វើតាម [ឯកសារផ្លូវការរបស់ Tailwind](https://tailwindcss.com/docs/guides/vite))*។
+
+### ការប្រើប្រាស់ Tailwind ជាមួយ Props
+
+ភាពអស្ចារ្យរបស់ React គឺយើងអាចប្រើប្រាស់ JavaScript Logic ដើម្បីផ្លាស់ប្តូរ Class របស់ Tailwind ទៅតាមលក្ខខណ្ឌ (Dynamic Styling)។
+
+**ឧទាហរណ៍៖ បង្កើត Button Component ដែលអាចប្តូរពណ៌បាន**
+
+```jsx
+function Button({ label, type = "primary" }) {
+  // កំណត់ Style មូលដ្ឋាន
+  let baseClasses = "px-4 py-2 rounded-md font-bold text-white transition-all";
+  
+  // ផ្លាស់ប្តូរពណ៌ទៅតាម Props (type)
+  let colorClasses = type === "danger" 
+    ? "bg-red-500 hover:bg-red-600" 
+    : "bg-blue-500 hover:bg-blue-600";
+
+  return (
+    // ផ្គុំ Classes បញ្ចូលគ្នា
+    <button className={`${baseClasses} ${colorClasses}`}>
+      {label}
+    </button>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="p-10 flex gap-4">
+      {/* ប៊ូតុងធម្មតា (Primary) */}
+      <Button label="ចុះឈ្មោះ" />
+      
+      {/* ប៊ូតុងពណ៌ក្រហម (Danger) */}
+      <Button label="លុបគណនី" type="danger" />
+    </div>
+  );
+}
+```
+
+### ការប្រើប្រាស់ `children` Prop
+
+`children` គឺជា Prop ពិសេសមួយដែល React បង្កើតឡើងដោយស្វ័យប្រវត្តិ។ វាផ្ទុកនូវអ្វីក៏ដោយដែលអ្នកសរសេរនៅចន្លោះ Tag បើក និង Tag បិទរបស់ Component។
+
+```jsx
+// Component សម្រាប់រុំកូដ
+function Card({ children }) {
+  return (
+    <div className="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+      {children}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="p-10 bg-gray-100 min-h-screen">
+      <Card>
+        <h2 className="text-xl font-bold mb-2">សេចក្តីជូនដំណឹង</h2>
+        <p className="text-gray-600">នេះគឺជាការប្រើប្រាស់ children prop ដើម្បីដាក់មាតិកាចូលក្នុង Card យ៉ាងងាយស្រួល។</p>
+      </Card>
+    </div>
+  );
+}
+```
+
+**សន្និដ្ឋាន:** Props ជួយអោយ Component របស់អ្នកឆ្លាតវៃ និងអាចបត់បែនបាន។ ចំណែកឯ Tailwind CSS ជួយអោយការរចនាមានភាពរហ័ស និងស្រស់ស្អាត។ នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនពី State ទីកន្លែងដែល Component អាចចងចាំទិន្នន័យ (Data) ដែលផ្លាស់ប្តូរញឹកញាប់!

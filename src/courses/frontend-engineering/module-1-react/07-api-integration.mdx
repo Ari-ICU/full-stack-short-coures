@@ -1,0 +1,121 @@
+---
+title: "Axios & API Integration"
+description: "ស្វែងយល់ពីរបៀបភ្ជាប់ Frontend របស់អ្នកទៅកាន់ Backend API ដើម្បីទាញយក ឬបញ្ជូនទិន្នន័យ (GET, POST, PUT, DELETE) តាមរយៈការប្រើប្រាស់ Axios។"
+objectives:
+  - "យល់ពីមូលហេតុដែលយើងពេញនិយមប្រើ Axios ជាង fetch API ធម្មតា"
+  - "ចេះធ្វើការបង្កើត Axios Instance ដើម្បីរៀបចំ Base URL និង Headers"
+  - "ចេះគ្រប់គ្រងស្ថានភាព Loading និង Error នៅពេលហៅ API"
+module: module-1-react
+order: 7
+quiz:
+  - question: ហេតុអ្វីបានជា Developer ភាគច្រើនជ្រើសរើសប្រើប្រាស់ Axios ជំនួសអោយ `fetch()` API ធម្មតារបស់ Browser ក្នុងការហៅ API?
+    options:
+      - ព្រោះ `fetch()` មិនអាចទាញយកទិន្នន័យប្រភេទ JSON បានទេ
+      - ព្រោះ Axios បំប្លែងទិន្នន័យ JSON ទៅជា JavaScript Object ដោយស្វ័យប្រវត្តិ (Auto JSON parsing) និងមានមុខងារ Interceptors ងាយស្រួលប្រើ
+      - ព្រោះ Axios ត្រូវបានបង្កើតឡើងដោយក្រុមហ៊ុន React (Meta) ផ្ទាល់
+      - ព្រោះ Axios ដើរលឿនជាង `fetch()` ១០ដង
+    correctAnswer: 2
+    explanation: "អត្ថប្រយោជន៍ចម្បងរបស់ Axios គឺការបំប្លែង Response ទៅជា JSON ដោយស្វ័យប្រវត្តិ (មិនបាច់សរសេរ `.then(res => res.json())` ទៀតទេ) និងការគាំទ្រ Interceptors ដែលងាយស្រួលក្នុងការបញ្ជូន Token ទៅអោយ Backend រាល់ពេលហៅ API។"
+---
+
+## 🌐 ហេតុអ្វីត្រូវប្រើ Axios?
+
+នៅក្នុងមេរៀនមុនៗ (ផ្នែក JavaScript) យើងធ្លាប់បានប្រើប្រាស់ `fetch()` API របស់ Browser រួចមកហើយ។ ប៉ុន្តែនៅក្នុងបរិបទកម្មវិធី React ធំៗ ការប្រើប្រាស់ Library **Axios** គឺពេញនិយមជាង ព្រោះវាជួយសម្រួលការងារបានច្រើន៖
+- មិនចាំបាច់សរសេរកូដបំប្លែង JSON ដោយដៃ
+- ងាយស្រួលដោះស្រាយ Error (វាចាត់ទុកកូដស៊េរី 400 និង 500 ថាជា Error ចូលទៅក្នុង `catch` block ដោយស្វ័យប្រវត្តិ)
+- មានប្រព័ន្ធ **Interceptors** ដ៏មានឥទ្ធិពល (ងាយស្រួលភ្ជាប់ Authentication Token ទៅគ្រប់ Request)
+
+*(ដំឡើង: `npm install axios`)*
+
+---
+
+## ⚙️ ការរៀបចំ Axios Instance
+
+ជំនួសអោយការវាយ URL វែងៗរាល់ពេលហៅ API (ឧ. `https://api.example.com/users`) យើងអាចបង្កើត "Instance" មួយដើម្បីរៀបចំការកំណត់ទូទៅ (Base config) តែម្តង។
+
+```javascript
+// ឯកសារ: src/api/axios.js
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://jsonplaceholder.typicode.com', // Base URL នៃ Backend
+  timeout: 5000, // ផ្តាច់ចោលប្រសិនបើទាញយូរជាង ៥វិនាទី
+});
+
+export default api;
+```
+
+---
+
+## 🔄 ការហៅ API ជាមួយនឹង Axios
+
+យើងនឹងប្រើប្រាស់ `useEffect` និង `useState` ដែលធ្លាប់រៀនដើម្បីបង្ហាញទិន្នន័យ។ ការគ្រប់គ្រង **Loading State** និង **Error State** គឺជារឿងដែលមិនអាចខ្វះបានសម្រាប់ User Experience (UX) ដ៏ល្អ។
+
+### ឧទាហរណ៍៖ ការទាញយកទិន្នន័យ (GET Request)
+
+```jsx
+import { useState, useEffect } from 'react';
+import api from './api/axios'; // ទាញយក Instance ដែលយើងទើបបង្កើត
+
+export default function UserList() {
+  const [users, setUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // បង្កើត Async Function
+    const fetchUsers = async () => {
+      try {
+        setIsLoading(true); // ចាប់ផ្តើមទាញ
+        
+        // ហៅទៅកាន់ /users (វាបូកជាមួយ BaseURL ខាងលើស្វ័យប្រវត្តិ)
+        const response = await api.get('/users');
+        
+        // Axios ដាក់ទិន្នន័យចុងក្រោយនៅក្នុង property ឈ្មោះ `data`
+        setUsers(response.data);
+      } catch (err) {
+        // ចាប់យកកំហុស
+        setError(err.message || 'មានបញ្ហាក្នុងការទាញយកទិន្នន័យ');
+      } finally {
+        setIsLoading(false); // បញ្ចប់ការទាញ (ទោះជោគជ័យ ឬបរាជ័យក៏ដោយ)
+      }
+    };
+
+    fetchUsers();
+  }, []); // ទាញយកតែម្តងគត់
+
+  // ការបង្ហាញ UI ទៅតាមស្ថានភាព (State)
+  if (isLoading) return <p className="text-blue-500">កំពុងដំណើរការ ⏳...</p>;
+  if (error) return <p className="text-red-500">❌ បញ្ហា: {error}</p>;
+
+  return (
+    <div className="p-10">
+      <h2 className="text-2xl font-bold mb-4">បញ្ជីឈ្មោះអ្នកប្រើប្រាស់</h2>
+      <ul className="list-disc pl-5">
+        {users.map(user => (
+          <li key={user.id} className="mb-2">{user.name} ({user.email})</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+### ការបញ្ជូនទិន្នន័យ (POST Request)
+
+នៅពេលអ្នក Submit Form (ដែលយើងបានរៀនក្នុងមេរៀន Zod) អ្នកត្រូវបញ្ជូនទិន្នន័យនោះទៅ Backend។
+
+```jsx
+const onSubmit = async (formData) => {
+  try {
+    const response = await api.post('/users', formData);
+    console.log('បង្កើតជោគជ័យ!', response.data);
+    alert('បង្កើតគណនីជោគជ័យ!');
+  } catch (err) {
+    console.error('មានបញ្ហាពេលបង្កើតគណនី:', err);
+    alert('ការបង្កើតគណនីបរាជ័យ');
+  }
+};
+```
+
+**សន្និដ្ឋាន:** Axios ធ្វើអោយការធ្វើការជាមួយ API កាន់តែងាយស្រួល និងស្អាត។ នៅក្នុងមេរៀនចុងក្រោយបន្ទាប់ យើងនឹងយកចំណេះដឹងទាំងអស់ដែលយើងបានរៀន (Components, State, Router, Forms, Axios) មកផ្គុំគ្នាបង្កើតជា **CRUD Dashboard** ពេញលេញមួយ!

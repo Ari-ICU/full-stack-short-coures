@@ -1,0 +1,132 @@
+---
+title: "React Router (Client-Side Routing)"
+description: "ស្វែងយល់ពីរបៀបបង្កើតប្រព័ន្ធបញ្ចូនទំព័រ (Navigation) នៅក្នុង React ដោយប្រើប្រាស់ React Router ដើម្បីបង្កើតកម្មវិធីប្រភេទ Single Page Application (SPA)។"
+objectives:
+  - "យល់ពីភាពខុសគ្នារវាងការប្តូរទំព័រធម្មតា និងការប្តូរទំព័រក្នុង SPA"
+  - "ចេះរៀបចំ Routes មូលដ្ឋាន និងការប្រើប្រាស់ <Link> ជំនួស <a>"
+  - "ចេះចាប់យកទិន្នន័យពី URL តាមរយៈ URL Parameters (useParams)"
+module: module-1-react
+order: 5
+quiz:
+  - question: ហេតុអ្វីបានជាយើងត្រូវប្រើប្រាស់ <Link> របស់ React Router ជំនួសអោយ HTML tag <a> (<a href="...">)?
+    options:
+      - ព្រោះ <a> tag លែងត្រូវបានគាំទ្រដោយ HTML5 ទៀតហើយ
+      - ព្រោះ <Link> ការពារមិនអោយ Browser ធ្វើការ Refresh ទំព័រទាំងមូល (Full page reload) ដែលរក្សាល្បឿនលឿនរបស់ SPA
+      - ព្រោះ <Link> ស្អាតជាង <a> នៅពេលប្រើជាមួយ Tailwind
+      - គ្មានចម្លើយត្រឹមត្រូវទេ
+    correctAnswer: 2
+    explanation: នៅក្នុង Single Page Application (SPA) ដូចជា React យើងមិនចង់អោយ Browser Refresh នោះទេ ព្រោះវានឹងធ្វើអោយបាត់បង់ State ទាំងអស់។ `<Link>` ជួយប្តូរ URL និងបង្ហាញ Component ថ្មីដោយមិនចាំបាច់ Load ទំព័រឡើងវិញ។
+---
+
+## 🚦 Single Page Application (SPA)
+
+ជាទូទៅ នៅពេលដែលអ្នកចុចលើ Link នៅក្នុងគេហទំព័រធម្មតា (HTML ធម្មតា) Browser របស់អ្នកនឹង Refresh ហើយទាញយកឯកសារ HTML ថ្មីពី Server។ 
+ប៉ុន្តែ React គឺជា **Single Page Application (SPA)**។ មានន័យថា អ្នកទាញយក HTML តែម្តងគត់តាំងពីពេលបើកវេបសាយដំបូង។ រាល់ការប្តូរទំព័រទៅមុខទៀត React គ្រាន់តែលុប Component ចាស់ ហើយគូរ Component ថ្មីជំនួសវិញយ៉ាងលឿន (ដោយមិនមានការ Refresh នោះទេ)។
+
+ដើម្បីធ្វើបែបនេះបាន យើងត្រូវការបណ្ណាល័យ (Library) ដ៏ល្បីល្បាញមួយឈ្មោះថា **React Router**។
+*(ដំឡើង: `npm install react-router-dom`)*
+
+---
+
+## 🛠️ ការរៀបចំ Routes (Routing Setup)
+
+នៅក្នុងកំណែទម្រង់ថ្មីរបស់ React Router v6 យើងប្រើប្រាស់រចនាសម្ព័ន្ធ `BrowserRouter`, `Routes`, និង `Route`។
+
+```jsx
+// ឯកសារ: src/App.jsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+// Components តំណាងអោយទំព័រនីមួយៗ
+const Home = () => <h1 className="text-2xl font-bold">🏠 ទំព័រដើម</h1>;
+const About = () => <h1 className="text-2xl font-bold">ℹ️ អំពីយើង</h1>;
+const NotFound = () => <h1 className="text-2xl font-bold text-red-500">❌ រកមិនឃើញទំព័រនេះទេ (404)</h1>;
+
+export default function App() {
+  return (
+    // ត្រូវរុំកម្មវិធីទាំងមូលជាមួយ BrowserRouter
+    <BrowserRouter>
+      {/* របារបញ្ជូលទំព័រ (Navigation Bar) */}
+      <nav className="p-4 bg-gray-100 flex gap-4 mb-4">
+        {/* ចំណាំ: យើងប្រើ Link ជំនួសអោយ <a> tag */}
+        <Link to="/" className="text-blue-500 hover:underline">ទំព័រដើម</Link>
+        <Link to="/about" className="text-blue-500 hover:underline">អំពីយើង</Link>
+      </nav>
+
+      {/* កន្លែងកំណត់ថា URL ណា ត្រូវបង្ហាញ Component មួយណា */}
+      <div className="p-4">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          {/* path="*" សម្រាប់ចាប់យក URL ដែលមិនត្រឹមត្រូវទាំងអស់ (404 Error) */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## 🔍 ការប្រើប្រាស់ URL Parameters (`useParams`)
+
+ពេលខ្លះ អ្នកមានទំព័រដែលបង្ហាញព័ត៌មានលម្អិតរបស់ផលិតផលនីមួយៗ ឧទាហរណ៍ `/products/1` ឬ `/products/2`។ អ្នកមិនអាចសរសេរ Route រាប់រយសម្រាប់ផលិតផលនីមួយៗបានទេ។ 
+
+យើងប្រើប្រាស់សញ្ញាចុចពីរ (`:`) ដើម្បីប្រាប់ថាផ្នែកនេះគឺជា **Dynamic Parameter** (អថេរដែលអាចផ្លាស់ប្តូរបាន)។
+
+```jsx
+import { BrowserRouter, Routes, Route, Link, useParams } from 'react-router-dom';
+
+// ទំព័រលម្អិតផលិតផល
+function ProductDetail() {
+  // ចាប់យកតម្លៃ :id ពីលើ URL
+  const { id } = useParams();
+  
+  return <h1 className="text-2xl">កំពុងបង្ហាញផលិតផលលេខសម្គាល់៖ {id} 📦</h1>;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <nav className="p-4 flex gap-4">
+        <Link to="/products/1">មើលទូរស័ព្ទ (ID: 1)</Link>
+        <Link to="/products/99">មើលកុំព្យូទ័រ (ID: 99)</Link>
+      </nav>
+
+      <Routes>
+        {/* :id តំណាងអោយតម្លៃអ្វីក៏ដោយដែលនៅខាងក្រោយ /products/ */}
+        <Route path="/products/:id" element={<ProductDetail />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## ➡️ ការប្តូរទំព័រតាមរយៈកូដ (Programmatic Navigation)
+
+ក្រៅពីការចុចលើ `<Link>` អ្នកក៏អាចបញ្ជាអោយប្តូរទំព័រដោយស្វ័យប្រវត្តិ (ឧ. បន្ទាប់ពី Login ជោគជ័យ) តាមរយៈ Hook មួយឈ្មោះថា `useNavigate`។
+
+```jsx
+import { useNavigate } from 'react-router-dom';
+
+function LoginButton() {
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    // ស្រមៃថាកូដ Login ដើរចប់នៅទីនេះ...
+    alert("ចូលគណនីជោគជ័យ!");
+    // បញ្ជូនអ្នកប្រើប្រាស់ទៅកាន់ទំព័រ Dashboard ដោយស្វ័យប្រវត្តិ
+    navigate('/dashboard');
+  };
+
+  return (
+    <button onClick={handleLogin} className="bg-blue-500 text-white px-4 py-2">
+      ចូលគណនី
+    </button>
+  );
+}
+```
+
+**សន្និដ្ឋាន:** React Router គឺជាផ្នែកដ៏សំខាន់បំផុតមួយនៃ React Ecosystem ដែលអនុញ្ញាតអោយកម្មវិធីរបស់អ្នកមានអារម្មណ៍លឿន និងទំនើបដូចជា Mobile App អញ្ចឹងដែរ!
