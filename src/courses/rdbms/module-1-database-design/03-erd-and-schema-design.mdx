@@ -1,60 +1,127 @@
 ---
 title: "ERD & Schema Design"
-description: "ស្វែងយល់ពីការរចនាមូលដ្ឋានទិន្នន័យ (Database Design) ភាគទី ៣។"
+description: "ស្វែងយល់ពីរបៀបបកប្រែបញ្ហាជាក់ស្តែង (Problem Solving) ទៅជាការរចនាមូលដ្ឋានទិន្នន័យ (Database Design) និងការគូស ERD។"
 objectives:
+  - "យល់ពីយន្តការគិត (Problem Solving Workflow) ក្នុងការរចនា Database"
+  - "ចេះបំប្លែងតម្រូវការអាជីវកម្ម (Business Requirements) ទៅជា Entities និង Relationships"
   - "យល់ពីការគូសវាស ERD (Entity Relationship Diagram)"
-  - "អនុវត្តការរចនា Schema សម្រាប់គម្រោងជាក់ស្តែង"
 module: module-1-database-design
 order: 3
+quiz:
+  - question: នៅក្នុងដំណាក់កាលបំប្លែងតម្រូវការទៅជា ERD តើ "នាម" (Nouns) ដូចជា "សិស្ស", "គ្រូ", "ថ្នាក់រៀន" ជាទូទៅតំណាងអោយអ្វីនៅក្នុង Database?
+    options:
+      - Relationships (ទំនាក់ទំនង)
+      - Entities (តារាង)
+      - Attributes (លក្ខណៈ)
+      - Primary Keys
+    correctAnswer: 1
+    explanation: "ជាទូទៅ នៅក្នុងការវិភាគតម្រូវការ (Requirements Analysis) ពាក្យជានាម (Nouns) ច្រើនតែត្រូវបានប្រែក្លាយទៅជា Entities (តារាង) ចំណែកឯកិរិយាសព្ទ (Verbs) ច្រើនតែតំណាងអោយ Relationships។"
+---
+
+## 🧠 របៀបគិតក្នុងការដោះស្រាយបញ្ហា (Problem Solving Workflow)
+
+មុននឹងសរសេរកូដបង្កើត Database អ្នកត្រូវមានសមត្ថភាពក្នុងការស្តាប់តម្រូវការរបស់អតិថិជន (Business Requirements) ហើយបំប្លែងវាទៅជារចនាសម្ព័ន្ធទិន្នន័យ។ នេះគឺជាដំណើរការគិត ៣ ជំហានដ៏សាមញ្ញ៖
+
+### ជំហានទី ១៖ ស្វែងរក "នាម" (Identify Entities)
+នៅពេលអានតម្រូវការ សូមគូសចំណាំពាក្យណាដែលជា **នាម (Nouns)** សំខាន់ៗ។
+*ឧទាហរណ៍៖ "ប្រព័ន្ធត្រូវអនុញ្ញាតអោយ **អ្នកប្រើប្រាស់** អាចទិញ **ទំនិញ**។"* 
+➡️ យើងទទួលបាន Entities (តារាង) ២ គឺ៖ `users` និង `products`។
+
+### ជំហានទី ២៖ ស្វែងរក "លក្ខណៈ" (Identify Attributes)
+តើ Entities នីមួយៗគួរមានព័ត៌មានអ្វីខ្លះ?
+*ឧទាហរណ៍៖ "អ្នកប្រើប្រាស់ត្រូវមានឈ្មោះ អ៊ីមែល និងលេខសម្ងាត់។"*
+➡️ យើងទទួលបាន Attributes (ជួរឈរ)៖ `name`, `email`, `password_hash`។
+
+### ជំហានទី ៣៖ ស្វែងរក "កិរិយា" (Identify Relationships)
+តើ Entities ទាំងនោះមានទំនាក់ទំនងគ្នាដូចម្តេច?
+*ឧទាហរណ៍៖ "អ្នកប្រើប្រាស់ម្នាក់ អាចទិញទំនិញបានច្រើន។"*
+➡️ នេះគឺជាទំនាក់ទំនង (Relationship) ប្រភេទ **One-to-Many**។ យើងប្រហែលជាត្រូវការតារាងកណ្តាលមួយឈ្មោះថា `orders`។
+
 ---
 
 ## 🗺️ អ្វីទៅជា ERD?
 
-**ERD (Entity Relationship Diagram)** គឺជាការគូសវាសប្លង់ (Diagram) ដែលបង្ហាញពីទម្រង់តារាង (Entities) និងទំនាក់ទំនង (Relationships) របស់វានៅក្នុង Database។ មុននឹងសរសេរកូដបង្កើត Database ការគូស ERD គឺជាជំហានដំបូងដ៏សំខាន់បំផុត ដើម្បីចៀសវាងការខុសឆ្គងទៅថ្ងៃក្រោយ។
-
-នៅក្នុង ERD មានសមាសធាតុ ៣ សំខាន់៖
-1. **Entity (តារាង):** តំណាងអោយវត្ថុ ឬមនុស្ស (ឧទាហរណ៍៖ `users`, `products`, `orders`)។
-2. **Attributes (ជួរឈរ):** ជាលក្ខណៈរបស់ Entity (ឧទាហរណ៍៖ `name`, `price`, `created_at`)។
-3. **Relationship (ទំនាក់ទំនង):** បង្ហាញពីរបៀបដែល Entity មួយទាក់ទងទៅ Entity មួយទៀត។
+**ERD (Entity Relationship Diagram)** គឺជាការគូសវាសប្លង់ (Diagram) ដែលបង្ហាញពីការគិតរបស់អ្នកនៅក្នុងជំហានទាំង ៣ ខាងលើ។ ការគូស ERD គឺជាការងារដំបូងដ៏សំខាន់បំផុត ដើម្បីអោយសមាជិកក្រុមទាំងអស់មានការយល់ឃើញដូចគ្នា មុនពេលចាប់ផ្តើមសរសេរកូដ (Coding)។
 
 ---
 
 ## 🛒 Case Study: ការរចនា Database សម្រាប់ E-Commerce
 
-ដើម្បីងាយយល់ យើងនឹងធ្វើការរចនា Database សម្រាប់ប្រព័ន្ធលក់ទំនិញអនឡាញ (E-Commerce) សាមញ្ញមួយ ដោយប្រើប្រាស់ PostgreSQL Schema។
+យើងនឹងយកដំណើរការគិតខាងលើ មកដោះស្រាយបញ្ហាក្នុងការបង្កើតប្រព័ន្ធ E-Commerce មួយ។
 
-យើងត្រូវការតារាង ៣ សំខាន់ៗ៖
-- **`users`**: សម្រាប់ផ្ទុកព័ត៌មានអ្នកទិញ
-- **`products`**: សម្រាប់ផ្ទុកព័ត៌មានទំនិញ
-- **`orders`**: សម្រាប់ផ្ទុកព័ត៌មាននៃការបញ្ជាទិញ
+**តម្រូវការ (Requirements):**
+> "យើងត្រូវការប្រព័ន្ធមួយដែល **អតិថិជន (Users)** អាចបញ្ជាទិញ **ទំនិញ (Products)**។ អតិថិជនម្នាក់អាចបង្កើត **ការកម្ម៉ង់ (Orders)** បានច្រើនដង ហើយក្នុងការកម្ម៉ង់ម្តងៗ អាចមានទំនិញជាច្រើនមុខ (Order Items)។"
 
-### តារាង Users
+### ១. ការគូស ERD (Entity Relationship Diagram)
+
+ខាងក្រោមនេះគឺជាការបង្ហាញពី ERD ដោយប្រើប្រាស់ Mermaid ដែលជា Tool ដ៏ពេញនិយមសម្រាប់ការគូស Diagram តាមរយៈកូដ៖
+
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : "places"
+    ORDERS ||--|{ ORDER_ITEMS : "contains"
+    PRODUCTS ||--o{ ORDER_ITEMS : "included in"
+
+    USERS {
+        UUID id PK
+        VARCHAR username
+        VARCHAR email
+    }
+    
+    PRODUCTS {
+        UUID id PK
+        VARCHAR name
+        NUMERIC price
+    }
+    
+    ORDERS {
+        UUID id PK
+        UUID user_id FK
+        VARCHAR status
+        TIMESTAMPTZ created_at
+    }
+
+    ORDER_ITEMS {
+        UUID id PK
+        UUID order_id FK
+        UUID product_id FK
+        INT quantity
+    }
+```
+
+### ២. ការបំប្លែងទៅជា Database Schema (PostgreSQL)
+
+បន្ទាប់ពីមាន ERD ច្បាស់លាស់ហើយ ការបង្កើតតារាងគឺជារឿងងាយស្រួល៖
+
+#### តារាង Users
 | Column Name | Data Type | លក្ខណៈពិសេស |
 | :--- | :--- | :--- |
 | `id` | `UUID` | Primary Key |
-| `username` | `VARCHAR(50)` | មិនអាចជាន់គ្នា (Unique) |
-| `email` | `VARCHAR(100)`| មិនអាចជាន់គ្នា (Unique) |
-| `password_hash` | `TEXT` | លាក់ការសម្ងាត់ |
-| `created_at` | `TIMESTAMPTZ` | កាលបរិច្ឆេទបង្កើត |
+| `username` | `VARCHAR(50)` | Unique |
+| `email` | `VARCHAR(100)`| Unique |
 
-### តារាង Products
+#### តារាង Products
 | Column Name | Data Type | លក្ខណៈពិសេស |
 | :--- | :--- | :--- |
 | `id` | `UUID` | Primary Key |
-| `name` | `VARCHAR(100)`| ឈ្មោះទំនិញ |
-| `description` | `TEXT` | ការពណ៌នា |
-| `price` | `NUMERIC(10,2)`| តម្លៃទំនិញ (ដុល្លារ) |
-| `stock` | `INT` | ចំនួននៅក្នុងស្តុក |
+| `name` | `VARCHAR(100)`| |
+| `price` | `NUMERIC(10,2)`| តម្លៃទំនិញ |
 
-### តារាង Orders
-ដើម្បីភ្ជាប់ Users និង Products យើងត្រូវការតារាង Orders។ ទំនាក់ទំនងនេះគឺជា **One-to-Many** (User ម្នាក់អាចទិញបានច្រើនដង)។
+#### តារាង Orders (ភ្ជាប់ Users ទៅនឺងការទិញ)
+| Column Name | Data Type | លក្ខណៈពិសេស |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key |
+| `user_id` | `UUID` | Foreign Key ភ្ជាប់ទៅ `users.id` |
+| `status` | `VARCHAR(20)` | ឧ. 'pending', 'paid' |
+
+#### តារាង Order Items (ភ្ជាប់ Orders និង Products)
+ដោយសារការកម្ម៉ង់មួយអាចមានទំនិញច្រើន ហើយទំនិញមួយអាចស្ថិតក្នុងការកម្ម៉ង់ច្រើន (Many-to-Many) យើងត្រូវមានតារាងកណ្តាល `order_items`។
 
 | Column Name | Data Type | លក្ខណៈពិសេស |
 | :--- | :--- | :--- |
 | `id` | `UUID` | Primary Key |
-| `user_id` | `UUID` | Foreign Key ភ្ជាប់ទៅតារាង `users` |
-| `total_price` | `NUMERIC(10,2)`| តម្លៃសរុប |
-| `status` | `VARCHAR(20)` | `pending`, `paid`, ឫ `shipped` |
-| `created_at` | `TIMESTAMPTZ` | កាលបរិច្ឆេទបញ្ជាទិញ |
+| `order_id` | `UUID` | Foreign Key ភ្ជាប់ទៅ `orders.id` |
+| `product_id` | `UUID` | Foreign Key ភ្ជាប់ទៅ `products.id` |
+| `quantity` | `INT` | ចំនួនទំនិញ |
 
-> 💡 **ចំណាំ:** នៅក្នុងការអនុវត្តជាក់ស្តែង យើងក៏ត្រូវការតារាង `order_items` មួយទៀតដើម្បីផ្ទុកទំនិញជាច្រើននៅក្នុងការកម្ម៉ង់តែមួយ (Many-to-Many)។
+**សន្និដ្ឋាន:** ការរចនា Database មិនមែនជាការអង្គុយសរសេរកូដ SQL ភ្លាមៗនោះទេ វាគឺជាការគិតវិភាគ (Problem Solving) ការគូសវាស (ERD) និងការសម្រេចចិត្តថាតើត្រូវរៀបចំទិន្នន័យបែបណាទើបត្រឹមត្រូវ និងមានភាពរឹងមាំសម្រាប់អនាគត។
