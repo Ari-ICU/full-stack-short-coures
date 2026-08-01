@@ -1,0 +1,115 @@
+---
+title: Routing & Navigation (Optional)
+description: ស្វែងយល់ពីប្រព័ន្ធបញ្ចូនទំព័រ (File-system based Routing) របស់ Next.js រួមមាន Dynamic Routes និងការគ្រប់គ្រង Error/Loading States។
+objectives:
+  - ចេះបង្កើតទំព័រថ្មីៗដោយគ្រាន់តែបង្កើត Folder (File-system routing)
+  - ចេះប្រើប្រាស់ `<Link>` របស់ Next.js ជំនួសអោយ React Router
+  - អាចបង្កើតទំព័រ Dynamic ដូចជា `[id]` សម្រាប់ការបង្ហាញទិន្នន័យលម្អិត
+  - ស្គាល់ពីឯកសារពិសេស `loading.tsx` នឹង `not-found.tsx`
+module: module-2-nextjs
+order: 3
+quiz:
+  - question: ប្រសិនបើអ្នកចង់បង្កើតទំព័រ "អំពីយើង" ដែលមាន URL ជា `/about` តើអ្នកត្រូវរៀបចំ Folder នឹង ឯកសារយ៉ាងដូចម្តេចនៅក្នុង `src/app`?
+    options:
+      - បង្កើតឯកសារ `about.tsx` នៅក្នុង `src/app/`
+      - បង្កើត Folder ឈ្មោះ `about` ហើយដាក់ឯកសារ `index.tsx` ចូលទៅក្នុងនោះ
+      - បង្កើត Folder ឈ្មោះ `about` ហើយដាក់ឯកសារ `page.tsx` ចូលទៅក្នុងនោះ
+      - ត្រូវទៅកំណត់នៅក្នុង `App.jsx` ដូចពេលប្រើ React Router
+    correctAnswer: 3
+    explanation: នៅក្នុង Next.js App Router ការបង្កើត URL Path គឺពឹងផ្អែកទៅលើឈ្មោះ Folder ហើយដើម្បីអោយ Folder នោះក្លាយជាទំព័រដែលអាចមើលឃើញ (Public Route) គឺទាមទារអោយមានឯកសារឈ្មោះ `page.tsx` នៅខាងក្នុងវាជានិច្ច។
+---
+
+## 📂 File-System Based Routing
+
+នៅក្នុង React សុទ្ធ អ្នកត្រូវប្រើប្រាស់ `react-router-dom` ហើយសរសេរកូដផ្គូផ្គង URL ជាមួយ Component ដោយខ្លួនឯង (`<Route path="/about" element={<About />} />`)។ 
+
+ប៉ុន្តែនៅក្នុង Next.js អ្នកមិនចាំបាច់សរសេរកូដនោះទេ។ វាប្រើប្រព័ន្ធ **File-System Based Routing** មានន័យថា **ឈ្មោះ Folder កំណត់ឈ្មោះ URL**។
+
+**ឧទាហរណ៍៖**
+```text
+src/app/
+ ├── page.tsx          ➡️ URL: / (ទំព័រដើម)
+ ├── about/
+ │    └── page.tsx     ➡️ URL: /about (អំពីយើង)
+ └── dashboard/
+      └── settings/
+           └── page.tsx ➡️ URL: /dashboard/settings (ការកំណត់)
+```
+
+---
+
+## 🔗 ការផ្លាស់ប្តូរទំព័រដោយប្រើ `next/link`
+
+ដើម្បីភ្ជាប់ទំព័រពីមួយទៅមួយ យើងមិនប្រើ `<a>` tag ទេ ព្រោះវានឹងធ្វើអោយ Browser Refresh។ យើងត្រូវប្រើ Component `<Link>` ដែលមានស្រាប់ពី Next.js។
+
+```tsx
+import Link from 'next/link'
+
+export default function Navigation() {
+  return (
+    <nav className="flex gap-4 p-4 bg-gray-100">
+      <Link href="/" className="hover:text-blue-500">ទំព័រដើម</Link>
+      <Link href="/about" className="hover:text-blue-500">អំពីយើង</Link>
+      <Link href="/dashboard/settings" className="hover:text-blue-500">ការកំណត់</Link>
+    </nav>
+  )
+}
+```
+*(ចំណាំ៖ ខុសពី React Router ដែលប្រើ `to="/"`, នៅក្នុង Next.js គឺប្រើ `href="/"`)*។
+
+---
+
+## 🔍 ទំព័រថាមវន្ត (Dynamic Routes)
+
+ចុះបើអ្នកចង់បាន URL ដូចជា `/products/1` ឬ `/products/99`? អ្នកអាចបង្កើត Folder ដោយប្រើសញ្ញាដង្កៀប `[]` ឧទាហរណ៍ `[id]`។
+
+**រចនាសម្ព័ន្ធ Folder:** `src/app/products/[id]/page.tsx`
+
+```tsx
+// ឯកសារ: src/app/products/[id]/page.tsx
+
+export default function ProductDetail({ params }: { params: { id: string } }) {
+  // Next.js បញ្ជូន params មកអោយយើងដោយស្វ័យប្រវត្តិ
+  return (
+    <div className="p-10">
+      <h1 className="text-2xl font-bold">ផលិតផលលេខសម្គាល់៖ {params.id} 📦</h1>
+    </div>
+  )
+}
+```
+
+---
+
+## ⏳ ការគ្រប់គ្រង Loading និង 404 (Not Found)
+
+ភាពអស្ចារ្យមួយទៀតរបស់ App Router គឺឯកសារពិសេសមួយចំនួនដែលអ្នកអាចបង្កើតនៅក្នុង Folder នីមួយៗបាន៖
+
+### ១. `loading.tsx`
+នៅពេលដែលទំព័ររបស់អ្នកកំពុងទាញយកទិន្នន័យពី Server Next.js នឹងបង្ហាញឯកសារ `loading.tsx` នេះដោយស្វ័យប្រវត្តិ។
+```tsx
+// ឯកសារ: src/app/products/loading.tsx
+export default function Loading() {
+  return <p className="text-blue-500 p-10">កំពុងទាញយកទិន្នន័យ... ⏳</p>
+}
+```
+
+### ២. `not-found.tsx`
+នៅពេលដែលអ្នកប្រើប្រាស់វាយបញ្ចូល URL ខុស (មិនមាន Folder នោះទេ) វានឹងបង្ហាញទំព័រ 404 នេះ។
+```tsx
+// ឯកសារ: src/app/not-found.tsx
+import Link from 'next/link'
+
+export default function NotFound() {
+  return (
+    <div className="p-10 text-center">
+      <h1 className="text-4xl font-bold text-red-500">៤០៤ - រកមិនឃើញទំព័រនេះទេ</h1>
+      <p className="mt-4 text-gray-600">សុំទោស ទីតាំងដែលអ្នកស្វែងរកមិនមានទេ។</p>
+      <Link href="/" className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+        ត្រលប់ទៅទំព័រដើមវិញ
+      </Link>
+    </div>
+  )
+}
+```
+
+**សន្និដ្ឋាន:** ការគ្រប់គ្រង Routing នៅក្នុង Next.js គឺងាយស្រួល ស្អាត និងមានប្រសិទ្ធភាពខ្ពស់។ នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនពីរបៀបទាញយកទិន្នន័យពី API មកបង្ហាញនៅលើទំព័រទាំងនេះ!
