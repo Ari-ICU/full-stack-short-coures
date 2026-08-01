@@ -36,7 +36,10 @@ const MODULE_TITLES: Record<string, string> = {
   "module-1-typescript": "Module 1 — TypeScript Fundamentals",
   "module-2-advanced-typescript": "Module 2 — Advanced TypeScript",
   "module-1-react": "Module 1 — React Fundamentals",
-  "module-1-nodejs": "Module 1 — Introduction to Node.js",
+  "module-1-nodejs": "Module 1 — Node.js & Architecture",
+  "module-2-express-and-rest": "Module 2 — Express.js & RESTful APIs",
+  "module-3-database-integration": "Module 3 — Database Integration",
+  "module-4-security-and-advanced": "Module 4 — Security & Advanced Concepts",
   "module-1-database-design": "Module 1 — Database Design & SQL",
 };
 
