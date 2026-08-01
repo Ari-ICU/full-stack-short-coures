@@ -1,0 +1,112 @@
+---
+title: Semantic HTML
+description: ស្វែងយល់ពីអត្ថន័យនៃ Semantic HTML, សារៈសំខាន់របស់វាសម្រាប់ SEO និង Accessibility, និងរបៀបប្រើប្រាស់ Semantic Tags ឱ្យបានត្រឹមត្រូវ។
+objectives:
+  - ស្វែងយល់ពីភាពខុសគ្នារវាង Semantic និង Non-semantic Elements
+  - យល់ពីសារៈសំខាន់នៃ Semantic HTML ចំពោះ SEO (Search Engine Optimization)
+  - អនុវត្តការប្រើប្រាស់ <header>, <nav>, <main>, <article>, <section>, និង <footer>
+module: module-1-html
+order: 2
+quiz:
+  - question: ហេតុអ្វីបានជាការប្រើប្រាស់ Semantic Tags ដូចជា <article> និង <section> គឺល្អជាងការប្រើប្រាស់ <div>?
+    options:
+      - ព្រោះវាធ្វើឱ្យ Website ដើរលឿនជាងមុន
+      - ព្រោះវាជួយឱ្យ Search Engine និង Screen Readers យល់ពីអត្ថន័យពិតប្រាកដនៃ Content
+      - ព្រោះវាផ្តល់ពណ៌ (Styling) ដោយស្វ័យប្រវត្តិ
+      - ព្រោះវាត្រូវបានតម្រូវដោយច្បាប់
+    correctAnswer: 1
+    explanation: Semantic Tags ប្រាប់ពីអត្ថន័យច្បាស់លាស់ទៅកាន់ Browser និង Search Engine (ដូចជា Google) ព្រមទាំងជួយសម្រួលដល់ជនពិការដែលប្រើប្រាស់ Screen Readers ឱ្យយល់ពី Content របស់ Website។
+---
+
+## 🏷️ អ្វីទៅជា Semantic HTML?
+
+នៅក្នុងភាសាអង់គ្លេស ពាក្យថា **Semantic** មានន័យថា "អត្ថន័យ" (Meaning)។ ដូច្នេះ **Semantic HTML** គឺជាការប្រើប្រាស់ HTML Tags ដែលមានអត្ថន័យច្បាស់លាស់ ដែលប្រាប់ទាំង Developer និង Browser ពីអ្វីដែល Content នោះតំណាងឱ្យ។
+
+### ភាពខុសគ្នារវាង Semantic និង Non-semantic Elements:
+
+- **Non-semantic Elements:** `<div>` និង `<span>` 
+  ពួកវាមិនបានប្រាប់អ្វីសោះអំពី Content របស់វា។ វាគ្រាន់តែជាប្រអប់ទទេសម្រាប់ផ្ទុករបស់ផ្សេងៗប៉ុណ្ណោះ។
+
+- **Semantic Elements:** `<form>`, `<table>`, និង `<article>` 
+  គ្រាន់តែឃើញឈ្មោះ Tag ភ្លាម អ្នក (និង Browser) អាចដឹងភ្លាមៗថាវាផ្ទុកទិន្នន័យប្រភេទអ្វី។
+
+---
+
+## 🚀 ហេតុអ្វីបានជា Semantic HTML មានសារៈសំខាន់?
+
+ការសរសេរកូដដោយប្រើប្រាស់ `<div>` សម្រាប់អ្វីៗទាំងអស់ គឺនៅតែអាចដំណើរការចេញជារូបរាងបានដូចគ្នា តែហេតុអ្វីបានជាយើងត្រូវខ្វល់ខ្វាយពី Semantic HTML?
+
+1. **Accessibility (ភាពងាយស្រួលក្នុងការប្រើប្រាស់):** ជនពិការភ្នែកពឹងផ្អែកលើកម្មវិធី Screen Readers ដើម្បីអាន Website ឱ្យពួកគេស្តាប់។ Semantic Tags ប្រាប់កម្មវិធីទាំងនោះពីរបៀបអានទំព័រឱ្យបានត្រឹមត្រូវ។
+2. **SEO (Search Engine Optimization):** Google និង Search Engines ផ្សេងៗចូលចិត្ត Semantic HTML។ ប្រសិនបើអ្នកប្រើ `<article>` ជំនួសឱ្យ `<div>` នោះ Google នឹងយល់ថាវាគឺជាអត្ថបទដ៏សំខាន់ ហើយជួយឱ្យ Website អ្នកឆាប់រុករកឃើញ។
+3. **ងាយស្រួលថែទាំ (Maintainability):** កូដដែលមានអត្ថន័យគឺងាយស្រួលអាន និងងាយស្រួលកែប្រែនៅពេលក្រោយសម្រាប់ Developer ដទៃទៀត។
+
+---
+
+## 🏗️ Semantic Tags សំខាន់ៗក្នុង HTML5
+
+HTML5 បានណែនាំ Semantic Tags ថ្មីៗជាច្រើនសម្រាប់ការសាងសង់ទំព័រ Web ឱ្យមានរចនាសម្ព័ន្ធច្បាស់លាស់៖
+
+- `<header>`: កំណត់ផ្នែកខាងលើនៃ Document ឬ Section មួយ (ជាទូទៅផ្ទុក Logo និង ចំណងជើង)។
+- `<nav>`: តំណាងឱ្យ Navigation Links សំខាន់ៗ (ឧ. Menu ខាងលើ)។
+- `<main>`: កំណត់ Content គោល (Main Content) នៃ Document។ គួរតែមាន `<main>` តែមួយគត់ក្នុងមួយទំព័រ។
+- `<article>`: កំណត់ Content ដែលអាចឈរឯករាជ្យបាន ឧទាហរណ៍ដូចជា Blog Post, អត្ថបទព័ត៌មាន ឬ Comment ជាដើម។
+- `<section>`: តំណាងឱ្យផ្នែកមួយ (Section) នៃ Document ដែលទាក់ទងគ្នា ឧទាហរណ៍ដូចជា "About Us" section ឬ "Contact" section។
+- `<aside>`: កំណត់ Content ដែលនៅចំហៀង (Sidebar) ដូចជាការផ្សាយពាណិជ្ជកម្ម ឬតំណភ្ជាប់ពាក់ព័ន្ធ។
+- `<footer>`: កំណត់ផ្នែកខាងក្រោមនៃ Document ឬ Section មួយ (ជាទូទៅផ្ទុក Copyright និង Contact Info)។
+
+---
+
+## 🖼️ ឧទាហរណ៍រចនាសម្ព័ន្ធ Semantic ពេញលេញ
+
+នេះជារបៀបដែលគេរៀបចំ Semantic Tags បញ្ចូលគ្នាដើម្បីបង្កើតទំព័រ Web មួយ៖
+
+```html
+<body>
+    <!-- ផ្នែកខាងលើ និង Menu -->
+    <header>
+        <h1>កំណត់ហេតុការធ្វើដំណើរ</h1>
+        <nav>
+            <a href="/">ទំព័រដើម</a>
+            <a href="/destinations">គោលដៅ</a>
+            <a href="/about">អំពីពួកយើង</a>
+        </nav>
+    </header>
+
+    <!-- Content គោលនៃទំព័រ -->
+    <main>
+        <!-- អត្ថបទទី ១ -->
+        <article>
+            <header>
+                <h2>ដំណើរកម្សាន្តនៅសៀមរាប</h2>
+                <p>ផ្សាយនៅថ្ងៃទី ១៥ មករា ២០២៤</p>
+            </header>
+            <p>ប្រាសាទអង្គរវត្តពិតជាអស្ចារ្យណាស់...</p>
+        </article>
+
+        <!-- អត្ថបទទី ២ -->
+        <article>
+            <header>
+                <h2>ឆ្នេរសមុទ្រក្រុងព្រះសីហនុ</h2>
+                <p>ផ្សាយនៅថ្ងៃទី ២០ មករា ២០២៤</p>
+            </header>
+            <p>ទឹកសមុទ្រខៀវស្រងាត់...</p>
+        </article>
+    </main>
+
+    <!-- របារចំហៀង -->
+    <aside>
+        <h3>អត្ថបទពេញនិយម</h3>
+        <ul>
+            <li><a href="/kampot">កំពត</a></li>
+            <li><a href="/kirirom">គិរីរម្យ</a></li>
+        </ul>
+    </aside>
+
+    <!-- ផ្នែកខាងក្រោម -->
+    <footer>
+        <p>&copy; 2024 Travel Blog. រក្សាសិទ្ធិគ្រប់យ៉ាង។</p>
+    </footer>
+</body>
+```
+
+តាមរយៈការប្រើប្រាស់ Semantic Elements បែបនេះ ទាំងអ្នកអាន ទាំង Developer និងទាំង Google ពិតជាងាយស្រួលយល់ពីរចនាសម្ព័ន្ធនៃ Website របស់អ្នក!
