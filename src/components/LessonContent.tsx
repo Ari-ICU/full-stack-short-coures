@@ -19,6 +19,17 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
         components={{
           img({ src, alt, ...props }) {
             const isSvg = typeof src === "string" && (src.endsWith(".svg") || src.includes("simpleicons.org"));
+            const isLogo = alt && alt.toLowerCase().includes("logo");
+            
+            if (isLogo) {
+              return (
+                <div className="flex justify-center my-8 not-prose">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt={alt} className="w-32 h-auto object-contain" {...props} />
+                </div>
+              );
+            }
+
             return (
               // eslint-disable-next-line @next/next/no-img-element
               <img
