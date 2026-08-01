@@ -1,0 +1,233 @@
+import fs from "fs";
+import path from "path";
+import matter from "gray-matter";
+import { Course, Module, Lesson, LessonFrontmatter } from "@/types";
+
+const COURSES_DIR = path.join(process.cwd(), "src", "courses");
+
+const COURSE_TITLES: Record<string, string> = {
+  "course-overview": "ទិដ្ឋភាពទូទៅ Full Stack",
+  "git": "ការគ្រប់គ្រងកូដជាមួយ Git & GitHub",
+  "web-design": "មូលដ្ឋានគ្រឹះ Web Design",
+  "typescript": "មូលដ្ឋានគ្រឹះ TypeScript",
+  "frontend-engineering": "Frontend Engineering ជាមួយ React",
+  "backend-architecture": "Backend Architecture ជាមួយ Node.js",
+};
+
+const COURSE_DESCRIPTIONS: Record<string, string> = {
+  "course-overview": "ស្វែងយល់ពី Full Stack Development, Tech Stack, ការដំឡើង Tools និង IDE សម្រាប់ការចាប់ផ្តើម។",
+  "git": "ស្វែងយល់ពីការរក្សាទុកកូដ (Version Control), ការធ្វើការងារជាក្រុម និងការប្រើប្រាស់ GitHub។",
+  "web-design": "រៀនពីមូលដ្ឋានគ្រឹះនៃ responsive design, HTML, CSS និងការបង្កើត interface ដ៏ស្រស់ស្អាត។",
+  "typescript": "រៀនពីការសរសេរ JavaScript ដែលមាន Static Typing ដើម្បីកាត់បន្ថយបញ្ហា និងងាយស្រួលថែទាំ។",
+  "frontend-engineering": "បង្កើតកម្មវិធី web (single-page applications) ដ៏ទំនើបដោយប្រើប្រាស់ React frameworks។",
+  "backend-architecture": "រៀនពីការរៀបចំ Server-side, ការគ្រប់គ្រងទិន្នន័យ និង API ជាមួយ Node.js។",
+};
+
+const MODULE_TITLES: Record<string, string> = {
+  "module-1-introduction": "Module 1 — សេចក្តីផ្តើម Full Stack",
+  "module-1-git": "Module 1 — មូលដ្ឋានគ្រឹះ Git",
+  "module-1-html": "Module 1 — HTML & Semantic Web",
+  "module-2-css": "Module 2 — Modern CSS Layouts",
+  "module-3-js": "Module 3 — JavaScript Fundamentals",
+  "module-1-typescript": "Module 1 — មូលដ្ឋានគ្រឹះ TypeScript",
+  "module-1-react": "Module 1 — មូលដ្ឋានគ្រឹះ React",
+  "module-1-nodejs": "Module 1 — សេចក្តីផ្តើមអំពី Node.js",
+};
+
+export function getModuleTitle(slug: string): string {
+  if (MODULE_TITLES[slug]) return MODULE_TITLES[slug];
+  return slug
+    .replace(/-\d+$/, "")
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+export function getModuleOrder(slug: string): number {
+  const match = slug.match(/module-(\d+)/i);
+  return match ? parseInt(match[1], 10) : 1;
+}
+
+export function getAllCourseSlugs(): string[] {
+  if (!fs.existsSync(COURSES_DIR)) return [];
+  return fs
+    .readdirSync(COURSES_DIR)
+    .filter((f) => fs.statSync(path.join(COURSES_DIR, f)).isDirectory());
+}
+
+export function getCourseLessons(courseSlug: string): Lesson[] {
+  const courseDir = path.join(COURSES_DIR, courseSlug);
+  if (!fs.existsSync(courseDir)) return [];
+
+  const lessons: Lesson[] = [];
+  const moduleDirs = fs
+    .readdirSync(courseDir)
+    .filter((f) => fs.statSync(path.join(courseDir, f)).isDirectory());
+
+  for (const moduleSlug of moduleDirs) {
+    const moduleDir = path.join(courseDir, moduleSlug);
+    const files = fs
+      .readdirSync(moduleDir)
+      .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+
+    for (const file of files) {
+      const lessonSlug = file.replace(/\.mdx?$/, "");
+      const filePath = `${process.cwd()}/src/courses/${courseSlug}/${moduleSlug}/${file}`;
+      const read = fs.readFileSync;
+      const raw = read(filePath, "utf-8");
+      const { data } = matter(raw);
+      const fm = data as LessonFrontmatter;
+
+      lessons.push({
+        slug: lessonSlug,
+        title: fm.title ?? lessonSlug,
+        description: fm.description ?? "",
+        descriptionKm: fm.descriptionKm,
+        objectives: fm.objectives ?? [],
+        objectivesKm: fm.objectivesKm,
+        module: fm.module ?? moduleSlug,
+        order: fm.order ?? 1,
+        quiz: fm.quiz,
+        courseSlug,
+        moduleSlug,
+      });
+    }
+  }
+
+  return lessons;
+}
+
+export function getCourse(courseSlug: string): Course | null {
+  const courseDir = path.join(COURSES_DIR, courseSlug);
+  if (!fs.existsSync(courseDir)) return null;
+
+  const moduleDirs = fs
+    .readdirSync(courseDir)
+    .filter((f) => fs.statSync(path.join(courseDir, f)).isDirectory())
+    .sort((a, b) => getModuleOrder(a) - getModuleOrder(b));
+
+  const modules: Module[] = moduleDirs.map((moduleSlug) => {
+    const moduleDir = path.join(courseDir, moduleSlug);
+    const files = fs
+      .readdirSync(moduleDir)
+      .filter((f) => f.endsWith(".mdx") || f.endsWith(".md"));
+
+    const lessons: Lesson[] = files
+      .map((file) => {
+        const lessonSlug = file.replace(/\.mdx?$/, "");
+        const filePath = `${process.cwd()}/src/courses/${courseSlug}/${moduleSlug}/${file}`;
+        const read = fs.readFileSync;
+        const raw = read(filePath, "utf-8");
+        const { data } = matter(raw);
+        const fm = data as LessonFrontmatter;
+        return {
+          slug: lessonSlug,
+          title: fm.title ?? lessonSlug,
+          description: fm.description ?? "",
+          descriptionKm: fm.descriptionKm,
+          objectives: fm.objectives ?? [],
+          objectivesKm: fm.objectivesKm,
+          module: fm.module ?? moduleSlug,
+          order: fm.order ?? 1,
+          quiz: fm.quiz,
+          courseSlug,
+          moduleSlug,
+        };
+      })
+      .sort((a, b) => a.order - b.order);
+
+    return {
+      slug: moduleSlug,
+      title: getModuleTitle(moduleSlug),
+      order: getModuleOrder(moduleSlug),
+      lessons,
+    };
+  });
+
+  return {
+    slug: courseSlug,
+    title: COURSE_TITLES[courseSlug] ?? courseSlug,
+    description: COURSE_DESCRIPTIONS[courseSlug] ?? "",
+    modules,
+  };
+}
+
+const COURSE_ORDER = [
+  "course-overview",
+  "web-design",
+  "typescript",
+  "git",
+  "frontend-engineering",
+  "backend-architecture"
+];
+
+export function getAllCourses(): Course[] {
+  return getAllCourseSlugs()
+    .map((slug) => getCourse(slug))
+    .filter(Boolean)
+    .sort((a, b) => {
+      // @ts-ignore
+      const aIndex = COURSE_ORDER.indexOf(a.slug);
+      // @ts-ignore
+      const bIndex = COURSE_ORDER.indexOf(b.slug);
+      
+      const aRank = aIndex !== -1 ? aIndex : 999;
+      const bRank = bIndex !== -1 ? bIndex : 999;
+      
+      return aRank - bRank;
+    }) as Course[];
+}
+
+export function getLesson(
+  courseSlug: string,
+  moduleSlug: string,
+  lessonSlug: string
+): { lesson: Lesson; content: string } | null {
+  const extensions = [".mdx", ".md"];
+  for (const ext of extensions) {
+    const filePath = `${process.cwd()}/src/courses/${courseSlug}/${moduleSlug}/${lessonSlug}${ext}`;
+    if (fs.existsSync(filePath)) {
+      const read = fs.readFileSync;
+      const raw = read(filePath, "utf-8");
+      const { data, content } = matter(raw);
+      const fm = data as LessonFrontmatter;
+      return {
+        lesson: {
+          slug: lessonSlug,
+          title: fm.title ?? lessonSlug,
+          description: fm.description ?? "",
+          objectives: fm.objectives ?? [],
+          module: fm.module ?? moduleSlug,
+          order: fm.order ?? 1,
+          quiz: fm.quiz,
+          courseSlug,
+          moduleSlug,
+        },
+        content,
+      };
+    }
+  }
+  return null;
+}
+
+export function getAdjacentLessons(
+  courseSlug: string,
+  moduleSlug: string,
+  lessonSlug: string
+): { prev: Lesson | null; next: Lesson | null } {
+  const course = getCourse(courseSlug);
+  if (!course) return { prev: null, next: null };
+
+  const allLessons = course.modules
+    .sort((a, b) => a.order - b.order)
+    .flatMap((m) => m.lessons.sort((a, b) => a.order - b.order));
+
+  const idx = allLessons.findIndex(
+    (l) => l.moduleSlug === moduleSlug && l.slug === lessonSlug
+  );
+
+  return {
+    prev: idx > 0 ? allLessons[idx - 1] : null,
+    next: idx < allLessons.length - 1 ? allLessons[idx + 1] : null,
+  };
+}

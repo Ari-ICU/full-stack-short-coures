@@ -1,0 +1,131 @@
+---
+title: ការប្រើប្រាស់ CSS Framework (Bootstrap)
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ Bootstrap ដែលជា CSS Framework ដ៏ពេញនិយមបំផុតដើម្បីរចនាគេហទំព័រឱ្យបានរហ័ស និងមានភាព Responsive។
+objectives:
+  - យល់ពីអត្ថប្រយោជន៍នៃការប្រើប្រាស់ CSS Framework
+  - របៀបតភ្ជាប់ (Link) Bootstrap ទៅក្នុង HTML តាមរយៈ CDN
+  - ប្រើប្រាស់ Bootstrap Grid System ដើម្បីរៀបចំ Layout
+  - ប្រើប្រាស់ Components ផ្សេងៗរបស់ Bootstrap (Buttons, Cards, Forms)
+module: module-2-css
+order: 4
+quiz:
+  - question: តើ Bootstrap ប្រើប្រាស់ប្រព័ន្ធអ្វីដើម្បីជួយដល់ការរៀបចំ Layout ឱ្យបានងាយស្រួល?
+    options:
+      - Flexbox System
+      - Table System
+      - Grid System (ដែលមាន ១២ ជួរឈរ)
+      - Float System
+    correctAnswer: 2
+    explanation: Bootstrap ប្រើប្រាស់ Grid System ដែលមាន ១២ ជួរឈរ (12-column grid system) ដែលជួយឱ្យការរៀបចំ Layout មានភាពងាយស្រួល និង Responsive ទៅតាមទំហំអេក្រង់ផ្សេងៗ។
+---
+
+## 🚀 អ្វីទៅជា CSS Framework?
+
+នៅពេលរចនាគេហទំព័រញឹកញាប់ យើងសង្កេតឃើញថាមានកូដ CSS មួយចំនួនដែលយើងតែងតែសរសេរដដែលៗ (ឧទាហរណ៍៖ ការបង្កើតប៊ូតុង កាត ឬម៉ឺនុយ)។ **CSS Framework** គឺជាកញ្ចប់កូដ CSS ដែលគេបានសរសេររួចជាស្រេច ដើម្បីឱ្យយើងយកមកប្រើប្រាស់ដោយងាយស្រួល ចំណេញពេលវេលា និងធានាបាននូវភាពស្រស់ស្អាត។
+
+**Bootstrap** គឺជា CSS Framework មួយដែលពេញនិយមបំផុតក្នុងលោក ដែលត្រូវបានបង្កើតឡើងដំបូងដោយក្រុមការងារ Twitter។
+
+---
+
+## 🔗 របៀបភ្ជាប់ Bootstrap ទៅក្នុង HTML
+
+វិធីដែលលឿន និងងាយស្រួលបំផុតគឺការប្រើប្រាស់ **CDN (Content Delivery Network)**។ អ្នកគ្រាន់តែចម្លងកូដ `<link>` ខាងក្រោមទៅដាក់នៅក្នុង `<head>` នៃឯកសារ HTML របស់អ្នក។
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>សាកល្បង Bootstrap</title>
+  
+  <!-- ភ្ជាប់ Bootstrap CSS តាមរយៈ CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <h1>សួស្តី Bootstrap!</h1>
+</body>
+</html>
+```
+
+---
+
+## 📐 ប្រព័ន្ធ Bootstrap Grid System
+
+Bootstrap Grid System គឺជាប្រព័ន្ធមួយដែលបែងចែកអេក្រង់ជា **១២ ជួរឈរ (12 Columns)**។ 
+
+ដើម្បីប្រើប្រាស់ប្រព័ន្ធនេះបាន គេត្រូវប្រើ Class ចំនួន ៣ សំខាន់ៗ៖
+1. `.container`: ជាប្រអប់ធំសម្រាប់ផ្ទុកអ្វីៗទាំងអស់ (មានគម្លាតសងខាង)។
+2. `.row`: ជាជួរដេក ដែលត្រូវនៅខាងក្នុង container។
+3. `.col-*`: ជាជួរឈរ ដែលត្រូវនៅខាងក្នុង row (ទំហំសរុបនៃជួរឈរក្នុងមួយជួរដេកត្រូវស្មើ ១២)។
+
+**ឧទាហរណ៍៖**
+
+```html
+<div class="container">
+  <div class="row">
+    <!-- យកទំហំ ៦ ជួរឈរ (ពាក់កណ្តាលអេក្រង់) -->
+    <div class="col-6" style="background-color: lightblue;">
+      ជួរឈរទី ១ (ពាក់កណ្តាល)
+    </div>
+    <!-- យកទំហំ ៦ ជួរឈរ (ពាក់កណ្តាលអេក្រង់ទៀត) -->
+    <div class="col-6" style="background-color: lightgreen;">
+      ជួរឈរទី ២ (ពាក់កណ្តាល)
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## 🎨 ភាព Responsive នៅក្នុង Bootstrap
+
+Bootstrap ក៏បានបែងចែកទំហំអេក្រង់ជាច្រើនកម្រិត ដើម្បីជួយឱ្យគេហទំព័រយើងមានភាព Responsive៖
+- `col-` (សម្រាប់ទូរស័ព្ទតូចខ្លាំង)
+- `col-sm-` (សម្រាប់ទូរស័ព្ទធម្មតា ≥576px)
+- `col-md-` (សម្រាប់ថេប្លេត ≥768px)
+- `col-lg-` (សម្រាប់កុំព្យូទ័រ ≥992px)
+- `col-xl-` (សម្រាប់អេក្រង់កុំព្យូទ័រធំ ≥1200px)
+
+**ឧទាហរណ៍នៃការបត់បែនតាមអេក្រង់៖**
+```html
+<!-- លើទូរស័ព្ទ (sm) វាមានទំហំ 12 (ពេញអេក្រង់) -->
+<!-- លើថេប្លេត (md) វាមានទំហំ 6 (ពាក់កណ្តាលអេក្រង់) -->
+<!-- លើកុំព្យូទ័រ (lg) វាមានទំហំ 4 (មួយភាគបីអេក្រង់) -->
+<div class="col-12 col-md-6 col-lg-4">
+  ខ្លឹមសាររបស់អ្នក
+</div>
+```
+
+---
+
+## 🛠️ Components ទូទៅមួយចំនួន
+
+Bootstrap មាន Components ស្រស់ស្អាតជាច្រើនដែលងាយស្រួលប្រើ៖
+
+**១. ប៊ូតុង (Buttons):**
+```html
+<button class="btn btn-primary">ប៊ូតុងពណ៌ខៀវ</button>
+<button class="btn btn-danger">ប៊ូតុងពណ៌ក្រហម (លុប)</button>
+<button class="btn btn-success">ប៊ូតុងពណ៌បៃតង (យល់ព្រម)</button>
+```
+
+**២. កាត (Cards):**
+```html
+<div class="card" style="width: 18rem;">
+  <img src="រូបភាព.jpg" class="card-img-top" alt="...">
+  <div class="card-body">
+    <h5 class="card-title">ចំណងជើងកាត</h5>
+    <p class="card-text">ការពណ៌នាសង្ខេបៗអំពីអ្វីមួយ។</p>
+    <a href="#" class="btn btn-primary">ចុចទីនេះ</a>
+  </div>
+</div>
+```
+
+**៣. Utility Classes (សម្រាប់រុញគម្លាត និងពណ៌):**
+- **Margin:** `mt-3` (រុញខាងលើ), `mb-3` (រុញខាងក្រោម), `my-3` (រុញលើក្រោម)
+- **Padding:** `pt-3`, `pb-3`, `px-3` (រុញសងខាង), `p-3` (រុញគ្រប់ជ្រុង)
+- **ពណ៌អក្សរ:** `text-primary`, `text-muted`, `text-danger`
+- **ពណ៌ផ្ទៃ:** `bg-light`, `bg-dark`, `bg-warning`
+
+ការប្រើប្រាស់ Bootstrap ជួយសន្សំពេលវេលាបានយ៉ាងច្រើនក្នុងការរចនាគេហទំព័រ!

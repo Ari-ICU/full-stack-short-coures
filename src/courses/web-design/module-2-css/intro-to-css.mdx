@@ -1,0 +1,131 @@
+---
+title: សេចក្តីផ្តើមអំពី CSS
+description: រៀនពីរបៀបរចនា HTML elements របស់អ្នកដោយប្រើប្រាស់ Cascading Style Sheets (CSS)។
+objectives:
+  - ស្វែងយល់ពីតួនាទីរបស់ CSS ក្នុងការរចនាគេហទំព័រ
+  - រៀនពីវាក្យសម្ព័ន្ធ CSS (selectors, properties, និង values)
+  - ស្វែងយល់ពីរបៀបផ្សេងៗក្នុងការបន្ថែម CSS ទៅកាន់ HTML
+module: module-2-css
+order: 1
+quiz:
+  - question: តើ HTML attribute មួយណាត្រូវបានប្រើដើម្បីកំណត់ inline styles?
+    options:
+      - class
+      - styles
+      - style
+      - css
+    correctAnswer: 2
+    explanation: "'style' attribute ត្រូវបានប្រើដើម្បីអនុវត្ត inline CSS ដោយផ្ទាល់ទៅកាន់ HTML element។"
+---
+
+## 🎨 ការតុបតែងគេហទំព័រ
+
+ប្រសិនបើ HTML គឺជាគ្រោងឆ្អឹងនៃគេហទំព័រ **CSS (Cascading Style Sheets)** គឺជាស្បែក សក់ និងសម្លៀកបំពាក់។ វាទទួលខុសត្រូវចំពោះរូបរាង និងសោភ័ណភាពនៃគេហទំព័ររបស់អ្នក។
+
+បើគ្មាន CSS ទេ គេហទំព័រនឹងមើលទៅគួរឱ្យធុញទ្រាន់ ដោយមានត្រឹមតែអក្សរពណ៌ខ្មៅនៅលើផ្ទៃពណ៌សប៉ុណ្ណោះ។
+
+---
+
+## 🧱 រចនាសម្ព័ន្ធនៃ CSS Rule
+
+CSS rule មួយមាន **selector** និង **declaration block**។
+
+```css
+h1 {
+  color: blue;
+  font-size: 24px;
+}
+```
+
+- **Selector (`h1`)**: ចង្អុលទៅកាន់ HTML element ដែលអ្នកចង់រចនា។
+- **Declaration Block (`{ ... }`)**: មានផ្ទុកមួយ ឬច្រើន declarations ដែលខណ្ឌដោយសញ្ញា (;)។
+- **Property (`color`)**: អ្វីដែលអ្នកចង់ផ្លាស់ប្តូរ (ឧ. ពណ៌)។
+- **Value (`blue`)**: លទ្ធផលថ្មីនៃ property (ឧ. ពណ៌ខៀវ)។
+
+---
+
+## 🎯 CSS Selectors
+
+Selectors គឺជារបៀបដែលអ្នកកំណត់គោលដៅលើ HTML elements ជាក់លាក់ណាមួយ។
+
+### 1. Element Selector
+កំណត់គោលដៅលើគ្រប់ elements នៃប្រភេទជាក់លាក់មួយ។
+```css
+p {
+  line-height: 1.5;
+}
+```
+
+### 2. Class Selector (`.`)
+កំណត់គោលដៅលើ elements ដែលមាន `class` attribute ជាក់លាក់។ នេះគឺជារបៀបដែលគេនិយមប្រើបំផុត ព្រោះវាអាចប្រើប្រាស់ឡើងវិញបានយ៉ាងងាយស្រួល។
+```html
+<div class="card">សួស្តី</div>
+```
+```css
+.card {
+  background-color: white;
+  border-radius: 8px;
+}
+```
+
+### 3. ID Selector (`#`)
+កំណត់គោលដៅលើ element តែមួយគត់ដែលមាន `id` attribute ជាក់លាក់។ (គួរចៀសវាងការប្រើ ID សម្រាប់ការរចនា; គួរប្រើ class វិញ)។
+```html
+<nav id="main-nav"></nav>
+```
+```css
+#main-nav {
+  background-color: black;
+}
+```
+
+---
+
+## 🔗 របៀបបន្ថែម CSS ទៅក្នុង HTML
+
+មាន ៣ របៀបក្នុងការអនុវត្ត CSS ទៅកាន់ឯកសារ HTML របស់អ្នក។
+
+### 1. External CSS (ណែនាំឱ្យប្រើ)
+អ្នកសរសេរ CSS នៅក្នុងឯកសារ `.css` ផ្សេងមួយ ហើយភ្ជាប់វានៅក្នុង HTML `<head>`។ វិធីនេះធ្វើឱ្យកូដរបស់អ្នកមានសណ្តាប់ធ្នាប់ និងអាចឱ្យអ្នកប្រើ stylesheet តែមួយសម្រាប់ទំព័រជាច្រើនបាន។
+```html
+<head>
+  <link rel="stylesheet" href="styles.css">
+</head>
+```
+
+### 2. Internal CSS
+អ្នកដាក់ CSS នៅក្នុង `<style>` tag ខាងក្នុង `<head>` នៃឯកសារ HTML។ ជាទូទៅប្រើសម្រាប់ទំព័រដែលមានរចនាប័ទ្មតែមួយគត់។
+```html
+<head>
+  <style>
+    body { background-color: linen; }
+  </style>
+</head>
+```
+
+### 3. Inline CSS
+អ្នកអនុវត្ត styles ដោយផ្ទាល់ទៅកាន់ HTML element ដោយប្រើ `style` attribute។ ជាទូទៅ វិធីនេះមិនត្រូវបានគេចាត់ទុកថាជាការអនុវត្តល្អទេសម្រាប់កម្មវិធីធំៗ ព្រោះវាលាយឡំរចនាសម្ព័ន្ធជាមួយការរចនា។
+```html
+<h1 style="color: blue; text-align: center;">សួស្តីពិភពលោក</h1>
+```
+
+---
+
+## 📦 CSS Box Model
+
+រាល់ element ទាំងអស់នៅលើគេហទំព័រត្រូវបានចាត់ទុកថាជាប្រអប់ (box) មួយ។ CSS Box Model កំណត់ពីរបៀបដែលប្រអប់ទាំងនេះមានទំហំ និងគម្លាត។
+
+ពីខាងក្នុងទៅក្រៅ box model រួមមាន៖
+1. **Content**: អត្ថបទ ឬរូបភាពជាក់ស្តែង។
+2. **Padding**: លំហអាកាសថ្លា *ខាងក្នុង* border, ជុំវិញ content។
+3. **Border**: ខ្សែបន្ទាត់ដែលរុំព័ទ្ធ padding និង content។
+4. **Margin**: លំហអាកាសថ្លា *ខាងក្រៅ* border, រុញ elements ផ្សេងៗឱ្យឆ្ងាយចេញ។
+
+```css
+.box {
+  width: 200px;
+  padding: 20px;
+  border: 2px solid black;
+  margin: 10px;
+}
+```

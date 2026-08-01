@@ -1,0 +1,136 @@
+---
+title: សេចក្តីផ្តើមអំពី HTML5
+description: រៀនពីមូលដ្ឋានគ្រឹះនៃ web។ តើអ្វីទៅជា HTML, ដំណើរការរបស់វា, និងហេតុអ្វីបានជាវាចាំបាច់សម្រាប់ web design?
+objectives:
+  - ស្វែងយល់ពីតួនាទីរបស់ HTML ក្នុងការអភិវឌ្ឍន៍ web
+  - បង្កើតឯកសារ HTML ដំបូងរបស់អ្នក
+  - រៀនពី HTML tags ជាមូលដ្ឋានដូចជា headings, paragraphs, និង lists
+  - ស្វែងយល់ពី HTML attributes និងរបៀបប្រើពួកវា
+  - រៀនពី Semantic HTML និងសារៈសំខាន់របស់វា
+module: module-1-html
+order: 1
+quiz:
+  - question: តើអក្សរកាត់ HTML តំណាងឱ្យអ្វី?
+    options:
+      - Hyper Text Markup Language
+      - High Tech Modern Language
+      - Hyper Transfer Markup Language
+      - Home Tool Markup Language
+    correctAnswer: 0
+    explanation: HTML តំណាងឱ្យ Hyper Text Markup Language ដែលត្រូវបានប្រើដើម្បីរៀបចំរចនាសម្ព័ន្ធមាតិកានៅលើ web។
+  - question: តើ tag មួយណាប្រើសម្រាប់ navigation links?
+    options:
+      - <div>
+      - <nav>
+      - <link>
+      - <menu>
+    correctAnswer: 1
+    explanation: <nav> គឺជា semantic tag ដែលប្រើសម្រាប់រុំ navigation links ដើម្បីជួយ screen readers និង SEO។
+---
+
+## 🌐 ឆ្អឹងខ្នងនៃ Web
+
+រាល់គេហទំព័រដែលអ្នកចូលមើល ពី Google ដល់ Netflix គឺត្រូវបានបង្កើតឡើងនៅលើ **HTML (Hyper Text Markup Language)**។
+
+HTML មិនមែនជាភាសាសរសេរកូដ (programming language) ទេ; វាគឺជា **markup language**។ វាប្រាប់កម្មវិធីរុករក (browser) ពីរបៀបរៀបចំ និងបង្ហាញមាតិកា។
+
+### តើ HTML ធ្វើអ្វីខ្លះ?
+
+HTML គ្រប់គ្រងផ្នែកទាំងនេះនៃគេហទំព័រ៖
+- **រចនាសម្ព័ន្ធ (Structure)**: ការរៀបចំមាតិកាជា headings, paragraphs, lists
+- **មាតិកា (Content)**: អត្ថបទ, រូបភាព, វីដេអូ, តំណភ្ជាប់
+- **អត្ថន័យ (Semantics)**: ប្រាប់ browser ថាមាតិកានីមួយៗ *គឺជាអ្វី* (navigation, article, footer)
+
+ចូរគិតពីការសាងសង់ផ្ទះមួយ៖
+- **HTML** គឺជារចនាសម្ព័ន្ធ (ជញ្ជាំង, កម្រាល, បន្ទប់)។
+- **CSS** គឺជាការរចនាផ្ទៃខាងក្នុង (ពណ៌ថ្នាំលាប, ម៉ូដគ្រឿងសង្ហារឹម)។
+- **JavaScript** គឺជាអគ្គិសនី និងប្រព័ន្ធទឹក (ធ្វើឱ្យអ្វីៗដំណើរការ)។
+
+### ប្រវត្តិខ្លីៗ
+
+HTML ត្រូវបានបង្កើតឡើងដោយ **Tim Berners-Lee** នៅឆ្នាំ 1991។ ដំបូងវាមាន tags ចំនួន 18 តែប៉ុណ្ណោះ! សព្វថ្ងៃ HTML5 គឺជា version ចុងក្រោយបង្អស់ ដែលមាន tags ជាង 100។
+
+---
+
+## 🏗️ រចនាសម្ព័ន្ធនៃឯកសារ HTML
+
+រាល់ទំព័រ HTML ទាំងអស់ត្រូវធ្វើតាមរចនាសម្ព័ន្ធស្តង់ដារមួយ។ តោះមើលឧទាហរណ៍ជាមូលដ្ឋាន៖
+
+```html
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="គេហទំព័រដំបូងរបស់ខ្ញុំ">
+    <title>My First Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>សូមស្វាគមន៍មកកាន់ Full Stack Mastery!</h1>
+        <nav>
+            <a href="#about">អំពីខ្ញុំ</a>
+            <a href="#contact">ទំនាក់ទំនង</a>
+        </nav>
+    </header>
+    <main>
+        <p>នេះគឺជាកថាខណ្ឌ (paragraph) នៃអត្ថបទ។</p>
+    </main>
+    <footer>
+        <p>&copy; 2024 My Website</p>
+    </footer>
+</body>
+</html>
+```
+
+### ការពន្យល់ពីកូដ៖
+
+| Tag | មុខងារ |
+|-----|--------|
+| `<!DOCTYPE html>` | ប្រាប់ browser ថានេះគឺជាឯកសារ HTML5 |
+| `<html lang="km">` | ឫសគល់ដែលរុំមាតិកាទាំងអស់។ `lang` attribute ប្រាប់ browser ពីភាសា |
+| `<head>` | ព័ត៌មាន metadata (ចំណងជើង, charset, viewport, stylesheets) |
+| `<meta charset="UTF-8">` | កំណត់ encoding អក្សរ — ចាំបាច់សម្រាប់អក្សរខ្មែរ |
+| `<meta name="viewport">` | ធ្វើឱ្យទំព័រ responsive នៅលើ mobile |
+| `<body>` | មាតិកាទាំងអស់ដែលអាចមើលឃើញនៅលើគេហទំព័រ |
+| `<header>` | ផ្នែកខាងលើនៃទំព័រ |
+| `<main>` | មាតិកាសំខាន់ៗ |
+| `<footer>` | ផ្នែកខាងក្រោមនៃទំព័រ |
+
+> 💡 **គន្លឹះ៖** ចាំថា `<head>` គឺជា metadata (មើលមិនឃើញ) ហើយ `<header>` គឺជាផ្នែកខាងលើទំព័រ (មើលឃើញ)។ កុំច្រឡំ!
+
+---
+
+## 🏷️ HTML Tags សំខាន់ៗ
+
+HTML ប្រើប្រាស់ **tags** ដើម្បីកំណត់ធាតុ (elements)។ tag ភាគច្រើនមាន opening tag និង closing tag។
+
+### Headings (ចំណងជើង)
+
+HTML មាន 6 កម្រិតនៃ headings៖
+
+```html
+<h1>ចំណងជើងធំបំផុត (ប្រើតែ 1 ក្នុងទំព័រ)</h1>
+<h2>ចំណងជើងអនុផ្នែក</h2>
+<h3>ចំណងជើងរង</h3>
+<h4>ចំណងជើងតូច</h4>
+<h5>ចំណងជើងតូចជាង</h5>
+<h6>ចំណងជើងតូចបំផុត</h6>
+```
+
+> ⚠️ **សំខាន់៖** ប្រើ headings ឱ្យមានលំដាប់ត្រឹមត្រូវ (h1 → h2 → h3)។ កុំប្រើ h3 មុន h2! នេះជួយ SEO និង screen readers។
+
+### Paragraphs & Text Formatting (អត្ថបទ)
+
+```html
+<p>នេះគឺជាកថាខណ្ឌធម្មតា។</p>
+
+<p>អ្នកអាចធ្វើ <strong>អក្សរដិត</strong> និង <em>អក្សរទ្រេត</em> បាន។</p>
+
+<p>ដើម្បីបន្ទាត់ថ្មី ប្រើ <br> tag។<br>នេះនៅបន្ទាត់ថ្មី។</p>
+
+<p>ដើម្បី <mark>highlight អត្ថបទ</mark> ប្រើ mark tag។</p>
+
+<p>អត្ថបទ <small>តូចជាង</small> ប្រើ small tag។</p>
+```

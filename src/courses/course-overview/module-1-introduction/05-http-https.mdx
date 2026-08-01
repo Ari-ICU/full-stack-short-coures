@@ -1,0 +1,31 @@
+---
+title: "method HTTP និង HTTPS"
+description: "ស្វែងយល់អំពីភាសាដែល Client និង Server ប្រើដើម្បីទាក់ទងគ្នា។"
+objectives:
+  - "យល់ពីគោលការណ៍របស់ HTTP"
+  - "យល់ពីសារៈសំខាន់នៃ HTTPS"
+  - "ស្គាល់ HTTP Methods សំខាន់ៗ"
+module: module-1-introduction
+order: 5
+---
+
+## 🌐 អ្វីទៅជា HTTP និង HTTPS?
+
+**HTTP (HyperText Transfer Protocol)** គឺជា method (Protocol) ដែលកំណត់ពីរបៀបដែលសារ (messages) ត្រូវបានបញ្ជូនតាមរយៈអ៊ីនធឺណិត។ វាជា "ភាសា" ដែល Client និង Server ប្រើប្រាស់ដើម្បីនិយាយគ្នា។
+
+**HTTPS (HyperText Transfer Protocol Secure)** គឺជា HTTP ដែលត្រូវបានបន្ថែមស្រទាប់សុវត្ថិភាព (Encryption)។ វាធានាថាទិន្នន័យដែលបញ្ជូនរវាង Client និង Server មិនអាចត្រូវអ្នកផ្សេងលួចមើលបានទេ។
+
+### HTTP Methods សំខាន់ៗ
+
+នៅពេល Client ផ្ញើសំណើ វាតែងតែភ្ជាប់មកជាមួយ Method មួយដើម្បីប្រាប់ Server ពីអ្វីដែលវាចង់ធ្វើ៖
+
+- **GET:** ស្នើសុំទិន្នន័យពី Server (ឧទាហរណ៍៖ អានអត្ថបទ)។
+- **POST:** ផ្ញើទិន្នន័យថ្មីទៅ Server (ឧទាហរណ៍៖ បង្កើតគណនីថ្មី)។
+- **PUT / PATCH:** កែប្រែទិន្នន័យដែលមានស្រាប់នៅលើ Server។
+- **DELETE:** លុបទិន្នន័យចេញពី Server។
+
+### HTTP Status Codes
+នៅពេល Server ឆ្លើយតប វាតែងតែភ្ជាប់លេខកូដដើម្បីប្រាប់ពីលទ្ធផល៖
+- **200 OK:** ជោគជ័យ។
+- **404 Not Found:** រកមិនឃើញទំព័រ ឬទិន្នន័យ។
+- **500 Internal Server Error:** មានបញ្ហានៅលើ Server។

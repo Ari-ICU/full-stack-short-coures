@@ -1,0 +1,121 @@
+---
+title: Modern JavaScript (ES6+)
+description: Explore the powerful features introduced in ES6 and beyond that make JavaScript development cleaner and more efficient.
+objectives:
+  - Understand ES6 features like let and const
+  - Use Arrow Functions for concise syntax
+  - Master Template Literals, Destructuring, and Spread Operators
+module: module-3-js
+order: 2
+quiz:
+  - question: Which syntax is correct for an Arrow Function?
+    options:
+      - "function() => {}"
+      - "() => {}"
+      - "=> function() {}"
+      - "function => {}"
+    correctAnswer: 1
+    explanation: "Arrow Functions use the `() => {}` syntax, which is shorter and doesn't bind its own `this` context."
+---
+
+## 🚀 អ្វីទៅជា Modern JavaScript?
+
+Modern JavaScript សំដៅទៅលើ Version ថ្មីៗចាប់ពី **ES6 (ECMAScript 2015)** រហូតដល់បច្ចុប្បន្ន។ វាបាននាំមកនូវ Features ថ្មីៗជាច្រើនដែលធ្វើអោយការសរសេរ Code មានភាពងាយស្រួល ខ្លី និងងាយយល់ជាងមុន។
+
+*ចំណាំ៖ Technical terms ជាច្រើននឹងមិនត្រូវបានបកប្រែទេ ដើម្បីងាយស្រួលក្នុងការស្រាវជ្រាវ (Research) និងការប្រើប្រាស់ជាក់ស្តែង។*
+
+---
+
+## 1. Arrow Functions
+
+**Arrow Functions** គឺជា syntax ថ្មីសម្រាប់បង្កើត Function ដែលខ្លីជាងធម្មតា និងមានអត្ថប្រយោជន៍ខ្ពស់នៅពេលប្រើប្រាស់ជាមួយ Array Methods និង Frameworks (ដូចជា React)។
+
+**Function ធម្មតា (ES5):**
+```javascript
+function add(a, b) {
+  return a + b;
+}
+```
+
+**Arrow Function (ES6):**
+```javascript
+const add = (a, b) => {
+  return a + b;
+};
+
+// បើកូដមានតែមួយបន្ទាត់ យើងមិនចាំបាច់ប្រើ {} និងពាក្យ 'return' ទេ (Implicit Return):
+const multiply = (a, b) => a * b;
+```
+
+---
+
+## 2. Template Literals
+
+**Template Literals** អនុញ្ញាតអោយយើងបញ្ជូល Variables ទៅក្នុង String ដោយប្រើ Backticks (`` ` ``) និង `${}` (String Interpolation) ដោយមិនចាំបាច់ប្រើសញ្ញាបូក (`+`) តគ្នាឡើយ។
+
+```javascript
+const name = "John";
+const age = 25;
+
+// បែបចាស់ (ES5):
+const greetingES5 = "Hello, my name is " + name + " and I am " + age + " years old.";
+
+// បែបថ្មី (ES6):
+const greetingES6 = `Hello, my name is ${name} and I am ${age} years old.`;
+```
+
+---
+
+## 3. Destructuring (Object & Array)
+
+**Destructuring** គឺជាវិធីក្នុងការទាញយក Values ពីក្នុង Objects ឬ Arrays មកដាក់ចូលទៅក្នុង Variables ដាច់ដោយឡែកពីគ្នាយ៉ាងងាយស្រួលដោយសរសេរកូដតែមួយបន្ទាត់។
+
+**Object Destructuring:**
+```javascript
+const user = { name: "Alice", role: "Admin", email: "alice@test.com" };
+
+// ទាញយកត្រឹមតែ name និង role
+const { name, role } = user;
+
+console.log(name); // "Alice"
+console.log(role); // "Admin"
+```
+
+**Array Destructuring:**
+```javascript
+const colors = ["red", "green", "blue", "yellow"];
+
+// ទាញយកពណ៍ទី១ និងទី២
+const [firstColor, secondColor] = colors;
+
+console.log(firstColor); // "red"
+console.log(secondColor); // "green"
+```
+
+---
+
+## 4. Spread & Rest Operators (`...`)
+
+សញ្ញាចុចបី (`...`) អាចប្រើជា **Spread Operator** (សម្រាប់បំបែកធាតុ) ឬ **Rest Operator** (សម្រាប់ប្រមូលធាតុដែលនៅសល់)។
+
+**Spread Operator (បញ្ចូល Arrays ឬ Objects ចូលគ្នា):**
+```javascript
+const arr1 = [1, 2, 3];
+const arr2 = [...arr1, 4, 5]; // លទ្ធផល: [1, 2, 3, 4, 5]
+
+const defaultUser = { role: "Guest", active: true };
+const specificUser = { ...defaultUser, name: "Bob", role: "Admin" }; 
+// លទ្ធផល: { role: "Admin", active: true, name: "Bob" } (role ត្រូវបាន overwrite)
+```
+
+**Rest Operator (ប្រមូល Arguments ដែលនៅសល់):**
+```javascript
+const printScores = (studentName, ...scores) => {
+  console.log(`Student: ${studentName}`);
+  console.log(`Scores: ${scores}`); // scores ក្លាយជា Array
+};
+
+printScores("David", 90, 85, 95); 
+// Student: David
+// Scores: [90, 85, 95]
+```

@@ -1,0 +1,108 @@
+---
+title: មេរៀន Flexbox & Grid
+description: ស្ទាត់ជំនាញបច្ចេកទេសរចនា Layout ទំនើបៗ។ រៀនពីរបៀបតម្រៀប និងបែងចែកទំហំរវាងធាតុនានាក្នុង container យ៉ាងងាយស្រួល។
+objectives:
+  - ស្វែងយល់ពីគំនិតនៃ Flexbox សម្រាប់ Layout ទម្រង់ ១ វិមាត្រ (1-dimensional)
+  - ស្វែងយល់ពីគំនិតនៃ CSS Grid សម្រាប់ Layout ទម្រង់ ២ វិមាត្រ (2-dimensional)
+  - បង្កើត responsive layouts ដោយមិនចាំបាច់ប្រើ floats ឬ positioning hacks
+module: module-2-css
+order: 2
+quiz:
+  - question: តើ CSS property មួយណាដែលត្រូវបានប្រើដើម្បីតម្រៀប flex items ជាជួរដេក (horizontally) តាមបណ្តោយអ័ក្សចម្បង (main axis)?
+    options:
+      - align-items
+      - justify-content
+      - align-content
+      - text-align
+    correctAnswer: 1
+    explanation: justify-content ត្រូវបានប្រើដើម្បីតម្រៀបធាតុតាមបណ្តោយអ័ក្សចម្បង (ជាជួរដេកតាមលំនាំដើម), ចំណែកឯ align-items តម្រៀបវាតាមបណ្តោយអ័ក្សកាត់ (ជាជួរឈរ)។
+---
+
+## 📐 បដិវត្តន៍នៃការរៀបចំ Layout
+
+អស់រយៈពេលជាច្រើនឆ្នាំ អ្នកបង្កើតគេហទំព័រត្រូវប្រើប្រាស់ "hacks" ស្មុគស្មាញដូចជា floats និង table-layouts ដើម្បីតម្រៀបធាតុនានាឱ្យនៅទន្ទឹមគ្នា។ 
+
+បច្ចុប្បន្ននេះ យើងមានប្រព័ន្ធ layout ដ៏មានឥទ្ធិពលពីរដែលភ្ជាប់មកជាមួយ CSS ស្រាប់៖ **Flexbox** និង **CSS Grid**។
+
+---
+
+## 🤸‍♀️ Flexbox (Flexible Box Layout)
+
+Flexbox ត្រូវបានរចនាឡើងសម្រាប់ Layout **១ វិមាត្រ (1-dimensional)**—មានន័យថាវាដោះស្រាយការងារជាមួយជួរដេកតែមួយ ឬជួរឈរតែមួយក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់ការតម្រៀបធាតុ ការបែងចែកលំហ និងការបង្កើត navbars។
+
+ដើម្បីដំណើរការ Flexbox អ្នកត្រូវអនុវត្ត `display: flex;` ទៅកាន់ parent container។
+
+### Properties សម្រាប់ Flex Container
+
+```css
+.container {
+  display: flex;
+  
+  /* ទិសដៅ: row (លំនាំដើម) | column | row-reverse | column-reverse */
+  flex-direction: row; 
+  
+  /* ការតម្រៀបតាមអ័ក្សចម្បង (ផ្តេកតាមលំនាំដើម): 
+     flex-start | center | flex-end | space-between | space-around */
+  justify-content: space-between;
+  
+  /* ការតម្រៀបតាមអ័ក្សកាត់ (បញ្ឈរតាមលំនាំដើម): 
+     stretch (លំនាំដើម) | center | flex-start | flex-end */
+  align-items: center;
+  
+  /* ការរុំ (Wrapping): nowrap (លំនាំដើម) | wrap */
+  flex-wrap: wrap;
+}
+```
+
+### ភាពអស្ចារ្យនៃ `gap`
+នៅក្នុង CSS ទំនើប អ្នកមិនចាំបាច់បន្ថែម margin ទៅធាតុនីមួយៗក្នុង flex container ទេ។ គ្រាន់តែប្រើ `gap` property ប៉ុណ្ណោះ!
+```css
+.container {
+  display: flex;
+  gap: 16px; /* បន្ថែមគម្លាត 16px រវាងធាតុទាំងអស់ */
+}
+```
+
+---
+
+## 🏁 CSS Grid
+
+ខណៈដែល Flexbox គឺសម្រាប់ ១ វិមាត្រ CSS Grid គឺសម្រាប់ Layout **២ វិមាត្រ (2-dimensional)**—វាគ្រប់គ្រងទាំងជួរដេក និងជួរឈរក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់រចនាសម្ព័ន្ធទំព័រទាំងមូល និងវិចិត្រសាលរូបភាពស្មុគស្មាញ។
+
+### Properties សម្រាប់ Grid Container
+
+```css
+.grid-container {
+  display: grid;
+  
+  /* កំណត់ជួរឈរ (Columns)។ ទីនេះយើងបង្កើតជួរឈរ ៣ ដែលមានទទឹងស្មើគ្នា។ */
+  grid-template-columns: 1fr 1fr 1fr;
+  
+  /* កំណត់ជួរដេក (Rows)។ ទីនេះយើងបង្កើតជួរដេក ២, នីមួយៗមានកម្ពស់ 200px។ */
+  grid-template-rows: 200px 200px;
+  
+  /* បន្ថែមគម្លាតរវាងធាតុក្នុង grid */
+  gap: 20px;
+}
+```
+
+### ឯកតាប្រភាគ (Fractional Unit: `fr`)
+Grid បានណែនាំឯកតារង្វាស់ថ្មីមួយគឺ៖ `fr` (fractional unit)។ វាតំណាងឱ្យប្រភាគនៃទំហំទំនេរនៅក្នុង grid container។
+- `grid-template-columns: 1fr 2fr 1fr;` បង្កើតជួរឈរ ៣ ដែលជួរឈរកណ្តាលមានទទឹងធំជាងគេពីរដង។
+
+### អនុគមន៍ `repeat()`
+ប្រសិនបើអ្នកចង់បានជួរឈរ ៤ ស្មើគ្នា អ្នកមិនចាំបាច់សរសេរ `1fr 1fr 1fr 1fr` ទេ។
+```css
+.grid-container {
+  grid-template-columns: repeat(4, 1fr);
+}
+```
+
+---
+
+## ⚖️ Flexbox vs Grid: តើគួរជ្រើសរើសមួយណា?
+
+- ប្រើ **Flexbox** សម្រាប់ Layout តូចៗ (navigation bars, ដាក់ icon ចំកណ្តាលប៊ូតុង, តម្រៀបធាតុក្នុងកាត)។
+- ប្រើ **CSS Grid** សម្រាប់ Layout ធំៗ (page layout, វិចិត្រសាលនៃកាតផលិតផល, dashboard grids)។
+
+នៅក្នុងការរចនាគេហទំព័រទំនើប ពួកវាត្រូវបានបង្កើតឡើងដើម្បីប្រើរួមគ្នា! ជាញឹកញាប់អ្នកនឹងមាន Grid layout សម្រាប់ទំព័រធំ ហើយកាតនីមួយៗនៅក្នុង grid នោះនឹងប្រើប្រាស់ Flexbox ដើម្បីតម្រៀបមាតិកាខាងក្នុងរបស់វា។

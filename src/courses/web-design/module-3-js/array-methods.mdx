@@ -1,0 +1,96 @@
+---
+title: Array Methods (map, filter, reduce)
+description: Master the most important higher-order array methods used in modern JavaScript and React development.
+objectives:
+  - Understand how to transform data using `.map()`
+  - Learn to extract specific elements using `.filter()`
+  - Grasp the concept of accumulating values using `.reduce()`
+module: module-3-js
+order: 3
+quiz:
+  - question: Which Array method should you use if you want to create a new array containing only the elements that pass a specific condition?
+    options:
+      - map()
+      - filter()
+      - reduce()
+      - forEach()
+    correctAnswer: 1
+    explanation: "`.filter()` is specifically designed to test each element and return a new array containing only those that return `true` for the condition."
+---
+
+## 🚀 Higher-Order Array Methods
+
+នៅក្នុង Modern JavaScript ជាពិសេសនៅពេលអ្នកសរសេរ **React** អ្នកនឹងកម្រឃើញការប្រើប្រាស់ `for` loop ណាស់។ ជំនួសមកវិញ គេប្រើប្រាស់ Array Methods ដូចជា `.map()`, `.filter()`, និង `.reduce()`។
+
+Methods ទាំងនេះត្រូវបានហៅថា **Higher-Order Functions** ព្រោះពួកវាទទួលយក Function (ជាទូទៅគឺ Arrow Function) ជា Parameter របស់វា។
+
+---
+
+## 1. `.map()` (ការផ្លាស់ប្តូរទិន្នន័យ)
+
+`.map()` ត្រូវបានប្រើនៅពេលដែលអ្នកចង់ឆ្លងកាត់ (loop) គ្រប់ធាតុនៅក្នុង Array ចាស់ ហើយ **បង្កើត Array ថ្មីមួយទៀត** ដោយមានការផ្លាស់ប្តូរតម្លៃ។
+
+**ឧទាហរណ៍៖ ការគុណលេខទាំងអស់នឹង ២**
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+
+// ប្រើ .map() ដើម្បីគុណនឹង ២
+const doubled = numbers.map(num => num * 2);
+
+console.log(doubled); // [2, 4, 6, 8, 10]
+console.log(numbers); // Array ដើមមិនប្រែប្រួលទេ: [1, 2, 3, 4, 5]
+```
+
+**ការប្រើប្រាស់ជាក់ស្តែង (ទាញយកឈ្មោះពី Objects):**
+```javascript
+const users = [
+  { id: 1, name: "Alice", age: 20 },
+  { id: 2, name: "Bob", age: 25 },
+  { id: 3, name: "Charlie", age: 22 }
+];
+
+const userNames = users.map(user => user.name);
+console.log(userNames); // ["Alice", "Bob", "Charlie"]
+```
+
+---
+
+## 2. `.filter()` (ការចម្រាញ់ទិន្នន័យ)
+
+`.filter()` ត្រូវបានប្រើដើម្បី **ច្រោះ (Filter)** យកតែធាតុណាដែលស្របតាមលក្ខខណ្ឌដែលអ្នកបានកំណត់។ វាបង្កើត Array ថ្មីដែលមានទំហំតូចជាង ឬស្មើ Array ចាស់។
+
+**ឧទាហរណ៍៖ យកតែលេខគូ**
+```javascript
+const numbers = [1, 2, 3, 4, 5, 6];
+
+// ច្រោះយកតែលេខដែលចែកនឹង ២ ដាច់
+const evenNumbers = numbers.filter(num => num % 2 === 0);
+
+console.log(evenNumbers); // [2, 4, 6]
+```
+
+**ការប្រើប្រាស់ជាក់ស្តែង (ស្វែងរក User ដែលអាយុលើស ២១ ឆ្នាំ):**
+```javascript
+const adultUsers = users.filter(user => user.age > 21);
+// លទ្ធផលនឹងបាន Array ដែលមានត្រឹម Bob (25) និង Charlie (22)
+```
+
+---
+
+## 3. `.reduce()` (ការសរុបទិន្នន័យ)
+
+`.reduce()` ត្រូវបានប្រើដើម្បីយកធាតុទាំងអស់ក្នុង Array មក **គណនាសរុបបញ្ចូលគ្នា** ទៅជាតម្លៃតែមួយ (Single Value) ដូចជាការបូកសរុបជាដើម។
+
+**ឧទាហរណ៍៖ ការបូកលេខបញ្ចូលគ្នាទាំងអស់**
+```javascript
+const prices = [10, 20, 30, 40];
+
+// total គឺជាតម្លៃដែលរក្សាទុកបណ្តោះអាសន្ន
+// price គឺជាតម្លៃនីមួយៗក្នុង Array
+// 0 នៅខាងចុង គឺជាតម្លៃចាប់ផ្តើម (Initial Value) របស់ total
+const sum = prices.reduce((total, price) => total + price, 0);
+
+console.log(sum); // 100
+```
+
+ការយល់ដឹងពីវិធីសាស្រ្តទាំង ៣ នេះនឹងធ្វើអោយអ្នកសរសេរកូដ JavaScript បានលឿន ខ្លី និងមានប្រសិទ្ធភាពខ្ពស់បំផុត! នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនពីរបៀបយក JavaScript ទៅផ្លាស់ប្តូរ HTML (DOM)។

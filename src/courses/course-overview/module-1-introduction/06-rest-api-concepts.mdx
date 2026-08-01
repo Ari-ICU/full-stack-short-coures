@@ -1,0 +1,35 @@
+---
+title: "គោលការណ៍ REST API"
+description: "ស្វែងយល់អំពី API និងស្ថាបត្យកម្ម RESTful ដែលពេញនិយមក្នុងការសាងសង់ Web Services។"
+objectives:
+  - "យល់ពីអ្វីទៅជា API"
+  - "យល់ពីគោលការណ៍របស់ REST API"
+  - "ស្គាល់ពីទម្រង់ទិន្នន័យ JSON"
+module: module-1-introduction
+order: 6
+---
+
+## 🔗 អ្វីទៅជា API និង REST?
+
+**API (Application Programming Interface)** គឺជាស្ពានចម្លងដែលអនុញ្ញាតឱ្យកម្មវិធីពីរផ្សេងគ្នាអាចទំនាក់ទំនងគ្នាបាន។ នៅក្នុង Web Development ភាគច្រើនមានន័យថាវាជាផ្លូវ (Endpoints) ដែល Frontend ប្រើដើម្បីទាញទិន្នន័យពី Backend។
+
+**REST (Representational State Transfer)** គឺជាក្បួន (Architecture Style) សម្រាប់ការបង្កើត API ឱ្យមានស្តង់ដារ និងងាយស្រួលប្រើ។ API ដែលធ្វើតាមក្បួន REST ត្រូវបានគេហៅថា **RESTful API**។
+
+### លក្ខណៈសម្បត្តិសំខាន់ៗរបស់ REST API
+
+1. **ប្រើប្រាស់ HTTP Methods យ៉ាងត្រឹមត្រូវ:** (GET, POST, PUT, DELETE) ដូចបានរៀបរាប់ក្នុងមេរៀនមុន។
+2. **Stateless:** Server មិនចងចាំស្ថានភាពរបស់ Client ពីរាល់សំណើមុនៗនោះទេ។ រាល់សំណើត្រូវតែមានព័ត៌មានគ្រប់គ្រាន់ដើម្បីឱ្យ Server យល់។
+3. **Resources ផ្អែកលើ URLs:** ទិន្នន័យត្រូវបានចាត់ទុកជា "Resources" ហើយអាចចូលប្រើបានតាមរយៈ URL ជាក់លាក់។
+   - ឧទាហរណ៍៖ `GET /users` (យកអ្នកប្រើប្រាស់ទាំងអស់), `GET /users/123` (យកអ្នកប្រើប្រាស់លេខ ១២៣)។
+
+### ទម្រង់ទិន្នន័យ JSON
+
+REST APIs ភាគច្រើនប្រើប្រាស់ទម្រង់ទិន្នន័យ **JSON (JavaScript Object Notation)** សម្រាប់ផ្លាស់ប្តូរព័ត៌មានព្រោះវាងាយស្រួលអានទាំងសម្រាប់មនុស្ស និងកុំព្យូទ័រ។
+
+```json
+{
+  "id": 1,
+  "name": "Sok",
+  "role": "Developer"
+}
+```
