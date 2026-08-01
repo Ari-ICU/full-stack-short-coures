@@ -8,6 +8,7 @@ import {
 } from "@/lib/courses";
 import { LessonContent } from "@/components/LessonContent";
 import { LessonSidebar } from "@/components/LessonSidebar";
+import { MobileLessonSidebar } from "@/components/MobileLessonSidebar";
 import { BookOpen, ChevronLeft, ChevronRight, Target } from "lucide-react";
 
 export async function generateStaticParams() {
@@ -104,6 +105,13 @@ export default async function LessonPage({
           />
         </div>
       </div>
+
+      {/* ── Mobile Sidebar (Hidden on LG) ── */}
+      <MobileLessonSidebar
+        courseSlug={courseSlug}
+        modules={course.modules}
+        activeLesson={lesson}
+      />
 
       {/* ── Content (fills remaining width) ── */}
       <div className="flex-1 min-w-0">
