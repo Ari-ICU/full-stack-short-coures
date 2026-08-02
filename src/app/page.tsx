@@ -47,7 +47,7 @@ export default function Home() {
               <br className="hidden sm:block" />
               {" "}ជាមួយ{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-300 to-rose-400">
-                Next.js & Node
+                React.js & Node
               </span>
             </h1>
 
