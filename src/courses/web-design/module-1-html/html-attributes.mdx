@@ -1,21 +1,12 @@
 ---
 title: HTML Attributes
-description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ HTML Attributes ដើម្បីផ្តល់ព័ត៌មានបន្ថែម និងកំណត់មុខងារផ្សេងៗដល់ HTML Elements។
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ HTML Attributes ដើម្បីផ្តល់ព័ត៌មានបន្ថែម និងកំណត់មុខងារផ្សេងៗដល់ HTML Elements ជាពិសេសគឺ Global Attributes។
 objectives:
   - យល់ពីគំនិតជាមូលដ្ឋាននៃ HTML Attributes
-  - ប្រើប្រាស់ Attributes សម្រាប់ Links (href, target) និង Images (src, alt)
-  - ស្គាល់ Global Attributes សំខាន់ៗ (id, class, style, title)
+  - ស្គាល់ Global Attributes សំខាន់ៗ (id, class, style, title) 
 module: module-1-html
-order: 2
+order: 3
 quiz:
-  - question: តើ Attribute មួយណាដែលចាំបាច់បំផុតសម្រាប់ Tag <img> ដើម្បីបង្ហាញរូបភាព?
-    options:
-      - href
-      - link
-      - src
-      - path
-    correctAnswer: 2
-    explanation: Attribute `src` (Source) ត្រូវបានប្រើដើម្បីបញ្ជាក់ពីទីតាំង ឬ URL នៃរូបភាពដែលត្រូវបង្ហាញ។
   - question: តើ Global Attribute មួយណាដែលត្រូវបានប្រើដើម្បីដាក់ឈ្មោះកំណត់សម្គាល់ (Identifier) តែមួយគត់ដល់ Element?
     options:
       - class
@@ -34,36 +25,7 @@ quiz:
 1. វាតែងតែត្រូវបានសរសេរនៅក្នុង **Opening Tag** ជានិច្ច។
 2. វាច្រើនតែមកជាទម្រង់គូ **name="value"** (ឈ្មោះ="តម្លៃ")។
 
----
 
-## 🔗 Attributes សំខាន់ៗសម្រាប់ Links 
-
-យើងប្រើ Tag `<a>` (Anchor) ដើម្បីបង្កើតតំណភ្ជាប់។ ប៉ុន្តែ Tag `<a>` ទទេមិនអាចធ្វើអ្វីបានទេ លុះត្រាតែមាន Attributes ទាំងនេះ៖
-
-- **`href` (Hypertext Reference):** ប្រាប់ពីអាសយដ្ឋាន URL ដែលត្រូវលោតទៅកាន់ពេលចុចលើ Link នោះ។
-- **`target`:** កំណត់ពីរបៀបដែល Link គួរតែបើក (ឧទាហរណ៍ `target="_blank"` គឺសម្រាប់បើកទំព័រថ្មីក្នុង Tab ថ្មី)។
-
-```html
-<!-- បើកទំព័រ Google ក្នុង Tab តែមួយ -->
-<a href="https://google.com">ទៅកាន់ Google</a>
-
-<!-- បើកទំព័រ Facebook ក្នុង Tab ថ្មី -->
-<a href="https://facebook.com" target="_blank">ទៅកាន់ Facebook</a>
-```
-
----
-
-## 🖼️ Attributes សំខាន់ៗសម្រាប់ Images
-
-Tag `<img>` មិនមាន Closing Tag ទេ ដូច្នេះវាពឹងផ្អែកទាំងស្រុងទៅលើ Attributes ដើម្បីបង្ហាញរូបភាព។
-
-- **`src` (Source):** ប្រភពនៃរូបភាព (URL នៃរូបភាពនៅលើអ៊ីនធឺណិត ឬ ទីតាំង File ក្នុងកុំព្យូទ័រ)។
-- **`alt` (Alternative Text):** អក្សរជំនួសដែលនឹងបង្ហាញឡើងក្នុងករណីដែលអ៊ិនធឺណិតខ្សោយរូបភាពដើរមិនចេញ ឬសម្រាប់កម្មវិធី Screen Readers អានឱ្យជនពិការភ្នែកស្តាប់។ នេះគឺសំខាន់ខ្លាំងណាស់សម្រាប់ SEO!
-- **`width` និង `height`:** កំណត់ប្រវែង និងកម្ពស់រូបភាព (គិតជា pixels)។
-
-```html
-<img src="profile.jpg" alt="រូបថតប្រវត្តិរូបរបស់ខ្ញុំ" width="200" height="200">
-```
 
 ---
 

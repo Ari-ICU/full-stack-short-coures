@@ -1,0 +1,128 @@
+---
+title: Objects
+description: សិក្សាពីរបៀបបង្កើត ការអាន ការកែប្រែ និងការលុបទិន្នន័យពីក្នុង Objects ព្រមទាំងការប្រើប្រាស់ Object Methods, Destructuring និង Spread Operator។
+objectives:
+  - យល់ពីទម្រង់ និងការប្រើប្រាស់ Objects (Key-Value pairs)
+  - ចេះធ្វើការអាន បន្ថែម កែប្រែ និងលុប Properties
+  - ស្គាល់ពីការបង្កើត Methods នៅខាងក្នុង Object
+  - ចេះប្រើប្រាស់ Object Destructuring និង Spread Operator (ES6)
+module: module-4-js
+order: 9
+quiz:
+  - question: "តើយើងត្រូវប្រើ Syntax មួយណាដើម្បីទាញយកតម្លៃ \\\"Admin\\\" ពី Object មួយនេះយ៉ាងខ្លីបំផុត? `const user = { name: \\\"Alice\\\", role: \\\"Admin\\\" };`"
+    options:
+      - const user.role = role;
+      - const { role } = user;
+      - const role = user[Admin];
+      - const { Admin } = user;
+    correctAnswer: 1
+    explanation: "ការប្រើប្រាស់ Object Destructuring (`const { role } = user;`) អនុញ្ញាតអោយយើងទាញយកតម្លៃពីក្នុង property `role` មកដាក់ចូលក្នុងអថេរ `role` យ៉ាងងាយស្រួលដោយសរសេរកូដតែមួយបន្ទាត់។"
+---
+
+## 📦 អ្វីទៅជា Objects?
+
+នៅក្នុងពិភពពិត វត្ថុមួយ (ឧទាហរណ៍៖ ឡាន) តែងតែមានលក្ខណៈសម្បត្តិ (ពណ៌, ម៉ាក, ទម្ងន់) និងសកម្មភាព (បញ្ឆេះ, បើក, ឈប់)។ នៅក្នុង JavaScript, **Objects** ត្រូវបានប្រើដើម្បីរៀបចំទិន្នន័យដែលមានទំនាក់ទំនងគ្នាតាមទម្រង់ `key: value` (កូនសោរ និងតម្លៃ)។
+
+```javascript
+const user = {
+  name: "John",    // Property: តម្លៃជា String
+  age: 20,         // Property: តម្លៃជា Number
+  isAdmin: false   // Property: តម្លៃជា Boolean
+};
+```
+
+---
+
+## 🛠️ ការប្រើប្រាស់ Objects (CRUD)
+
+យើងអាចធ្វើប្រតិបត្តិការ ៤ យ៉ាងលើ Object Properties៖ អាន (Read), បន្ថែម/កែប្រែ (Update), និងលុប (Delete)។
+
+### 1. ការអាន Properties (Reading)
+យើងអាចអានតម្លៃដោយប្រើ Dot Notation (`.`) ឬ Bracket Notation (`[]`)។
+```javascript
+// ប្រើ . គឺពេញនិយមបំផុត
+console.log(user.name); // "John"
+
+// ប្រើ [] នៅពេលដែល Key មានដកឃ្លា ឬត្រូវបានបញ្ជូនមកជាអថេរ
+const keyName = "age";
+console.log(user[keyName]); // 20
+```
+
+### 2. ការកែប្រែ និងការបន្ថែម Properties (Updating & Adding)
+ប្រសិនបើ Key នោះមានរួចហើយ វានឹងកែប្រែតម្លៃ។ ប្រសិនបើគ្មានទេ វានឹងបន្ថែម Key នោះថ្មី។
+```javascript
+// កែប្រែអាយុ
+user.age = 21; 
+
+// បន្ថែមអាសយដ្ឋានថ្មី
+user.address = "Phnom Penh";
+
+console.log(user); 
+// { name: "John", age: 21, isAdmin: false, address: "Phnom Penh" }
+```
+
+### 3. ការលុប Properties (Deleting)
+ប្រើ Keyword `delete` ដើម្បីលុប Property ណាមួយចេញ។
+```javascript
+delete user.isAdmin;
+console.log(user); // លែងមាន isAdmin ទៀតហើយ
+```
+
+---
+
+## ⚙️ Object Methods (សកម្មភាពរបស់ Object)
+
+Properties មិនត្រឹមតែអាចផ្ទុកទិន្នន័យធម្មតាទេ វាថែមទាំងអាចផ្ទុក **Function** ផងដែរ! នៅពេល Function ស្ថិតនៅក្នុង Object យើងហៅវាថា **Method**។
+
+```javascript
+const calculator = {
+  brand: "Casio",
+  add: function(a, b) {
+    return a + b;
+  },
+  // ការសរសេរកាត់ (ES6) សម្រាប់ Methods
+  multiply(a, b) {
+    return a * b;
+  }
+};
+
+console.log(calculator.add(10, 5)); // 15
+console.log(calculator.multiply(10, 5)); // 50
+```
+
+---
+
+## ✨ មុខងារទំនើបៗ (ES6+) សម្រាប់ Objects
+
+### 1. Object Destructuring
+នេះគឺជាវិធីដ៏ឆ្លាតវៃក្នុងការទាញយក Values ចេញពី Object មកដាក់ចូលទៅក្នុង Variables ថ្មីៗដោយឡែកពីគ្នា ដោយសរសេរកូដតែមួយបន្ទាត់ប៉ុណ្ណោះ។
+
+```javascript
+const student = { fullName: "Alice", score: 95, grade: "A" };
+
+// ជំនួសអោយការសរសេរវែង: 
+// const fullName = student.fullName;
+// const score = student.score;
+
+// យើងប្រើ Destructuring:
+const { fullName, score } = student;
+
+console.log(fullName); // "Alice"
+console.log(score);    // 95
+```
+
+### 2. Spread Operator (`...`)
+សញ្ញាចុចបី (`...`) ត្រូវបានប្រើដើម្បីចម្លង (Copy) Properties ទាំងអស់ពី Object មួយទៅ Object មួយទៀត ឬយកមកបញ្ជូលគ្នា។
+
+```javascript
+const defaultSettings = { theme: "light", notifications: true };
+
+// យើងចង់ Copy setting ខាងលើ ហើយកែតែ theme ទៅជា "dark"
+const mySettings = { 
+  ...defaultSettings, // ចម្លងចូលទាំងអស់
+  theme: "dark"       // Overwrite យកតម្លៃថ្មី
+};
+
+console.log(mySettings); 
+// { theme: "dark", notifications: true }
+```

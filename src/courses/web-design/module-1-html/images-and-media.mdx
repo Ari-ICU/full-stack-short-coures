@@ -1,0 +1,107 @@
+---
+title: Images & Media
+description: រៀនពីរបៀបដាក់ Images, Video, Audio និងការបង្កប់មាតិកាពីខាងក្រៅ (iframes) ចូលទៅក្នុងគេហទំព័រ។
+objectives:
+  - យល់ពីការប្រើប្រាស់ Tag <img> និង Attributes របស់វា (src, alt, lazy loading)
+  - បន្ថែម Video និង Audio ដោយប្រើ HTML5 Tags
+  - បង្កប់ (Embed) វីដេអូ YouTube និងផែនទី Google Maps តាមរយៈ <iframe>
+module: module-1-html
+order: 5
+quiz:
+  - question: ហេតុអ្វីបានជាអ្នកគួរប្រើប្រាស់ `loading="lazy"` នៅលើរូបភាពដែលមានទីតាំងនៅខាងក្រោមនៃគេហទំព័រ?
+    options:
+      - ដើម្បីធ្វើឱ្យរូបភាពច្បាស់ជាងមុន
+      - ដើម្បីឱ្យទំព័រដើរលឿនជាងមុន ដោយមិនទាន់ទាញយករូបភាពរហូតទាល់តែអ្នកប្រើប្រាស់អូសចុះទៅដល់
+      - ដើម្បីកាត់បន្ថយទំហំរូបភាពដោយស្វ័យប្រវត្តិ
+      - ដើម្បីឱ្យមាន Animations ពេលរូបភាពបង្ហាញ
+    correctAnswer: 1
+    explanation: '`loading="lazy"` គឺជាបច្ចេកទេសមួយដែលបញ្ជាឱ្យ Browser កុំទាន់អាលទាញយក (Download) រូបភាពរហូតទាល់តែអ្នកប្រើប្រាស់ Scroll ជិតទៅដល់វា ដែលធ្វើឱ្យទំព័រលោតចេញលឿននៅពេលបើកដំបូង។'
+  - question: តើ Tag មួយណាដែលត្រូវបានប្រើដើម្បីបង្កប់ (Embed) វីដេអូពី YouTube ចូលទៅក្នុងទំព័ររបស់អ្នក?
+    options:
+      - '<youtube>'
+      - '<video>'
+      - '<embed>'
+      - '<iframe>'
+    correctAnswer: 3
+    explanation: Tag `<iframe>` ត្រូវបានប្រើដើម្បីបង្កប់ឯកសារ ឬគេហទំព័រផ្សេងទៀត (ដូចជា YouTube Player ជាដើម) ចូលទៅក្នុងទំព័របច្ចុប្បន្នរបស់អ្នក។
+---
+
+## 🖼️ Images
+
+រូបភាពធ្វើឱ្យគេហទំព័រមានភាពរស់រវើក។ នៅក្នុង HTML យើងប្រើ Tag `<img>` ដែលជា Self-closing tag (គ្មាន closing tag ទេ)។
+
+```html
+<img src="cat.jpg" alt="កូនឆ្មាពណ៌សកំពុងដេក" width="500" height="300" loading="lazy">
+```
+
+### Attributes សំខាន់ៗបំផុតសម្រាប់ `<img>`៖
+1.  **`src` (Source)**: (ចាំបាច់) បញ្ជាក់ពីទីតាំងនៃរូបភាព (URL លើអ៊ីនធឺណិត ឬ Path ក្នុងកុំព្យូទ័រ)។
+2.  **`alt` (Alternative Text)**: (ចាំបាច់ណាស់!) នេះគឺជាអត្ថបទដែលនឹងបង្ហាញឡើងប្រសិនបើរូបភាពមិនអាចផ្ទុកបាន។ វាក៏ត្រូវបានអានដោយឧបករណ៍ Screen Readers សម្រាប់អ្នកពិការភ្នែក និងជួយដល់ SEO ផងដែរ។
+3.  **`width` និង `height`**: កំណត់ទំហំរូបភាពជា Pixels។ ការកំណត់ទំហំនេះជួយការពារកុំឱ្យទំព័រលោតចុះឡើង (Layout shift) ពេលរូបភាពកំពុងផ្ទុក។
+4.  **`loading="lazy"`**: នេះគឺជាបច្ចេកទេសទំនើប! វាប្រាប់ Browser ឱ្យពន្យារពេលក្នុងការទាញយករូបភាពនេះ រហូតទាល់តែអ្នកប្រើប្រាស់អូស (Scroll) ជិតទៅដល់វា។ វាធ្វើឱ្យ Website ដើរលឿនជាងមុនដាច់។
+
+---
+
+## 🎬 Multimedia
+
+HTML5 បាននាំមកនូវភាពងាយស្រួលក្នុងការចាក់វីដេអូ និងសំឡេងដោយមិនចាំបាច់ប្រើកម្មវិធីជំនួយ (Plugins ដូចជា Flash ពីមុន)។
+
+### <video>
+អ្នកអាចប្រើ Tag `<video>` រួមជាមួយ Attribute `controls` ដើម្បីបង្ហាញផ្ទាំងបញ្ជា (Play, Pause, Volume)។
+
+```html
+<video width="640" height="360" controls>
+    <!-- ប្រភពវីដេអូរបស់អ្នក -->
+    <source src="my-video.mp4" type="video/mp4">
+    <!-- សារនេះនឹងបង្ហាញបើសិនជា Browser របស់គាត់ចាស់ពេក -->
+    កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រការចាក់វីដេអូនេះទេ។
+</video>
+```
+*(អ្នកក៏អាចបន្ថែម Attribute `autoplay` ឱ្យវាលេងខ្លួនឯង ឬ `muted` ដើម្បីបិទសំឡេង)*
+
+### <audio>
+ស្រដៀងទៅនឹង Video ដែរ យើងគ្រាន់តែប្រើ Tag `<audio>`។
+
+```html
+<audio controls>
+    <source src="music.mp3" type="audio/mpeg">
+    Browser របស់អ្នកមិនគាំទ្រការចាក់សំឡេងទេ។
+</audio>
+```
+
+---
+
+## 🌍 Embedding Content
+
+ចុះបើអ្នកចង់ដាក់វីដេអូពី YouTube ឬផែនទីពី Google Maps ចូលក្នុង Website អ្នក? អ្នកមិនចាំបាច់ Download វាមកទេ! អ្នកអាចប្រើ **`<iframe>`**។
+
+`<iframe>` (Inline Frame) អនុញ្ញាតឱ្យអ្នក "ចោះប្រហោង" មួយនៅលើទំព័ររបស់អ្នក ដើម្បីបង្ហាញទំព័រវិបសាយមួយផ្សេងទៀតនៅក្នុងនោះ។
+
+### 1. បង្កប់វីដេអូ YouTube
+YouTube ផ្តល់កូដ iframe ស្រាប់ឱ្យអ្នក! (គ្រាន់តែចូលទៅកាន់ Video -> ចុច Share -> ចុច Embed)។
+
+```html
+<iframe 
+    width="560" 
+    height="315" 
+    src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+    title="YouTube video player" 
+    frameborder="0" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+    allowfullscreen>
+</iframe>
+```
+
+### 2. បង្កប់ផែនទី Google Maps
+ដូចគ្នាដែរ អ្នកអាចចូលទៅ Google Maps ស្វែងរកទីតាំង -> ចុច Share -> ចុច Embed a map ហើយ Copy យកមកដាក់បានម៉ាអែម!
+
+```html
+<iframe 
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!..." 
+    width="600" 
+    height="450" 
+    style="border:0;" 
+    allowfullscreen="" 
+    loading="lazy">
+</iframe>
+```

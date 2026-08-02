@@ -1,12 +1,12 @@
 ---
 title: Forms & Inputs
-description: រៀនពីរបៀបប្រមូល User Data ដោយប្រើ HTML Forms, Input Fields, និង Buttons។
+description: រៀនពីរបៀបប្រមូល User Data ដោយប្រើ HTML Forms, Input Fields, Form Validation និងប្រភេទ Inputs ទំនើបៗ។
 objectives:
   - ស្វែងយល់ពីគោលបំណងនៃ Tag <form>
-  - បង្កើតប្រភេទ Input Fields ផ្សេងៗ
-  - រៀនពី Attributes របស់ Form ដូចជា Action និង Method
+  - បង្កើតប្រភេទ Input Fields និង Form Controls ផ្សេងៗ
+  - ប្រើប្រាស់ HTML5 Form Validation ដើម្បីត្រួតពិនិត្យទិន្នន័យ
 module: module-1-html
-order: 5
+order: 9
 quiz:
   - question: តើ Input មួយណាត្រូវបានប្រើសម្រាប់បញ្ជី Dropdown?
     options:
@@ -94,31 +94,95 @@ Tag `<input>` គឺជា Form Element ដែលអាចបត់បែនប�
 <label for="subscribe">ចុះឈ្មោះទទួលព័ត៌មាន (Newsletter)</label>
 ```
 
+### 6. ប្រភេទ Inputs ទំនើបៗ (HTML5 Input Types)
+HTML5 បានបន្ថែម Input ថ្មីៗជាច្រើន ដែលជួយសម្រួលដល់អ្នកប្រើប្រាស់ និងអ្នកសរសេរកូដ៖
+*   **`type="number"`**: សម្រាប់បញ្ចូលតែលេខ (មានសញ្ញាព្រួញឡើងចុះ)។
+*   **`type="date"` / `type="time"`**: បង្ហាញប្រតិទិន ឬនាឡិកាសម្រាប់រើសថ្ងៃខែម៉ោង។
+*   **`type="color"`**: បង្ហាញផ្ទាំងរើសពណ៌ (Color Picker)។
+*   **`type="file"`**: អនុញ្ញាតឱ្យអ្នកប្រើប្រាស់ Upload ឯកសារ។
+*   **`type="range"`**: បង្ហាញជារបាររអិល (Slider) សម្រាប់រើសលេខក្នុងចន្លោះណាមួយ។
+*   **`type="url"` / `type="search"`**: ស្រដៀងនឹង Text ដែរ តែមានមុខងារពិសេសលើទូរស័ព្ទ (លោត Keyboard ត្រូវតាមប្រភេទ)។
+
+```html
+<label for="bday">ថ្ងៃខែឆ្នាំកំណើត៖</label>
+<input type="date" id="bday" name="bday">
+
+<label for="age">អាយុ៖</label>
+<input type="number" id="age" name="age" min="18" max="100">
+```
+
 ---
 
-## 🔘 Dropdowns & Textareas
+## 🎛️ Form Controls ផ្សេងៗទៀត
 
-### Dropdown List (`<select>`)
-ប្រើនៅពេលអ្នកមានជម្រើសវែងៗច្រើន។
+### 1. Dropdown List (`<select>`) និង `<optgroup>`
+ប្រើនៅពេលអ្នកមានជម្រើសវែងៗច្រើន។ អ្នកអាចប្រើ `<optgroup>` ដើម្បីចាត់ក្រុមជម្រើសទាំងនោះ។
 ```html
-<label for="country">ប្រទេស៖</label>
-<select id="country" name="country">
-    <option value="cambodia">កម្ពុជា</option>
-    <option value="usa">សហរដ្ឋអាមេរិក</option>
-    <option value="japan">ជប៉ុន</option>
+<label for="cars">រើសឡាន៖</label>
+<select id="cars" name="cars">
+  <optgroup label="ឡានជប៉ុន">
+    <option value="toyota">Toyota</option>
+    <option value="honda">Honda</option>
+  </optgroup>
+  <optgroup label="ឡានអាល្លឺម៉ង់">
+    <option value="bmw">BMW</option>
+  </optgroup>
 </select>
 ```
 
-### Multi-line Text (`<textarea>`)
+### 2. Multi-line Text (`<textarea>`)
 ប្រើសម្រាប់ Text វែងៗ ដូចជាមតិយោបល់ ឬសារ។
 ```html
 <label for="message">សារ៖</label>
 <textarea id="message" name="message" rows="4" cols="50"></textarea>
 ```
 
+### 3. `<datalist>`
+ស្រដៀងនឹង `<select>` ដែរ ប៉ុន្តែវាអនុញ្ញាតឱ្យអ្នកប្រើប្រាស់វាយបញ្ចូលអត្ថបទខ្លួនឯងបានផងដែរ (Auto-complete)។
+```html
+<label for="browser">រើស Browser៖</label>
+<input list="browsers" name="browser" id="browser">
+<datalist id="browsers">
+  <option value="Chrome">
+  <option value="Firefox">
+  <option value="Safari">
+</datalist>
+```
+
+### 4. `<fieldset>` និង `<legend>`
+ប្រើសម្រាប់ចងក្រង Inputs ដែលទាក់ទងគ្នាជាក្រុម និងគូសប្រអប់ជុំវិញវា ដើម្បីងាយស្រួលមើល។
+```html
+<fieldset>
+  <legend>ព័ត៌មានផ្ទាល់ខ្លួន៖</legend>
+  <label for="fname">ឈ្មោះ៖</label>
+  <input type="text" id="fname" name="fname"><br><br>
+  <label for="lname">ត្រកូល៖</label>
+  <input type="text" id="lname" name="lname">
+</fieldset>
+```
+
 ---
 
-## 🚀 ការ Submit Form
+## 🛡️ Form Validation
+
+មុននឹងបញ្ជូនទិន្នន័យទៅ Server យើងគួរតែពិនិត្យមើលសិនថាអ្នកប្រើប្រាស់បានបំពេញត្រឹមត្រូវឬទេ។ HTML5 មានមុខងារនេះស្រាប់ដោយមិនបាច់ប្រើ JavaScript!
+*   **`required`**: បង្ខំឱ្យត្រូវតែបំពេញ។
+*   **`min` / `max`**: កំណត់តម្លៃលេខ ឬថ្ងៃខែតិចបំផុត/ច្រើនបំផុត (ឧ. `min="18"` សម្រាប់អាយុ)។
+*   **`maxlength` / `minlength`**: កំណត់ចំនួនតួអក្សរតិចបំផុត/ច្រើនបំផុត។
+*   **`pattern`**: ប្រើ Regular Expression ដើម្បីកំណត់ទម្រង់ជាក់លាក់ (ឧ. ត្រូវតែជាលេខទូរស័ព្ទ)។
+
+```html
+<form action="/submit">
+  <label for="username">Username (អក្សរ 3-10):</label>
+  <input type="text" id="username" name="username" required minlength="3" maxlength="10">
+  
+  <input type="submit">
+</form>
+```
+
+---
+
+## 🚀 Submit Form
 
 ចុងក្រោយ អ្នកត្រូវការ Button មួយដើម្បីបញ្ជូនទិន្នន័យពី Form ទៅកាន់ Server នៅពេលអ្នកប្រើប្រាស់ចុចលើវា។
 

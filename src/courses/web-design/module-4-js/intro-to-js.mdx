@@ -3,19 +3,19 @@ title: សេចក្តីផ្តើមអំពី JavaScript
 description: រៀនពីមូលដ្ឋានគ្រឹះនៃ JavaScript ដើម្បីធ្វើឱ្យគេហទំព័ររបស់អ្នកមានជីវិត និងអាចឆ្លើយតបជាមួយអ្នកប្រើប្រាស់។
 objectives:
   - ស្វែងយល់ពីតួនាទីរបស់ JavaScript ក្នុង Web Development
-  - រៀនពីរបៀបបង្កើត Variables (អថេរ) និងយល់ពី Scope
-  - យល់ដឹងពីការប្រើប្រាស់ Functions និង Control Flow
+  - រៀនពីរបៀបបញ្ចូល JavaScript ទៅក្នុង HTML (Tag <script>)
+  - យល់ពីការប្រើប្រាស់ Console ដើម្បីសាកល្បងកូដ
 module: module-4-js
 order: 1
 quiz:
-  - question: តើពាក្យគន្លឹះ (keyword) មួយណាដែលប្រើសម្រាប់ប្រកាសអថេរដែលអាចផ្លាស់ប្តូរតម្លៃបានក្នុង ES6?
+  - question: តើ Tag មួយណាដែលយើងប្រើដើម្បីបញ្ចូលកូដ JavaScript ទៅក្នុង HTML?
     options:
-      - var
-      - let
-      - const
-      - int
-    correctAnswer: 1
-    explanation: "'let' ត្រូវបានប្រើដើម្បីប្រកាសអថេរដែលអាចផ្លាស់ប្តូរតម្លៃបាន ខណៈដែល 'const' ប្រើសម្រាប់តម្លៃដែលមិនអាចផ្លាស់ប្តូរបាន។"
+      - <js>
+      - <scripting>
+      - <javascript>
+      - <script>
+    correctAnswer: 3
+    explanation: "Tag `<script>` ត្រូវបានប្រើប្រាស់ដើម្បីរុំព័ទ្ធកូដ JavaScript នៅក្នុងឯកសារ HTML ឬដើម្បីទាញយកឯកសារ .js ពីខាងក្រៅមកប្រើប្រាស់។"
 ---
 
 ## 🚀 ស្វាគមន៍មកកាន់ JavaScript
@@ -44,75 +44,11 @@ JavaScript គឺជាភាសា Programming ដែលធ្វើឱ្យ�
 
 ---
 
-## 📦 Variables និង Scoping
+## 📌 តើត្រូវរៀនអ្វីខ្លះបន្ត?
 
-នៅក្នុង JavaScript ទំនើប យើងប្រើ `let` និង `const` ដើម្បីបង្កើត Variable។ ពួកវាមាន **Block Scope** ដែលមានន័យថាវាត្រូវបានស្គាល់តែនៅក្នុងវង់ក្រចក `{}` ដែលវាត្រូវបានបង្កើតឡើងប៉ុណ្ណោះ។
+នៅក្នុងមេរៀនបន្ទាប់ៗ យើងនឹងស្វែងយល់លម្អិតអំពី៖
+- **Variables**: របៀបបង្កើត និងរក្សាទុកទិន្នន័យ។
+- **Data Types**: ប្រភេទទិន្នន័យផ្សេងៗ។
+- **Functions & Control Flow**: ការគ្រប់គ្រង Logic របស់កូដ។
 
-```javascript
-// ១. ប្រើ let សម្រាប់តម្លៃដែលអាចផ្លាស់ប្តូរ
-let age = 25;
-age = 26; // អាចផ្លាស់ប្តូរបាន
-
-// ២. ប្រើ const សម្រាប់តម្លៃថេរ (មិនអាចផ្លាស់ប្តូរបានទេ)
-const name = "Sok";
-// name = "Sao"; // ❌ នឹងមាន Error
-
-// ៣. Block Scope ឧទាហរណ៍
-if (true) {
-  let message = "Hello";
-  console.log(message); // ✅ ដំណើរការ (Prints: Hello)
-}
-// console.log(message); // ❌ Error: message is not defined (ព្រោះវានៅក្រៅ Block)
-```
-
----
-
-## 🗂️ Data Types
-
-JavaScript អាចផ្ទុកទិន្នន័យបានច្រើនប្រភេទ៖
-
-```javascript
-let isStudent = true; // Boolean (ពិត ឬ មិនពិត)
-let score = 95.5; // Number (លេខ)
-let text = "សួស្តី"; // String (អក្សរ)
-let hobbies = ["អានសៀវភៅ", "សរសេរកូដ"]; // Array (បញ្ជីទិន្នន័យ)
-let person = { name: "សុខ", age: 25 }; // Object (ទិន្នន័យមានលក្ខណៈសម្បត្តិ)
-```
-
----
-
-## ⚙️ Functions
-
-**Functions** អនុញ្ញាតឱ្យយើងសរសេរកូដម្តង ហើយអាចហៅមកប្រើបានច្រើនដង។ វាជួយអោយកូដយើងស្អាត និងមិនជាន់គ្នា។
-
-```javascript
-// ការបង្កើត Function ដោយមាន Parameters (a, b)
-function addNumbers(a, b) {
-  let sum = a + b;
-  return sum; // បញ្ជូនលទ្ធផលត្រឡប់ទៅវិញ
-}
-
-// ការហៅ Function មកប្រើ (Arguments: 10, 5)
-let result = addNumbers(10, 5);
-console.log(result); // លទ្ធផល: 15
-```
-
----
-
-## 🔀 Control Flow (If...Else)
-
-ដើម្បីធ្វើការសម្រេចចិត្តក្នុងកូដ យើងប្រើ `if`, `else if`, និង `else`។
-
-```javascript
-let score = 85;
-
-if (score >= 90) {
-  console.log("អ្នកទទួលបាននិទ្ទេស A");
-} else if (score >= 80) {
-  console.log("អ្នកទទួលបាននិទ្ទេស B");
-} else {
-  console.log("អ្នកត្រូវខិតខំបន្ថែមទៀត");
-}
-```
-
-JavaScript គឺជាបេះដូងរបស់ Web Application ទំនើបៗ។ នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនពីមុខងារថ្មីៗរបស់ JavaScript ES6+!
+តោះទៅកាន់មេរៀនទី ២ ដើម្បីចាប់ផ្តើមសរសេរកូដ JavaScript ទាំងអស់គ្នា!
