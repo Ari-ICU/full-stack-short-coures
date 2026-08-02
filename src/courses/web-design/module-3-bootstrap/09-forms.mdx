@@ -1,0 +1,110 @@
+---
+title: Forms & Inputs
+description: រៀនពីរបៀបរចនាទម្រង់បញ្ចូលទិន្នន័យ (Forms) អោយមានភាពទាក់ទាញ ដោយប្រើប្រាស់ Bootstrap Form Controls, Floating Labels, និងមុខងារ Validation។
+objectives:
+  - យល់ពីការប្រើប្រាស់ .form-control និង .form-label
+  - ចេះបង្កើតទម្រង់ទំនើបដោយប្រើ Floating Labels
+  - ចេះរៀបចំ Checkboxes, Radios, និង Switches
+  - ចេះប្រើប្រាស់ Input Groups និង Form Validation
+module: module-3-bootstrap
+order: 9
+quiz:
+  - question: "តើ Class មួយណាដែលត្រូវដាក់នៅលើ `<input>` ដើម្បីអោយវាប្រែក្លាយទៅជា Input ដ៏ស្រស់ស្អាតរបស់ Bootstrap?"
+    options:
+      - .input-bootstrap
+      - .form-control
+      - .form-input
+      - .bootstrap-input
+    correctAnswer: 1
+    explanation: "`.form-control` គឺជា Class គោលដែលត្រូវដាក់នៅលើកន្លែងវាយបញ្ចូលទិន្នន័យ (`<input>`, `<textarea>`) ទាំងអស់ ដើម្បីទទួលបានរចនាបថស្អាត មានទំហំពេញ (100% width) និងមានស្រមោល (Focus ring) ពេលចុចលើ។"
+---
+
+## 📝 ការរចនា Forms
+
+Forms គឺជាផ្នែកដ៏សំខាន់បំផុតមួយនៃគេហទំព័រសម្រាប់អោយអ្នកប្រើប្រាស់បញ្ចូលទិន្នន័យ (ឧ. Login, Register)។ Bootstrap ធ្វើអោយ Forms របស់អ្នកមើលទៅ Professional ភ្លាមៗ។
+
+---
+
+## 1. Form Controls មូលដ្ឋាន
+
+ដើម្បីរចនា Input ធម្មតា អ្នកត្រូវប្រើប្រាស់ `.form-label` សម្រាប់អត្ថបទពិពណ៌នា និង `.form-control` សម្រាប់ប្រអប់បញ្ចូល។
+
+```html
+<div class="mb-3">
+  <label for="emailInput" class="form-label">អាសយដ្ឋានអ៊ីមែល</label>
+  <input type="email" class="form-control" id="emailInput" placeholder="name@example.com">
+</div>
+<div class="mb-3">
+  <label for="exampleTextarea" class="form-label">សាររបស់អ្នក</label>
+  <textarea class="form-control" id="exampleTextarea" rows="3"></textarea>
+</div>
+```
+
+---
+
+## 2. Floating Labels
+
+នេះគឺជារចនាបថទំនើបដែលអត្ថបទពិពណ៌នា (Label) នៅខាងក្នុង Input ហើយវានឹងអណ្តែតឡើងលើនៅពេលអ្នកចុចវាយអក្សរ។ ដើម្បីប្រើវា យើងត្រូវរុំពួកវាជាមួយ `.form-floating` ហើយដាក់ `<label>` នៅ **ពីក្រោម** `<input>` ជានិច្ច!
+
+```html
+<div class="form-floating mb-3">
+  <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+  <label for="floatingInput">អាសយដ្ឋានអ៊ីមែល</label>
+</div>
+```
+
+---
+
+## 3. Checkboxes, Radios និង Switches
+
+សម្រាប់ប្រអប់គ្រីស (Checkbox) និងជម្រើស (Radio) យើងប្រើ `.form-check`, `.form-check-input`, និង `.form-check-label`។
+
+### Checkbox & Radio
+```html
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" id="flexCheckDefault">
+  <label class="form-check-label" for="flexCheckDefault">
+    ចងចាំគណនីរបស់ខ្ញុំ
+  </label>
+</div>
+```
+
+### Switch (កុងតាក់)
+គ្រាន់តែបន្ថែម `.form-switch` ទៅលើ `.form-check` នោះ Checkbox នឹងប្រែជាកុងតាក់យ៉ាងស្រស់ស្អាត!
+```html
+<div class="form-check form-switch">
+  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+  <label class="form-check-label" for="flexSwitchCheckDefault">បើក Dark Mode</label>
+</div>
+```
+
+---
+
+## 4. Input Groups (ការផ្គុំ Input)
+
+ពេលខ្លះអ្នកចង់ដាក់រូបតំណាង (Icon) ឬអក្សរ (ដូចជា `@` ឬ `$`) នៅជាប់នឹងប្រអប់ Input តែម្តង។ យើងប្រើ `.input-group` និង `.input-group-text`។
+
+```html
+<div class="input-group mb-3">
+  <span class="input-group-text" id="basic-addon1">@</span>
+  <input type="text" class="form-control" placeholder="Username">
+</div>
+```
+
+---
+
+## 5. ការផ្ទៀងផ្ទាត់ទិន្នន័យ (Form Validation)
+
+នៅពេលអ្នកប្រើប្រាស់វាយខុស អ្នកអាចបង្ហាញស៊ុមពណ៌ក្រហម និងសារបញ្ជាក់បានយ៉ាងងាយ។
+*   **`.is-valid`**: ពណ៌បៃតង (ត្រឹមត្រូវ) ជាមួយ `.valid-feedback` សម្រាប់សារ។
+*   **`.is-invalid`**: ពណ៌ក្រហម (មិនត្រឹមត្រូវ) ជាមួយ `.invalid-feedback` សម្រាប់សារព្រមាន។
+
+```html
+<div>
+  <label class="form-label">ឈ្មោះអ្នកប្រើប្រាស់</label>
+  <input type="text" class="form-control is-invalid" value="admin">
+  <div class="invalid-feedback">
+    ឈ្មោះនេះមានគេប្រើរួចហើយ! សូមរើសឈ្មោះផ្សេង។
+  </div>
+</div>
+```

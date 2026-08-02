@@ -1,0 +1,78 @@
+---
+title: Spinners
+description: រៀនពីរបៀបបង្ហាញសញ្ញាកំពុងផ្ទុក (Loading indicators) ជូនអ្នកប្រើប្រាស់នៅពេលដែលគេហទំព័រកំពុងដំណើរការទាញយកទិន្នន័យ។
+objectives:
+  - ស្គាល់ភាពខុសគ្នារវាង spinner-border និង spinner-grow
+  - ចេះផ្លាស់ប្តូរពណ៌របស់ Spinner អោយស៊ីនឹង Theme
+  - ចេះបញ្ចូល Spinner ទៅក្នុងប៊ូតុងនៅពេលកំពុង Submit ទិន្នន័យ
+module: module-3-bootstrap
+order: 16
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់ដាក់ Spinner តូចមួយនៅខាងក្នុងប៊ូតុង ដើម្បីបញ្ជាក់ថាប៊ូតុងកំពុងផ្ទុកទិន្នន័យ តើអ្នកត្រូវប្រើ Class បន្ថែមអ្វី?"
+    options:
+      - .spinner-mini
+      - .spinner-border-sm
+      - .btn-spinner
+      - .spinner-small
+    correctAnswer: 1
+    explanation: "`.spinner-border-sm` ត្រូវបានប្រើប្រាស់ដើម្បីបង្រួមទំហំរបស់ Spinner ដើម្បិអោយវាអាចដាក់ចូលទៅក្នុងប៊ូតុង (Button) បានយ៉ាងស័ក្តិសម។"
+---
+
+## ⏳ សញ្ញាកំពុងផ្ទុក (Loading Spinners)
+
+នៅពេលដែលកម្មវិធីរបស់អ្នកកំពុងទាញយកទិន្នន័យពី Server (Asynchronous task) អ្នកគួរតែបង្ហាញសញ្ញាអ្វីមួយប្រាប់អ្នកប្រើប្រាស់អោយរង់ចាំ ជាជាងទុកអោយអេក្រង់នៅទទេស្អាត។ Bootstrap មានផ្តល់ជូននូវ **Spinners** ដែលធ្វើពី CSS សុទ្ធ។
+
+---
+
+## 1. Spinner មូលដ្ឋាន (Border Spinner)
+
+នេះគឺជា Spinner រាងជារង្វង់វិលដែលពេញនិយមបំផុត។ ប្រើប្រាស់ Class `.spinner-border`។
+
+```html
+<div class="spinner-border text-primary" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+<div class="spinner-border text-danger" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+```
+*(អ្នកអាចប្រើប្រាស់ថ្នាក់ `.text-*` ដូចជា `text-primary` ដើម្បីប្តូរពណ៌របស់វាបានយ៉ាងងាយ!)*
+
+---
+
+## 2. Spinner រីកធំ (Growing Spinner)
+
+ប្រសិនបើអ្នកចង់បានរចនាបថបែបទំនើបបន្តិច អ្នកអាចប្រើ Spinner ដែលមានចលនារីកធំហើយរលាយបាត់ទៅវិញ ដោយប្រើប្រាស់ Class `.spinner-grow`។
+
+```html
+<div class="spinner-grow text-success" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+<div class="spinner-grow text-warning" role="status">
+  <span class="visually-hidden">Loading...</span>
+</div>
+```
+
+---
+
+## 3. ការដាក់ Spinner ចូលក្នុងប៊ូតុង (Buttons)
+
+នេះគឺជាការអនុវត្តជាក់ស្តែងបំផុត! ឧទាហរណ៍៖ នៅពេលអ្នកប្រើប្រាស់ចុចប៊ូតុង "Login" ប៊ូតុងនោះនឹងបង្ហាញ Spinner ជំនួសអោយអក្សរធម្មតា ខណៈពេលកំពុងពិនិត្យពាក្យសម្ងាត់។
+
+អ្នកត្រូវប្រើប្រាស់ `.spinner-border-sm` ឬ `.spinner-grow-sm` ដើម្បីបង្រួមទំហំរបស់វាអោយចូលទៅក្នុងប៊ូតុងចុះ។
+
+```html
+<!-- ប៊ូតុងមានតែ Spinner -->
+<button class="btn btn-primary" type="button" disabled>
+  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  <span class="visually-hidden">Loading...</span>
+</button>
+
+<!-- ប៊ូតុងមាន Spinner ផង និងអក្សរផង -->
+<button class="btn btn-primary" type="button" disabled>
+  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  កំពុងផ្ទុក...
+</button>
+```
+
+> 💡 **គន្លឹះសំខាន់៖** នៅក្នុងគម្រោងពិតប្រាកដ អ្នកនឹងប្រើប្រាស់ JavaScript ដើម្បីបន្ថែម ឬដក Spinner ទាំងនេះចេញពីប៊ូតុង ដោយផ្អែកទៅលើស្ថានភាពនៃការទាញយកទិន្នន័យ (Fetching data)។

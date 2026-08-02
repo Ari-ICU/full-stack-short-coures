@@ -1,0 +1,77 @@
+---
+title: Alerts
+description: រៀនពីរបៀបបង្ហាញសារជូនដំណឹង (Alert Messages) ទៅកាន់អ្នកប្រើប្រាស់ ដូចជាសារជោគជ័យ សារបរាជ័យ ឬសារព្រមាន និងរបៀបបង្កើតប៊ូតុងសម្រាប់បិទសារទាំងនោះចោល។
+objectives:
+  - យល់ពីការប្រើប្រាស់ .alert រួមជាមួយ .alert-* ពណ៌ផ្សេងៗ
+  - ចេះរៀបចំអត្ថបទ និងតំណភ្ជាប់នៅខាងក្នុង Alert 
+  - ចេះបង្កើត Alert ដែលអាចចុចបិទបាន (Dismissible Alerts)
+module: module-3-bootstrap
+order: 13
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់បង្កើត Alert មួយដែលអាចអោយអ្នកប្រើប្រាស់ចុចខ្វែង (X) ដើម្បីបិទវាចោលបាន តើអ្នកត្រូវប្រើ Class បន្ថែមអ្វីខ្លះនៅលើ `.alert` នោះ?"
+    options:
+      - .alert-close និង .alert-hide
+      - .alert-dismissible និងប៊ូតុងដែលមានគុណលក្ខណៈ data-bs-dismiss="alert"
+      - .alert-remove 
+      - គ្រាន់តែដាក់ប៊ូតុង .btn-close គឺគ្រប់គ្រាន់ហើយ
+    correctAnswer: 1
+    explanation: "ដើម្បីអោយ Alert អាចបិទបាន អ្នកត្រូវបន្ថែម `.alert-dismissible` ទៅលើប្រអប់ Alert ហើយបន្ទាប់មកត្រូវមានប៊ូតុងដែលផ្ទុក `data-bs-dismiss=\\\"alert\\\"` ដើម្បីបញ្ជាអោយ Bootstrap ធ្វើការលុបប្រអប់នោះចោល។"
+---
+
+## 🔔 អ្វីទៅជា Alerts?
+
+**Alerts** គឺជាប្រអប់សារលេចឡើងដែលប្រើសម្រាប់ផ្តល់ព័ត៌មានត្រឡប់ (Feedback) ទៅកាន់អ្នកប្រើប្រាស់ បន្ទាប់ពីពួកគេបានធ្វើសកម្មភាពអ្វីមួយ (ឧទាហរណ៍៖ "ចុះឈ្មោះជោគជ័យ", "ពាក្យសម្ងាត់មិនត្រឹមត្រូវ", ឬ "សូមពិនិត្យមើលអុីមែលរបស់អ្នក")។
+
+---
+
+## 1. ការបង្កើត Alerts ជាមូលដ្ឋាន
+
+ដើម្បីបង្កើត Alert អ្នកត្រូវប្រើ Class គោលគឺ `.alert` រួចបន្ថែម Class ពណ៌ Theme របស់ Bootstrap ដូចជា `.alert-success`។
+
+```html
+<div class="alert alert-primary" role="alert">
+  នេះគឺជាសារ Alert ពណ៌ខៀវ (Primary)!
+</div>
+<div class="alert alert-success" role="alert">
+  អបអរសាទរ! ទិន្នន័យត្រូវបានរក្សាទុកដោយជោគជ័យ!
+</div>
+<div class="alert alert-danger" role="alert">
+  សូមអភ័យទោស! មានកំហុសប្រព័ន្ធ សូមព្យាយាមម្តងទៀត។
+</div>
+<div class="alert alert-warning" role="alert">
+  ប្រយ័ត្ន! គណនីរបស់អ្នកជិតដល់ថ្ងៃផុតកំណត់ហើយ។
+</div>
+```
+
+---
+
+## 2. តំណភ្ជាប់ (Links) នៅក្នុង Alerts
+
+ប្រសិនបើអ្នកចង់ដាក់ Link នៅក្នុង Alert អោយមានពណ៌ស៊ីគ្នាជាមួយពណ៌របស់ Alert នោះ (ឧ. ពណ៌ខៀវដិតសម្រាប់ Alert ពណ៌ខៀវខ្ចី) អ្នកគួរតែបន្ថែម Class `.alert-link` ទៅលើ Link `<a>` នោះ។
+
+```html
+<div class="alert alert-info" role="alert">
+  កំណែថ្មី (Version 2.0) ត្រូវបានបញ្ចេញហើយ! សូម <a href="#" class="alert-link">ចុចទីនេះដើម្បីអានបន្ថែម</a>។
+</div>
+```
+
+---
+
+## 3. Alerts ដែលអាចចុចបិទបាន (Dismissible Alerts)
+
+ជាទូទៅ អ្នកតែងតែចង់អោយអ្នកប្រើប្រាស់អាចបិទសារជូនដំណឹងនោះចោលបានបន្ទាប់ពីពួកគេបានអានរួច។ ដើម្បីធ្វើបែបនេះបាន អ្នកត្រូវការធាតុផ្សំ ៣ យ៉ាង៖
+1.  បន្ថែម `.alert-dismissible` ទៅលើប្រអប់ Alert ដើម (ដើម្បីទុកកន្លែងសម្រាប់ប៊ូតុងខ្វែង)
+2.  បន្ថែមប៊ូតុង `.btn-close` (ដែលជារូបសញ្ញាខ្វែង X របស់ Bootstrap)
+3.  ដាក់ `data-bs-dismiss="alert"` ទៅក្នុងប៊ូតុងនោះ ដើម្បីបញ្ជាអោយ JavaScript របស់ Bootstrap ដឹងថាត្រូវលុបអ្វីចោល។
+
+```html
+<!-- កុំភ្លេចថែម alert-dismissible -->
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>សូមប្រយ័ត្ន!</strong> អ្នកមិនគួរចែករំលែកពាក្យសម្ងាត់នេះទៅកាន់នរណាម្នាក់ឡើយ។
+  
+  <!-- ប៊ូតុងសម្រាប់ចុចបិទ -->
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+```
+
+> 💡 **ចំណាំ៖** ការប្រើប្រាស់ `.fade` និង `.show` គឺដើម្បីអោយពេលអ្នកចុចបិទ វាមានចលនា (Animation) រលាយបាត់យឺតៗ មិនមែនបាត់ភ្លាមៗដោយគ្មានចលនាឡើយ។ នេះគឺជាតួនាទីរបស់ Bootstrap JavaScript Bundle ដែលយើងបានភ្ជាប់នៅក្នុងមេរៀនទី ១!

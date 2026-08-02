@@ -1,0 +1,83 @@
+---
+title: Bootstrap Icons
+description: រៀនពីរបៀបដំឡើង និងប្រើប្រាស់បណ្ណាល័យរូបតំណាង (Icons Library) ផ្លូវការរបស់ Bootstrap ដើម្បីធ្វើអោយគេហទំព័រកាន់តែមានភាពទាក់ទាញ។
+objectives:
+  - ស្គាល់ពីបណ្ណាល័យ Bootstrap Icons និងរបៀបភ្ជាប់វាទៅក្នុងគម្រោង
+  - ចេះប្រើប្រាស់ថ្នាក់ .bi ដើម្បីបង្ហាញរូបតំណាង 
+  - ចេះផ្លាស់ប្តូរទំហំ និងពណ៌របស់ Icon តាមរយៈកូដ CSS និង Utility classes
+module: module-3-bootstrap
+order: 21
+quiz:
+  - question: "តើអ្វីទៅដែលជាអត្ថប្រយោជន៍ដ៏ធំបំផុតនៃការប្រើប្រាស់ Bootstrap Icons ដែលជាប្រភេទពុម្ពអក្សរ (Icon Font) ឬ SVG?"
+    options:
+      - វាមានទំហំធំជាងរូបភាពធម្មតា
+      - វាមានពណ៌ចម្រុះស្រាប់ៗ
+      - យើងអាចផ្លាស់ប្តូរទំហំ និងពណ៌របស់វាបានយ៉ាងងាយស្រួលដោយប្រើ CSS
+      - វាដំណើរការតែនៅលើកុំព្យូទ័រ Mac ប៉ុណ្ណោះ
+    correctAnswer: 2
+    explanation: "អត្ថប្រយោជន៍ដ៏អស្ចារ្យរបស់ Icon Fonts ឬ SVGs គឺវាប្រៀបដូចជាអក្សរធម្មតាដែរ! អ្នកអាចប្តូរពណ៌វាជាមួយ `text-primary` និងប្តូរទំហំវាជាមួយ `font-size` បានដោយមិនបាត់បង់គុណភាពភាពច្បាស់របស់វាឡើយ។"
+---
+
+## 🌟 អ្វីទៅជា Bootstrap Icons?
+
+**Bootstrap Icons** គឺជាបណ្ណាល័យផ្ទុកនូវរូបតំណាង (Icons) ជាង ២០០០ ប្រភេទដែលត្រូវបានរចនាឡើងដោយក្រុមការងារ Bootstrap ផ្ទាល់។ ពួកវាជាប្រភេទ SVG (Scalable Vector Graphics) ឬអាចប្រើជា Web Font ដែលមានន័យថាអ្នកអាចពង្រីកវាធំប៉ុណ្ណាក៏វានៅតែច្បាស់ល្អ។
+
+> ⚠️ **ចំណាំ៖** Bootstrap Icons មិនមានភ្ជាប់មកជាមួយឯកសារ `bootstrap.css` ដើមទេ អ្នកត្រូវដំឡើងវាដោយឡែកពីគ្នា!
+
+---
+
+## 1. របៀបដំឡើង (Installation)
+
+មធ្យោបាយលឿនបំផុតគឺការប្រើប្រាស់ CDN ដោយចម្លងកូដខាងក្រោមទៅដាក់ក្នុង `<head>` នៃ HTML របស់អ្នក៖
+
+```html
+<!-- ភ្ជាប់ Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+```
+
+ប្រសិនបើប្រើ NPM (សម្រាប់ React/Vite):
+```bash
+npm i bootstrap-icons
+```
+
+---
+
+## 2. របៀបប្រើប្រាស់ (Usage)
+
+បន្ទាប់ពីភ្ជាប់រួចរាល់ អ្នកអាចស្វែងរករូបតំណាងដែលអ្នកចង់បាននៅលើគេហទំព័រ [icons.getbootstrap.com](https://icons.getbootstrap.com/)។ 
+
+ដើម្បីប្រើវា គ្រាន់តែបង្កើត `<i>` tag មួយ ហើយបន្ថែម Class គោល `.bi` និង Class ឈ្មោះរបស់ Icon (ឧ. `.bi-house`)។
+
+```html
+<p>ត្រឡប់ទៅ <i class="bi bi-house"></i> ទំព័រដើម</p>
+<button class="btn btn-primary">
+  <i class="bi bi-cart"></i> កន្ត្រកទំនិញ
+</button>
+<button class="btn btn-danger">
+  <i class="bi bi-trash"></i> លុបចោល
+</button>
+```
+
+---
+
+## 3. ការប្តូរពណ៌ និង ទំហំ (Colors & Sizes)
+
+ដោយសារ Icons ទាំងនេះដើរតួដូចជា **អក្សរ (Text)** ដូច្នេះអ្នកអាចប្រើប្រាស់ Typography Utilities និង Color Utilities របស់ Bootstrap ទៅលើវាបានយ៉ាងងាយស្រួល!
+
+**ប្តូរពណ៌ដោយប្រើ `text-*`:**
+```html
+<i class="bi bi-heart text-danger"></i> <!-- បេះដូងពណ៌ក្រហម -->
+<i class="bi bi-check-circle text-success"></i> <!-- សញ្ញាគ្រីសពណ៌បៃតង -->
+```
+
+**ប្តូរទំហំដោយប្រើ `fs-*` (Font Size):**
+```html
+<!-- fs-1 គឺទំហំធំបំផុត រហូតដល់ fs-6 ជាទំហំតូច -->
+<i class="bi bi-alarm fs-1"></i>
+<i class="bi bi-alarm fs-6"></i>
+```
+
+បើអ្នកចង់បានទំហំខុសពីនេះ អ្នកអាចសរសេរ CSS បន្តិចបន្តួចបាន៖
+```html
+<i class="bi bi-star" style="font-size: 2rem;"></i>
+```

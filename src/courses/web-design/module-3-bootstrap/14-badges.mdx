@@ -1,0 +1,71 @@
+---
+title: Badges
+description: សិក្សាពីការប្រើប្រាស់ Badges ដើម្បីបង្ហាញចំនួន (ឧ. ចំនួនសារថ្មីៗ) ស្ថានភាព (ឧ. ថ្មី, លក់ដាច់) ឬស្លាកសញ្ញាតូចៗនៅលើ Elements ផ្សេងៗ។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធរបស់ Badge និងការប្រើប្រាស់រួមជាមួយ Theme Colors
+  - ចេះផ្លាស់ប្តូររូបរាង Badge អោយទៅជារាងមូល (Pill badges)
+  - ចេះដាក់ Badge អោយអណ្តែតនៅជ្រុងនៃប៊ូតុង (Positioned badges)
+module: module-3-bootstrap
+order: 14
+quiz:
+  - question: "តើ Class មួយណាដែលធ្វើអោយ Badge ផ្លាស់ប្តូរពីរាងជ្រុង ទៅជារាងមូលទ្រវែង (Pill shape)?"
+    options:
+      - .badge-pill
+      - .rounded-pill
+      - .circle-badge
+      - .badge-round
+    correctAnswer: 1
+    explanation: "នៅក្នុង Bootstrap ជំនាន់ថ្មី យើងប្រើ Utility Class `.rounded-pill` ដើម្បីធ្វើអោយ Element ណាមួយ (រួមទាំង Badges ផងដែរ) មានរាងមូលសងខាង។"
+---
+
+## 🏷️ អ្វីទៅជា Badges?
+
+**Badges** គឺជាស្លាកសញ្ញាតូចៗដែលត្រូវបានប្រើសម្រាប់បង្ហាញព័ត៌មានបន្ថែម ដូចជាចំនួនការជូនដំណឹង (Notifications), ស្ថានភាពរបស់ទំនិញ (New, Out of Stock), ឬប្រភេទ (Categories) ជាដើម។
+
+---
+
+## 1. ការបង្កើត Badges ជាមូលដ្ឋាន
+
+ដើម្បីបង្កើត Badge អ្នកត្រូវប្រើប្រាស់ Class គោល `.badge` រួមជាមួយនឹង Class ពណ៌ផ្ទៃខាងក្រោយ (`bg-*`) ណាមួយក៏បាន។
+
+```html
+<h1>ចំណងជើងធំ <span class="badge bg-secondary">ថ្មី</span></h1>
+<h2>ចំណងជើងតូច <span class="badge bg-primary">ថ្មី</span></h2>
+<p>អត្ថបទធម្មតា <span class="badge bg-success">ជោគជ័យ</span></p>
+```
+
+ដូចដែលអ្នកឃើញ Badges នឹងផ្លាស់ប្តូរទំហំរបស់វាដោយស្វ័យប្រវត្តិទៅតាមទំហំអក្សររបស់មេវា (Parent element)។
+
+---
+
+## 2. Pill Badges (Badges រាងមូល)
+
+ប្រសិនបើអ្នកមិនចូលចិត្តរាងជ្រុង អ្នកអាចធ្វើអោយវាមូលសងខាងបានដោយបន្ថែម Class `.rounded-pill`។ នេះគឺជារូបរាងដែលគេនិយមប្រើបំផុតសម្រាប់ប្រភេទ "Tags"។
+
+```html
+<span class="badge rounded-pill bg-primary">Primary</span>
+<span class="badge rounded-pill bg-success">Success</span>
+<span class="badge rounded-pill bg-danger">Danger</span>
+<span class="badge rounded-pill bg-warning text-dark">Warning</span>
+```
+
+---
+
+## 3. Positioned Badges (Badges អណ្តែត)
+
+នេះគឺជាអ្វីដែលអ្នកតែងតែឃើញនៅលើប៊ូតុងកន្ត្រកទំនិញ (Cart) ឬប៊ូតុងសារ (Messages)។ យើងអាចយក Badge ទៅដាក់អណ្តែតនៅជ្រុងខាងស្តាំខាងលើនៃប៊ូតុងមួយបាន ដោយប្រើប្រាស់ Position utilities (`position-relative` និង `position-absolute`) របស់ Bootstrap។
+
+```html
+<!-- ប៊ូតុងមេត្រូវមាន position-relative -->
+<button type="button" class="btn btn-primary position-relative">
+  សារចូល
+  
+  <!-- Badge ត្រូវមាន position-absolute និងកំណត់ទីតាំង (top, start/end) -->
+  <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    99+
+    <span class="visually-hidden">សារមិនទាន់អាន</span>
+  </span>
+</button>
+```
+
+> 💡 **ចំណាំ៖** `<span class="visually-hidden">` ត្រូវបានបន្ថែមសម្រាប់តែឧបករណ៍អានអេក្រង់ (Screen Readers) សម្រាប់ជនពិការភ្នែកប៉ុណ្ណោះ។ មនុស្សធម្មតានឹងមិនឃើញអក្សរនេះទេ។ នេះគឺជាការអនុវត្តដ៏ល្អមួយសម្រាប់ Web Accessibility!

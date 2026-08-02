@@ -1,0 +1,106 @@
+---
+title: Modal
+description: រៀនពីរបៀបបង្កើតផ្ទាំងលេចឡើង (Popup Dialog) នៅចំកណ្តាលអេក្រង់ដោយប្រើប្រាស់ Bootstrap Modal ដើម្បីបង្ហាញព័ត៌មាន ទម្រង់ (Forms) ឬសារបញ្ជាក់ (Confirmations)។
+objectives:
+  - យល់ពីរចនាសម្ព័ន្ធរបស់ Modal (Header, Body, Footer)
+  - ចេះបើក Modal តាមរយៈការចុចប៊ូតុង
+  - ចេះបង្កើត Static Backdrop (មិនអាចចុចខាងក្រៅដើម្បីបិទបាន)
+  - ស្គាល់ពីរបៀបផ្លាស់ប្តូរទំហំ (Sizes) និងធ្វើជា Fullscreen Modal
+module: module-3-bootstrap
+order: 18
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់អោយ Modal មួយមិនអាចបិទបាននៅពេលដែលអ្នកប្រើប្រាស់ចុចលើផ្ទៃខាងក្រៅរបស់វា (Backdrop) តើអ្នកត្រូវប្រើគុណលក្ខណៈ (Attribute) អ្វី?"
+    options:
+      - data-bs-backdrop="static"
+      - data-bs-keyboard="false"
+      - data-bs-close="none"
+      - data-bs-dismiss="false"
+    correctAnswer: 0
+    explanation: "ការបន្ថែម `data-bs-backdrop=\\\"static\\\"` ទៅលើ Modal នឹងធ្វើអោយវាជាប់គាំង មិនអាចបិទបានទេនៅពេលចុចខាងក្រៅ។ អ្នកប្រើប្រាស់ត្រូវតែចុចប៊ូតុងខ្វែង (X) ឬប៊ូតុងបិទនៅខាងក្នុងទើបបាន។"
+---
+
+## 🖼️ អ្វីទៅជា Modal?
+
+**Modal** គឺជាផ្ទាំង Dialog ដែលលេចឡើងនៅពីលើគេហទំព័ររបស់អ្នក និងធ្វើអោយផ្ទៃខាងក្រោយងងឹត (Backdrop) ដើម្បីទាមទារការយកចិត្តទុកដាក់ពីអ្នកប្រើប្រាស់។ គេនិយមប្រើវាសម្រាប់៖ បង្ហាញរូបភាពធំៗ, ទម្រង់ Login/Register, ឬសារបញ្ជាក់មុនពេលលុបទិន្នន័យ។
+
+---
+
+## 1. ការបើក Modal (Trigger)
+
+ស្រដៀងទៅនឹង Collapse ដែរ អ្នកត្រូវការប៊ូតុងមួយដើម្បីបញ្ជាអោយ Modal បើក។ ប៊ូតុងនោះត្រូវតែមាន `data-bs-toggle="modal"` និង `data-bs-target="#id_របស់_modal"`។
+
+```html
+<!-- ប៊ូតុងបញ្ជា -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  បើក Modal
+</button>
+```
+
+---
+
+## 2. រចនាសម្ព័ន្ធរបស់ Modal
+
+Modal មួយត្រូវបានបែងចែកជា ៣ ផ្នែកសំខាន់ៗគឺ៖ Header (ក្បាល), Body (ដងខ្លួន), និង Footer (បាត)។
+
+```html
+<!-- កូដរបស់ Modal (គួរដាក់វានៅខាងចុងគេនៃ <body>) -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      
+      <!-- ផ្នែកក្បាល -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">ចំណងជើង Modal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <!-- ផ្នែកតួខ្លួន -->
+      <div class="modal-body">
+        នេះគឺជាអត្ថបទពិពណ៌នានៅខាងក្នុង Modal។ អ្នកអាចដាក់ Form ឬរូបភាពបាន។
+      </div>
+      
+      <!-- ផ្នែកបាត -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">បិទ</button>
+        <button type="button" class="btn btn-primary">រក្សាទុក</button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## 3. Static Backdrop (មិនអោយចុចខាងក្រៅបិទ)
+
+ជាទូទៅ ពេលអ្នកចុចលើផ្ទៃពណ៌ខ្មៅខាងក្រៅ Modal វានឹងបិទដោយស្វ័យប្រវត្តិ។ ប៉ុន្តែប្រសិនបើអ្នកកំពុងអោយអ្នកប្រើប្រាស់វាយបញ្ចូលទិន្នន័យសំខាន់ ហើយខ្លាចពួកគាត់ច្រឡំដៃចុចខុស អ្នកអាចដាក់អោយវាមិនអាចបិទបាន ដោយបន្ថែម `data-bs-backdrop="static"` និង `data-bs-keyboard="false"` (ការពារការចុចប៊ូតុង ESC) ទៅលើ `.modal`។
+
+```html
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+  <!-- រចនាសម្ព័ន្ធ Modal ដូចខាងលើ... -->
+</div>
+```
+
+---
+
+## 4. ទំហំ (Sizes) និង Fullscreen
+
+អ្នកអាចកំណត់ទំហំរបស់ Modal បានដោយបន្ថែម Class ទៅលើ `.modal-dialog`៖
+
+*   **`.modal-sm`**: តូច
+*   **`.modal-lg`**: ធំ
+*   **`.modal-xl`**: ធំបំផុត
+*   **`.modal-fullscreen`**: លាតពេញអេក្រង់តែម្តង!
+
+```html
+<!-- Modal ធំ -->
+<div class="modal-dialog modal-lg">
+  <div class="modal-content">...</div>
+</div>
+
+<!-- Modal ពេញអេក្រង់ -->
+<div class="modal-dialog modal-fullscreen">
+  <div class="modal-content">...</div>
+</div>
+```
