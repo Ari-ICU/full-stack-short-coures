@@ -1,0 +1,96 @@
+---
+title: keyof, typeof, and infer
+description: ស្វែងយល់ពី Keyword ដ៏មានឥទ្ធិពលបំផុតទាំង ៣ របស់ TypeScript សម្រាប់ទាញយកនិងវិភាគ Types ដោយស្វ័យប្រវត្តិ។
+objectives:
+  - យល់ពីការប្រើប្រាស់ `keyof` សម្រាប់ទាញយក Keys ពី Object
+  - យល់ពីការប្រើប្រាស់ `typeof` សម្រាប់បម្លែង Value ទៅជា Type
+  - យល់ពីក្បួនរបស់ `infer` ក្នុងការទាញយក Type ពីក្នុងលក្ខខណ្ឌ
+module: module-2-advanced-typescript
+order: 5
+quiz:
+  - question: "តើការប្រើប្រាស់ `typeof` នៅក្នុង TypeScript (បរិបទ Type) មានភាពខុសគ្នាពី `typeof` នៅក្នុង JavaScript យ៉ាងដូចម្តេច?"
+    options:
+      - "\"ពួកវាដូចគ្នាបេះបិទ\""
+      - "\"នៅក្នុង JavaScript, `typeof` ប្រគល់ត្រលប់នូវអក្សរ (ឧ. 'string', 'object')។ ឯចំណែកក្នុង TypeScript វាត្រូវបានប្រើដើម្បីបម្លែងអថេរ (Value) ដែលយើងមានស្រាប់ អោយក្លាយទៅជាទម្រង់ Type (Shape) ដើម្បីយកទៅប្រើប្រាស់ក្នុងកូដ TypeScript បន្ត។\""
+      - "\"នៅក្នុង TypeScript, `typeof` ប្រើបានតែជាមួយលេខប៉ុណ្ណោះ\""
+      - "\"`typeof` ត្រូវបានលុបចោលនៅក្នុង TypeScript\""
+    correctAnswer: 2
+    explanation: "`typeof` នៅក្នុង TypeScript គឺជាស្ពានចម្លងដ៏អស្ចារ្យ! វាអនុញ្ញាតអោយអ្នកចាប់យករូបរាងនៃអថេរឫទិន្នន័យ (Object) ណាមួយដែលមានរួចមកហើយ ប្រែក្លាយវាទៅជា Type ដោយមិនចាំបាច់អង្គុយវាយ Type នោះឡើងវិញដោយដៃឡើយ។"
+---
+
+## 🔑 1. `keyof` (អ្នកទាញយក Keys)
+
+`keyof` គឺជាឧបករណ៍សម្រាប់ទាញយក **ឈ្មោះ Property ទាំងអស់ (Keys)** ចេញពី Type (Object) មួយ រួចបង្កើតវាទៅជា Union Type នៃអក្សរ (String Literals)។
+
+```ts
+type User = {
+  name: string;
+  age: number;
+  email: string;
+};
+
+// ទាញយក Keys ទាំងអស់ពី User
+type UserKeys = keyof User; 
+// លទ្ធផល: "name" | "age" | "email"
+
+// ឥឡូវអ្នកអាចប្រើវាដើម្បីកំណត់លក្ខខណ្ឌបាន!
+let prop: UserKeys = "age"; // ✅ ត្រូវ
+// let prop2: UserKeys = "phone"; // ❌ ខុស! ព្រោះ User អត់មាន phone ទេ
+```
+
+---
+
+## 🖨️ 2. `typeof` (អ្នកក្លូន Type)
+
+`typeof` គឺប្រើសម្រាប់ **ទាញយក Type ចេញពី អថេរ (Value)** ដែលមានស្រាប់។ នេះគឺមានប្រយោជន៍ណាស់ពេលអ្នកខ្ជិលសរសេរ Type ដោយខ្លួនឯង!
+
+```ts
+// នេះជាអថេរ JavaScript ធម្មតា
+const myConfig = {
+  theme: "dark",
+  fontSize: 14,
+  showSidebar: true
+};
+
+// ប្រើ typeof ដើម្បីក្លូនយករូបរាងរបស់វា មកធ្វើជា Type!
+type ConfigType = typeof myConfig;
+/*
+  លទ្ធផលដែលទទួលបាន:
+  {
+    theme: string;
+    fontSize: number;
+    showSidebar: boolean;
+  }
+*/
+```
+
+> 💡 **គន្លឹះ:** អ្នកសរសេរកម្មវិធីជើងចាស់តែងតែប្រើ `keyof typeof ...` ផ្គួបគ្នា ដើម្បីទាញយកឈ្មោះ Properties ចេញពីអថេរ Object ដោយផ្ទាល់!
+> `type ConfigKeys = keyof typeof myConfig; // "theme" | "fontSize" | "showSidebar"`
+
+---
+
+## 🕵️‍♂️ 3. `infer` (អ្នកស៊ើបអង្កេត)
+
+`infer` គឺជាពាក្យដែលពិបាកយល់ជាងគេបន្តិច។ វាត្រូវបានគេប្រើតែនៅក្នុង **Conditional Types (`extends ? :`)** ប៉ុណ្ណោះ។ 
+`infer` មានតួនាទីជាអ្នកស៊ើបអង្កេត ដើម្បីលូកដៃចូលទៅចាប់ទាញយក (Extract) Type ណាមួយចេញពីក្នុងរចនាសម្ព័ន្ធដ៏ស្មុគស្មាញ រួចរក្សាទុកក្នុងអថេរមួយដើម្បីអោយយើងអាចយកវាទៅប្រើបន្ត។
+
+ឧទាហរណ៍៖ ទាញយកប្រភេទ (Return Type) ចេញពី Function
+
+```ts
+// យើងបង្កើត Conditional Type មួយ សម្រាប់ឆែកមើលថា T ជា Function ឫអត់?
+// បើវាជា Function, សូមស៊ើបអង្កេត (infer) មើលថាវានឹង return លទ្ធផលអ្វី (R) រួចប្រគល់ R នោះមកវិញ!
+// បើមិនមែនជា Function ទេ ប្រគល់ any មកវិញ។
+type GetReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
+
+
+// សាកល្បងប្រើ
+function doMath() {
+  return 100; // លទ្ធផលជាលេខ (number)
+}
+
+// ទាញយក Return Type របស់មុខងារ doMath
+type MathResult = GetReturnType<typeof doMath>;
+// លទ្ធផល: number
+```
+
+*(កំណត់សម្គាល់: TypeScript មាន `ReturnType<T>` ស្រាប់សម្រាប់ធ្វើការងារខាងលើនេះ នេះគ្រាន់តែជាការពន្យល់ពីរបៀបដែល `infer` ដំណើរការនៅពីក្រោយខ្នងប៉ុណ្ណោះ)*

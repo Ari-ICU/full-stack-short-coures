@@ -1,0 +1,95 @@
+---
+title: Template Literal Types
+description: ស្វែងយល់ពីរបៀបបង្កើត Types ថ្មីៗដោយការផ្សំអក្សរចូលគ្នា (String Concatenation) ដោយប្រើប្រាស់ Template Literals នៅក្នុង TypeScript។
+objectives:
+  - យល់ពីការប្រើប្រាស់ Backticks (``) ដើម្បីបង្កើត Template Literal Types
+  - ចេះយក Union Types មកផ្សំគ្នាដើម្បីបង្កើត Types ថ្មីរាប់សិបដោយសរសេរកូដតែមួយជួរ
+module: module-2-advanced-typescript
+order: 6
+quiz:
+  - question: "ប្រសិនបើ `type Color = 'red' | 'blue';` តើ `type bgClass = \`bg-${Color}\`;` មានលទ្ធផលជាអ្វី?"
+    options:
+      - "\"វាជាកំហុស\""
+      - "\"`'bg-red' | 'bg-blue'`\""
+      - "\"`'bg-Color'`\""
+      - "\"`'red' | 'blue'`\""
+    correctAnswer: 2
+    explanation: "Template Literal Types មានសមត្ថភាពយកសមាជិកនិមួយៗពី Union Type (red និង blue) មកបូកបញ្ចូលជាមួយអក្សរថេរ ('bg-') ដើម្បីបង្កើតជា Union Type ថ្មីយ៉ាងអស្ចារ្យ!"
+---
+
+## 🔠 អ្វីទៅជា Template Literal Types?
+
+អ្នកប្រហែលជាធ្លាប់ប្រើ Template Literals នៅក្នុង JavaScript ហើយ ដែលយើងប្រើសញ្ញា (``) ដើម្បីបូកអក្សរនិងអថេរចូលគ្នា ឧទាហរណ៍ `` `សួស្តី ${name}` ``។
+
+នៅក្នុង TypeScript 4.1 ឡើងទៅ យើងអាចប្រើប្រាស់ក្បួននេះ **ដើម្បីបង្កើត Types** បាន! វាមានថាមពលខ្លាំងណាស់ក្នុងការបង្កើតរូបរាងអក្សរ (String Literals) ដែលមានទម្រង់ជាក់លាក់ណាមួយ។
+
+---
+
+## 1. ការប្រើប្រាស់មូលដ្ឋាន
+
+```ts
+type World = "ពិភពលោក";
+
+// យើងយក Type 'World' មកបូកបញ្ចូលជាមួយអក្សរ
+type Greeting = `សួស្តី ${World}`; 
+
+let msg: Greeting = "សួស្តី ពិភពលោក"; // ត្រូវ ✅
+// let msg2: Greeting = "សួស្តី កម្ពុជា"; // ❌ ខុស! (ព្រោះវាមិនមែនជា 'សួស្តី ពិភពលោក')
+```
+
+---
+
+## 2. ថាមពលពិតប្រាកដ (ការផ្សំ Union Types)
+
+ភាពអស្ចារ្យបំផុតរបស់វា គឺនៅពេលដែលអ្នកយកវាទៅប្រើជាមួយ **Union Types**។ 
+ស្រមៃថាអ្នកកំពុងសរសេរ CSS Framework (ដូចជា Tailwind) អ្នកមានពណ៌ ៣ មុខ និងទីតាំង ៤ មុខ។ អ្នកចង់បង្កើត Classes សម្រាប់ Margin (ដូចជា `m-top`, `m-bottom`...)។
+
+```ts
+type Position = "top" | "bottom" | "left" | "right";
+
+// គ្រាន់តែសរសេរមួយជួរនេះ...
+type MarginClass = `m-${Position}`;
+
+/* 
+  លទ្ធផលដែល TS បង្កើតអោយដោយស្វ័យប្រវត្តិគឺ:
+  "m-top" | "m-bottom" | "m-left" | "m-right"
+*/
+let myMargin: MarginClass = "m-top"; // ដំណើរការបានយ៉ាងល្អ
+```
+
+ចុះបើមាន Union ពីរចូលគ្នាវិញ? TypeScript នឹងធ្វើការគុណខ្វែង (Cross-multiply) អោយយើង!
+
+```ts
+type Color = "red" | "blue" | "green";
+type Size = "sm" | "md" | "lg";
+
+// គុណខ្វែង (3 ពណ៌ x 3 ទំហំ = 9 ជម្រើស!)
+type ButtonClass = `btn-${Color}-${Size}`;
+
+// ជម្រើសមួយក្នុងចំណោម 9 ជម្រើស
+let myBtn: ButtonClass = "btn-blue-lg"; 
+```
+
+---
+
+## 3. ឧបករណ៍បម្លែងអក្សរ (Intrinsic String Types)
+
+TypeScript ក៏ផ្តល់ជូននូវមុខងារបម្លែងអក្សរមួយចំនួន សម្រាប់ប្រើប្រាស់ជាមួយ Template Literals នេះផងដែរ៖
+- `Uppercase<T>`: ប្តូរទៅអក្សរធំទាំងអស់
+- `Lowercase<T>`: ប្តូរទៅអក្សរតូចទាំងអស់
+- `Capitalize<T>`: ប្តូរអក្សរដំបូងគេទៅជាអក្សរធំ
+- `Uncapitalize<T>`: ប្តូរអក្សរដំបូងគេទៅជាអក្សរតូច
+
+```ts
+type EventType = "click" | "hover" | "scroll";
+
+// ប្តូរអក្សរដំបូងទៅជាអក្សរធំ (Click, Hover, Scroll) ហើយថែមពាក្យ 'on' នៅពីមុខ
+type EventHandler = `on${Capitalize<EventType>}`; 
+
+/*
+  លទ្ធផល: 
+  "onClick" | "onHover" | "onScroll"
+*/
+let handler: EventHandler = "onClick";
+```
+នេះជាវិធីដ៏ល្អបំផុតក្នុងការសរសេរ Type អោយ Props របស់ React Components!
