@@ -37,38 +37,47 @@ Form គឺជាប្រអប់ (Container) សម្រាប់ប្រ�
 ```
 
 ### Attributes សំខាន់ៗ៖
-- **`action`**: បញ្ជាក់ទីកន្លែងដែលត្រូវបញ្ជូនទិន្នន័យនៅពេល Form ត្រូវបាន Submit (ជាធម្មតាទៅកាន់ Server)។
-- **`method`**: បញ្ជាក់ពីរបៀបបញ្ជូនទិន្នន័យ (HTTP Method)។ ទូទៅបំផុតគឺ `GET` និង `POST`។
+- **`action`**: បញ្ជាក់ទីកន្លែងដែលត្រូវបញ្ជូនទិន្នន័យទៅដំណើរការនៅពេល Form ត្រូវបាន Submit (ជាធម្មតាគឺ URL របស់ Server ឧ. `/api/login`)។
+- **`method`**: បញ្ជាក់ពីរបៀបបញ្ជូនទិន្នន័យ (HTTP Method)។ វិធីសាស្ត្រដែលទូទៅបំផុតមានពីរ៖
+  - **`GET`**: ទិន្នន័យត្រូវបានបញ្ជូនដោយភ្ជាប់ទៅនឹង URL ខាងលើ (ឧ. `?search=shoes`)។ ប្រើសម្រាប់តែការទាញយកទិន្នន័យប៉ុណ្ណោះ (ដូចជាការ Search) ព្រោះវាមិនមានសុវត្ថិភាពសម្រាប់ទិន្នន័យសម្ងាត់ទេ។
+  - **`POST`**: ទិន្នន័យត្រូវបានបញ្ជូនលាក់នៅខាងក្នុង HTTP request body។ ប្រើសម្រាប់ការបញ្ជូនទិន្នន័យរសើប (ដូចជា Password, ព័ត៌មានកាតធនាគារ) ឬទិន្នន័យដែលមានទំហំធំ។
 
 ---
 
-## ⌨️ ប្រភេទ Inputs
+## ⌨️ ប្រភេទ Inputs និង Attributes
 
-Tag `<input>` គឺជា Form Element ដែលអាច অন্ততប្រើបានច្រើនយ៉ាង។ សកម្មភាពរបស់វាផ្លាស់ប្តូរទាំងស្រុងទៅតាម `type` Attribute របស់វា។
+Tag `<input>` គឺជា Form Element ដែលអាចបត់បែនបានច្រើនបំផុត។ មុខងាររបស់វាផ្លាស់ប្តូរទាំងស្រុងទៅតាម `type` Attribute។ មុននឹងមើលប្រភេទនីមួយៗ យើងត្រូវស្គាល់ Attributes គោលៗសិន៖
+*   **`type`**: កំណត់ប្រភេទនៃ input (ឧ. text, password, date...)។
+*   **`name`**: ជាឈ្មោះអថេរដែលបញ្ជូនទៅ Server។ **បើគ្មាន `name` ទេ ទិន្នន័យនឹងមិនត្រូវបានបញ្ជូនឡើយ!**
+*   **`id`**: ឈ្មោះសម្គាល់ពិសេស ប្រើសម្រាប់ភ្ជាប់ជាមួយ `<label>` និង CSS/JavaScript។
+*   **`value`**: តម្លៃពិតប្រាកដនៃ input។
+*   **`placeholder`**: អត្ថបទព្រាលៗនៅក្នុងប្រអប់ ដើម្បីណែនាំអ្នកប្រើប្រាស់។
+*   **`required`**: បង្ខំឱ្យអ្នកប្រើប្រាស់ត្រូវតែបំពេញប្រអប់នេះមុននឹង Submit។
 
 ### 1. Text Input
-ប្រើសម្រាប់ Text ខ្លីៗ ដូចជាឈ្មោះ។
+ប្រើសម្រាប់អត្ថបទខ្លីៗ ដូចជាឈ្មោះ។
 ```html
 <label for="username">Username:</label>
-<input type="text" id="username" name="username" placeholder="បញ្ចូល username របស់អ្នក">
+<input type="text" id="username" name="username" placeholder="បញ្ចូល username របស់អ្នក" required>
 ```
 
 ### 2. Password Input
-លាក់តួអក្សរដែលអ្នកប្រើប្រាស់បានបញ្ចូល។
+លាក់តួអក្សរដែលអ្នកប្រើប្រាស់បានបញ្ចូល (ចេញជាសញ្ញាផ្កាយរឺចំណុចខ្មៅ) ដើម្បីសុវត្ថិភាព។
 ```html
 <label for="pwd">Password:</label>
-<input type="password" id="pwd" name="pwd">
+<input type="password" id="pwd" name="pwd" required>
 ```
 
 ### 3. Email Input
-ផ្ទៀងផ្ទាត់ (Validate) ដោយស្វ័យប្រវត្តិថាការបញ្ចូលគឺជាទម្រង់ Email ត្រឹមត្រូវ។
+ផ្ទៀងផ្ទាត់ (Validate) ដោយស្វ័យប្រវត្តិថាការបញ្ចូលគឺជាទម្រង់ Email ត្រឹមត្រូវ (ត្រូវមានសញ្ញា @)។
 ```html
 <label for="email">Email:</label>
-<input type="email" id="email" name="email" required>
+<input type="email" id="email" name="email">
 ```
 
 ### 4. Radio Buttons
-អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស តែមួយ ជម្រើសគត់ពីបញ្ជី។ Radio Buttons ទាំងអស់ក្នុងក្រុមតែមួយត្រូវតែមាន `name` Attribute ដូចគ្នា។
+អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស **តែមួយ** ជម្រើសគត់ពីបញ្ជី។
+> ⚠️ **ចំណាំ:** Radio Buttons ទាំងអស់ក្នុងក្រុមតែមួយត្រូវតែមាន `name` Attribute **ដូចគ្នា** ទើបវាដំណើរការជាក្រុមបាន។ `value` គឺជាអ្វីដែលនឹងត្រូវបញ្ជូនទៅ Server។
 ```html
 <p>ជ្រើសរើសវគ្គសិក្សារបស់អ្នក៖</p>
 <input type="radio" id="frontend" name="course" value="frontend">
@@ -79,10 +88,10 @@ Tag `<input>` គឺជា Form Element ដែលអាច অন্ততប្
 ```
 
 ### 5. Checkboxes
-អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស ច្រើន ឬគ្មាន ជម្រើស។
+អនុញ្ញាតឱ្យអ្នកប្រើជ្រើសរើស **ច្រើនជម្រើស** ឬមិនជ្រើសរើសសោះ។
 ```html
 <input type="checkbox" id="subscribe" name="subscribe" value="yes">
-<label for="subscribe">ចុះឈ្មោះទទួលព័ត៌មាន</label>
+<label for="subscribe">ចុះឈ្មោះទទួលព័ត៌មាន (Newsletter)</label>
 ```
 
 ---
@@ -111,10 +120,15 @@ Tag `<input>` គឺជា Form Element ដែលអាច অন্ততប្
 
 ## 🚀 ការ Submit Form
 
-ចុងក្រោយ អ្នកត្រូវការ Button មួយដើម្បីបញ្ជូនទិន្នន័យពី Form ទៅកាន់ Server។
+ចុងក្រោយ អ្នកត្រូវការ Button មួយដើម្បីបញ្ជូនទិន្នន័យពី Form ទៅកាន់ Server នៅពេលអ្នកប្រើប្រាស់ចុចលើវា។
 
 ```html
-<button type="submit">Submit Form</button>
+<button type="submit">បញ្ជូនទិន្នន័យ (Submit)</button>
+<!-- ឬក៏ប្រើ input -->
+<!-- <input type="submit" value="បញ្ជូនទិន្នន័យ"> -->
 ```
 
-*គន្លឹះ៖ គួរប្រើ `<label>` Tags ជានិច្ច និងភ្ជាប់វាទៅកាន់ Input របស់វាដោយប្រើ `for` Attribute និង `id` របស់ Input។ នេះគឺសំខាន់ណាស់សម្រាប់ Screen Readers និង Web Accessibility!*
+> 💡 **សារៈសំខាន់នៃ `<label>`៖**
+> ដូចដែលអ្នកឃើញក្នុងឧទាហរណ៍ខាងលើ យើងតែងតែប្រើ `<label>`។ ការប្រើ `<label>` មានអត្ថប្រយោជន៍ ២ យ៉ាងធំៗ៖
+> 1. **Accessibility**: ឧបករណ៍ Screen Reader នឹងអានអត្ថបទក្នុង label ឱ្យអ្នកពិការភ្នែកស្តាប់នៅពេលគេ Focus លើ Input ណាមួយ។
+> 2. **UX (User Experience)**: ការភ្ជាប់ `for` របស់ label ទៅកាន់ `id` របស់ input ធ្វើឱ្យអ្នកប្រើប្រាស់អាចចុចលើអក្សរ (Label) ដើម្បី Focus ឬ Tick លើប្រអប់ Input នោះបាន (ងាយស្រួលខ្លាំងសម្រាប់ Radio និង Checkbox ដែលមានប្រអប់តូចៗ)។
