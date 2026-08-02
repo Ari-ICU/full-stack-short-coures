@@ -1,0 +1,76 @@
+---
+title: Optional Properties
+description: រៀនពីការប្រើប្រាស់សញ្ញាសួរ (?) ដើម្បីកំណត់អថេរ ឫលក្ខណសម្បត្តិរបស់ Object ថាវាអាចមាន ឫមិនមានក៏បាន (Optional) នៅក្នុង TypeScript។
+objectives:
+  - ចេះប្រើប្រាស់សញ្ញាសួរ `?` សម្រាប់កំណត់ Optional Properties នៅក្នុង Object
+  - ចេះប្រើប្រាស់សញ្ញាសួរ `?` សម្រាប់ Function Parameters
+module: module-1-typescript
+order: 10
+quiz:
+  - question: "នៅក្នុង TypeScript ប្រសិនបើអ្នកចង់កំណត់ថា អថេរ `age` នៅក្នុង Object មនុស្ស (Person) អាចមានក៏បាន ឬមិនមានក៏បាន (Optional) តើអ្នកត្រូវសរសេរយ៉ាងដូចម្តេច?"
+    options:
+      - "\"age: number || undefined\""
+      - "\"age?: number\""
+      - "\"age: optional\""
+      - "\"?age: number\""
+    correctAnswer: 2
+    explanation: "ការបន្ថែមសញ្ញាសួរ `?` នៅពីក្រោយឈ្មោះអថេរ (ដូចជា `age?`) គឺជាវិធីដ៏ខ្លីនិងពេញនិយមបំផុតដើម្បីប្រាប់ TypeScript ថា អថេរមួយនេះមិនចាំបាច់ត្រូវតែមានជានិច្ចនោះទេ។"
+---
+
+## ❓ អ្វីទៅជា Optional Properties?
+
+នៅក្នុងការសរសេរកម្មវិធីពិតប្រាកដ ទិន្នន័យខ្លះគឺចាំបាច់ត្រូវតែមាន (Required) ហើយទិន្នន័យខ្លះទៀតមិនមានក៏មិនអីដែរ (Optional)។
+ឧទាហរណ៍ ពេលបំពេញទម្រង់ចុះឈ្មោះ ឈ្មោះគឺចាំបាច់ តែលេខទូរស័ព្ទអាចមិនចាំបាច់។
+
+នៅក្នុង TypeScript ដើម្បីកំណត់ថាទិន្នន័យមួយជា Optional យើងគ្រាន់តែបន្ថែមសញ្ញាសួរ **`?`** នៅពីក្រោយឈ្មោះរបស់វា!
+
+---
+
+## 1. Optional នៅក្នុង Objects
+
+ឧបមាថាយើងចង់កំណត់រូបរាងទិន្នន័យរបស់អ្នកប្រើប្រាស់ ដែលគាត់ប្រហែលជាមិនមានអ៊ីមែលទេ។
+
+```ts
+// យើងនឹងរៀនពី 'type' លម្អិតនៅមេរៀនក្រោយៗ តែពេលនេះគ្រាន់តែដឹងថាវាប្រើសម្រាប់កំណត់រូបរាង Object
+type User = {
+  name: string;
+  email?: string; // សញ្ញាសួរប្រាប់ថា email អាចមានក៏បាន មិនមានក៏បាន!
+};
+
+// ត្រឹមត្រូវ! មិនដាក់ email ក៏ TypeScript មិនថាអ្វីដែរ ព្រោះវាជា Optional
+const user1: User = {
+  name: "Ratha", 
+};
+
+// ត្រឹមត្រូវ! ដាក់ email ចូលក៏បាន
+const user2: User = {
+  name: "Sok",
+  email: "sok@gmail.com",
+};
+```
+
+នៅពីក្រោយខ្នង ការសរសេរ `email?: string` គឺមានន័យដូចគ្នាបេះបិទទៅនឹងការសរសេរ `email: string | undefined` ដែរ! បើគេមិនដាក់ email នោះតម្លៃរបស់វាគឺ `undefined`។
+
+---
+
+## 2. Optional នៅក្នុងមុខងារ (Function Parameters)
+
+អ្នកក៏អាចប្រើប្រាស់វាសម្រាប់ Parameters របស់ Function បានផងដែរ នៅពេលដែលអ្នកចង់អនុញ្ញាតអោយអ្នកហៅ Function នោះមិនបាច់បញ្ចូលទិន្នន័យមួយចំនួន។
+
+```ts
+// ទីនេះ lastName គឺអាចមាន ឬមិនមានក៏បាន
+function greet(firstName: string, lastName?: string) {
+  if (lastName !== undefined) {
+    console.log(`សួស្តី ${firstName} ${lastName}`);
+  } else {
+    console.log(`សួស្តី ${firstName}`);
+  }
+}
+
+greet("Ratha", "Developer"); // លទ្ធផល: សួស្តី Ratha Developer
+greet("Sok");                // លទ្ធផល: សួស្តី Sok (មិនលោត Error ទេ!)
+```
+
+> ⚠️ **ច្បាប់សំខាន់:** Parameters ដែលជា Optional ត្រូវតែស្ថិតនៅ **ខាងចុងគេបង្អស់** នៃបញ្ជី Parameters ជានិច្ច!
+> ❌ ខុស: `function greet(lastName?: string, firstName: string)`
+> ✅ ត្រូវ: `function greet(firstName: string, lastName?: string)`

@@ -1,0 +1,63 @@
+---
+title: Primitive Types
+description: ស្វែងយល់ពីប្រភេទអថេរជាមូលដ្ឋាន (Primitive Types) បំផុតទាំង ៣ នៅក្នុងកូដ TypeScript គឺ string, number, និង boolean។
+objectives:
+  - ស្គាល់និងចេះប្រើប្រាស់ប្រភេទ `string`, `number`, `boolean`
+  - ដឹងពីភាពខុសគ្នារវាងអក្សរតូច (string) និងអក្សរធំ (String)
+module: module-1-typescript
+order: 5
+quiz:
+  - question: "តើការសរសេរប្រាប់ Type មួយណាដែលត្រឹមត្រូវនៅក្នុង TypeScript?"
+    options:
+      - "\"let isDone: Boolean = false;\""
+      - "\"let myName: String = 'Sok';\""
+      - "\"let age: number = 25;\""
+      - "\"let score: Number = 100;\""
+    correctAnswer: 3
+    explanation: "នៅក្នុង TypeScript យើងត្រូវប្រើឈ្មោះប្រភេទជាអក្សរតូចជានិច្ច (string, number, boolean)។ ការសរសេរអក្សរធំនៅខាងមុខ (String, Number, Boolean) សំដៅទៅលើ Object ពិសេសរបស់ JavaScript ដែលគេមិនសូវប្រើប្រាស់ទេ ហើយអាចបង្កជាកំហុសបាន។"
+---
+
+## 🧱 ប្រភេទមូលដ្ឋាន (Primitive Types)
+
+ដូចដែលអ្នកបានដឹងពី JavaScript មកហើយ ទិន្នន័យត្រូវបានបែងចែកជាច្រើនប្រភេទ។ នៅក្នុង TypeScript យើងមានប្រភេទមូលដ្ឋាន (Primitive Types) ចំនួន ៣ ដែលអ្នកនឹងត្រូវប្រើវាស្ទើរតែរៀងរាល់ថ្ងៃ៖
+
+1. **`string`**: តំណាងអោយអត្ថបទ ឬអក្សរ
+2. **`number`**: តំណាងអោយលេខ (ទាំងលេខគត់ និងលេខទសភាគ)
+3. **`boolean`**: តំណាងអោយការពិត ឬមិនពិត (`true` ឬ `false`)
+
+---
+
+## ការកំណត់ Types
+
+ដើម្បីប្រាប់ TypeScript ថាអថេរមួយជាប្រភេទអ្វី យើងគ្រាន់តែបន្ថែមសញ្ញាចុចពីរ (`:`) និងឈ្មោះប្រភេទនៅពីក្រោយឈ្មោះអថេរនោះ។
+
+```ts
+// ប្រភេទអក្សរ
+let firstName: string = "សុខ";
+let lastName: string = 'សាន្ត';
+let fullName: string = `${firstName} ${lastName}`;
+
+// ប្រភេទលេខ (រួមទាំងលេខមានក្បៀស)
+let age: number = 25;
+let price: number = 19.99;
+let negativeTemp: number = -5;
+
+// ប្រភេទពិត/មិនពិត
+let isStudent: boolean = true;
+let isGraduated: boolean = false;
+```
+
+> **⚠️ ប្រយ័ត្ន:** សូមប្រាកដថាអ្នកប្រើអក្សរតូចទាំងអស់ (`string`, `number`, `boolean`)។ កុំប្រើអក្សរធំ (`String`, `Number`, `Boolean`) អោយសោះ ព្រោះវាជា Object ពិសេសនៅក្នុង JavaScript មិនមែនជា Primitive Type ទេ!
+
+### ការបូកបញ្ចូលគ្នា (Type Checking in Action)
+
+អត្ថប្រយោជន៍នៃការសរសេរ Types បែបនេះ គឺដើម្បីការពារការច្រឡំបូកលេខជាមួយនឹងអក្សរ៖
+
+```ts
+let quantity: number = 10;
+let cost: string = "5";
+
+// Error: មិនអាចយកអក្សរទៅគុណនឹងលេខបានទេ!
+// កំហុសនេះលោតឡើងភ្លាមៗនៅក្នុង VS Code របស់អ្នកតែម្តង។
+let total = quantity * cost; 
+```

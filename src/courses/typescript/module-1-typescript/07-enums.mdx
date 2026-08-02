@@ -1,0 +1,81 @@
+---
+title: Enums
+description: ស្វែងយល់ពី Enums (Enumerations) ដែលជាវិធីដ៏ល្អសម្រាប់បង្កើតសំណុំនៃតម្លៃថេរ ដើម្បីអោយកូដងាយស្រួលអាន និងមានអត្ថន័យច្បាស់លាស់។
+objectives:
+  - យល់ពីគំនិតនៃ Enum និងអត្ថប្រយោជន៍របស់វា
+  - ចេះបង្កើត Numeric Enums និង String Enums
+module: module-1-typescript
+order: 7
+quiz:
+  - question: "ប្រសិនបើអ្នកបង្កើត Enum `enum Direction { Up, Down, Left, Right }` ដោយមិនកំណត់តម្លៃ តើ `Direction.Up` មានតម្លៃស្មើនឹងប៉ុន្មាន?"
+    options:
+      - "\"ស្មើនឹងពាក្យ 'Up'\""
+      - "\"ស្មើនឹង 1\""
+      - "\"ស្មើនឹង 0\""
+      - "\"ស្មើនឹង undefined\""
+    correctAnswer: 3
+    explanation: "តាមលំនាំដើម (Default) Numeric Enum ចាប់ផ្តើមរាប់ពីលេខ 0។ ដូច្នេះ Up=0, Down=1, Left=2, Right=3។ ប្រសិនបើអ្នកចង់អោយវាចាប់ផ្តើមពីលេខ 1 អ្នកត្រូវសរសេរ `Up = 1`។"
+---
+
+## 🚦 អ្វីទៅជា Enums?
+
+**Enum** (អានថា អ៊ីណាំ) មកពីពាក្យពេញថា Enumeration មានន័យថា ការរាយឈ្មោះតម្លៃ។ 
+វាជាមុខងារពិសេសមួយរបស់ TypeScript (ដែល JavaScript មិនមាន) សម្រាប់អនុញ្ញាតអោយអ្នកកំណត់ក្រុមនៃតម្លៃថេរ (Constants) ដែលទាក់ទងគ្នា ដើម្បីអោយកូដរបស់អ្នកងាយស្រួលអានជាងមុន។
+
+ឧទាហរណ៍ ស្រមៃថាអ្នកចង់តំណាងអោយទំហំអាវ (Small, Medium, Large)។ 
+បើអ្នកប្រើលេខ (1=Small, 2=Medium, 3=Large) កូដរបស់អ្នកនឹងមើលទៅពិបាកយល់ណាស់។ នៅទីនេះហើយដែល Enum អាចជួយបាន!
+
+---
+
+## 1. Numeric Enums (Enum ជាលេខ)
+
+តាមលំនាំដើម TypeScript នឹងភ្ជាប់តម្លៃជា "លេខ" ទៅកាន់ឈ្មោះនិមួយៗនៅក្នុង Enum ដោយចាប់ផ្តើមពីលេខ `0`។
+
+```ts
+enum Size {
+  Small,  // ស្មើ 0
+  Medium, // ស្មើ 1
+  Large,  // ស្មើ 2
+}
+
+let myShirtSize: Size = Size.Medium;
+
+console.log(myShirtSize); // លទ្ធផល: 1
+```
+
+ប្រសិនបើអ្នកមិនចង់អោយវាចាប់ផ្តើមពីលេខ 0 ទេ អ្នកអាចកំណត់លេខអោយវាដោយខ្លួនឯងបាន៖
+```ts
+enum Size {
+  Small = 1, // ឥឡូវវាចាប់ផ្តើមពី 1
+  Medium,    // ស្មើ 2
+  Large,     // ស្មើ 3
+}
+```
+
+---
+
+## 2. String Enums (Enum ជាអក្សរ)
+
+ការប្រើលេខពេលខ្លះក៏ពិបាកក្នុងការសរសេរកូដដែរ (Debug) ព្រោះយើងមិនដឹងថាលេខ 2 មានន័យថាម៉េចទេ។ 
+ដូច្នេះអ្នកអភិវឌ្ឍន៍ភាគច្រើននិយមប្រើ **String Enums** ជាជាងលេខ ដោយយើងកំណត់អក្សរផ្ទាល់ទៅអោយវាជានិច្ច!
+
+```ts
+enum Direction {
+  Up = "UP",
+  Down = "DOWN",
+  Left = "LEFT",
+  Right = "RIGHT"
+}
+
+// ពេលសរសេរកូដ យើងគ្រាន់តែវាយ Direction. វានឹងលោតពាក្យទាំង ៤ មកអោយរើស!
+function moveCharacter(dir: Direction) {
+  if (dir === Direction.Up) {
+    console.log("កំពុងរត់ទៅលើ...");
+  }
+}
+
+moveCharacter(Direction.Up); // ត្រឹមត្រូវ ✅
+// moveCharacter("UP"); // ❌ Error! អ្នកមិនអាចវាយអក្សរ "UP" ផ្ទាល់បានទេ ត្រូវតែហៅតាមរយៈ Direction.Up
+```
+
+> **អត្ថប្រយោជន៍:** Enums ជួយកាត់បន្ថយកំហុសអក្ខរាវិរុទ្ធ (Spelling mistakes) ព្រោះ VS Code នឹងលោតបញ្ជីឈ្មោះអោយអ្នករើសដោយស្វ័យប្រវត្តិ!

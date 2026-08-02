@@ -1,0 +1,68 @@
+---
+title: Conditional Types
+description: រៀនពីរបៀបបង្កើត Type ដែលអាចផ្លាស់ប្តូររូបរាង (Dynamic) ទៅតាមលក្ខខណ្ឌ (If-Else) ដោយប្រើប្រាស់ Conditional Types នៅក្នុង TypeScript។
+objectives:
+  - យល់ពីការសរសេរលក្ខខណ្ឌដោយប្រើប្រាស់ `extends` និង `? :` នៅក្នុង Type
+  - ចេះយក Conditional Types ទៅអនុវត្តដើម្បីត្រងយកតែប្រភេទដែលចង់បាន
+module: module-2-advanced-typescript
+order: 2
+quiz:
+  - question: "តើកូដ `type IsString<T> = T extends string ? true : false;` មានដំណើរការដូចម្តេច?"
+    options:
+      - "\"វាជាកំហុស ព្រោះ Type មិនអាចមានលក្ខខណ្ឌ If-Else ទេ\""
+      - "\"វាឆែកមើលថា បើប្រភេទ `T` គឺជា `string` នោះវានឹងក្លាយជាប្រភេទ `true` (ជា Literal Type) បើមិនមែនទេ វាក្លាយជា `false`\""
+      - "\"វានឹងបម្លែងតម្លៃគ្រប់យ៉ាងអោយទៅជាអក្សរ\""
+      - "\"វាឆែកមើលប្រវែងអក្សរ (Length)\""
+    correctAnswer: 2
+    explanation: "នេះគឺជា Conditional Type! វាមានទម្រង់ស្រដៀងនឹង Ternary Operator នៅក្នុង JavaScript (`លក្ខខណ្ឌ ? ពិត : មិនពិត`) ប៉ុន្តែវាយកមកអនុវត្តលើ Types ជំនួសអោយតម្លៃ (Values)។"
+---
+
+## 🔀 អ្វីទៅជា Conditional Types?
+
+នៅក្នុង JavaScript យើងតែងតែប្រើប្រាស់ `if-else` ឬ `? :` ដើម្បីអោយកូដសម្រេចចិត្តថាត្រូវធ្វើអ្វីបន្ត។
+ចុះបើអ្នកចង់អោយ **Types** របស់អ្នកចេះសម្រេចចិត្តដែរនោះ តើត្រូវធ្វើដូចម្តេច?
+
+នៅទីនេះហើយដែល **Conditional Types (ប្រភេទលក្ខខណ្ឌ)** ចូលខ្លួនមក! វាមើលទៅស្រដៀងនឹង Ternary Operator បេះបិទ៖
+`លក្ខខណ្ឌ ? យកអាមួយនេះបើពិត : យកអាមួយនេះបើមិនពិត`
+
+---
+
+## 1. ការប្រើប្រាស់ជាមូលដ្ឋាន
+
+ដើម្បីសរសេរលក្ខខណ្ឌនៅក្នុង TypeScript យើងប្រើប្រាស់ពាក្យ **`extends`**។ នៅទីនេះ `extends` មានន័យថា **"តើវាជាប្រភេទនៃ... មែនទេ?"**។
+
+```ts
+// បង្កើត Type មួយដែលចេះឆែកមើលអក្សរ
+type IsString<T> = T extends string ? "Yes!" : "No!";
+
+// ពេលយើងប្រើវា...
+type A = IsString<string>; // លទ្ធផល: "Yes!"
+type B = IsString<number>; // លទ្ធផល: "No!"
+type C = IsString<any>;    // លទ្ធផល: "Yes!" | "No!"
+```
+
+នេះមានន័យថា `A` មិនមែនជា `string` ធម្មតាទេ តែវាជាប្រភេទអក្សរច្បាស់លាស់ (Literal Type) គឺ `"Yes!"` តែម្តង!
+
+---
+
+## 2. ឧទាហរណ៍ជាក់ស្តែង (ការច្រោះយកទិន្នន័យ)
+
+ការប្រើប្រាស់ Conditional Type ដែលពេញនិយមបំផុតគឺការបង្កើត **"តម្រង (Filter)"** ដើម្បីទាញយកតែប្រភេទដែលយើងចង់បានចេញពី Union Type។
+
+ឧបមាថាយើងមាន Union Type មួយដែលលាយឡំគ្នា ហើយយើងចង់កម្ចាត់ `null` និង `undefined` ចោល៖
+
+```ts
+// បង្កើតតម្រងមួយ: បើ T ជា null ឫ undefined យើងយក never (មានន័យថាកាត់ចោល), បើមិនមែនទេ យក T មកវិញដដែល
+type NonNullable<T> = T extends null | undefined ? never : T;
+
+// សាកល្បងប្រើ
+type MyData = string | number | null | undefined;
+
+// TypeScript នឹងរត់កាត់សមាជិកនិមួយៗ ហើយកាត់ null និង undefined ចោល
+type CleanData = NonNullable<MyData>; 
+// លទ្ធផលរបស់ CleanData គឺនៅសល់ត្រឹមតែ: string | number
+```
+
+*(កំណត់សម្គាល់: `NonNullable` គឺជា Utility Type មួយដែលមានស្រាប់នៅក្នុង TypeScript អ្នកមិនបាច់បង្កើតវាដោយខ្លួនឯងទេ)*
+
+> 💡 **ចំណុចពិសេស:** នៅពេលអ្នកប្រើ Conditional Type ជាមួយ Union Type ដូចជា `A | B | C` TypeScript នឹងធ្វើការ **បំបែក (Distribute)** ការគិតរបស់វាម្តងមួយៗដោយស្វ័យប្រវត្តិ។ ឧទាហរណ៍: `Condition<A> | Condition<B> | Condition<C>`។ នេះហៅថា Distributive Conditional Types!

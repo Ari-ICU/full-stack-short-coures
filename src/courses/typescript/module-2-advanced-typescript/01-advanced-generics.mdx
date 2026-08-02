@@ -1,0 +1,85 @@
+---
+title: Advanced Generics
+description: ឈានចូលកម្រិតបន្ទាប់នៃការប្រើប្រាស់ Generics ដោយរៀនពីរបៀបដាក់លក្ខខណ្ឌ (Constraints) និងការកំណត់តម្លៃលំនាំដើម (Defaults) ដើម្បីធ្វើអោយកូដរបស់អ្នកកាន់តែមានសុវត្ថិភាពនិងបត់បែន។
+objectives:
+  - យំល់ពីការប្រើប្រាស់ `extends` ដើម្បីដាក់លក្ខខណ្ឌលើ Generic Type
+  - ចេះផ្តល់តម្លៃ Default ទៅអោយ Generic Type
+module: module-2-advanced-typescript
+order: 1
+quiz:
+  - question: "តើកូដ `function getLength<T extends { length: number }>(item: T)` មានន័យដូចម្តេច?"
+    options:
+      - "\"វាជាកំហុស ព្រោះ `T` មិនអាចភ្ជាប់ជាមួយ `extends` បានទេ\""
+      - "\"វាអនុញ្ញាតអោយបញ្ជូនទិន្នន័យអ្វីក៏បានមកកាន់ function នេះ\""
+      - "\"វាដាក់លក្ខខណ្ឌថា ទិន្នន័យ (item) ដែលអាចបញ្ជូនមកបាន ត្រូវតែជាប្រភេទអ្វីក៏ដោយ (អក្សរ ឫ Array) អោយតែវាមាន Property `length` នៅពីក្នុង។\""
+      - "\"វាអនុញ្ញាតតែលេខប៉ុណ្ណោះ\""
+    correctAnswer: 3
+    explanation: "ការប្រើប្រាស់ `extends` នៅក្នុង Generic (ហៅថា Constraints) គឺជាវិធីប្រាប់ TypeScript ថា: 'ខ្ញុំមិនខ្វល់ថាវាជារូបរាងអ្វីទេ អោយតែវាមានលក្ខណៈសម្បត្តិដែលខ្ញុំទាមទារ (ឧ. មាន length) នោះខ្ញុំនឹងទទួលយកវា។'"
+---
+
+## 🚀 អ្វីទៅជា Generics? (រំលឹកឡើងវិញ)
+
+**Generics** (តំណាងដោយអក្សរ `<T>`) គឺប្រៀបដូចជា **"អថេរសម្រាប់ទុក Type"** អញ្ចឹង។ 
+វាអនុញ្ញាតអោយយើងសរសេរ Function ឬកូដម្តង តែអាចប្រើបានជាមួយប្រភេទទិន្នន័យច្រើនមុខ។
+
+```ts
+// T អាចជា string, number ឫប្រភេទអ្វីក៏បាន អាស្រ័យលើពេលគេហៅវា
+function identity<T>(value: T): T {
+  return value;
+}
+
+const a = identity<string>("Hello"); // T គឺជា string
+const b = identity<number>(100);     // T គឺជា number
+```
+
+---
+
+## 1. Generic Constraints (ការដាក់លក្ខខណ្ឌ)
+
+បញ្ហារបស់ Generic ធម្មតាគឺវា **"សេរីពេក"**! `T` អាចជាអ្វីក៏បាន។ ចុះបើ Function របស់អ្នកត្រូវការអានប្រវែង (`.length`) របស់ទិន្នន័យនោះ? បើគេបញ្ជូន `number` មក វានឹង Crash ព្រោះលេខអត់មាន `.length` ទេ!
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងត្រូវដាក់លក្ខខណ្ឌ (Constraint) ទៅលើ `T` ដោយប្រើពាក្យ **`extends`**។
+
+```ts
+// ប្រាប់ថា T ត្រូវតែមានរូបរាងជាអ្វីក៏ដោយ អោយតែមាន property 'length'
+function printLength<T extends { length: number }>(item: T) {
+  console.log("ប្រវែងគឺ:", item.length);
+}
+
+// ✅ ត្រូវ! ព្រោះ Array មាន `.length`
+printLength([1, 2, 3]); 
+
+// ✅ ត្រូវ! ព្រោះ String មាន `.length`
+printLength("សួស្តី"); 
+
+// ❌ Error! ព្រោះលេខអត់មាន `.length` ទេ! (សុវត្ថិភាពខ្ពស់ណាស់!)
+// printLength(100); 
+```
+
+---
+
+## 2. Generic Defaults (តម្លៃលំនាំដើម)
+
+ដូចគ្នានឹង Function Parameters ដែរ យើងអាចអោយតម្លៃ Default ទៅកាន់ Generic Type ក្នុងករណីដែលគេមិនបានប្រាប់ថា `T` ជាអ្វី!
+
+```ts
+// បើគេមិនបញ្ជាក់ T ទេ, យើងនឹងចាត់ទុក T ថាជា 'string'
+type APIResponse<T = string> = {
+  status: number;
+  data: T;
+};
+
+// មិនបាច់ប្រាប់ T ក៏បាន (វាយក string ជា default)
+const textRes: APIResponse = {
+  status: 200,
+  data: "ជោគជ័យ!" // ត្រូវតែជាអក្សរ
+};
+
+// បើចង់បាន Object យើងត្រូវប្រាប់វា
+const objRes: APIResponse<{ id: number }> = {
+  status: 200,
+  data: { id: 1 }
+};
+```
+
+ការប្រើ Generic Default ពិតជាមានប្រយោជន៍ខ្លាំងណាស់ក្នុងការសរសេរ Type សម្រាប់បណ្ណាល័យ (Libraries) ដែលផ្តល់ភាពងាយស្រួលដល់អ្នកប្រើប្រាស់!

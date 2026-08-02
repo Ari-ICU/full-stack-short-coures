@@ -1,0 +1,88 @@
+---
+title: Indexed Access Types
+description: ស្វែងយល់ពីរបៀបចូលទៅយក (Extract) Type តូចៗ ដែលកប់ជ្រៅនៅខាងក្នុង Type ធំៗ ដោយមិនចាំបាច់សរសេរវាឡើងវិញ។
+objectives:
+  - យល់ពីរបៀបប្រើប្រាស់ `Type["Property"]` ដើម្បីទាញយក Type
+  - ចេះយក Type ចេញពី Array ឫ Union Type
+module: module-2-advanced-typescript
+order: 4
+quiz:
+  - question: "ប្រសិនបើអ្នកមាន `type User = { age: number, name: string };` តើអ្នកអាចទាញយកប្រភេទរបស់អាយុ (number) មកដាក់ក្នុង Type ថ្មីយ៉ាងដូចម្តេច?"
+    options:
+      - "\"type Age = User.age;\""
+      - "\"type Age = User['age'];\""
+      - "\"type Age = extract(User, age);\""
+      - "\"មិនអាចទាញយកបានទេ ត្រូវសរសេរ number ដោយខ្លួនឯង\""
+    correctAnswer: 2
+    explanation: "ដូចគ្នានឹងការចូលអានតម្លៃ Object ក្នុង JavaScript តាមរយៈដង្កៀប `[]` (Bracket Notation) ដែរ! នៅក្នុង TypeScript យើងប្រើទម្រង់ `Type['PropertyName']` ដើម្បីចូលទៅចម្លងយកប្រភេទទិន្នន័យ (Type) របស់វាដោយផ្ទាល់។ វិធីនេះជួយអោយអ្នកមិនបាច់សរសេរកូដដដែលៗ និងងាយស្រួល Update ពេលក្រោយ។"
+---
+
+## 🔍 អ្វីទៅជា Indexed Access Types?
+
+នៅក្នុង JavaScript បើអ្នកមាន Object មួយ អ្នកអាចទាញយកតម្លៃរបស់វាតាមរយៈ `object.property` ឬ `object["property"]` មែនទេ?
+ចំណែកឯនៅក្នុង TypeScript បើអ្នកមាន Type ធំមួយ អ្នកក៏អាច **"លូកដៃ"** ចូលទៅទាញយក Type តូចៗពីក្នុងនោះមកប្រើបានដែរ ដោយប្រើសញ្ញាដង្កៀប `[]`។
+
+### 1. ការទាញយក Type ពីក្នុង Object
+
+ស្រមៃថាមានអ្នកណាម្នាក់បានសរសេរ Type នេះអោយអ្នក៖
+
+```ts
+type Person = {
+  age: number;
+  name: string;
+  alive: boolean;
+};
+```
+
+ថ្ងៃមួយ អ្នកចង់បង្កើតអថេរមួយសម្រាប់ផ្ទុក "អាយុ" ដែលត្រូវតែមាន Type ដូចគ្នាទៅនឹង `age` របស់ `Person` បេះបិទ។
+ជំនួសអោយការសរសេរ `number` ដោយផ្ទាល់ អ្នកគួរតែទាញយកវាចេញពី `Person` តែម្តង៖
+
+```ts
+// យក Type ចេញពី age របស់ Person (លទ្ធផល: number)
+type Age = Person["age"]; 
+
+let myAge: Age = 25; // ត្រឹមត្រូវ!
+```
+**ហេតុអ្វីត្រូវធ្វើបែបនេះ?** ព្រោះបើថ្ងៃក្រោយ គេប្តូរ `age: number` ទៅជា `age: string` (ឧ. អាយុ "២៥ឆ្នាំ") នោះអថេរ `Age` របស់អ្នកនឹងផ្លាស់ប្តូរទៅជា `string` តាមដោយស្វ័យប្រវត្តិ!
+
+---
+
+### 2. ការទាញយកប្រភេទច្រើនព្រមៗគ្នា
+
+អ្នកអាចទាញយកច្រើនជាងមួយដោយប្រើសញ្ញា `|` (Union) នៅខាងក្នុងដង្កៀប!
+
+```ts
+// លទ្ធផល: number | string
+type AgeOrName = Person["age" | "name"]; 
+
+// ឫអ្នកអាចប្រើ keyof តែម្តង ដើម្បីទាញយក Types ទាំងអស់មកឡូកឡំគ្នា!
+type AllTypes = Person[keyof Person]; 
+// លទ្ធផល: number | string | boolean
+```
+
+---
+
+### 3. ការទាញយក Type ចេញពី Array
+
+ប្រសិនបើទិន្នន័យរបស់អ្នកជាទម្រង់បញ្ជី (Array) នោះអ្នកអាចប្រើ **`[number]`** ដើម្បីទាញយកប្រភេទរបស់សមាជិកដែលនៅក្នុងនោះ!
+
+```ts
+// នេះជា Array ដែលផ្ទុក Object ច្រើន
+const MyArray = [
+  { name: "Alice", age: 15 },
+  { name: "Bob", age: 23 },
+  { name: "Eve", age: 38 },
+];
+
+// ចុះបើយើងចង់ទាញយក Type របស់មនុស្សម្នាក់ៗ (Object) ចេញពី Array នោះ?
+type PersonInsideArray = typeof MyArray[number];
+/* 
+  លទ្ធផលដែលទទួលបាន:
+  {
+    name: string;
+    age: number;
+  }
+*/
+```
+
+ការចេះប្រើប្រាស់ Indexed Access Types នឹងជួយអោយអ្នកអាចរុករក និងប្រើប្រាស់កូដចាស់ៗរបស់បណ្ណាល័យ (Libraries) ធំៗដូចជា React បានយ៉ាងងាយស្រួល ដោយមិនចាំបាច់សរសេរ Type វែងៗដោយខ្លួនឯងឡើយ!

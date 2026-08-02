@@ -1,0 +1,103 @@
+---
+title: Mapped Types
+description: ស្វែងយល់ពីរបៀបបម្លែង (Transform) Properties ទាំងអស់នៅក្នុង Object ចាស់ ទៅជាទម្រង់ថ្មីព្រមៗគ្នាតែម្តង ដោយប្រើប្រាស់ Mapped Types។
+objectives:
+  - យល់ពីអ្វីទៅជា Mapped Types
+  - ចេះប្រើប្រាស់ `[K in keyof T]` ដើម្បីបម្លែង Properties
+  - ចេះបន្ថែម ឬលុប `readonly` និង `?` (Modifiers) ចេញពី Type
+module: module-2-advanced-typescript
+order: 3
+quiz:
+  - question: "តើកូដ `[K in keyof T]: boolean` នៅក្នុង Mapped Type មានតួនាទីអ្វី?"
+    options:
+      - "\"វាលុប Properties ទាំងអស់ចេញពី Object\""
+      - "\"វាបង្កើត Object ថ្មីមួយ ដែលយកឈ្មោះ Properties ចាស់ៗទាំងអស់ពី T មកប្រើ តែប្តូរប្រភេទរបស់ពួកវាទៅជា `boolean` ទាំងអស់។\""
+      - "\"វាប្តូរឈ្មោះ Properties ទៅជាអក្សរធំ\""
+      - "\"វាមិនមែនជាកូដ TypeScript ត្រឹមត្រូវទេ\""
+    correctAnswer: 2
+    explanation: "Mapped Types មានដំណើរការដូចជាមុខងារ `.map()` នៅក្នុង JavaScript ដែរ ប៉ុន្តែវាធ្វើការជាមួយ Types វិញ! វាជួយសន្សំពេលវេលាដោយអនុញ្ញាតអោយអ្នកបម្លែង (Transform) រូបរាង Object ទាំងមូលបានយ៉ាងលឿន។"
+---
+
+## 🗺️ អ្វីទៅជា Mapped Types?
+
+ស្រមៃថាអ្នកមានរូបរាង Object (Type) មួយដែលផ្ទុកព័ត៌មានអតិថិជន។ ថ្ងៃមួយ មេរបស់អ្នកប្រាប់ថា គាត់ចង់បានរូបរាង Object ថ្មីមួយទៀតដែលមានឈ្មោះ Properties ដូចគ្នាទាំងអស់ គ្រាន់តែចង់ប្តូរប្រភេទទិន្នន័យទៅជា `boolean` សុទ្ធ (ឧ. ដើម្បីកត់ត្រាថាគាត់បានបំពេញវាហើយឫនៅ)!
+
+```ts
+// Type ចាស់
+type User = {
+  name: string;
+  age: number;
+  email: string;
+};
+
+// ❌ របៀបល្ងង់ខ្លៅ (សរសេរដោយដៃម្តងទៀត)
+type UserChecklist = {
+  name: boolean;
+  age: boolean;
+  email: boolean;
+};
+```
+ចុះបើ `User` មាន ៥០ Properties? អ្នកច្បាស់ជាហត់ស្លាប់ហើយ!
+នៅទីនេះហើយដែល **Mapped Types** ចូលមកជួយ! 
+
+---
+
+## 1. ការបង្កើត Mapped Type
+
+Mapped Types អនុញ្ញាតអោយអ្នករត់កាត់ (Loop) Properties ទាំងអស់របស់ Object មួយ រួចបម្លែងវាទៅជារូបរាងថ្មី ដូចគ្នាទៅនឹង `.map()` ដែរ។
+
+```ts
+// ✅ របៀបឆ្លាតវៃ (Mapped Types)
+type OptionsFlags<Type> = {
+  [Property in keyof Type]: boolean;
+};
+```
+**ពន្យល់កូដខាងលើ៖**
+- `keyof Type` នឹងទាញយកឈ្មោះ Properties ទាំងអស់ (name | age | email)
+- `[Property in ...]` គឺប្រៀបដូចជាការរត់ Loop យកម្តងមួយៗ (in)
+- `boolean` គឺជាប្រភេទថ្មីដែលយើងចង់ប្តូរដាក់អោយវា
+
+ឥឡូវសាកយកមកប្រើមើល៖
+```ts
+type UserChecklist = OptionsFlags<User>;
+/* 
+  លទ្ធផលដែលទទួលបានដោយស្វ័យប្រវត្តិគឺ:
+  {
+    name: boolean;
+    age: boolean;
+    email: boolean;
+  }
+*/
+```
+
+---
+
+## 2. ការលុប ឬបន្ថែម Modifiers (`readonly` និង `?`)
+
+អ្វីដែលកាន់តែអស្ចារ្យនោះគឺ អ្នកអាចប្រើប្រាស់សញ្ញា **`+` (បន្ថែម)** និង **`-` (លុបចោល)** នៅពេលអ្នកកំពុងធ្វើ Mapping ដើម្បីគ្រប់គ្រងពាក្យ `readonly` ឫសញ្ញាសួរ `?` (Optional) ថែមទៀតផង!
+
+ឧទាហរណ៍ យើងចង់បង្កើត Type ថ្មីមួយដែល **ដោះសោរ** (លុបពាក្យ readonly) ចេញពី Properties ទាំងអស់៖
+
+```ts
+type LockedAccount = {
+  readonly id: string;
+  readonly name: string;
+};
+
+// បង្កើតតម្រងមួយដែល លុបសញ្ញា readonly ចេញ
+type Unlocker<Type> = {
+  -readonly [Property in keyof Type]: Type[Property]; 
+  // ចំណាំ: Type[Property] មានន័យថារក្សាតម្លៃដើមរបស់វាទុកដដែល (string នៅតែ string)
+};
+
+type UnlockedAccount = Unlocker<LockedAccount>;
+/*
+  លទ្ធផល: (លែងមាន readonly ទៀតហើយ!)
+  {
+    id: string;
+    name: string;
+  }
+*/
+```
+
+> 💡 **ចំណាំ:** តាមការពិតទៅ TypeScript បានផ្តល់ជូននូវ Utility Types ស្រាប់ៗជាច្រើនដែលប្រើប្រាស់ក្បួន Mapped Types នេះនៅពីក្រោយខ្នង (ដូចជា `Partial`, `Required`, `Readonly`) ដែលអ្នកនឹងរៀននៅមេរៀនបន្ទាប់ៗ! ដូច្នេះអ្នកកម្រនឹងត្រូវសរសេរ Mapped Type ដោយខ្លួនឯងណាស់។
