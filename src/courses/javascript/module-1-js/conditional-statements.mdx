@@ -1,0 +1,101 @@
+---
+title: Conditional Statements
+description: រៀនពីរបៀបប្រើប្រាស់ Conditional Statements ដូចជា if, else if, else, switch, និង Ternary Operator ដើម្បីធ្វើការសម្រេចចិត្តក្នុងកូដ JavaScript។
+objectives:
+  - យល់ពីដំណើរការរបស់ if, else if, និង else
+  - ចេះសរសេរលក្ខខណ្ឌខ្លីៗដោយប្រើ Ternary Operator
+  - យល់ពីការប្រើប្រាស់ switch statement សម្រាប់ជម្រើសច្រើន
+module: module-1-js
+order: 6
+quiz:
+  - question: តើ Ternary Operator សរសេរតាមទម្រង់មួយណា?
+    options:
+      - condition ? true_value : false_value;
+      - condition : true_value ? false_value;
+      - if condition ? true_value else false_value;
+      - condition => true_value : false_value;
+    correctAnswer: 0
+    explanation: "Ternary Operator ប្រើសញ្ញា `?` ដើម្បីបញ្ជាក់ថាលក្ខខណ្ឌពិត (true) និងសញ្ញា `:` សម្រាប់ករណីមិនពិត (false)។"
+---
+
+## 🛤️ អ្វីទៅជា Conditional Statements?
+
+ក្នុងជីវិតប្រចាំថ្ងៃ យើងតែងតែធ្វើការសម្រេចចិត្ត៖ *"បើមេឃភ្លៀង ខ្ញុំនឹងយកឆ័ត្រ បើមិនអញ្ចឹងទេ ខ្ញុំមិនយកទេ"*។ ក្នុងកូដក៏ដូចគ្នា **Conditional Statements** អនុញ្ញាតអោយកូដរបស់យើងដើរទៅតាមផ្លូវខុសៗគ្នា អាស្រ័យលើលក្ខខណ្ឌណាមួយ (ពិត ឬ មិនពិត)។
+
+---
+
+## 1. `if`, `else if`, និង `else`
+
+នេះគឺជាទម្រង់ពេញនិយមបំផុតសម្រាប់ការធ្វើលក្ខខណ្ឌ។
+
+```javascript
+let time = 14; // ម៉ោង 2 រសៀល (ប្រព័ន្ធ 24 ម៉ោង)
+
+if (time < 12) {
+  // ដើរនៅពេលលក្ខខណ្ឌ (time < 12) គឺ true
+  console.log("អរុណសួស្តី! ព្រឹកនេះស្រស់ស្រាយទេ?");
+} else if (time < 18) {
+  // ដើរនៅពេលលក្ខខណ្ឌខាងលើខុស ហើយលក្ខខណ្ឌនេះ true
+  console.log("ទិវាសួស្តី! ញ៉ាំបាយថ្ងៃត្រង់ហើយនៅ?");
+} else {
+  // ដើរនៅពេលដែលលក្ខខណ្ឌខាងលើខុសទាំងអស់
+  console.log("សាយ័ន្តសួស្តី!");
+}
+```
+
+អ្នកអាចមាន `else if` ច្រើនប៉ុណ្ណាក៏បាន ប៉ុន្តែ `else` (ចុងក្រោយគេបង្អស់) អាចមានតែមួយគត់ ឬមិនបាច់មានក៏បាន។
+
+---
+
+## ⚖️ 2. Switch Statement
+
+នៅពេលដែលអ្នកមាន `else if` ច្រើនពេក ដើម្បីប្រៀបធៀបជាមួយតម្លៃតែមួយ `switch` គឺជាជម្រើសដ៏ល្អ ព្រោះវាធ្វើអោយកូដងាយស្រួលអានជាង។
+
+```javascript
+let day = "Monday";
+
+switch (day) {
+  case "Monday":
+    console.log("ថ្ងៃចន្ទ - ចាប់ផ្តើមធ្វើការវិញហើយ!");
+    break; // បញ្ឈប់ការឆែកបន្តទៀត
+  case "Friday":
+    console.log("ថ្ងៃសុក្រ - ជិតដល់ចុងសប្តាហ៍ហើយ!");
+    break;
+  case "Saturday":
+  case "Sunday":
+    console.log("ថ្ងៃសម្រាក! ដើរលេង!"); // ដើរសម្រាប់ទាំង Saturday និង Sunday
+    break;
+  default:
+    // ដើរប្រសិនបើគ្មាន case ណាមួយត្រូវសោះ (ស្រដៀងនឹង else)
+    console.log("ជាថ្ងៃធ្វើការធម្មតា។");
+}
+```
+
+> ⚠️ **កុំភ្លេច `break;`** នៅក្នុង `switch`! បើអ្នកភ្លេចដាក់វា កូដនឹងបន្តរត់ (Fall-through) ចូលទៅក្នុង case បន្ទាប់ទោះបីជាលក្ខខណ្ឌវាមិនត្រូវក៏ដោយ។
+
+---
+
+## ❓ 3. Ternary Operator
+
+**Ternary Operator** គឺជាវិធីសរសេរកាត់របស់ `if...else` នៅក្នុងមួយបន្ទាត់! វាស័ក្តិសមបំផុតសម្រាប់លក្ខខណ្ឌសាមញ្ញ។
+
+ទម្រង់របស់វាគឺ៖ `លក្ខខណ្ឌ ? បើពិត : បើមិនពិត`
+
+```javascript
+let age = 20;
+
+// ការសរសេរ if...else ធម្មតា
+let statusNormal;
+if (age >= 18) {
+  statusNormal = "ពេញវ័យ";
+} else {
+  statusNormal = "អនីតិជន";
+}
+
+// ការប្រើប្រាស់ Ternary Operator (ខ្លីជាង លឿនជាង)
+let statusTernary = age >= 18 ? "ពេញវ័យ" : "អនីតិជន";
+
+console.log(statusTernary); // "ពេញវ័យ"
+```
+
+អ្នកអាចអានវាថា៖ *"តើ age ធំជាង ឬស្មើ 18 មែនទេ (`?`)? បើមែន យក `ពេញវ័យ`។ បើមិនមែន (`:`) យក `អនីតិជន`"*។

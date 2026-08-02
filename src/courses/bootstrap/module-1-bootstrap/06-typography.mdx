@@ -1,0 +1,94 @@
+---
+title: Typography
+description: សិក្សាពីការរៀបចំទម្រង់អក្សរ (Typography) នៅក្នុង Bootstrap ដូចជាការកំណត់ទំហំ កម្រាស់ និងការតម្រឹមអក្សរ។
+objectives:
+  - ស្គាល់ភាពខុសគ្នារវាង Headings ធម្មតា និង Display Headings
+  - ចេះប្រើប្រាស់ថ្នាក់សម្រាប់តម្រឹមអក្សរ (text-center, text-end)
+  - ចេះផ្លាស់ប្តូរកម្រាស់ (Font weight) និងទម្រង់អក្សរ (Text transform)
+module: module-1-bootstrap
+order: 6
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់អោយអក្សរទាំងអស់នៅក្នុងកថាខណ្ឌ (Paragraph) មួយក្លាយជាអក្សរធំ (UPPERCASE) តើអ្នកគួរប្រើ Class មួយណា?"
+    options:
+      - .text-upper
+      - .text-uppercase
+      - .font-uppercase
+      - .text-capitalize
+    correctAnswer: 1
+    explanation: "`.text-uppercase` នឹងប្រែក្លាយអក្សរទាំងអស់ទៅជាអក្សរធំ (UPPERCASE)។ ចំណែកឯ `.text-capitalize` នឹងធ្វើអោយតែអក្សរដំបូងនៃពាក្យនីមួយៗធំប៉ុណ្ណោះ។"
+---
+
+## ✍️ ការគ្រប់គ្រងទម្រង់អក្សរ (Typography)
+
+Bootstrap បានធ្វើការកំណត់ទម្រង់អក្សរដើម (Default Typography) យ៉ាងស្អាតរួចជាស្រេច។ ប៉ុន្តែវាមានថ្នាក់ (Classes) ជាច្រើនទៀតដែលអនុញ្ញាតអោយអ្នកតុបតែងអក្សរបានយ៉ាងងាយស្រួលដោយមិនបាច់សរសេរ CSS បន្ថែម។
+
+---
+
+## 1. Headings ធម្មតា និង Display Headings
+
+អ្នកអាចប្រើប្រាស់ `<h1>` ដល់ `<h6>` ធម្មតា ឬក៏អាចយកវាទៅដាក់ជា Class លើ Element ផ្សេងៗក៏បាន (ឧទាហរណ៍ `<p class="h1">`)។
+
+ប៉ុន្តែប្រសិនបើអ្នកចង់បានចំណងជើងដែលធំលេចធ្លោជាងធម្មតា (សម្រាប់ Hero Section) អ្នកគួរតែប្រើ **Display Headings** ពី `.display-1` ដល់ `.display-6`។
+
+```html
+<h1>ចំណងជើងធម្មតា H1</h1>
+
+<!-- ធំជាង H1 ធម្មតា និងមានកម្រាស់ស្តើងជាង -->
+<h1 class="display-1">ចំណងជើងយក្ស Display 1</h1>
+<h1 class="display-6">ចំណងជើងតូច Display 6</h1>
+```
+
+---
+
+## 2. កថាខណ្ឌលេចធ្លោ (Lead Text)
+
+ប្រើប្រាស់ Class `.lead` ដើម្បីធ្វើអោយកថាខណ្ឌ (Paragraph) មួយមានភាពលេចធ្លោជាងកថាខណ្ឌដទៃទៀត។ វានឹងពង្រីកទំហំ និងកម្ពស់បន្ទាត់ (Line height) បន្តិច។ ស័ក្តិសមសម្រាប់សរសេរការណែនាំខ្លីៗខាងក្រោមចំណងជើង។
+
+```html
+<p class="lead">នេះគឺជាកថាខណ្ឌណែនាំ។ វាមានភាពលេចធ្លោជាងធម្មតាបន្តិច។</p>
+<p>នេះគឺជាកថាខណ្ឌធម្មតា។ អក្សរវាតូចជាង និងក្រាស់ជាងបន្តិច។</p>
+```
+
+---
+
+## 3. ការតម្រឹមអក្សរ (Text Alignment)
+
+អ្នកអាចតម្រឹមអក្សរទៅ ឆ្វេង ស្តាំ ឬ កណ្តាល យ៉ាងងាយស្រួល។ គួររំលឹកថា Bootstrap ប្រើពាក្យ `start` ជំនួសអោយ `left` និង `end` ជំនួសអោយ `right`។
+
+```html
+<p class="text-start">អក្សរតម្រឹមមកឆ្វេង (Left aligned)</p>
+<p class="text-center">អក្សរតម្រឹមចំកណ្តាល (Center aligned)</p>
+<p class="text-end">អក្សរតម្រឹមទៅស្តាំ (Right aligned)</p>
+```
+
+---
+
+## 4. កម្រាស់អក្សរ (Font Weight) និង ទម្រង់លំអៀង (Italics)
+
+ការគ្រប់គ្រងកម្រាស់អក្សរ (Bold/Light) ដោយមិនបាច់ប៉ះពាល់ CSS ដើម៖
+
+*   **`.fw-bold`**: អក្សរដិតក្រាស់ (Bold)
+*   **`.fw-normal`**: អក្សរធម្មតា (Normal weight)
+*   **`.fw-light`**: អក្សរស្តើង (Light weight)
+*   **`.fst-italic`**: អក្សរទ្រេត (Italic)
+
+```html
+<p class="fw-bold">អត្ថបទនេះដិតក្រាស់ខ្លាំង។</p>
+<p class="fw-light fst-italic">អត្ថបទនេះស្តើង ហើយទ្រេតទៀតផង។</p>
+```
+
+---
+
+## 5. ការប្តូរទម្រង់អក្សរ (Text Transform)
+
+ប្រើសម្រាប់បំប្លែងអក្សរឡាតាំង (English) ទៅជាទម្រង់ផ្សេងៗ៖
+
+*   **`.text-lowercase`**: អក្សរតូចទាំងអស់ (lowercased text)
+*   **`.text-uppercase`**: អក្សរធំទាំងអស់ (UPPERCASED TEXT)
+*   **`.text-capitalize`**: អក្សរធំដើមពាក្យ (Capitalized Text)
+
+```html
+<p class="text-lowercase">Lowercased text.</p>
+<p class="text-uppercase">Uppercased text.</p>
+<p class="text-capitalize">CapiTaliZed text.</p>
+```

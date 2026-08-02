@@ -1,0 +1,101 @@
+---
+title: Type Conversion
+description: រៀនពីរបៀបបំប្លែងប្រភេទទិន្នន័យ (Type Conversion) នៅក្នុង JavaScript ដើម្បីការពារកំហុសនៅពេលបញ្ជូលតម្លៃផ្សេងៗគ្នា។
+objectives:
+  - យល់ដឹងពីការបំប្លែងប្រភេទដោយស្វ័យប្រវត្តិ (Implicit) និងដោយដៃ (Explicit)
+  - ចេះប្រើប្រាស់ Number(), String(), និង Boolean() ដើម្បីបំប្លែងទិន្នន័យ
+  - យល់ពីការប្រើប្រាស់ parseInt() និង parseFloat()
+  - ជៀសវាងកំហុសទូទៅ (Common beginner mistakes) នៅពេលបូកបញ្ចូលលេខ និងអក្សរ
+module: module-1-js
+order: 5
+quiz:
+  - question: តើលទ្ធផលនៃ `"5" + 2` គឺជាអ្វី?
+    options:
+      - 7
+      - 52
+      - "52"
+      - NaN (Not a Number)
+    correctAnswer: 2
+    explanation: "នៅពេលអ្នកប្រើសញ្ញាបូក (+) រវាង String និង Number, JavaScript នឹងបំប្លែងលេខនោះទៅជា String ជាមុនសិន រួចទើបតភ្ជាប់វាចូលគ្នា (Concatenation) ដូច្នេះលទ្ធផលគឺ String \"52\"។"
+---
+
+## 🔄 អ្វីទៅជា Type Conversion?
+
+នៅក្នុងការសរសេរកូដ យើងជារឿយៗតែងតែត្រូវការបំប្លែងទិន្នន័យពីប្រភេទមួយទៅប្រភេទមួយទៀត ឧទាហរណ៍ពីអក្សរទៅជាលេខ (String to Number) ជាដើម។ ការធ្វើបែបនេះហៅថា **Type Conversion**។
+
+Type Conversion មានពីរទម្រង់គឺ៖
+1. **Implicit Conversion (Type Coercion):** គឺនៅពេលដែល JavaScript ធ្វើការបំប្លែងប្រភេទអោយយើងដោយស្វ័យប្រវត្តិ (ច្រើនតែបង្កកំហុស)។
+2. **Explicit Conversion:** គឺនៅពេលដែលយើងអ្នកសរសេរកូដជាអ្នកបង្ខំអោយវាបំប្លែងដោយប្រើ Functions ផ្សេងៗ (ល្អបំផុត និងមានសុវត្ថិភាព)។
+
+---
+
+## 🎭 1. Implicit Conversion (បញ្ហាទូទៅ)
+
+នេះជាកំហុសដែលសិស្សថ្មីៗជួបប្រទះច្រើនជាងគេបំផុត! JavaScript ព្យាយាម "ឆ្លាត" ពេកដោយការបំប្លែងប្រភេទអោយអ្នក តែវាបែរជាធ្វើអោយលទ្ធផលខុសពីការរំពឹងទុក។
+
+```javascript
+// កំហុសជាមួយសញ្ញាបូក (+)
+console.log("5" + 2);   // ចេញ "52" (មិនមែន 7 ទេ ព្រោះវាគិតថាជាការតអក្សរ)
+console.log("5" + "2"); // ចេញ "52"
+
+// រឹតតែចម្លែកជាមួយសញ្ញាផ្សេងទៀត!
+console.log("5" - 2);   // ចេញ 3 (វាបំប្លែង "5" ទៅជាលេខវិញ)
+console.log("5" * 2);   // ចេញ 10
+console.log("5" / 2);   // ចេញ 2.5
+```
+> **ការណែនាំ:** សូមកុំទុកចិត្ត JavaScript អោយធ្វើការបំប្លែងដោយស្វ័យប្រវត្តិ! អ្នកគួរតែប្រាកដថាទិន្នន័យនោះជាលេខពិតប្រាកដមុនពេលធ្វើការគណនា ដោយប្រើ Explicit Conversion។
+
+---
+
+## 🛠️ 2. Explicit Conversion (ការបំប្លែងដោយដៃ)
+
+### បំប្លែងទៅជា String
+ប្រើ Function `String()` ដើម្បីប្រែក្លាយអ្វីៗទៅជាអក្សរ។
+```javascript
+let num = 123;
+let str = String(num); // ឥឡូវវាក្លាយជា "123"
+let bool = String(true); // ក្លាយជា "true"
+```
+
+### បំប្លែងទៅជា Number
+ប្រើ `Number()` ដើម្បីប្រែក្លាយអ្វីៗទៅជាលេខ។ បើវាបំប្លែងមិនចេញ វាសងត្រឡប់មកវិញនូវ `NaN` (Not a Number)។
+```javascript
+console.log(Number("100")); // ចេញលេខ 100
+console.log(Number("Hello")); // ចេញ NaN (មិនមែនជាលេខ)
+console.log(Number("")); // ចេញលេខ 0
+console.log(Number(true)); // ចេញលេខ 1
+```
+
+### បំប្លែងទៅជា Boolean
+ប្រើ `Boolean()` នឹងត្រឡប់មកវិញជា `true` លើកលែងតែតម្លៃនោះជា **Falsy values**។ 
+> តម្លៃ Falsy រួមមាន៖ `0`, `""` (អក្សរទទេ), `null`, `undefined`, `NaN`, និង `false`។ អ្វីផ្សេងពីនេះគឺពិត (`true`) ទាំងអស់!
+
+```javascript
+console.log(Boolean(1)); // true
+console.log(Boolean("Hello")); // true
+console.log(Boolean(0)); // false
+console.log(Boolean("")); // false
+```
+
+---
+
+## 🔢 3. ការប្រើប្រាស់ parseInt() និង parseFloat()
+
+ជួនកាលយើងចង់ដកយកតែលេខចេញពីអក្សរដែលមានតួអក្សរនៅលាយឡំ។
+
+*   **`parseInt()`**: បំប្លែងយកតែលេខគត់ (Integer)។
+*   **`parseFloat()`**: បំប្លែងយកលេខទសភាគ (Float)។
+
+```javascript
+// ឧទាហរណ៍៖ ទាញយកតម្លៃពី input របស់ CSS
+let margin = "20px";
+console.log(Number(margin)); // NaN (ព្រោះមានអក្សរ px)
+
+console.log(parseInt(margin)); // 20 (វាអានតែលេខខាងដើម)
+console.log(parseInt("10.5")); // 10 (កាត់កន្ទុយចោល)
+
+console.log(parseFloat("10.5")); // 10.5 (រក្សាទុកកន្ទុយ)
+console.log(parseFloat("10.5rem")); // 10.5
+```
+
+> ⚠️ **ចំណាំ:** `parseInt()` និង `parseFloat()` ដំណើរការបានតែក្នុងករណីដែល **លេខនៅខាងដើម** អក្សរប៉ុណ្ណោះ។ បើអក្សរនៅមុខវិញ វាចេញ NaN ដដែល (ឧទាហរណ៍ `parseInt("width: 20px")` ចេញ NaN)។

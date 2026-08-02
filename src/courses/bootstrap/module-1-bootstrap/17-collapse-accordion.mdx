@@ -1,0 +1,91 @@
+---
+title: Collapse & Accordion
+description: រៀនពីរបៀបបង្កើតផ្ទាំងមាតិកាដែលអាចលាក់និងបង្ហាញបាន (Collapse) និងរបៀបផ្គុំវាបញ្ចូលគ្នាដើម្បីបង្កើតជា Accordion សម្រាប់សំណួរ-ចម្លើយ (FAQ)។
+objectives:
+  - យល់ពីរបៀបដែល JavaScript របស់ Bootstrap ធ្វើការជាមួយ data-bs-toggle និង data-bs-target
+  - ចេះបង្កើតប៊ូតុងសម្រាប់លាក់/បង្ហាញមាតិកា (Collapse)
+  - ចេះបង្កើត Accordion សម្រាប់បង្ហាញព័ត៌មានច្រើនដោយសន្សំសំចៃទំហំ
+module: module-1-bootstrap
+order: 17
+quiz:
+  - question: "តើគុណលក្ខណៈ (Attribute) មួយណាដែលប្រាប់ Bootstrap ថាប៊ូតុងនេះគឺមានតួនាទីសម្រាប់បញ្ជាមុខងារ Collapse?"
+    options:
+      - class="collapse-btn"
+      - data-bs-target="#myID"
+      - data-bs-toggle="collapse"
+      - aria-expanded="false"
+    correctAnswer: 2
+    explanation: "`data-bs-toggle=\\\"collapse\\\"` គឺជាកូដវេទមន្តដែលធ្វើអោយ Bootstrap JavaScript ដឹងថាប៊ូតុងនេះគឺជាកុងតាក់សម្រាប់បិទ/បើកផ្ទាំង Collapse។"
+---
+
+## ↕️ ការលាក់ និង បង្ហាញមាតិកា
+
+**Collapse** គឺជាមុខងារដែលអនុញ្ញាតអោយអ្នកចុចលើប៊ូតុងមួយ ដើម្បីលាក់ ឬបង្ហាញផ្ទាំងមាតិកាណាមួយ។ វាស័ក្តិសមបំផុតសម្រាប់អត្ថបទវែងៗដែលអ្នកមិនចង់អោយវាកកកុញនៅលើអេក្រង់។
+
+---
+
+## 1. ការប្រើប្រាស់ Collapse មូលដ្ឋាន
+
+ដើម្បីបង្កើត Collapse បាន អ្នកត្រូវការផ្នែក ២ គឺ៖ **ប៊ូតុងបញ្ជា** និង **ផ្ទាំងមាតិកាដែលត្រូវលាក់**។
+
+*   **ប៊ូតុងបញ្ជា**: ត្រូវមាន `data-bs-toggle="collapse"` និង `data-bs-target="#id_របស់ផ្ទាំង"` (ប្រសិនបើប្រើ `<a>` ត្រូវដាក់ ID ក្នុង `href`)។
+*   **ផ្ទាំងមាតិកា**: ត្រូវមាន Class `.collapse` និង `id` អោយត្រូវនឹង `data-bs-target` ខាងលើ។
+
+```html
+<p>
+  <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+    ចុចទីនេះដើម្បីបង្ហាញមាតិកា
+  </a>
+</p>
+
+<!-- ផ្ទាំងនេះនឹងត្រូវលាក់ជាស្រេចដោយសារ Class 'collapse' -->
+<div class="collapse" id="collapseExample">
+  <div class="card card-body">
+    នេះគឺជាមាតិកាដែលត្រូវបានលាក់។ វានឹងរំកិលចុះក្រោមយ៉ាងស្រស់ស្អាតនៅពេលអ្នកចុចប៊ូតុង!
+  </div>
+</div>
+```
+
+---
+
+## 2. Accordion (សំណួរ-ចម្លើយ)
+
+**Accordion** គឺជាការយកផ្ទាំង Collapse ជាច្រើនមកផ្គុំបញ្ចូលគ្នា ហើយវាមានលក្ខណៈពិសេសមួយគឺ៖ **នៅពេលអ្នកបើកផ្ទាំងមួយ វានឹងបិទផ្ទាំងផ្សេងទៀតដោយស្វ័យប្រវត្តិ!** គេនិយមប្រើវាបំផុតសម្រាប់ផ្នែក សំណួរដែលសួរញឹកញាប់ (FAQ)។
+
+រចនាសម្ព័ន្ធរបស់វាគឺរាងវែងបន្តិច ព្រោះវាផ្សំពី `.accordion`, `.accordion-item`, `.accordion-header`, និង `.accordion-collapse`។ ដើម្បីអោយវាអាចបិទផ្ទាំងផ្សេងដោយស្វ័យប្រវត្តិបាន យើងត្រូវភ្ជាប់ `data-bs-parent` ទៅកាន់ ID របស់ Accordion ធំ។
+
+```html
+<div class="accordion" id="accordionExample">
+  
+  <!-- ផ្ទាំងទី ១ -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        សំណួរទី ១៖ តើ Bootstrap ឥតគិតថ្លៃឬទេ?
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        បាទ/ចាស, Bootstrap គឺជាគម្រោង Open-source និងអាចប្រើប្រាស់បានដោយឥតគិតថ្លៃទាំងស្រុង។
+      </div>
+    </div>
+  </div>
+
+  <!-- ផ្ទាំងទី ២ -->
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        សំណួរទី ២៖ តើត្រូវប្រើ JavaScript ដែរឬទេ?
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        ដើម្បីអោយមុខងារ Accordion និងមុខងារផ្សេងទៀតដំណើរការបាន អ្នកត្រូវភ្ជាប់ឯកសារ `bootstrap.bundle.min.js`។
+      </div>
+    </div>
+  </div>
+  
+</div>
+```
+
+> 💡 **ចំណាំ៖** Class `.show` ធ្វើអោយផ្ទាំងទី ១ បើកជាស្រេច (Default Open)។ ចំណែកឯ Class `.collapsed` នៅលើប៊ូតុងទី ២ ធ្វើអោយរូបសញ្ញាព្រួញបាញ់ចុះក្រោមត្រឹមត្រូវ។

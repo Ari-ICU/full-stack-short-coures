@@ -1,0 +1,86 @@
+---
+title: Progress Bars
+description: រៀនពីរបៀបបង្កើតរបារវឌ្ឍនភាព (Progress Bars) ដើម្បីបង្ហាញពីភាគរយនៃការងារដែលបានបំពេញ ដូចជានៅក្នុង Dashboards ជាដើម។
+objectives:
+  - យល់ពីរចនាសម្ព័ន្ធរបស់ Progress Bar (.progress និង .progress-bar)
+  - ចេះផ្លាស់ប្តូរពណ៌នៃ Progress Bar ដោយប្រើ Theme Colors
+  - ចេះបន្ថែម Label និង Animation ទៅលើ Progress Bar
+module: module-1-bootstrap
+order: 15
+quiz:
+  - question: "តើគុណលក្ខណៈ (Attribute) មួយណាដែលយើងត្រូវប្រើប្រាស់នៅក្នុងកូដ HTML ដើម្បីកំណត់ថាតើ Progress Bar នោះគួរលាតសន្ធឹងប៉ុន្មានភាគរយ?"
+    options:
+      - class="width-25"
+      - style="width: 25%"
+      - value="25"
+      - progress="25"
+    correctAnswer: 1
+    explanation: "Bootstrap ប្រើប្រាស់ `style=\\\"width: X%\\\"` នៅលើ `.progress-bar` ដើម្បីបញ្ជាក់ពីប្រវែងលាតរបស់វា។"
+---
+
+## 📊 របារវឌ្ឍនភាព (Progress Bars)
+
+**Progress Bars** គឺជាធាតុផ្សំដ៏ពេញនិយមបំផុតមួយដែលអ្នកតែងតែជួបប្រទះនៅលើផ្ទាំងគ្រប់គ្រង (Dashboards) សម្រាប់បង្ហាញពីវឌ្ឍនភាពនៃការងារ ថាមពលដែលនៅសល់ ឬភាគរយនៃការផ្ទុកទិន្នន័យ។
+
+---
+
+## 1. រចនាសម្ព័ន្ធមូលដ្ឋាន
+
+ដើម្បីបង្កើត Progress Bar អ្នកត្រូវការ HTML ចំនួន ២ ជាន់។ ជាន់ខាងក្រៅគឺ `.progress` (តំណាងអោយប្រអប់ព្រមទាំងផ្ទៃខាងក្រោយពណ៌ប្រផេះ) ហើយជាន់ខាងក្នុងគឺ `.progress-bar` (តំណាងអោយរបារពណ៌ខៀវដែលរត់)។ 
+
+អ្នកត្រូវប្រើ `style="width: ...%"` ដើម្បីកំណត់ប្រវែងរបស់វា។
+
+```html
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+```
+*(ចំណាំ៖ `aria-*` គឺជាគុណលក្ខណៈសម្រាប់ Accessibility)*
+
+---
+
+## 2. ការបន្ថែមអក្សរ (Labels)
+
+អ្នកអាចសរសេរអក្សរ ឬភាគរយចូលទៅក្នុង `.progress-bar` ផ្ទាល់តែម្តង។
+
+```html
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+    50% បានបញ្ចប់
+  </div>
+</div>
+```
+
+---
+
+## 3. ការផ្លាស់ប្តូរពណ៌ (Backgrounds)
+
+ដោយប្រើប្រាស់ប្រព័ន្ធ Theme Colors របស់ Bootstrap អ្នកអាចផ្លាស់ប្តូរពណ៌ Progress Bar យ៉ាងងាយស្រួលដោយបន្ថែម `.bg-*` ទៅលើ `.progress-bar`។
+
+```html
+<div class="progress mb-3">
+  <div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<div class="progress mb-3">
+  <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+<div class="progress">
+  <div class="progress-bar bg-danger" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+```
+
+---
+
+## 4. របារឆ្នូត និង ចលនា (Striped & Animated)
+
+ដើម្បីធ្វើអោយរបារមើលទៅកាន់តែរស់រវើក អ្នកអាចបន្ថែមឆ្នូត និងធ្វើអោយវាមានចលនាដើរទៅមុខជានិច្ច!
+
+*   **`.progress-bar-striped`**: បន្ថែមឆ្នូត
+*   **`.progress-bar-animated`**: ធ្វើអោយឆ្នូតមានចលនារត់
+
+```html
+<div class="progress">
+  <!-- បន្ថែម striped និង animated -->
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+```

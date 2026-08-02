@@ -1,0 +1,90 @@
+---
+title: Bootstrap Customization
+description: រៀនពីរបៀបកែប្រែ (Override) រចនាបថដើមរបស់ Bootstrap តាមរយៈ CSS ផ្ទាល់ខ្លួន និងការប្រើប្រាស់ CSS Variables ដើម្បីបង្កើត Theme ផ្ទាល់ខ្លួន។
+objectives:
+  - ចេះសរសេរ CSS បន្ថែមដើម្បីលុប ឬផ្លាស់ប្តូរស្ទីលរបស់ Bootstrap
+  - ស្គាល់ពីលំដាប់នៃការភ្ជាប់ឯកសារ CSS (CSS Specificity)
+  - ចេះប្តូរ Theme Colors ទាំងមូលដោយប្រើប្រាស់ CSS Variables ជំនាន់ថ្មី
+module: module-1-bootstrap
+order: 24
+quiz:
+  - question: "ដើម្បីអោយកូដ CSS ផ្ទាល់ខ្លួនរបស់អ្នកអាចកែប្រែ (Override) កូដរបស់ Bootstrap បាន តើអ្នកត្រូវភ្ជាប់ឯកសារ CSS នោះនៅក្នុង `<head>` របៀបណា?"
+    options:
+      - ដាក់ឯកសារ CSS ផ្ទាល់ខ្លួននៅពីលើឯកសាររបស់ Bootstrap
+      - ដាក់ឯកសារ CSS ផ្ទាល់ខ្លួននៅពីក្រោមឯកសាររបស់ Bootstrap
+      - មិនសំខាន់ទេ ដាក់វានៅទីណាក៏បាន
+      - ត្រូវលុបឯកសាររបស់ Bootstrap ចោលសិន
+    correctAnswer: 1
+    explanation: "យោងតាមក្បួន CSS, កូដដែលនៅខាងក្រោម (អានក្រោយគេ) នឹងមានឥទ្ធិពលឈ្នះកូដដែលនៅខាងលើ។ ដូច្នេះអ្នកត្រូវភ្ជាប់ `<link href=\\\"style.css\\\">` របស់អ្នក **នៅខាងក្រោម** Bootstrap ជានិច្ច!"
+---
+
+## 🎨 តើយើងអាចកែប្រែ Bootstrap បានទេ?
+
+ជាការពិតណាស់! ទោះបីជា Bootstrap មានរចនាបថស្រស់ស្អាតស្រាប់ក៏ដោយ ក៏គេហទំព័រគ្រប់គ្នាមិនគួរមើលទៅដូចគ្នាបេះបិទនោះទេ។ អ្នកអភិវឌ្ឍន៍អាជីពតែងតែយក Bootstrap មកធ្វើជាគ្រឹះ រួចកែច្នៃវាអោយត្រូវនឹងអត្តសញ្ញាណម៉ាក (Brand Identity) របស់គេ។
+
+---
+
+## 1. ការភ្ជាប់ CSS អោយបានត្រឹមត្រូវ
+
+ច្បាប់ទី ១ ដើម្បីកែប្រែ Bootstrap គឺ **អ្នកត្រូវភ្ជាប់ CSS របស់អ្នកនៅខាងក្រោម Bootstrap ជានិច្ច!**
+
+```html
+<head>
+  <!-- 1. ភ្ជាប់ Bootstrap មុន -->
+  <link href="bootstrap.min.css" rel="stylesheet">
+  
+  <!-- 2. ភ្ជាប់ CSS ផ្ទាល់ខ្លួនរបស់អ្នកនៅក្រោម ដើម្បី Override -->
+  <link href="my-style.css" rel="stylesheet">
+</head>
+```
+
+---
+
+## 2. ការសរសេរ CSS Override
+
+ឧបមាថាអ្នកចង់អោយប៊ូតុង `.btn-primary` ទាំងអស់របស់អ្នកមានរាងមូល (Border-radius ធំ)។ អ្នកគ្រាន់តែសរសេរកូដ CSS ដែលមានឈ្មោះ Class ដូចគ្នា!
+
+**នៅក្នុងឯកសារ `my-style.css` របស់អ្នក៖**
+```css
+/* កែប្រែប៊ូតុង Primary */
+.btn-primary {
+  background-color: #ff5722; /* ប្តូរពណ៌ Background */
+  border-color: #ff5722; /* ប្តូរពណ៌ស៊ុម */
+  border-radius: 30px; /* ធ្វើអោយវាមូលសងខាង */
+}
+
+/* កែប្រែពេល Hover */
+.btn-primary:hover {
+  background-color: #e64a19;
+  border-color: #e64a19;
+}
+```
+ឥឡូវនេះរាល់ពេលដែលអ្នកហៅ Class `btn-primary` នៅក្នុង HTML វានឹងចេញពណ៌ទឹកក្រូចរាងមូល ជំនួសអោយពណ៌ខៀវដើម!
+
+---
+
+## 3. ការកែប្រែដោយប្រើ CSS Variables (ទំនើប)
+
+ចាប់ពីជំនាន់ Bootstrap 5 ឡើងមក ពួកគេបានងាកមកប្រើប្រាស់ **CSS Variables** យ៉ាងទូលំទូលាយ។ នេះគឺជាវិធីដែលងាយស្រួលបំផុតក្នុងការប្តូរ Theme ទាំងមូល ដោយមិនបាច់សរសេរកូដ Override ច្រើន!
+
+**នៅក្នុងឯកសារ `my-style.css` របស់អ្នក៖**
+```css
+/* កែប្រែអថេរដើមរបស់ Bootstrap សម្រាប់ឯកសារទាំងមូល (:root) */
+:root {
+  /* ប្តូរពណ៌ Primary ពីខៀវ ទៅជាពណ៌ស្វាយ */
+  --bs-primary: #6f42c1;
+  
+  /* ប្តូរពណ៌ Success ទៅជាពណ៌បៃតងចាស់ */
+  --bs-success: #198754;
+  
+  /* ប្តូរ Font ដើមរបស់គេហទំព័រទាំងមូល */
+  --bs-font-sans-serif: 'Kantumruy Pro', sans-serif;
+  
+  /* ប្តូរកម្រិតមូលនៃស៊ុម (Border-radius) សម្រាប់អ្វីៗទាំងអស់ (Cards, Buttons...) */
+  --bs-border-radius: 0.5rem;
+}
+```
+
+ការប្រើប្រាស់ Variables បែបនេះមានថាមពលខ្លាំងណាស់ ព្រោះវាផ្លាស់ប្តូរស្ទីលរបស់ Elements រាប់រយនៅក្នុង Bootstrap ក្នុងពេលតែមួយ!
+
+> 💡 **គន្លឹះអ្នកជំនាញ (Sass):** សម្រាប់គម្រោងធំៗ (ដូចជាប្រើ Next.js ឬ React) អ្នកអភិវឌ្ឍន៍និយមទាញយកឯកសារកូដដើមរបស់ Bootstrap (Source Code - Sass/SCSS) ដើម្បីកែប្រែ Variables មុនពេល Compile ចេញជា CSS។ នេះគឺជាវិធីដែលមានប្រសិទ្ធភាពបំផុត!

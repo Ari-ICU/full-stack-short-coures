@@ -1,0 +1,90 @@
+---
+title: "CSS Positioning & Z-Index"
+description: "ស្វែងយល់ពីរបៀបរុញ និងទាញយក Elements ចេញពីលំហូរធម្មតា (Normal Flow) តាមរយៈការប្រើប្រាស់ CSS Positioning និងការត្រួតស៊ីគ្នា (Z-Index)។"
+objectives:
+  - "យល់ពីភាពខុសគ្នារវាង `static`, `relative`, `absolute`, `fixed`, និង `sticky`"
+  - "ចេះប្រើប្រាស់ `top`, `bottom`, `left`, `right` ដើម្បីរំកិលទីតាំង"
+  - "យល់ពីរបៀបប្រើ `z-index` ដើម្បីកំណត់ស្រទាប់ (Layer) របស់ Element"
+module: module-1-css
+order: 5
+quiz:
+  - question: "តើ Position មួយណាដែលធ្វើអោយ Element នៅជាប់មួយកន្លែងលើអេក្រង់ ទោះបីជាយើង Scroll ចុះក្រោមក៏ដោយ (ឧទាហរណ៍ដូចជា Chat Button ជាដើម)?"
+    options:
+      - "position: absolute;"
+      - "position: relative;"
+      - "position: fixed;"
+      - "position: static;"
+    correctAnswer: 3
+    explanation: "`position: fixed;` ចាប់យកទីតាំងធៀបនឹងអេក្រង់ (Viewport) ទាំងមូល ដូច្នេះវានឹងមិនរំកិលទៅណាឡើយទោះបីជាយើង Scroll អេក្រង់ក៏ដោយ។"
+---
+
+## 📍 CSS Position
+
+តាមលំនាំដើម Elements ទាំងអស់នៅលើ HTML គឺរៀបចំតម្រៀបគ្នាពីលើចុះក្រោម (Normal Flow)។ ប៉ុន្តែពេលខ្លះ យើងចង់យក Element ណាមួយចេញពីលំដាប់នេះ ហើយយកវាទៅដាក់នៅទីតាំងជាក់លាក់ណាមួយ (ឧ. នៅជ្រុងអេក្រង់, នៅពីលើរូបភាព)។ យើងប្រើ `position`។
+
+មានតម្លៃ ៥ សំខាន់ៗសម្រាប់ `position`:
+
+### 1. `position: static;` (លំនាំដើម)
+នេះគឺជាតម្លៃធម្មតារបស់ Elements ទាំងអស់។ វាមិនអាចប្រើជាមួយ `top`, `bottom`, `left`, `right`, ឬ `z-index` បានទេ។
+
+### 2. `position: relative;` (ធៀបនឹងទីតាំងដើមរបស់វា)
+វានៅតែរក្សាកន្លែងទំនេរដើមរបស់វាដដែល ប៉ុន្តែយើងអាចរំកិលវាបានតាមរយៈ `top/left/right/bottom`។ 
+- **ការប្រើប្រាស់ដ៏សំខាន់បំផុត:** គេតែងតែប្រើវាធ្វើជាមេ (Container) ដើម្បីឃុំ Element កូនដែលមាន `position: absolute;` មិនអោយរត់ចេញក្រៅ។
+
+### 3. `position: absolute;` (ធៀបនឹងមេរបស់វា)
+វាលោតចេញពី Normal Flow ទាំងស្រុង (លែងស៊ីកន្លែងនៅលើអេក្រង់ទៀតហើយ)។ វានឹងរត់ទៅតាមការកំណត់ `top/left/right/bottom` ដោយធៀបទៅនឹង Element មេណាដែលនៅជិតវាបំផុត ដែលមាន `position: relative;`។ 
+*(បើគ្មានមេណាមាន relative ទេ វានឹងធៀបជាមួយទំព័រទាំងមូល `<HTML>`)*។
+
+```css
+.parent {
+  position: relative; /* ធ្វើជាទ្រុងឃុំកូន */
+  width: 300px;
+  height: 300px;
+}
+
+.child {
+  position: absolute; /* រំកិលខ្លួនបានសេរី */
+  top: 10px;
+  right: 10px;
+}
+```
+
+### 4. `position: fixed;` (ធៀបនឹងអេក្រង់ទូរស័ព្ទ/កុំព្យូទ័រ)
+វាលោតចេញពី Normal Flow ទាំងស្រុងដែរ។ ប៉ុន្តែវាមិនខ្វល់ពីមេរបស់វាទេ គឺវាធៀបនឹងអេក្រង់ (Viewport) តែម្តង។ ទោះបីជាអ្នក Scroll ទំព័រចុះក្រោម វាលក៏នៅតែស្ងៀមត្រង់កន្លែងដែលអ្នកកំណត់។
+- **ឧទាហរណ៍:** Navbar នៅខាងលើជាប់ជានិច្ច ឬ ប៊ូតុងឆាត (Chat Button) នៅជ្រុងខាងស្តាំ។
+
+### 5. `position: sticky;` (កូនកាត់ relative នឹង fixed)
+វាដើរតួជា `relative` ជាធម្មតា រហូតដល់អ្នក Scroll អេក្រង់ទៅដល់ទីតាំងរបស់វា វានឹងប្រែខ្លួនជា `fixed` (ស្អិតជាប់នឹងអេក្រង់តែម្តង)។
+- **ឧទាហរណ៍:** ចំណងជើងមាតិកាដែលអូសទៅដល់ហើយ វានៅជាប់ខាងលើជានិច្ច។
+
+```css
+.sticky-header {
+  position: sticky;
+  top: 0; /* ពេល Scroll ទៅដល់ចម្ងាយ 0px ពីខាងលើ វានឹងស្អិតជាប់ */
+}
+```
+
+---
+
+## 🥞 ការត្រួតស៊ីគ្នា (Z-Index)
+
+នៅពេលដែលអ្នកប្រើ Positioning (ក្រៅពី static), Elements អាចនឹងរត់ទៅត្រួតស៊ីគ្នា (ជាន់គ្នា)។ 
+តើធ្វើដូចម្តេចទើបដឹងថា មួយណានៅលើ មួយណានៅក្រោម?
+
+- យើងប្រើប្រាស់ **`z-index`** ដើម្បីកំណត់ស្រទាប់ (Layer)។
+- `z-index` ដែលមានតម្លៃលេខធំជាង នឹងស្ថិតនៅខាងលើគេ។
+- `z-index` ដំណើរការ **តែនៅពេលដែល Element នោះមាន `position` (relative, absolute, fixed, sticky) ប៉ុណ្ណោះ!**
+
+```css
+.box-behind {
+  position: absolute;
+  z-index: 1;
+}
+
+.box-front {
+  position: absolute;
+  z-index: 100; /* នៅលើគេ ព្រោះលេខធំជាង */
+}
+```
+
+> 💡 **គន្លឹះ:** ជារឿយៗគេប្រើលេខកន្ទុយសូន្យ (ដូចជា 10, 20, 100, 999) សម្រាប់ `z-index` ដើម្បីងាយស្រួលក្នុងការដាក់ Element ថ្មីៗចូលនៅចន្លោះកណ្តាលនៅថ្ងៃក្រោយ។

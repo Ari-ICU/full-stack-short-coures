@@ -1,0 +1,124 @@
+---
+title: Functions
+description: ស្វែងយល់ពីរបៀបសរសេរ Functions ក្នុងទម្រង់ផ្សេងៗគ្នា រួមមាន Function Declaration, Function Expression, និង Arrow Function ព្រមទាំងការប្រើប្រាស់ Parameters ផ្សេងៗ។
+objectives:
+  - អាចបង្កើត Functions បានច្រើនទម្រង់ (Declaration, Expression, Arrow)
+  - យល់ពីការបញ្ជូនទិន្នន័យ (Parameters/Arguments) ទៅក្នុង Function
+  - ចេះកំណត់ Default Parameters
+  - យល់ពីការបញ្ជូនលទ្ធផលត្រឡប់មកវិញដោយប្រើ Return
+module: module-1-js
+order: 8
+quiz:
+  - question: តើ syntax មួយណាដែលត្រឹមត្រូវសម្រាប់ Arrow Function?
+    options:
+      - "function() => {}"
+      - "() => {}"
+      - "=> function() {}"
+      - "function => {}"
+    correctAnswer: 1
+    explanation: "Arrow Functions ប្រើប្រាស់ syntax `() => {}` ដែលខ្លីជាង និងជាមុខងារថ្មីមួយរបស់ ES6 ជំនួសអោយពាក្យ `function` ធម្មតា។"
+---
+
+## ⚙️ អ្វីទៅជា Functions?
+
+**Functions** ប្រៀបបាននឹងម៉ាស៊ីនផលិតទឹកក្រឡុកអញ្ចឹង។ អ្នកដាក់ផ្លែឈើចូល (Parameters) ម៉ាស៊ីនកិនវា (Logic) ហើយអ្នកទទួលបានទឹកក្រឡុកចេញមកក្រៅ (Return)។ វាអនុញ្ញាតឱ្យអ្នកសរសេរកូដម្តង ហើយហៅមកប្រើច្រើនដងដោយមិនបាច់សរសេរឡើងវិញ (Reusability)។
+
+---
+
+## 1. របៀបបង្កើត Functions ទាំង ៣ ទម្រង់
+
+នៅក្នុង JavaScript អ្នកអាចបង្កើត Function តាម ៣ របៀបខុសៗគ្នា៖
+
+### ទី១៖ Function Declaration
+នេះគឺជាទម្រង់បុរាណបំផុត ហើយវាមានអត្ថប្រយោជន៍មួយគឺ **Hoisting** ដែលមានន័យថាអ្នកអាចហៅវាមកប្រើមុនពេលអ្នកសរសេរវាប្រកាសក៏បាន។
+```javascript
+// ការបង្កើត
+function greet() {
+  console.log("សួស្តី!");
+}
+
+// ការហៅមកប្រើ (Call/Invoke)
+greet(); 
+```
+
+### ទី២៖ Function Expression
+នេះគឺជាការបង្កើត Function រួចយកវាទៅផ្ទុកក្នុង Variable មួយ។ វាមិនមាន Hoisting ទេ។
+```javascript
+const greetUser = function() {
+  console.log("សួស្តីអ្នកប្រើប្រាស់!");
+};
+
+greetUser();
+```
+
+### ទី៣៖ Arrow Function (ES6+) ⭐⭐⭐
+នេះគឺជាទម្រង់ថ្មីដែលខ្លីជាងមុន ហើយពេញនិយមខ្លាំងបំផុតនាពេលបច្ចុប្បន្ន ពិសេសនៅពេលសរសេរជាមួយ React ឬ Frameworks ផ្សេងៗ។ ជំនួសអោយការសរសេរពាក្យ `function` វាប្រើសញ្ញា `=>` (Arrow)។
+```javascript
+const sayHi = () => {
+  console.log("Hi ប្រូ!");
+};
+
+sayHi();
+```
+
+---
+
+## 📥 2. Parameters និង Arguments
+
+ដើម្បីអោយម៉ាស៊ីន (Function) ដំណើរការបានតាមតម្រូវការ យើងត្រូវបញ្ជូនទិន្នន័យអោយវា។ តម្លៃដែលយើងកំណត់ពេល **បង្កើត** Function ហៅថា **Parameters** ចំណែកឯតម្លៃដែលយើងបញ្ជូនពេល **ហៅ** Function ហៅថា **Arguments**។
+
+```javascript
+// name គឺជា Parameter
+const welcomeMessage = (name) => {
+  console.log(`សូមស្វាគមន៍មកកាន់ក្រុមការងារ, ${name}!`);
+};
+
+welcomeMessage("Sok"); // "Sok" គឺជា Argument
+welcomeMessage("Dara");
+```
+
+### Default Parameters (តម្លៃលំនាំដើម)
+ចុះបើអ្នកប្រើប្រាស់ភ្លេចបញ្ជូន Argument អោយវា? យើងអាចកំណត់ **Default Parameter** បានការពារកុំអោយវាចេញ `undefined`។
+```javascript
+const multiply = (a, b = 1) => {
+  console.log(a * b);
+};
+
+multiply(5, 2); // លទ្ធផល: 10
+multiply(5);    // លទ្ធផល: 5 (ព្រោះ b យកតម្លៃលំនាំដើម 1 ដោយស្វ័យប្រវត្តិ)
+```
+
+---
+
+## 📤 3. ការប្រគល់លទ្ធផល (Return)
+
+Function ភាគច្រើនធ្វើការគណនារួច មិនមែនគ្រាន់តែព្រីនចេញ (`console.log`) នោះទេ ប៉ុន្តែវាត្រូវប្រគល់លទ្ធផលនោះត្រឡប់មកក្រៅវិញ ដើម្បីអោយយើងយកទៅប្រើប្រាស់បន្ត។ យើងប្រើពាក្យគន្លឹះ `return`។
+
+```javascript
+function addNumbers(num1, num2) {
+  let sum = num1 + num2;
+  return sum; // បញ្ជូន sum ចេញមកក្រៅ
+  
+  // កូដដែលនៅក្រោម return នឹងមិនដំណើរការទេ!
+  // console.log("ខ្ញុំលែងដើរហើយ");
+}
+
+// យើងអាចផ្ទុកលទ្ធផលក្នុង Variable ថ្មី
+let myResult = addNumbers(10, 20);
+console.log(myResult); // 30
+```
+
+### Implicit Return (ចំណុចពិសេសរបស់ Arrow Function)
+បើ Arrow Function របស់អ្នកមានកូដតែ **មួយបន្ទាត់** អ្នកមិនចាំបាច់ប្រើវង់ក្រចក `{}` និងពាក្យ `return` នោះទេ។ វានឹង Return ដោយស្វ័យប្រវត្តិ!
+
+```javascript
+// សរសេរធម្មតា
+const subtract = (a, b) => {
+  return a - b;
+};
+
+// សរសេរកាត់ (Implicit Return) - ខ្លី ស្អាត!
+const divide = (a, b) => a / b;
+
+console.log(divide(10, 2)); // 5
+```

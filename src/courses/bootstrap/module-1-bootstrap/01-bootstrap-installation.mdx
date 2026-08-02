@@ -1,0 +1,79 @@
+---
+title: Bootstrap Installation
+description: សិក្សាពីរបៀបដំឡើង និងប្រើប្រាស់ Bootstrap នៅក្នុងគម្រោងរបស់អ្នក តាមរយៈ CDN, ការទាញយកផ្ទាល់ (Download), npm, ឬជាមួយ Frameworks ផ្សេងៗដូចជា Vite, React និង Next.js។
+objectives:
+  - ស្គាល់វិធីសាស្រ្តផ្សេងៗក្នុងការដំឡើង Bootstrap
+  - ចេះភ្ជាប់ Bootstrap ចូលទៅក្នុង HTML ដោយប្រើប្រាស់ CDN
+  - ចេះដំឡើង Bootstrap តាមរយៈ npm សម្រាប់ Modern Projects
+module: module-1-bootstrap
+order: 1
+quiz:
+  - question: "តើវិធីមួយណាដែលលឿនជាងគេក្នុងការភ្ជាប់ Bootstrap ចូលទៅក្នុងឯកសារ HTML ធម្មតាដោយមិនចាំបាច់ដំឡើងអ្វីទាំងអស់?"
+    options:
+      - ទាញយក (Download) ឯកសារយកមកដាក់ក្នុង Project
+      - ប្រើប្រាស់ CDN (Content Delivery Network) Link
+      - ប្រើប្រាស់ពាក្យបញ្ជា `npm install bootstrap`
+      - ប្រើប្រាស់ Vite
+    correctAnswer: 1
+    explanation: "ការប្រើប្រាស់ CDN គឺជាមធ្យោបាយលឿនបំផុត ព្រោះអ្នកគ្រាន់តែថតចម្លង (Copy) តំណ Link បញ្ចូលទៅក្នុង `<head>` នៃ HTML របស់អ្នកប៉ុណ្ណោះ។"
+---
+
+## 🚀 វិធីសាស្រ្តក្នុងការដំឡើង Bootstrap
+
+Bootstrap ផ្តល់នូវជម្រើសជាច្រើនក្នុងការដំឡើងអាស្រ័យលើប្រភេទ Project ដែលអ្នកកំពុងធ្វើ។
+
+---
+
+## 1. ការប្រើប្រាស់ CDN (លឿន និងងាយស្រួលបំផុត)
+
+ប្រសិនបើអ្នកកំពុងរៀន ឬសរសេរគេហទំព័រធម្មតា (HTML, CSS, JS) ការប្រើប្រាស់ **CDN** (Content Delivery Network) គឺជាជម្រើសល្អបំផុត។ អ្នកគ្រាន់តែថតចម្លង Link ខាងក្រោមនេះទៅដាក់ក្នុង `<head>` ជាការស្រេច។
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bootstrap Page</title>
+  
+  <!-- ភ្ជាប់ Bootstrap CSS ទីនេះ -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  
+  <h1 class="text-primary">សួស្តី Bootstrap!</h1>
+
+  <!-- ភ្ជាប់ Bootstrap JS នៅចុងបំផុតនៃ body -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+```
+
+---
+
+## 2. ការទាញយកផ្ទាល់ (Download)
+
+បើអ្នកមិនចង់ពឹងផ្អែកលើអុីនធឺណិត (Offline) អ្នកអាចចូលទៅកាន់គេហទំព័រ [getbootstrap.com](https://getbootstrap.com) ដើម្បីទាញយកឯកសារ CSS និង JS មកដាក់ក្នុងម៉ាស៊ីនរបស់អ្នកផ្ទាល់ រួចភ្ជាប់វាទៅក្នុង HTML។
+
+```html
+<!-- ឧបមាថាអ្នកបានទាញយកវាដាក់ក្នុង Folder ឈ្មោះ css -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+```
+
+---
+
+## 3. ការដំឡើងតាមរយៈ NPM (សម្រាប់អ្នកជំនាញ)
+
+ប្រសិនបើអ្នកប្រើប្រាស់ **Vite**, **React**, ឬ **Next.js** អ្នកនឹងត្រូវដំឡើងវាតាមរយៈ NPM (Node Package Manager)។
+
+១. ដំឡើងតាមរយៈ Terminal៖
+```bash
+npm install bootstrap
+```
+
+២. បន្ទាប់មក ភ្ជាប់វាទៅក្នុងឯកសារដើមរបស់អ្នក (ឧទាហរណ៍ `main.js` ឬ `_app.js`)៖
+```javascript
+import 'bootstrap/dist/css/bootstrap.min.css';
+```
+
+> 💡 **ចំណាំសម្រាប់ React / Next.js:** ជាទូទៅ នៅពេលសរសេរ React គេនិយមប្រើប្រាស់កញ្ចប់ **React Bootstrap** បន្ថែម ដើម្បីងាយស្រួលគ្រប់គ្រង Components។ ប៉ុន្តែការរៀនក្បួនខ្នាត Classes របស់ Bootstrap ធម្មតាគឺនៅតែជាមូលដ្ឋានគ្រឹះដ៏សំខាន់!

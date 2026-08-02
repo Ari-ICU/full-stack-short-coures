@@ -1,0 +1,93 @@
+---
+title: Classes & Object-Oriented Programming
+description: រៀនពីរបៀបសរសេរកូដតាមបែប Object-Oriented Programming (OOP) ដោយប្រើប្រាស់ Classes នៅក្នុង JavaScript។
+objectives:
+  - យល់ពីគំនិតនៃ Class ដែលជាគំរូ (Blueprint) សម្រាប់បង្កើត Objects
+  - ចេះប្រើប្រាស់ constructor ដើម្បីទទួលយកទិន្នន័យដំបូង
+  - យល់ពីតួនាទីរបស់ពាក្យគន្លឹះ this
+  - ចេះបង្កើត Class ថ្មីដោយយកលក្ខណៈពី Class ចាស់ (Inheritance) ដោយប្រើ extends និង super
+module: module-1-js
+order: 22
+quiz:
+  - question: តើពាក្យគន្លឹះ (Keyword) មួយណាដែលត្រូវប្រើប្រាស់ដើម្បីហៅ `constructor` របស់ Class ដើម (Parent Class) ពីខាងក្នុង Class ដែលបានបន្តពូជ (Child Class)?
+    options:
+      - this
+      - parent
+      - super
+      - extends
+    correctAnswer: 2
+    explanation: "`super()` ត្រូវបានប្រើនៅខាងក្នុង `constructor` របស់ Child Class ដើម្បីហៅទៅកាន់ `constructor` របស់ Parent Class ដើម្បិបញ្ជូនទិន្នន័យទៅអោយវា។"
+---
+
+## 🏛️ អ្វីទៅជា Classes?
+
+ប្រសិនបើអ្នកចង់បង្កើត Object សម្រាប់អ្នកប្រើប្រាស់ម្នាក់ អ្នកអាចសរសេរវាដោយដៃបាន។ ប៉ុន្តែចុះបើអ្នកចង់បង្កើតអ្នកប្រើប្រាស់ ១០០ នាក់ដែលមានរចនាសម្ព័ន្ធដូចគ្នា? 
+
+**Class** គឺជា "ពុម្ពគំរូ" (Blueprint) សម្រាប់បង្កើត Objects ដែលមានរចនាសម្ព័ន្ធដូចៗគ្នា។ វាគឺជាបេះដូងនៃ **Object-Oriented Programming (OOP)**។
+
+---
+
+## 1. ការបង្កើត Class និង Constructor
+
+យើងបង្កើត Class ដោយប្រើពាក្យគន្លឹះ `class` (ជាទូទៅឈ្មោះ Class ត្រូវផ្តើមដោយអក្សរធំ)។ នៅខាងក្នុងនោះ វាមានកន្លែងពិសេសមួយហៅថា `constructor` ដែលដើរដោយស្វ័យប្រវត្តិរាល់ពេលដែលអ្នកបង្កើត Object ថ្មីពី Class នោះ។
+
+### តើ `this` គឺជាអ្វី?
+`this` តំណាងអោយ Object ថ្មីដែលកំពុងត្រូវបានបង្កើត។
+
+```javascript
+class User {
+  // constructor ទទួលយកទិន្នន័យនៅពេលបង្កើត
+  constructor(name, age) {
+    this.name = name; // តម្លៃ this.name ជារបស់ Object, name ជា Parameter
+    this.age = age;
+  }
+
+  // អ្នកអាចបង្កើត Methods នៅទីនេះបាន
+  greet() {
+    console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name} ហើយខ្ញុំមានអាយុ ${this.age} ឆ្នាំ។`);
+  }
+}
+
+// ប្រើពាក្យ 'new' ដើម្បីបង្កើត Object ថ្មីពី Class
+const user1 = new User("Sok", 25);
+const user2 = new User("Dara", 30);
+
+user1.greet(); // សួស្តី ខ្ញុំឈ្មោះ Sok ហើយខ្ញុំមានអាយុ 25 ឆ្នាំ។
+user2.greet(); // សួស្តី ខ្ញុំឈ្មោះ Dara ហើយខ្ញុំមានអាយុ 30 ឆ្នាំ។
+```
+
+---
+
+## 2. ការបន្តពូជ (Inheritance: `extends` និង `super`)
+
+ឧបមាថាអ្នកចង់បង្កើត `Admin` មួយ។ `Admin` ក៏ជា `User` ដែរ តែគេមានសិទ្ធិបន្ថែម។ ជំនួសអោយការសរសេរកូដ `User` ឡើងវិញទាំងអស់ អ្នកអាចអោយ `Admin` ទទួលយកលក្ខណៈពី `User` បានដោយប្រើប្រាស់ `extends`។
+
+ហើយប្រសិនបើអ្នកចង់បន្ថែមទិន្នន័យថ្មីទៅក្នុង `constructor` របស់ `Admin` អ្នកត្រូវហៅ `super()` ដើម្បីបញ្ជូនទិន្នន័យចាំបាច់ទៅអោយ Parent Class (`User`) ជាមុនសិន។
+
+```javascript
+// Admin បន្តពូជពី User
+class Admin extends User {
+  constructor(name, age, role) {
+    // ហៅ super() ដើម្បីបញ្ជូន name និង age ទៅអោយ constructor របស់ User
+    super(name, age);
+    
+    // បន្ថែម Property ថ្មីផ្ទាល់ខ្លួន
+    this.role = role;
+  }
+
+  // បង្កើត Method ថ្មីដែលមានតែ Admin ទើបអាចប្រើបាន
+  deletePost() {
+    console.log(`${this.name} បានលុបអត្ថបទមួយ ដោយមានសិទ្ធិជា ${this.role}។`);
+  }
+}
+
+const admin1 = new Admin("Alice", 28, "SuperAdmin");
+
+// អាចហៅ Method របស់ User បាន (Inheritance)
+admin1.greet(); 
+
+// អាចហៅ Method របស់ខ្លួនឯងបាន
+admin1.deletePost();
+```
+
+ការប្រើប្រាស់ Classes ធ្វើអោយកូដមានសណ្តាប់ធ្នាប់ ងាយស្រួលគ្រប់គ្រង និងអាចពង្រីកបានធំ (Scalable) នៅពេលកម្មវិធីរបស់អ្នកមានភាពស្មុគស្មាញ!

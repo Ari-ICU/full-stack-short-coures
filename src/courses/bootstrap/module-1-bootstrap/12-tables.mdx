@@ -1,0 +1,105 @@
+---
+title: Tables
+description: រៀនពីរបៀបផ្លាស់ប្តូរតារាង HTML ធម្មតា អោយទៅជាតារាងដ៏ស្រស់ស្អាត មានស៊ុម មានពណ៌ និងអាចបត់បែនបាន (Responsive) ដោយប្រើ Bootstrap។
+objectives:
+  - ស្គាល់ Class គោលសម្រាប់តារាងគឺ `.table`
+  - ចេះតុបតែងតារាងដោយប្រើ `.table-hover`, `.table-striped`, និង `.table-bordered`
+  - ចេះបង្កើតតារាងពណ៌ងងឹត `.table-dark`
+  - ចេះធ្វើអោយតារាង Responsive លើទូរស័ព្ទដៃ
+module: module-1-bootstrap
+order: 12
+quiz:
+  - question: "តើ Class មួយណាដែលជួយអោយតារាងធំៗមិនបាក់ Layout (មិនខូចទម្រង់) នៅពេលបើកមើលលើទូរស័ព្ទដៃ ដោយអនុញ្ញាតអោយអ្នកអូស (Scroll) ស្តាំឆ្វេងបាន?"
+    options:
+      - .table-scroll
+      - .table-responsive
+      - .table-mobile
+      - .table-fluid
+    correctAnswer: 1
+    explanation: "ការរុំតារាងរបស់អ្នកទៅក្នុង `<div>` ដែលមាន Class `.table-responsive` នឹងជួយអោយតារាងនោះអាច Scroll ស្តាំឆ្វេងបាននៅលើអេក្រង់តូចៗ ដោយមិនធ្វើអោយខូច Layout គេហទំព័រទាំងមូលឡើយ។"
+---
+
+## 📊 រចនាបថតារាង (Tables)
+
+តារាង (Tables) នៅក្នុង HTML ដើម មើលទៅរាងសាមញ្ញពេក និងមិនសូវស្អាតទេ។ គ្រាន់តែបន្ថែម Class `.table` របស់ Bootstrap មួយ នោះតារាងរបស់អ្នកនឹងប្រែជាស្រស់ស្អាត មានលំហ (Padding) និងមានបន្ទាត់កាត់យ៉ាងមានសណ្តាប់ធ្នាប់។
+
+```html
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">ឈ្មោះ</th>
+      <th scope="col">មុខតំណែង</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td>Sok</td>
+      <td>Developer</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td>Dara</td>
+      <td>Designer</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+---
+
+## 1. តុបតែងតារាង (Table Variants)
+
+អ្នកអាចបន្ថែម Classes ទាំងនេះទៅលើ `.table` ដើម្បីផ្លាស់ប្តូររូបរាងរបស់វា៖
+
+*   **`.table-striped`**: ធ្វើអោយជួរដេកមានពណ៌ផ្ទៃឆ្លាស់គ្នា (ងងឹត ភ្លឺ ងងឹត ភ្លឺ) ជួយអោយងាយស្រួលអាន។
+*   **`.table-hover`**: ពេលអ្នកយកកណ្តុរទៅដាក់លើ (Hover) ជួរដេកណាមួយ ជួរនោះនឹងដូរពណ៌បន្តិច។
+*   **`.table-bordered`**: បន្ថែមស៊ុម (Borders) ជុំវិញក្រឡា (Cells) ទាំងអស់។
+
+```html
+<table class="table table-striped table-hover table-bordered">
+  <!-- មាតិកាតារាងនៅទីនេះ -->
+</table>
+```
+
+---
+
+## 2. តារាងពណ៌ងងឹត (Dark Tables)
+
+អ្នកអាចប្តូរតារាងទាំងមូលទៅជាពណ៌ងងឹត (Dark Mode) ដោយប្រើ `.table-dark`។ វាអាចប្រើរួមគ្នាជាមួយ `striped` និង `hover` បានផងដែរ។
+
+```html
+<table class="table table-dark table-striped">
+  <!-- មាតិកាតារាងនៅទីនេះ -->
+</table>
+```
+
+---
+
+## 3. Responsive Tables
+
+ជាទូទៅ តារាងដែលមានទិន្នន័យច្រើន (ជួរឈរច្រើន) តែងតែមានបញ្ហានៅពេលបើកមើលលើទូរស័ព្ទដៃ ព្រោះវាធ្វើអោយគេហទំព័រត្រូវរុញទំហំចេញក្រៅ។
+
+ដំណោះស្រាយគឺ **ការរុំតារាងរបស់អ្នកទៅក្នុង `<div>` មួយទៀតដែលមាន Class `.table-responsive`**។ ការធ្វើបែបនេះ តារាងនឹងមាន Scrollbar ខាងក្រោមសម្រាប់អូសមើល ជំនួសអោយការបំបាក់ Layout!
+
+```html
+<!-- រុំតារាងក្នុង div.table-responsive -->
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ឈ្មោះ</th>
+        <th scope="col">អាយុ</th>
+        <th scope="col">ទីកន្លែងកំណើត</th>
+        <th scope="col">ការងារ</th>
+        <th scope="col">អ៊ីមែល</th>
+        <!-- បើមានជួរឈរច្រើន វាអាចនឹងលាតហួសទំហំអេក្រង់ -->
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ... -->
+    </tbody>
+  </table>
+</div>
+```

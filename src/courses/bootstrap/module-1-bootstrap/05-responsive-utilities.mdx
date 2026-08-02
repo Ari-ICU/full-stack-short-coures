@@ -1,0 +1,75 @@
+---
+title: Responsive Utilities
+description: រៀនពីរបៀបបង្ហាញ (Show) ឬលាក់ (Hide) ធាតុផ្សេងៗនៅលើគេហទំព័រអាស្រ័យលើទំហំអេក្រង់របស់អ្នកប្រើប្រាស់។
+objectives:
+  - ស្គាល់ Class សម្រាប់លាក់ (`d-none`) និងបង្ហាញ (`d-block`) ធាតុ
+  - ចេះបញ្ចូល Breakpoints ដើម្បីបង្កើត Responsive Display (ឧទាហរណ៍៖ លាក់លើទូរស័ព្ទ បង្ហាញលើកុំព្យូទ័រ)
+  - យល់ពីរបៀបដែល Bootstrap អនុវត្ត Mobile-First Strategy
+module: module-1-bootstrap
+order: 5
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់លាក់ប៊ូតុងមួយនៅលើទូរស័ព្ទ (អេក្រង់តូច) ប៉ុន្តែចង់បង្ហាញវានៅលើអេក្រង់ Tablet (`md`) ឡើងទៅ តើអ្នកគួរប្រើប្រាស់កូដមួយណា?"
+    options:
+      - "`<button class=\\\"d-md-block\\\">Click</button>`"
+      - "`<button class=\\\"d-none d-md-block\\\">Click</button>`"
+      - "`<button class=\\\"d-block d-md-none\\\">Click</button>`"
+      - "`<button class=\\\"hide show-md\\\">Click</button>`"
+    correctAnswer: 1
+    explanation: "`d-none` នឹងលាក់ប៊ូតុងនោះនៅលើគ្រប់ទំហំអេក្រង់ទាំងអស់ (ចាប់ពីតូចបំផុត) ប៉ុន្តែដោយសារយើងដាក់ `d-md-block` បន្ត វានឹងជួយបង្ហាញ (Show) មកវិញនៅពេលអេក្រង់មានទំហំចាប់ពី `md` ឡើងទៅ។"
+---
+
+## 📱 ការគ្រប់គ្រងការបង្ហាញ (Display Utilities)
+
+នៅក្នុងគម្រោងជាក់ស្តែង អ្នកតែងតែជួបប្រទះករណីដែលអ្នកចង់៖
+*   បង្ហាញម៉ឺនុយបែបចំហៀង (Sidebar) តែនៅលើកុំព្យូទ័រ ហើយលាក់វានៅលើទូរស័ព្ទ។
+*   បង្ហាញប៊ូតុង "Burger Menu" តែនៅលើទូរស័ព្ទ ហើយលាក់វានៅលើកុំព្យូទ័រ។
+
+នេះគឺជាពេលដែលអ្នកត្រូវប្រើប្រាស់ **Display Utilities** (`d-*`) របស់ Bootstrap!
+
+---
+
+## 1. ការលាក់ និង បង្ហាញជាទូទៅ
+
+ការប្រើប្រាស់ `d-*` គឺវាស្មើនឹងការសរសេរកូដ CSS `display: ...`។ 
+*   **`d-none`**: លាក់ (ស្មើនឹង `display: none`)
+*   **`d-block`**: បង្ហាញជាទម្រង់ Block (ស្មើនឹង `display: block`)
+*   **`d-inline`**: បង្ហាញជាទម្រង់ Inline (ស្មើនឹង `display: inline`)
+*   **`d-flex`**: បង្ហាញជាទម្រង់ Flexbox (ស្មើនឹង `display: flex`)
+
+```html
+<p class="d-none">ខ្ញុំត្រូវបានលាក់បាត់ហើយ! អ្នកមើលខ្ញុំមិនឃើញទេ!</p>
+```
+
+---
+
+## 2. Responsive Display (Mobile-First)
+
+Bootstrap ត្រូវបានរចនាឡើងតាមគោលការណ៍ **Mobile-First** ដែលមានន័យថា៖ បើអ្នកសរសេរ Class អ្វីមួយដោយគ្មានបញ្ជាក់ពីទំហំអេក្រង់ (ឧ. `d-none`) វានឹងចាប់ផ្តើមអនុវត្តពីអេក្រង់តូចបំផុត (ទូរស័ព្ទ) រហូតដល់អេក្រង់ធំបំផុត។ ប្រសិនបើអ្នកចង់ផ្លាស់ប្តូរវានៅទំហំអេក្រង់ណាមួយ អ្នកត្រូវបន្ថែម Breakpoints (`sm`, `md`, `lg`, `xl`)។
+
+ទម្រង់ទូទៅគឺ៖ `d-{breakpoint}-{value}`។
+
+### ឧទាហរណ៍ទី ១៖ លាក់លើទូរស័ព្ទ បង្ហាញលើ Tablet/Laptop
+យើងចាប់ផ្តើមដោយលាក់វា (`d-none`) រួចចាំបង្ហាញវាវិញពេលដល់ទំហំ `md` (`d-md-block`)។
+```html
+<div class="d-none d-md-block bg-primary text-white p-3">
+  ខ្ញុំនឹងបាត់មុខនៅលើទូរស័ព្ទ ប៉ុន្តែលេចមុខនៅលើ Tablet និងកុំព្យូទ័រ!
+</div>
+```
+
+### ឧទាហរណ៍ទី ២៖ បង្ហាញលើទូរស័ព្ទ លាក់លើ Tablet/Laptop
+យើងទុកវាជាធម្មតា (ឬដាក់ `d-block`) រួចចាំលាក់វាពេលដល់ទំហំ `md` (`d-md-none`)។
+```html
+<button class="btn btn-warning d-block d-md-none">
+  ប៊ូតុងនេះសម្រាប់តែទូរស័ព្ទទេ!
+</button>
+```
+
+### ឧទាហរណ៍ទី ៣៖ លាក់តែលើ Tablet ប៉ុណ្ណោះ
+បង្ហាញលើទូរស័ព្ទ, លាក់លើ Tablet, បង្ហាញវិញលើ Desktop (`lg`)។
+```html
+<div class="d-md-none d-lg-block bg-info p-3">
+  ខ្ញុំបង្ហាញមុខគ្រប់ពេល លើកលែងតែអេក្រង់ Tablet!
+</div>
+```
+
+ការស្ទាត់ជំនាញលើ Responsive Utilities ទាំងនេះ នឹងធ្វើអោយអ្នកអាចគ្រប់គ្រង Layout ស្មុគស្មាញដោយមិនចាំបាច់សរសេរ CSS Media Queries ដោយខ្លួនឯងឡើយ!

@@ -1,0 +1,158 @@
+---
+title: DOM Manipulation
+description: រៀនពីរបៀបប្រើប្រាស់ JavaScript ដើម្បីចាប់យក និងផ្លាស់ប្តូរធាតុ (Elements) នៅលើគេហទំព័រដោយផ្ទាល់។
+objectives:
+  - យល់ដឹងពីគោលការណ៍នៃ Document Object Model (DOM)
+  - ចេះប្រើប្រាស់ querySelector ដើម្បីចាប់យក Elements
+  - រៀនពីរបៀបបន្ថែម Events (Click, Submit) និងប្រើប្រាស់ Event Object
+module: module-1-js
+order: 12
+quiz:
+  - question: ហេតុអ្វីបានជាយើងត្រូវប្រើ `e.preventDefault()` នៅពេល Submit Form?
+    options:
+      - ដើម្បីការពារកុំអោយមាន XSS Attack
+      - ដើម្បីបញ្ឈប់ Form មិនអោយ Refresh ទំព័រ (Page Reload) ដោយស្វ័យប្រវត្តិ
+      - ដើម្បីអោយ Button ដូរពណ៌
+      - ដើម្បី Submit ទិន្នន័យទៅកាន់ Server លឿនជាងមុន
+    correctAnswer: 1
+    explanation: "តាមលំនាំដើម (Default) នៅពេល Submit Form វានឹងធ្វើការ Refresh ទំព័រ។ យើងប្រើ `e.preventDefault()` ដើម្បីបញ្ឈប់សកម្មភាពនេះ និងគ្រប់គ្រងការ Submit ដោយប្រើ JavaScript វិញ។"
+---
+
+## 🏗️ ស្វែងយល់ពី DOM
+
+**DOM (Document Object Model)** គឺជារចនាសម្ព័ន្ធដើមឈើ (Tree Structure) ដែល Browser បង្កើតឡើងនៅពេលវាអានកូដ HTML របស់អ្នក។ តាមរយៈ DOM, JavaScript អាចផ្លាស់ប្តូររចនាសម្ព័ន្ធ, Style និងមាតិការបស់គេហទំព័របានយ៉ាងងាយស្រួល។
+
+---
+
+## 1. Selecting Elements
+
+ដើម្បីអាចបញ្ជា HTML Element ណាមួយបាន ជាដំបូងយើងត្រូវចាប់យកវាសិន។ វិធីដែលពេញនិយមបំផុតនាពេលបច្ចុប្បន្នគឺការប្រើប្រាស់ `querySelector` (ដែលទទួលយក CSS Selectors)៖
+
+```javascript
+// ចាប់យក Element ដែលមាន id="my-button"
+const myButton = document.querySelector("#my-button");
+
+// ចាប់យក Element ដែលមាន class="box" (យកតែមួយដំបូងគេ)
+const firstBox = document.querySelector(".box");
+
+// ចាប់យក Elements ទាំងអស់ដែលមាន class="box" (ត្រឡប់មកជាបញ្ជី NodeList)
+const allBoxes = document.querySelectorAll(".box");
+```
+
+---
+
+## 2. Modifying Content and Style
+
+បន្ទាប់ពីចាប់យកបានហើយ យើងអាចផ្លាស់ប្តូរវាបាន៖
+
+```javascript
+const heading = document.querySelector("h1");
+
+// ផ្លាស់ប្តូរអត្ថបទ
+heading.textContent = "សួស្តីពី JavaScript!";
+
+// ផ្លាស់ប្តូរពណ៌ និងទំហំអក្សរតាមរយៈ style
+heading.style.color = "blue";
+heading.style.fontSize = "40px";
+
+// បន្ថែម ឬដក CSS Class (ណែនាំអោយប្រើវិធីនេះ)
+heading.classList.add("active");
+heading.classList.remove("hidden");
+```
+
+---
+
+## 3. Event Listeners នឹង Event Object
+
+នេះគឺជាចំណុចដែលគេហទំព័ររបស់អ្នកអាចឆ្លើយតបជាមួយអ្នកប្រើប្រាស់!
+
+**Click Event:**
+```javascript
+const button = document.querySelector("#click-me");
+
+button.addEventListener("click", () => {
+  console.log("ប៊ូតុងត្រូវបានចុច!");
+});
+```
+
+**ការ Submit Form និងការប្រើប្រាស់ Event Object (`e`):**
+នៅពេលមាន Event មួយកើតឡើង JavaScript តែងតែបញ្ជូន **Event Object (ច្រើនតាងដោយ `e` ឬ `event`)** ដែលមានផ្ទុកព័ត៌មានលម្អិតអំពី Event នោះ។
+
+```html
+<form id="login-form">
+  <input type="text" id="username" placeholder="បញ្ចូលឈ្មោះ" />
+  <button type="submit">ចូលប្រើប្រាស់</button>
+</form>
+```
+
+```javascript
+const form = document.querySelector("#login-form");
+const usernameInput = document.querySelector("#username");
+
+form.addEventListener("submit", (e) => {
+  // បញ្ឈប់ការ Refresh ទំព័រ (Page Reload) ដែលជាទម្លាប់ធម្មតារបស់ Form
+  e.preventDefault();
+  
+  // ទាញយកតម្លៃ (Value) ដែលអ្នកប្រើប្រាស់បានវាយបញ្ចូល
+  const username = usernameInput.value;
+  
+  console.log(`សូមស្វាគមន៍, ${username}!`);
+});
+```
+
+ការយល់ដឹងពីរបៀបគ្រប់គ្រង Events និង `e.preventDefault()` គឺមានសារៈសំខាន់ខ្លាំងណាស់សម្រាប់ការបង្កើត **Single Page Applications (SPA)**!
+
+---
+
+## 4. ឧទាហរណ៍ជាក់ស្តែង៖ បញ្ចូល HTML, CSS និង JavaScript ជាមួយគ្នា
+
+ដើម្បីអោយអ្នកឃើញរូបភាពកាន់តែច្បាស់ នេះគឺជាឧទាហរណ៍បង្ហាញពីការសហការគ្នារវាង HTML, CSS, និង JS ក្នុងការបង្កើតមុខងារ **Dark Mode Toggle** ដ៏សាមញ្ញមួយ៖
+
+**HTML (រចនាសម្ព័ន្ធ):**
+```html
+<div class="card">
+  <h2 id="title">សួស្តីពិភពលោក!</h2>
+  <button id="theme-btn">ប្តូរពណ៌</button>
+</div>
+```
+
+**CSS (ការតុបតែង):**
+```css
+/* Style លំនាំដើម (Light Mode) */
+.card {
+  background-color: white;
+  color: black;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+/* Style បន្ថែម (Dark Mode) ដែលនឹងត្រូវបញ្ជាដោយ JS */
+.dark-theme {
+  background-color: #333;
+  color: white;
+}
+```
+
+**JavaScript (អន្តរកម្ម/តក្កវិជ្ជា):**
+```javascript
+// ១. ចាប់យក Elements ទាំងពីរ
+const cardElement = document.querySelector(".card");
+const themeBtn = document.querySelector("#theme-btn");
+
+// ២. បន្ថែម Event ទៅអោយប៊ូតុងនៅពេលចុច
+themeBtn.addEventListener("click", () => {
+  
+  // ៣. ប្រើ toggle ដើម្បី បន្ថែម/ដក class 'dark-theme'
+  cardElement.classList.toggle("dark-theme");
+  
+  // ៤. ផ្លាស់ប្តូរអក្សរនៅលើប៊ូតុងទៅតាមស្ថានភាព
+  if (cardElement.classList.contains("dark-theme")) {
+    themeBtn.textContent = "ត្រឡប់ទៅពណ៌ស";
+  } else {
+    themeBtn.textContent = "ប្តូរពណ៌";
+  }
+  
+});
+```
+
+ឧទាហរណ៍នេះបង្ហាញយ៉ាងច្បាស់ថា៖ **HTML** បង្កើតប្រអប់, **CSS** រង់ចាំផ្លាស់ប្តូរពណ៌, ហើយ **JavaScript** គឺជាអ្នកបញ្ជាអោយប្តូរនៅពេលអ្នកប្រើប្រាស់ចុចប៊ូតុង!

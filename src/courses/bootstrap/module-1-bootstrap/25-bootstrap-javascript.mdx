@@ -1,0 +1,88 @@
+---
+title: Bootstrap JavaScript
+description: សិក្សាពីរបៀបបញ្ជាមុខងារ (Components) របស់ Bootstrap ដូចជា Modal ឬ Tooltips តាមរយៈការសរសេរកូដ JavaScript សុទ្ធ ដោយមិនចាំបាច់ចុចប៊ូតុង។
+objectives:
+  - យល់ពីទំនាក់ទំនងរវាង HTML Data Attributes (data-bs-*) និង JavaScript API
+  - ចេះបើក Modal តាមរយៈកូដ JavaScript (ឧ. បើកដោយស្វ័យប្រវត្តិពេលមានកំហុស)
+  - ចេះបើកដំណើរការមុខងារ Tooltips និង Popovers
+module: module-1-bootstrap
+order: 25
+quiz:
+  - question: "តើមុខងារមួយណាខាងក្រោមនេះរបស់ Bootstrap ដែលទាមទារអោយអ្នកត្រូវតែសរសេរកូដ JavaScript ដើម្បីផ្តើមវា (Initialize) ទើបវាអាចដំណើរការបាន?"
+    options:
+      - Modal
+      - Dropdown
+      - Tooltips
+      - Collapse
+    correctAnswer: 2
+    explanation: "ខុសពី Modal ឬ Dropdown ដែលអាចដំណើរការបានតាមរយៈការប្រើតែ HTML (data-bs-toggle), Tooltips និង Popovers តម្រូវអោយអ្នកសរសេរកូដ JavaScript បន្តិចបន្តួចដើម្បីប្រាប់ Bootstrap អោយតាមដានវានៅលើអេក្រង់ ព្រោះវាទាមទារការគណនាទីតាំងច្រើនពី Popper.js ដែលអាចធ្វើអោយគេហទំព័រដើរយឺតបើបើកវាទាំងអស់តាំងពីដើម។"
+---
+
+## ⚙️ ការបញ្ជាតាមរយៈ JavaScript (JS API)
+
+រហូតមកដល់ពេលនេះ យើងបានប្រើប្រាស់មុខងាររបស់ Bootstrap (ដូចជា Modal និង Dropdown) តាមរយៈការសរសេរកូដ HTML ភ្ជាប់ជាមួយគុណលក្ខណៈ `data-bs-*` (Data Attributes)។
+
+ប៉ុន្តែនៅក្នុងគម្រោងជាក់ស្តែង មានពេលខ្លះអ្នកចង់បើក Modal ដោយស្វ័យប្រវត្តិ ឧទាហរណ៍៖ បន្ទាប់ពីការរក្សាទុកទិន្នន័យ (Save data) ជោគជ័យ។ នេះគឺជាពេលដែលយើងត្រូវប្រើប្រាស់ **JavaScript API** របស់ Bootstrap!
+
+---
+
+## 1. ការបើក Modal តាមរយៈ JavaScript
+
+ឧបមាថាអ្នកមាន Modal មួយដែលមាន ID `#successModal`។ អ្នកមិនមានប៊ូតុងសម្រាប់ចុចបើកវាទេ អ្នកចង់បើកវានៅពេលកូដណាមួយដើរចប់។
+
+```javascript
+// 1. ចាប់យកផ្ទាំង Modal ដោយប្រើ ID
+const myModalElement = document.getElementById('successModal');
+
+// 2. បង្កើត Object ថ្មីរបស់ Bootstrap Modal
+const myModal = new bootstrap.Modal(myModalElement);
+
+// 3. បញ្ជាអោយវាបើក
+myModal.show();
+
+// 4. (ជម្រើស) បញ្ជាអោយវាបិទវិញក្រោយពេល 3 វិនាទី
+setTimeout(() => {
+  myModal.hide();
+}, 3000);
+```
+
+---
+
+## 2. ការបើកដំណើរការ Tooltips (ត្រូវតែធ្វើ)
+
+**Tooltips** គឺជាអត្ថបទតូចៗដែលលេចឡើងពេលអ្នកយកកណ្តុរទៅដាក់ពីលើ (Hover) ប៊ូតុង ឬអត្ថបទអ្វីមួយ។ ដោយសារហេតុផលល្បឿន (Performance), Bootstrap មិនបានបើកមុខងារនេះអោយដើរដោយស្វ័យប្រវត្តិទេ។
+
+ដើម្បីប្រើវា អ្នកត្រូវបន្ថែម HTML នេះសិន៖
+```html
+<button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-title="នេះគឺជាអត្ថបទ Tooltip លាក់កំបាំង!">
+  ដាក់កណ្តុរពីលើខ្ញុំ
+</button>
+```
+
+បន្ទាប់មក អ្នកត្រូវសរសេរកូដ JS ដើម្បីប្រាប់ Bootstrap អោយស្វែងរកគ្រប់ប៊ូតុងដែលមាន `data-bs-toggle="tooltip"` ហើយបើកមុខងារអោយវា៖
+
+```javascript
+// ស្វែងរកគ្រប់ Elements ទាំងអស់ដែលមាន data-bs-toggle="tooltip"
+const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+
+// ប្រើប្រាស់ Array ម៉ាភ (Map) ដើម្បីបង្កើត Bootstrap Tooltip Object សម្រាប់ Element នីមួយៗ
+const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+```
+
+---
+
+## 3. Popovers
+
+**Popovers** ស្រដៀងនឹង Tooltips ដែរ ប៉ុន្តែវាអាចផ្ទុកព័ត៌មានបានច្រើនជាង មានចំណងជើង និងអត្ថបទ ហើយវានឹងលេចឡើងនៅពេលអ្នក **ចុច (Click)** ជំនួសអោយការ Hover។ វាក៏ត្រូវការការ Initialize តាមរយៈ JS ដូច Tooltips ដែរ។
+
+```html
+<button type="button" class="btn btn-danger" data-bs-toggle="popover" data-bs-title="ចំណងជើង Popover" data-bs-content="នេះគឺជាព័ត៌មានលម្អិតដ៏វែងអន្លាយដែលចេញមកពេលអ្នកចុចប៊ូតុង។">
+  ចុចដើម្បីអានបន្ថែម
+</button>
+```
+
+កូដ JS សម្រាប់បើកមុខងារ៖
+```javascript
+const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+```

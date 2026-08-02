@@ -1,0 +1,88 @@
+---
+title: "CSS Typography & Colors"
+description: "ស្វែងយល់ពីការតុបតែងអក្សរ (Font & Text) ពណ៌ (Colors) និងការទាញយក Google Fonts មកប្រើប្រាស់។"
+objectives:
+  - "យល់ពីការកំណត់ពណ៌ (HEX, RGB, HSL)"
+  - "ចេះប្រើប្រាស់ Properties សម្រាប់តុបតែងអក្សរ (font-family, font-size, text-align...)"
+  - "ចេះប្រើប្រាស់ Google Fonts សម្រាប់ភាសាខ្មែរ និងអង់គ្លេស"
+module: module-1-css
+order: 2
+quiz:
+  - question: "តើ Property មួយណាបម្រើសម្រាប់ប្តូរពណ៌របស់អក្សរ?"
+    options:
+      - "text-color"
+      - "color"
+      - "font-color"
+      - "background-color"
+    correctAnswer: 2
+    explanation: "នៅក្នុង CSS ដើម្បីប្តូរពណ៌អក្សរ យើងប្រើពាក្យ `color` ទទេ មិនមែន `text-color` នោះទេ។ ចំណែក `background-color` គឺសម្រាប់ពណ៌ផ្ទៃខាងក្រោយ។"
+---
+
+## 🎨 ការប្រើប្រាស់ពណ៌ (Colors) ក្នុង CSS
+
+នៅក្នុង CSS យើងអាចកំណត់ពណ៌បានតាម ៤ របៀបធំៗ៖
+
+1. **ឈ្មោះពណ៌ (Color Names):** `red`, `blue`, `green`, `tomato`, ល។
+2. **កូដ HEX:** ផ្តើមដោយសញ្ញា `#` តាមដោយលេខនិងអក្សរ ៦ ខ្ទង់ (ឧ. `#FF5733`)។ វាជាទម្រង់ពេញនិយមបំផុតក្នុងការរចនា (Design)។
+3. **RGB / RGBA:** តំណាងអោយ Red, Green, Blue។ `A` គឺ Alpha សម្រាប់ភាពថ្លា (Opacity)។ (ឧ. `rgba(255, 0, 0, 0.5)`)។
+4. **HSL:** Hue, Saturation, Lightness។ ល្អបំផុតសម្រាប់ការប្រែពណ៌ពីងងឹតទៅភ្លឺដោយងាយស្រួល។
+
+```css
+h1 {
+  color: #2c3e50;           /* កូដ HEX ពណ៌ខៀវចាស់ */
+  background-color: rgba(236, 240, 241, 0.8); /* ពណ៌ប្រផេះថ្លា */
+}
+```
+
+---
+
+## ✍️ ការតុបតែងអក្សរ (Typography & Text Formatting)
+
+អក្សរគឺជាផ្នែកដ៏សំខាន់បំផុតនៃវេបសាយ។ CSS ផ្តល់អោយយើងនូវ Properties ជាច្រើនសម្រាប់រៀបចំអក្សរ៖
+
+### Font Properties (លក្ខណៈនៃតួអក្សរ)
+- `font-family`: កំណត់ប្រភេទពុម្ពអក្សរ (ឧ. Arial, Times New Roman)។
+- `font-size`: កំណត់ទំហំអក្សរ (គិតជា `px`, `rem`, `em`)។
+- `font-weight`: កម្រិតកម្រាស់អក្សរ (`normal`, `bold`, ឬលេខ 100 ដល់ 900)។
+
+### Text Properties (ការរៀបចំទម្រង់អក្សរ)
+- `text-align`: តម្រឹមអក្សរ (`left`, `center`, `right`, `justify`)។
+- `text-decoration`: គូសបន្ទាត់ (`underline`, `line-through`, `none`)។ (ជារឿយៗប្រើ `none` ដើម្បីលុបបន្ទាត់ពីក្រោម Link `<a>`)
+- `line-height`: គម្លាតចន្លោះបន្ទាត់បញ្ឈរ (ជួយអោយងាយស្រួលអាន)។
+- `letter-spacing`: គម្លាតរវាងតួអក្សរមួយទៅមួយទៀត។
+
+**ឧទាហរណ៍៖**
+```css
+p {
+  font-family: 'Helvetica', sans-serif;
+  font-size: 16px;
+  font-weight: normal;
+  text-align: justify;
+  line-height: 1.6;        /* គម្លាតបន្ទាត់ 1.6 ដងនៃទំហំអក្សរ */
+  color: #333333;
+}
+```
+
+---
+
+## 🔠 របៀបប្រើប្រាស់ Google Fonts
+
+ជាទូទៅ កុំព្យូទ័រមិនមានពុម្ពអក្សរ (Fonts) ស្អាតៗគ្រប់គ្រាន់ទេ។ ដើម្បីអោយវេបសាយយើងមាន Font ស្អាត និងដូចគ្នានៅលើគ្រប់កុំព្យូទ័រ (Device) យើងតែងតែប្រើប្រាស់សេវាកម្មឥតគិតថ្លៃរបស់ [Google Fonts](https://fonts.google.com/)។
+
+**ជំហានទី ១៖** ចូលទៅកាន់វេបសាយ Google Fonts រួចជ្រើសរើស Font ដែលអ្នកពេញចិត្ត (ឧ. `Roboto` សម្រាប់អង់គ្លេស ឬ `Hanuman` សម្រាប់ភាសាខ្មែរ)។
+**ជំហានទី ២៖** Copy កូដ `<link>` យកមកដាក់ក្នុង `<head>` នៃឯកសារ HTML របស់អ្នក។
+**ជំហានទី ៣៖** ហៅឈ្មោះវាប្រើនៅក្នុង CSS តាមរយៈ Property `font-family`។
+
+```html
+<!-- ដាក់ក្នុង HTML <head> របស់អ្នក -->
+<link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap" rel="stylesheet">
+```
+
+```css
+/* ហៅប្រើក្នុង CSS */
+body {
+  font-family: 'Hanuman', serif;
+}
+```
+
+**សន្និដ្ឋាន:** ការតុបតែងអក្សរបានត្រឹមត្រូវ ធ្វើអោយវេបសាយមានសោភ័ណភាព និងភាពងាយស្រួលក្នុងការអាន (Readability)។ នៅក្នុងមេរៀនបន្ទាប់ យើងនឹងរៀនពីរបៀបចាត់ចែងទីតាំង (Layout) ដោយប្រើប្រាស់ **Flexbox និង Grid** ដែលជាជំនាញដ៏សំខាន់បំផុតមួយ។

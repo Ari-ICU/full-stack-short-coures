@@ -1,0 +1,107 @@
+---
+title: "Selectors & Specificity"
+description: "ស្វែងយល់ពីរបៀបជ្រើសរើស Elements ចំគោលដៅ (Advanced Selectors) និងក្បួនវិធានការអាទិភាព (CSS Specificity) ដ៏សំខាន់បំផុត។"
+objectives:
+  - "យល់ និងចេះប្រើប្រាស់ Advanced Selectors គ្រប់ប្រភេទ"
+  - "ស្គាល់ពី Pseudo-classes និង Pseudo-elements"
+  - "យល់ច្បាស់ពីវិធានការអាទិភាព (Specificity) ថាតើកូដមួយណាឈ្នះ នៅពេលមានការជាន់គ្នា"
+module: module-1-css
+order: 3
+quiz:
+  - question: "ប្រសិនបើយើងមានកូដ `p { color: red; }` និង `#title { color: green; }` សម្រាប់ Element តែមួយ តើវានឹងចេញពណ៌អ្វី?"
+    options:
+      - "ពណ៌ក្រហម ព្រោះ `p` ជា Element ដើម"
+      - "ពណ៌បៃតង ព្រោះ ID (`#title`) មានអំណាច (Specificity) ធំជាង Element (`p`)"
+      - "ពណ៌លាយបញ្ចូលគ្នា"
+      - "Error ព្រោះមានកូដជាន់គ្នា"
+    correctAnswer: 2
+    explanation: "នៅក្នុងច្បាប់ Specificity របស់ CSS, ID Selector មានពិន្ទុ ឬអំណាចខ្លាំងជាង Element Selector ទោះបីជាវានៅខាងលើ ឬខាងក្រោមក៏ដោយ។"
+---
+
+## 🎯 CSS Selectors កម្រិតខ្ពស់
+
+ដើម្បីរចនាវេបសាយបានល្អ អ្នកត្រូវដឹងពីរបៀបកំណត់គោលដៅ (Target) ទៅលើ HTML Elements ឱ្យបានច្បាស់លាស់។
+
+### 1. Selectors មូលដ្ឋាន
+- `*` **(Universal):** ជ្រើសរើសគ្រប់ Elements ទាំងអស់។
+- `.class` **(Class):** ជ្រើសរើស Elements ណាដែលមាន `class="name"`។ (ឧ. `.btn { }`)
+- `#id` **(ID):** ជ្រើសរើស Element ណាដែលមាន `id="name"`។ ត្រូវចាំថា ID មិនអាចប្រើជាន់គ្នាបានទេ។ (ឧ. `#header { }`)
+
+### 2. Combinators (ការផ្គូផ្គង)
+- `div p` **(Descendant):** ជ្រើសរើសគ្រប់ `<p>` ទាំងអស់ដែលស្ថិតនៅខាងក្នុង `<div>` ទោះបីជាវានៅជ្រៅប៉ុណ្ណាក៏ដោយ។
+- `div > p` **(Child):** ជ្រើសរើសតែ `<p>` ណាដែលជាកូនផ្ទាល់ (Direct Child) របស់ `<div>` ប៉ុណ្ណោះ។
+- `div + p` **(Adjacent Sibling):** ជ្រើសរើស `<p>` ដែលនៅជាប់ខាងក្រោមបន្តផ្ទាល់ពី `<div>`។
+- `div ~ p` **(General Sibling):** ជ្រើសរើសគ្រប់ `<p>` ដែលជាបងប្អូន (នៅកម្រិតស្មើគ្នា) ស្ថិតនៅខាងក្រោម `<div>`។
+
+### 3. Attribute Selectors
+អ្នកអាចជ្រើសរើសដោយផ្អែកលើ Attributes របស់ HTML៖
+```css
+input[type="text"] {
+  border: 1px solid blue;
+}
+a[href^="https"] {
+  /* ជ្រើសរើស Link ណាដែលផ្តើមដោយ https */
+  color: green;
+}
+```
+
+---
+
+## ⚡ Pseudo-classes និង Pseudo-elements
+
+### Pseudo-classes (ស្ថានភាពរបស់ Element)
+ប្រើសម្រាប់រចនា Element នៅពេលវាស្ថិតក្នុងស្ថានភាពណាមួយ៖
+- `:hover` ពេលយក Mouse ទៅដាក់ពីលើ
+- `:focus` ពេលចុចលើ Input
+- `:active` ពេលកំពុងចុចសង្កត់ (Clicking)
+- `:first-child` កូនដំបូងគេបង្អស់
+- `:last-child` កូនចុងក្រោយគេបង្អស់
+- `:nth-child(n)` កូនទី n (ឧ. `:nth-child(2)` ឬ `:nth-child(odd)`)
+
+### Pseudo-elements (ការបង្កើតផ្នែកថ្មី)
+ប្រើសម្រាប់បន្ថែម ឬកំណត់រចនាបថលើផ្នែកតូចមួយនៃ Element នោះ៖
+- `::before` បន្ថែម Content នៅខាងមុខ Element
+- `::after` បន្ថែម Content នៅខាងក្រោយ Element
+- `::placeholder` រចនាអក្សរ Placeholder នៅក្នុង Input
+
+```css
+/* បន្ថែមសញ្ញាផ្កាយពណ៌ក្រហមនៅខាងមុខកថាខណ្ឌ */
+p::before {
+  content: "⭐ ";
+  color: red;
+}
+```
+
+---
+
+## ⚖️ CSS Specificity (វិធានការអាទិភាព)
+
+នេះគឺជាចំណុចដ៏សំខាន់បំផុតមួយដែលសិស្សតែងតែមានការភាន់ច្រឡំ។ **តើមានអ្វីកើតឡើងនៅពេលអ្នកសរសេរកូដពណ៌ ២ ផ្សេងគ្នា ទៅលើ Element តែមួយ?** 
+
+```html
+<p id="title" class="text" style="color: yellow;">សួស្តី</p>
+```
+```css
+p { color: red; }
+.text { color: blue; }
+#title { color: green; }
+```
+
+**សំណួរ៖ តើពាក្យ "សួស្តី" នឹងមានពណ៌អ្វី?**
+ចម្លើយគឺ **ពណ៌លឿង (Yellow)**! ហេតុអ្វី? ព្រោះ CSS មានប្រព័ន្ធផ្តល់ពិន្ទុអំណាច (Specificity)។
+
+### លំដាប់ថ្នាក់អំណាច (ពីតូចទៅធំ)
+1. **Element និង Pseudo-elements** (`p`, `div`, `::before`) = អំណាចខ្សោយបំផុត
+2. **Class, Attribute, នឹង Pseudo-classes** (`.text`, `[type="text"]`, `:hover`) = អំណាចមធ្យម
+3. **ID** (`#title`) = អំណាចខ្លាំង (ឈ្នះ Class នឹង Element)
+4. **Inline Style** (`style="color: yellow;"`) = អំណាចខ្លាំងបំផុត (ឈ្នះ ID, Class, Element)
+5. **`!important`** = អំណាចផ្តាច់ការ (មិនគួរប្រើទេ លុះត្រាតែចាំបាច់បំផុត)
+
+```css
+/* ទោះបីជាមាន Inline Style ឬ ID ក៏ដោយ ក៏ !important ឈ្នះដែរ */
+p {
+  color: purple !important; 
+}
+```
+
+**សន្និដ្ឋាន:** ការយល់ដឹងពី Specificity ជួយឱ្យអ្នកដឹងពីមូលហេតុដែលកូដ CSS របស់អ្នក احياناً (ជួនកាល) មិនព្រមផ្លាស់ប្តូរតាមការចង់បាន។ នៅពេលដែលអ្នកដឹងច្បាប់នេះ អ្នកអាចដោះស្រាយបញ្ហាបានយ៉ាងងាយស្រួលដោយមិនបាច់ប្រឹងសរសេរ `!important` គ្រប់កន្លែងនោះទេ។
