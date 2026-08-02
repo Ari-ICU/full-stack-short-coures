@@ -1,0 +1,92 @@
+---
+title: Next.js Project Setup
+description: ស្វែងយល់ពី Next.js, អត្ថប្រយោជន៍របស់វាលើសពី React ធម្មតា និងរបៀបបង្កើតគម្រោងថ្មីជាមួយ create-next-app រួមទាំងការប្រើប្រាស់ TypeScript។
+objectives:
+  - យល់ពីអ្វីទៅជា Next.js (The React Framework for the Web)
+  - ចេះបង្កើតគម្រោង Next.js ថ្មីដោយប្រើ `create-next-app`
+  - ស្គាល់ពីរចនាសម្ព័ន្ធថតសំខាន់ៗ (Folder structure) របស់ App Router
+module: module-1-nextjs
+order: 1
+quiz:
+  - question: "តើអ្វីគឺជាភាពខុសគ្នាដ៏ធំបំផុតរវាងកម្មវិធីដែលបង្កើតដោយ Vite (React ធម្មតា) និងកម្មវិធីដែលបង្កើតដោយ Next.js?"
+    options:
+      - "\"Next.js មិនប្រើប្រាស់ React ទេ វាប្រើភាសាថ្មី\""
+      - "\"Next.js អាចដំណើរការកូដនៅលើ Server (Server-Side Rendering) ដែលជួយអោយ SEO ល្អ និងល្បឿនលឿន ខណៈដែល Vite ដំណើរការកូដតែនៅលើ Browser របស់អតិថិជនប៉ុណ្ណោះ (Client-Side Rendering)\""
+      - "\"Next.js មិនត្រូវការ Node.js ដើម្បីដំណើរការទេ\""
+      - "\"Vite អាចប្រើបានតែជាមួយកុំព្យូទ័រ Mac ប៉ុណ្ណោះ\""
+    correctAnswer: 2
+    explanation: "អត្ថប្រយោជន៍ធំបំផុតរបស់ Next.js គឺសមត្ថភាពក្នុងការ Render គេហទំព័រនៅលើ Server មុននឹងបញ្ជូនទៅកាន់ Browser ដែលវាមានសារៈសំខាន់ខ្លាំងណាស់សម្រាប់ការស្វែងរករបស់ Google (SEO) និងល្បឿននៃការបើកទំព័រដំបូង។"
+---
+
+## 🚀 អ្វីទៅជា Next.js?
+
+React គឺជាបណ្ណាល័យ (Library) ដ៏អស្ចារ្យសម្រាប់ការសាងសង់ UI។ ប៉ុន្តែនៅពេលអ្នកចង់បង្កើតគេហទំព័រធំៗដែលមានលក្ខណៈស្តង់ដារពិតប្រាកដ អ្នកត្រូវការរបស់ជាច្រើនទៀតដូចជា៖ ការប្តូរទំព័រ (Routing), ការទាញយកទិន្នន័យពី Database, និងការធ្វើអោយ Google ងាយស្រួលរកឃើញ (SEO)។ 
+
+នេះគឺជាពេលដែល **Next.js** ចូលមកដល់! Next.js គឺជា **Framework** ដែលត្រូវបានបង្កើតឡើងនៅលើ React (មានន័យថាអ្នកនៅតែសរសេរកូដ React ដដែល) ប៉ុន្តែវាមានបញ្ចូលមុខងារពិសេសៗទាំងអស់នេះរួចជាស្រេច។
+
+---
+
+## 1. ការបង្កើតគម្រោង Next.js ថ្មី
+
+បើក Terminal របស់អ្នក ហើយវាយបញ្ជាខាងក្រោម៖
+
+```bash
+npx create-next-app@latest
+```
+
+បន្ទាប់មកវានឹងសួរអ្នកសំណួរមួយចំនួន ដើម្បីរៀបចំគម្រោង (យើងណែនាំអោយឆ្លើយ `Yes` ភាគច្រើន)៖
+
+```text
+What is your project named? my-next-app
+Would you like to use TypeScript? Yes
+Would you like to use ESLint? Yes
+Would you like to use Tailwind CSS? Yes
+Would you like to use `src/` directory? Yes
+Would you like to use App Router? (recommended) Yes
+Would you like to customize the default import alias (@/*)? No
+```
+
+បន្ទាប់ពីវាដំឡើងចប់ សូមចូលទៅកាន់ Folder នោះ រួចដំណើរការវា៖
+
+```bash
+cd my-next-app
+npm run dev
+```
+បើក Browser ហើយចូលទៅកាន់ `http://localhost:3000` នោះអ្នកនឹងឃើញផ្ទាំងស្វាគមន៍របស់ Next.js!
+
+---
+
+## 2. ស្គាល់ពីរចនាសម្ព័ន្ធថត (App Router)
+
+ចាប់តាំងពីជំនាន់ទី 13 មក Next.js បានណែនាំទម្រង់ថ្មីមួយហៅថា **App Router** ដែលមានភាពខ្លាំងក្លាជាងមុន។ បើអ្នកបើក Folder `src/app` អ្នកនឹងឃើញមានឯកសារសំខាន់ៗ៖
+
+*   `layout.tsx`: នេះគឺជាសំបកក្រៅនៃគេហទំព័ររបស់អ្នក។ វាផ្ទុកកូដ `<html>` និង `<body>` ហើយជារឿយៗយើងដាក់ Navbar ឬ Footer នៅទីនេះ ព្រោះវានឹងបង្ហាញនៅលើគ្រប់ទំព័រទាំងអស់។
+*   `page.tsx`: នេះគឺជាមាតិកានៃទំព័រ (សាច់រឿង)។ ឯកសារ `app/page.tsx` តំណាងអោយទំព័រដើម (`/`) របស់គេហទំព័រ។
+*   `globals.css`: ជាកន្លែងសម្រាប់សរសេរកូដ CSS ទូទៅ និងបញ្ចូល Tailwind CSS។
+
+> 💡 **តើ `.tsx` គឺជាអ្វី?** វាដូចគ្នាបេះបិទទៅនឹង `.jsx` ដែរ គ្រាន់តែវាប្រាប់កុំព្យូទ័រថាយើងកំពុងប្រើប្រាស់ **TypeScript** ជំនួសអោយ JavaScript សុទ្ធ។
+
+---
+
+## 3. អ្វីទៅជា TypeScript ហេតុអ្វីបានជាយើងត្រូវប្រើវា?
+
+នៅក្នុង Next.js ទំនើប គេតែងតែប្រើប្រាស់វាជាមួយ TypeScript។ **TypeScript (TS)** គឺជាកំណែអាប់ដេតរបស់ JavaScript ដែលអនុញ្ញាតអោយអ្នកប្រាប់យ៉ាងច្បាស់ថា អថេរណាមួយគួរតែជា "លេខ" មិនមែនជា "អក្សរ" ទេ។
+
+**កូដ JS ធម្មតា (អាចមានកំហុសពេលរត់):**
+```js
+function add(a, b) {
+  return a + b;
+}
+add("5", 3); // លទ្ធផលគឺ "53" ព្រោះវាយកអក្សរទៅតភ្ជាប់ជាមួយលេខ!
+```
+
+**កូដ TS (លោតក្រហមប្រាប់កំហុសមុនពេល Save):**
+```ts
+// យើងកំណត់ថា a និង b ត្រូវតែជាលេខ (number) ជាដាច់ខាត!
+function add(a: number, b: number) {
+  return a + b;
+}
+add("5", 3); // ❌ TS នឹងលោតបន្ទាត់ក្រហមប្រាប់អ្នកភ្លាមៗក្នុង VS Code ថាខុសហើយ!
+```
+
+ការប្រើប្រាស់ TypeScript ដំបូងអាចរាងទើសដៃបន្តិច ប៉ុន្តែវាជួយអ្នកសន្សំពេលវេលារាប់ម៉ោងក្នុងការស្វែងរកកំហុស (Bugs) នៅថ្ងៃអនាគត។

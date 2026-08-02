@@ -1,0 +1,111 @@
+---
+title: Route Handlers (API Routes)
+description: រៀនពីរបៀបបង្កើតកូដ Backend (API Endpoints) ដោយផ្ទាល់នៅក្នុងគម្រោង Next.js តាមរយៈ Route Handlers។
+objectives:
+  - យល់ពីសមត្ថភាពរបស់ Next.js ក្នុងការធ្វើជា Full-stack Framework
+  - ចេះបង្កើត API Routes ដោយប្រើឯកសារ `route.ts`
+  - ចេះសរសេរកូដសម្រាប់ទទួលសំណើប្រភេទ GET, POST, និងលុបទិន្នន័យ (DELETE)
+module: module-1-nextjs
+order: 4
+quiz:
+  - question: "ដើម្បីបង្កើត API នៅក្នុង Next.js (App Router) សម្រាប់ទទួលសំណើនៅទីតាំង `/api/users` តើអ្នកត្រូវបង្កើតឯកសារមួយណា?"
+    options:
+      - "\"app/api/users.ts\""
+      - "\"app/api/users/page.tsx\""
+      - "\"app/api/users/route.ts\""
+      - "\"server/api/users.ts\""
+    correctAnswer: 3
+    explanation: "នៅក្នុង App Router រាល់ API Endpoint ទាំងអស់ត្រូវតែដាក់ឈ្មោះថា `route.ts` (ឬ `.js`) ដែលស្ថិតនៅក្នុងថតរៀងៗខ្លួន។ បើអ្នកដាក់ឈ្មោះថា `page.tsx` វានឹងចាត់ទុកថាជាកូដ UI សម្រាប់បង្ហាញគេហទំព័រវិញហើយ។"
+---
+
+## 🛠️ Next.js គឺ Full-stack!
+
+Next.js មិនមែនគ្រាន់តែជាកន្លែងសម្រាប់សរសេរ React ដើម្បីបង្ហាញ UI នោះទេ វាមានកុំព្យូទ័រ Server ផ្ទាល់ខ្លួនរបស់វា! មានន័យថាអ្នកអាចភ្ជាប់ទៅកាន់ Database និងបង្កើត **API** (Application Programming Interface) នៅទីនេះបានដោយមិនចាំបាច់បង្កើតគម្រោង Node.js/Express ថ្មីដាច់ដោយឡែកឡើយ។
+
+បច្ចេកទេសនេះគេហៅថា **Route Handlers**។
+
+---
+
+## 1. ការបង្កើត Route Handler (API Route)
+
+ដើម្បីបង្កើត API អ្នកត្រូវបង្កើតថតមួយ (ឧ. `app/api/users`) ហើយបង្កើតឯកសារមួយឈ្មោះថា **`route.ts`** នៅខាងក្នុងនោះ។
+
+> ⚠️ **ចំណាំ:** កុំដាក់ឯកសារ `page.tsx` និង `route.ts` ចូលគ្នាក្នុងថតតែមួយអោយសោះ ព្រោះ URL វានឹងជាន់គ្នា!
+
+**ឯកសារ `app/api/hello/route.ts`:**
+```ts
+import { NextResponse } from 'next/server';
+
+// មុខងារនេះនឹងរត់នៅពេលដែលមានគេហៅ API: GET /api/hello
+export async function GET() {
+  // បញ្ជូនទិន្នន័យត្រលប់ទៅវិញជាទម្រង់ JSON
+  return NextResponse.json({ message: 'សួស្តីពី Next.js Backend!' });
+}
+```
+
+ឥឡូវនេះ បើអ្នកបើក Browser ហើយចូលទៅ `http://localhost:3000/api/hello` អ្នកនឹងឃើញកូដ JSON នោះ!
+
+---
+
+## 2. ការទទួល និងបញ្ជូនទិន្នន័យ (POST)
+
+នៅពេលអ្នកប្រើប្រាស់បញ្ជូនទិន្នន័យពីទម្រង់ (Form) មកអោយ Server ដើម្បីចុះឈ្មោះ យើងត្រូវសរសេរមុខងារប្រភេទ **POST**។
+
+**ឯកសារ `app/api/users/route.ts`:**
+```ts
+import { NextResponse } from 'next/server';
+
+// ឧបមាថាយើងមានបញ្ជីទិន្នន័យនៅក្នុងកូដនេះសិន (ជាធម្មតាយើងរក្សាទុកក្នុង Database)
+const users = [
+  { id: 1, name: "រដ្ឋា" }
+];
+
+export async function GET() {
+  return NextResponse.json(users);
+}
+
+export async function POST(request: Request) {
+  try {
+    // ១. ចាប់យកទិន្នន័យដែលគេបញ្ជូនមក
+    const body = await request.json();
+    
+    // ២. បង្កើតអ្នកប្រើប្រាស់ថ្មី
+    const newUser = {
+      id: users.length + 1,
+      name: body.name
+    };
+    users.push(newUser); // រក្សាទុក
+    
+    // ៣. បញ្ជូនចម្លើយត្រលប់ទៅវិញជាមួយនឹងលេខកូដជោគជ័យ (201 Created)
+    return NextResponse.json({ message: "បានបង្កើតដោយជោគជ័យ!", user: newUser }, { status: 201 });
+    
+  } catch (error) {
+    // បើមានបញ្ហាណាមួយកើតឡើង ប្រាប់គេថាយើងមានបញ្ហាក្នុង Server
+    return NextResponse.json({ message: "មានបញ្ហាក្នុងការបង្កើត!" }, { status: 500 });
+  }
+}
+```
+
+---
+
+## 3. ការអានលេខសម្គាល់ពី URL (Dynamic API Routes)
+
+ចុះបើអ្នកចង់ហៅ API ដើម្បីលុបអ្នកប្រើប្រាស់ទី ៥ (`DELETE /api/users/5`)? 
+អ្នកត្រូវបង្កើតថតដោយប្រើសញ្ញា `[]` ដើម្បីចាប់យកលេខ ៥ នោះ។
+
+**ឯកសារ `app/api/users/[id]/route.ts`:**
+```ts
+import { NextResponse } from 'next/server';
+
+// ចាប់យក id តាមរយៈប៉ារ៉ាម៉ែត្រទី ២ (params)
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const userId = params.id;
+  
+  // នៅទីនេះ អ្នកអាចសរសេរកូដដើម្បីលុបទិន្នន័យនោះចេញពី Database បាន
+  console.log("កំពុងលុបអ្នកប្រើប្រាស់លេខ:", userId);
+  
+  return NextResponse.json({ message: `អ្នកប្រើប្រាស់លេខ ${userId} ត្រូវបានលុប!` });
+}
+```
+
+នេះគឺជាភាពងាយស្រួលបំផុតរបស់ Next.js! កូដ Frontend និង Backend របស់អ្នកអាចរស់នៅក្នុងកន្លែងតែមួយដោយសុខសាន្ត។

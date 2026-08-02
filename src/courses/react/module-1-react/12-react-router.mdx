@@ -1,0 +1,102 @@
+---
+title: React Router
+description: រៀនពីរបៀបបង្កើតទំព័រច្រើន (Multi-page navigation) នៅក្នុងគម្រោង React (Single Page Application) ដោយប្រើប្រាស់ React Router DOM។
+objectives:
+  - ចេះដំឡើង React Router ចូលទៅក្នុងគម្រោង
+  - ចេះរៀបចំ Routes សម្រាប់ទំព័រខុសៗគ្នា (ឧ. Home, About, Contact)
+  - ចេះប្រើប្រាស់ `<Link>` សម្រាប់ប្តូរទំព័រដោយមិនអោយ Browser Refresh
+module: module-1-react
+order: 12
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើប្រាស់ `<Link>` ជំនួសអោយ `<a>` ធម្មតានៅក្នុង React Router?"
+    options:
+      - "\"ដោយសារតែ `<a>` មិនអាចប្រើប្រាស់ CSS បាន\""
+      - "\"ដោយសារតែ `<Link>` ជួយទប់ស្កាត់មិនអោយ Browser ធ្វើការ Refresh ទំព័រទាំងមូលនៅពេលប្តូរទំព័រ ដែលធ្វើអោយគេហទំព័រមានល្បឿនលឿនដូចកម្មវិធីទូរស័ព្ទ\""
+      - "\"ដោយសារតែវាជាច្បាប់របស់ HTML5\""
+      - "\"ដោយសារតែ `<a>` មិនអាចផ្ទុកអក្សរបាន\""
+    correctAnswer: 1
+    explanation: "កម្លាំងពិតប្រាកដរបស់ Single Page Application (SPA) គឺការប្តូរទំព័រដោយមិនចាំបាច់ផ្ទុកឡើងវិញ (Refresh) ដែលធ្វើអោយមានភាពរលូនបំផុត។ ការប្រើ `<a>` នឹងធ្វើអោយ Browser Refresh ទំព័រទាំងមូល។"
+---
+
+## 🚦 អ្វីទៅជា React Router?
+
+React បង្កើតឡើងដើម្បីសាងសង់ **Single Page Applications (SPA)** មានន័យថាវាមានឯកសារ `index.html` តែមួយគត់។ ដូច្នេះបើយើងចង់បង្កើតទំព័រច្រើន (ឧ. ទំព័រដើម, អំពីយើង, ទំនាក់ទំនង) យើងត្រូវការបណ្ណាល័យ (Library) បន្ថែមដើម្បីបន្លំ Browser ថាវាមានទំព័រច្រើន។ 
+
+បណ្ណាល័យដែលគេពេញនិយមបំផុតគឺ **React Router**!
+
+---
+
+## 1. ការដំឡើង (Installation)
+
+បើក Terminal របស់អ្នកនៅក្នុងថតគម្រោង រួចវាយបញ្ជា៖
+```bash
+npm install react-router-dom
+```
+
+---
+
+## 2. ការរៀបចំ Routes
+
+ដើម្បីប្រើប្រាស់វា យើងត្រូវទៅកាន់ឯកសារចម្បង (ជាធម្មតា `main.jsx` ឬ `App.jsx`) ហើយរុំកម្មវិធីយើងជាមួយ `<BrowserRouter>`។ នៅក្នុងឧទាហរណ៍នេះ យើងសរសេរវានៅក្នុង `App.jsx` ផ្ទាល់តែម្តង។
+
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+// បង្កើត Component ទំព័រតូចៗសិន
+const Home = () => <h1>ទំព័រដើម 🏠</h1>;
+const About = () => <h1>អំពីយើង 📖</h1>;
+const Contact = () => <h1>ទំនាក់ទំនង 📞</h1>;
+const NotFound = () => <h1 style={{color: 'red'}}>រកមិនឃើញទំព័រនេះទេ (404) 😢</h1>;
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      {/* Routes គឺជាកន្លែងដែលយើងកំណត់ថា តើ URL មួយណាត្រូវបង្ហាញ Component មួយណា */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        
+        {/* សញ្ញាផ្កាយ * មានន័យថា URL ផ្សេងពីខាងលើទាំងអស់ */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## 3. ការតភ្ជាប់ទំព័រ (Navigation)
+
+នៅក្នុង HTML ធម្មតា យើងប្រើ `<a href="/about">`។ ប៉ុន្តែនៅក្នុង React វានឹងធ្វើអោយ Browser វិល (Refresh)។ ដើម្បីអោយការចុចមានភាពរលូន (គ្មានការ Refresh) យើងត្រូវប្រើ Component **`<Link>`** ជំនួសវិញ។
+
+```jsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+// ... (Component ពីខាងលើ)
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      {/* បង្កើត Navigation Bar */}
+      <nav style={{ padding: 10, background: '#eee' }}>
+        <Link to="/" style={{ marginRight: 10 }}>ទំព័រដើម</Link>
+        <Link to="/about" style={{ marginRight: 10 }}>អំពីយើង</Link>
+        <Link to="/contact">ទំនាក់ទំនង</Link>
+      </nav>
+
+      <div style={{ padding: 20 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
+  );
+}
+```
+
+ឥឡូវនេះសាកល្បងចុចលើតំណនីមួយៗ អ្នកនឹងឃើញ Component ផ្លាស់ប្តូរភ្លាមៗដោយគ្មានការ Refresh ទំព័រឡើយ! នេះហើយគឺជាមន្តអាគមរបស់ SPA។

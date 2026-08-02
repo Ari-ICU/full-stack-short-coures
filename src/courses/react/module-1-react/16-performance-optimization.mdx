@@ -1,0 +1,133 @@
+---
+title: Performance Optimization
+description: សិក្សាពីមូលហេតុដែលធ្វើអោយកម្មវិធី React ដើរយឺត និងរបៀបប្រើប្រាស់ React.memo, useMemo, និង useCallback ដើម្បីបង្កើនល្បឿន (Performance Optimization)។
+objectives:
+  - យល់ពីមូលហេតុដែលបណ្តាលអោយមានការ Re-render មិនចាំបាច់ (Unnecessary re-renders)
+  - ចេះប្រើប្រាស់ `React.memo` ដើម្បីការពារ Component កុំអោយ Re-render បើ Props មិនប្តូរ
+  - ចេះប្រើប្រាស់ `useMemo` ដើម្បីរក្សាទុកលទ្ធផលនៃការគណនាស្មុគស្មាញ
+  - ចេះប្រើប្រាស់ `useCallback` ដើម្បីរក្សាទុក Function
+module: module-1-react
+order: 16
+quiz:
+  - question: "តើ `useMemo` មានតួនាទីអ្វីនៅក្នុង React?"
+    options:
+      - "\"ប្រើសម្រាប់រក្សាទុក (Cache) លទ្ធផលនៃការគណនាណាដែលចំណាយពេលយូរ ដើម្បីកុំអោយវាគណនាឡើងវិញរាល់ពេល Component Re-render\""
+      - "\"ប្រើសម្រាប់បង្កើតអថេរ State ថ្មី\""
+      - "\"ប្រើសម្រាប់បញ្ឈប់ការទាញយកទិន្នន័យពី API\""
+      - "\"ប្រើសម្រាប់រក្សាទុកអក្សរសម្ងាត់ (Passwords)\""
+    correctAnswer: 1
+    explanation: "`useMemo` (មកពីពាក្យ Memoization/Memorization) ត្រូវបានប្រើប្រាស់ដើម្បីចងចាំលទ្ធផលនៃការគណនាណាមួយដែលមានភាពស្មុគស្មាញ ជួយសន្សំសំចៃពេលវេលាមិនអោយវាគណនាឡើងវិញបើទិន្នន័យមិនផ្លាស់ប្តូរ។"
+---
+
+## ⚡ បញ្ហានៃការ Re-render
+
+នៅក្នុង React នៅពេលដែល Component មេ (Parent) មានការផ្លាស់ប្តូរ State, Component នោះនិង Component កូនៗ (Children) របស់វាទាំងអស់នឹងត្រូវបានគូរឡើងវិញ (Re-rendered) ជាស្វ័យប្រវត្តិ ទោះបីជាកូនៗទាំងនោះមិនមានការផ្លាស់ប្តូរអ្វីក៏ដោយ។ នេះអាចធ្វើអោយកម្មវិធីធំៗដើរយឺត។
+
+ដើម្បីដោះស្រាយបញ្ហានេះ React ផ្តល់ជូននូវឧបករណ៍ ៣ សំខាន់ៗ៖
+
+---
+
+## 1. ការប្រើប្រាស់ `React.memo`
+
+`React.memo` គឺជាប្រអប់ការពារមួយ! ប្រសិនបើអ្នករុំ Component កូនរបស់អ្នកជាមួយ `memo` នោះ React នឹងមិន Re-render Component នោះទេ លុះត្រាតែ `Props` របស់វាមានការផ្លាស់ប្តូរពិតប្រាកដ។
+
+```jsx
+import { useState, memo } from 'react';
+
+// ១. រុំ Component កូនជាមួយ memo
+const ChildComponent = memo(function ChildComponent({ name }) {
+  console.log("Child ត្រូវបាន Re-rendered!"); // វានឹងរត់តែពេល 'name' ផ្លាស់ប្តូរប៉ុណ្ណោះ
+  return <div>សួស្តី {name}</div>;
+});
+
+export default function Parent() {
+  const [count, setCount] = useState(0);
+  const [name, setName] = useState("រដ្ឋា");
+
+  return (
+    <div>
+      {/* ទោះបីជា Parent Re-render ពេលចុចប៊ូតុងខាងក្រោម ក៏ Child មិន Re-render ដែរ! */}
+      <ChildComponent name={name} />
+      
+      <button onClick={() => setCount(count + 1)}>បូកចំនួន: {count}</button>
+    </div>
+  );
+}
+```
+
+---
+
+## 2. ការប្រើប្រាស់ `useMemo`
+
+ឧបមាថាអ្នកមានកូដគណនាគណិតវិទ្យាដ៏ស្មុគស្មាញមួយ ដែលចំណាយពេលដល់ទៅ ២ វិនាទីដើម្បីចេញលទ្ធផល។ បើកូដនេះរត់រាល់ពេលដែល Component Re-render នោះទំព័ររបស់អ្នកនឹងគាំងមិនខាន។
+
+`useMemo` អាចជួយ "ចងចាំ" លទ្ធផលនៃការគណនានោះបាន!
+
+```jsx
+import { useState, useMemo } from 'react';
+
+function complexCalculation(num) {
+  console.log("កំពុងគណនាយ៉ាងស្មុគស្មាញ...");
+  for (let i = 0; i < 1000000000; i++) {} // ក្លែងធ្វើជាការគណនាយូរ
+  return num * 2;
+}
+
+export default function Calculator() {
+  const [number, setNumber] = useState(5);
+  const [theme, setTheme] = useState("light");
+
+  // ២. រក្សាទុកលទ្ធផលជាមួយ useMemo
+  // វានឹងគណនាឡើងវិញ តែនៅពេល 'number' ផ្លាស់ប្តូរប៉ុណ្ណោះ
+  const result = useMemo(() => {
+    return complexCalculation(number);
+  }, [number]);
+
+  return (
+    <div style={{ background: theme === 'dark' ? 'black' : 'white' }}>
+      <p>លទ្ធផល: {result}</p>
+      <button onClick={() => setNumber(number + 1)}>ប្តូរលេខ</button>
+      
+      {/* ពេលចុចប៊ូតុងនេះ វានឹងមិនគណនាលេខឡើងវិញទេ ព្រោះ number មិនបានប្តូរ! */}
+      <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>ប្តូរពណ៌</button>
+    </div>
+  );
+}
+```
+
+---
+
+## 3. ការប្រើប្រាស់ `useCallback`
+
+`useCallback` គឺស្រដៀងទៅនឹង `useMemo` ដែរ តែវាប្រើសម្រាប់ **ចងចាំ Function** មិនមែនចងចាំទិន្នន័យ (Value) ទេ។
+
+រាល់ពេល Component Re-render វាបង្កើត Functions ថ្មីៗរហូត។ បើអ្នកបញ្ជូន Function នេះជា Props ទៅកាន់ Component កូនដែលរុំដោយ `React.memo` វានឹងធ្វើអោយកូនគិតថា Props ផ្លាស់ប្តូរជានិច្ច ធ្វើអោយ `memo` លែងស័ក្តិសិទ្ធិ។
+
+```jsx
+import { useState, useCallback, memo } from 'react';
+
+const ChildButton = memo(({ onClick }) => {
+  console.log("ChildButton Re-rendered!");
+  return <button onClick={onClick}>ចុចខ្ញុំ</button>;
+});
+
+export default function Parent() {
+  const [count, setCount] = useState(0);
+
+  // ៣. ចងចាំ Function នេះកុំអោយវាបង្កើតថ្មីរាល់ពេល Parent Re-render
+  const handleClick = useCallback(() => {
+    console.log("Button clicked!");
+  }, []); // អត់មាន Dependency (Array ទទេ) មានន័យថាវាចងចាំ Function នេះជារៀងរហូត
+
+  return (
+    <div>
+      <p>ចំនួន: {count}</p>
+      <button onClick={() => setCount(count + 1)}>បូកលេខ</button>
+      
+      {/* ដោយសារ handleClick មិនផ្លាស់ប្តូរ ChildButton ក៏មិន Re-render ដែរ */}
+      <ChildButton onClick={handleClick} />
+    </div>
+  );
+}
+```
+
+> **ប្រយ័ត្ន:** កុំប្រើប្រាស់ `memo`, `useMemo`, និង `useCallback` រាត់រាយគ្រប់កន្លែង! ប្រើវាតែនៅពេលដែលអ្នកសង្កេតឃើញថាកម្មវិធីរបស់អ្នកមានភាពយឺតយ៉ាវ (Performance issues) ប៉ុណ្ណោះ ព្រោះឧបករណ៍ទាំងនេះក៏ស៊ីមេម៉ូរីបន្តិចបន្តួចដែរក្នុងការចងចាំ។

@@ -1,0 +1,100 @@
+---
+title: Error Pages
+description: រៀនពីរបៀបបង្កើតផ្ទាំងជូនដំណឹងកំហុស (Error Pages) និងទំព័រដែលរកមិនឃើញ (404 Not Found) ដោយស្វ័យប្រវត្តិជាមួយ Next.js ។
+objectives:
+  - ចេះបង្កើតឯកសារ `error.tsx` សម្រាប់ចាប់យកកំហុសដែលកើតមានឡើងក្នុង Server Components
+  - ស្គាល់ពីលក្ខខណ្ឌពិសេសរបស់ `error.tsx` គឺវាត្រូវតែជា "use client"
+  - ចេះបង្កើតឯកសារ `not-found.tsx` សម្រាប់បង្ហាញពេល URL មិនត្រឹមត្រូវ
+module: module-1-nextjs
+order: 7
+quiz:
+  - question: "តើច្បាប់មួយណាដែលអ្នកត្រូវគោរពនៅពេលបង្កើតឯកសារ `error.tsx` នៅក្នុង Next.js?"
+    options:
+      - "\"វាត្រូវតែជា Server Component ជានិច្ច\""
+      - "\"វាត្រូវតែសរសេរជាភាសា JavaScript សុទ្ធ មិនអាចប្រើប្រាស់ TypeScript បានទេ\""
+      - "\"វាត្រូវតែជា Client Component ដោយបន្ថែមពាក្យ `\"use client\";` នៅខាងលើបង្អស់នៃឯកសារ\""
+      - "\"វាត្រូវតែបញ្ជូនទៅកាន់ Server របស់ Vercel ផ្ទាល់\""
+    correctAnswer: 3
+    explanation: "កំហុសអាចកើតមានឡើងទាំងនៅលើម៉ាស៊ីនមេ (Server) និងនៅលើ Browser (Client)។ ដើម្បីអោយ `error.tsx` អាចចាប់យកកំហុសបានគ្រប់កន្លែង និងអាចផ្តល់ប៊ូតុងអោយគេចុច 'ព្យាយាមម្តងទៀត' វាចាំបាច់ត្រូវតែជា Client Component ដោយដាក់បញ្ជា `\"use client\";`។"
+---
+
+## 💥 ការចាប់យកកំហុស (Error Handling)
+
+នៅក្នុងមេរៀនទី ១៧ នៃ React ធម្មតា យើងបានបង្កើត `ErrorBoundary` ដោយខ្លួនឯងយ៉ាងពិបាក។ តែនៅក្នុង Next.js វាផ្តល់ជូននូវឯកសារពិសេសមួយឈ្មោះថា **`error.tsx`** ដែលធ្វើការជា Error Boundary ដោយស្វ័យប្រវត្តិ!
+
+ប្រសិនបើមានកូដណាមួយគាំង (crash) នៅកន្លែងណាមួយ វានឹងបង្ហាញទំព័រ `error.tsx` ដែលនៅក្បែរវាបំផុតជំនួសអោយការគាំងពណ៌សពេញអេក្រង់។
+
+---
+
+## 1. ការបង្កើត `error.tsx`
+
+**ច្បាប់សំខាន់:** `error.tsx` ត្រូវតែជា Client Component ជាដាច់ខាត! 
+
+អ្នកអាចបង្កើតវានៅកម្រិត Root (app/error.tsx) ដើម្បីរុំព័ទ្ធពេញកម្មវិធី ឬបង្កើតនៅកម្រិតថតនីមួយៗ (ឧ. app/dashboard/error.tsx) ក៏បាន។
+
+**ឯកសារ `app/error.tsx`:**
+```tsx
+"use client"; // ត្រូវតែមាននៅបន្ទាត់លើគេបង្អស់!
+
+import { useEffect } from 'react';
+
+// Next.js នឹងបញ្ជូន Props មកអោយ ២ គឺកំហុស (error) និងមុខងារសម្រាប់ព្យាយាមម្តងទៀត (reset)
+export default function ErrorPage({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  
+  useEffect(() => {
+    // យើងអាចយកកំហុសនេះទៅ Log ទុកក្នុងប្រព័ន្ធ
+    console.error("មានកំហុសមួយត្រូវបានរាយការណ៍:", error);
+  }, [error]);
+
+  return (
+    <div style={{ padding: 50, textAlign: 'center' }}>
+      <h2>អូស! មានបញ្ហាអ្វីម្យ៉ាងហើយ។ 🤕</h2>
+      <p style={{ color: 'red' }}>សារកំហុស: {error.message}</p>
+      
+      {/* ផ្តល់ប៊ូតុងអោយអ្នកប្រើប្រាស់សាកល្បងហៅទិន្នន័យម្តងទៀត ដោយមិនបាច់ Refresh ទាំងស្រុង */}
+      <button 
+        onClick={() => reset()}
+        style={{ padding: '10px 20px', background: 'blue', color: 'white' }}
+      >
+        ព្យាយាមម្តងទៀត
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## 2. ការបង្ហាញទំព័ររកមិនឃើញ (`not-found.tsx`) 🕵️‍♂️
+
+ក្រៅពីបញ្ហាកូដគាំង បញ្ហាទូទៅមួយទៀតគឺអ្នកប្រើប្រាស់វាយ URL ខុស (ឧ. `yoursite.com/fsfgsfgs`).
+ដើម្បីផ្លាស់ប្តូរទំព័រ 404 របស់ Next.js ដែលអាក្រក់មើល ទៅជាទំព័រដ៏ស្រស់ស្អាតផ្ទាល់ខ្លួនរបស់អ្នក អ្នកគ្រាន់តែបង្កើតឯកសារ `not-found.tsx`។
+
+**ឯកសារ `app/not-found.tsx`:**
+```tsx
+import Link from 'next/link';
+
+export default function NotFound() {
+  return (
+    <div style={{ textAlign: 'center', padding: '100px' }}>
+      <h1 style={{ fontSize: '100px', margin: 0 }}>៤០៤</h1>
+      <h2>រកមិនឃើញទំព័រដែលអ្នកកំពុងស្វែងរកទេ! 🔍</h2>
+      <p>ទំព័រនេះប្រហែលជាត្រូវបានលុប ឬអ្នកវាយអាសយដ្ឋានខុសហើយ។</p>
+      
+      <Link href="/">
+        <button style={{ padding: '10px 20px', cursor: 'pointer' }}>
+          ត្រលប់ទៅទំព័រដើមវិញ
+        </button>
+      </Link>
+    </div>
+  );
+}
+```
+
+> **គន្លឹះពិសេស:** អ្នកអាចហៅមុខងារ `notFound()` របស់ Next.js នៅក្នុងកូដ `page.tsx` របស់អ្នកដោយផ្ទាល់បាន បើអ្នករកទិន្នន័យអ្វីមួយមិនឃើញ (ឧទាហរណ៍ រកមើលទំនិញលេខ ៩៩៩៩ តែក្នុង Database គ្មាន នោះអ្នកអាចហៅ `notFound()` ដើម្បីលោតមកទំព័រនេះភ្លាមៗ)!

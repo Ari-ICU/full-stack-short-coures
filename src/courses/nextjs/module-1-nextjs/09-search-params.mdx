@@ -1,0 +1,99 @@
+---
+title: Search Params
+description: រៀនពីការទាញយកនិងប្រើប្រាស់ប៉ារ៉ាម៉ែត្រនៅខាងចុង URL (ឧទាហរណ៍ ?search=apple&page=2) ដោយប្រើប្រាស់មុខងាររបស់ Next.js ដើម្បីធ្វើការស្វែងរក និងចម្រាញ់ទិន្នន័យ (Filter)។
+objectives:
+  - យល់ពីអ្វីទៅជា Query Parameters (Search Params)
+  - ចេះទាញយក Search Params នៅក្នុង Server Components តាមរយៈ Props
+  - ចេះប្រើប្រាស់ Hook `useSearchParams` នៅក្នុង Client Components
+module: module-1-nextjs
+order: 9
+quiz:
+  - question: "ដើម្បីទាញយកពាក្យថា 'apple' ពី URL `https://mysite.com/products?query=apple` នៅក្នុងកូដ Client Component របស់ Next.js តើអ្នកត្រូវប្រើអ្វី?"
+    options:
+      - "\"ហៅប្រើ `const query = params.query;`\""
+      - "\"ហៅប្រើ Hook `useSearchParams()` រួចយក `.get('query')`\""
+      - "\"ហៅប្រើ `window.location.search`\""
+      - "\"មិនអាចទាញយកបានទេ លើកលែងតែនៅ Server Component\""
+    correctAnswer: 2
+    explanation: "នៅក្នុង Client Components របស់ Next.js វិធីដែលត្រឹមត្រូវ និងមានសុវត្ថិភាពបំផុតក្នុងការអាន Search Params គឺការប្រើប្រាស់ Hook `useSearchParams()` ដែលបានផ្តល់ដោយ Next.js ផ្ទាល់តែម្តង។"
+---
+
+## 🔎 អ្វីទៅជា Search Params?
+
+ក្រៅពី Dynamic Routes ដែលយើងបានរៀនពីមុន (ឧ. `/products/5`) យើងមានវិធីមួយទៀតក្នុងការបញ្ជូនទិន្នន័យទៅក្នុង URL ដែលគេនិយមប្រើសម្រាប់ការស្វែងរក (Search) និងការរៀបទំព័រ (Pagination) គឺ **Search Parameters** ឫ **Query Parameters**។
+
+វាគឺអក្សរដែលនៅបន្ទាប់ពីសញ្ញាសួរ `?` នៅក្នុង URL។ 
+ឧទាហរណ៍៖ `https://example.com/shop?category=shoes&page=2`
+- `category` មានតម្លៃស្មើ `shoes`
+- `page` មានតម្លៃស្មើ `2`
+
+តើយើងចាប់យកតម្លៃទាំងនេះក្នុង Next.js យ៉ាងដូចម្តេច? វាមានវិធី ២ យ៉ាងទៅតាមប្រភេទ Component!
+
+---
+
+## 1. ការចាប់យកក្នុង Server Component
+
+នេះគឺជាវិធីដែលស្រួលបំផុត! រាល់ឯកសារ `page.tsx` ទាំងអស់សុទ្ធតែត្រូវបាន Next.js បញ្ជូន Props មួយឈ្មោះថា `searchParams` មកអោយស្រាប់តែម្តង! (វាស្រដៀងទៅនឹង `params` ដែរ)។
+
+**ឯកសារ `app/shop/page.tsx`:**
+```tsx
+type Props = {
+  // searchParams ផ្ទុកទិន្នន័យទាំងអស់ដែលនៅក្រោយសញ្ញា ?
+  searchParams: { [key: string]: string | undefined }
+};
+
+export default function ShopPage({ searchParams }: Props) {
+  // ចាប់យកតម្លៃ (អាចមាន ឬ អាចគ្មាន/undefined)
+  const category = searchParams.category || 'all';
+  const page = searchParams.page || '1';
+
+  return (
+    <div>
+      <h1>ទំព័រលក់ទំនិញ</h1>
+      <p>អ្នកកំពុងមើលប្រភេទទំនិញ: <b>{category}</b></p>
+      <p>អ្នកកំពុងនៅលើទំព័រទី: <b>{page}</b></p>
+      
+      {/* កន្លែងសម្រាប់ទាញយក និងបង្ហាញទំនិញពី Database តាមលក្ខខណ្ឌខាងលើ... */}
+    </div>
+  );
+}
+```
+សាកល្បងចូលទៅកាន់ `http://localhost:3000/shop?category=laptop&page=3` នោះអ្នកនឹងឃើញកូដខាងលើផ្លាស់ប្តូរ!
+
+---
+
+## 2. ការចាប់យកក្នុង Client Component
+
+ប្រសិនបើអ្នកកំពុងសរសេរកូដនៅក្នុង Client Component (មានកូដ `"use client";` នៅពីលើ ដូចជាកូដដែលត្រូវការការវាយបញ្ចូលអក្សរ `onChange`) អ្នកមិនអាចអាន `searchParams` ពី Props បានទេ។
+
+អ្នកត្រូវហៅប្រើ Hook ឈ្មោះថា **`useSearchParams`** របស់ Next.js!
+
+**ឯកសារ `app/components/SearchBar.tsx`:**
+```tsx
+"use client";
+
+import { useSearchParams } from 'next/navigation';
+
+export default function SearchBar() {
+  // ហៅប្រើ Hook
+  const searchParams = useSearchParams();
+  
+  // ទាញយកតម្លៃដោយប្រើ .get()
+  const searchQuery = searchParams.get('q') || '';
+
+  return (
+    <div>
+      <input 
+        type="text" 
+        defaultValue={searchQuery} 
+        placeholder="ស្វែងរកទំនិញ..." 
+      />
+      <button>ស្វែងរក</button>
+      
+      {searchQuery && <p>លទ្ធផលស្វែងរកសម្រាប់៖ "{searchQuery}"</p>}
+    </div>
+  );
+}
+```
+
+> **កំណត់សម្គាល់:** បើអ្នកចង់ **ផ្លាស់ប្តូរ** URL (ឧទាហរណ៍ពេលគេចុចប៊ូតុងស្វែងរក ចង់អោយ URL ប្តូរទៅជា `?q=hello`) អ្នកត្រូវប្រើប្រាស់ `useRouter()` របស់ Next.js ដើម្បីធ្វើការ `router.push('/shop?q=hello')`។ វានឹងធ្វើការប្តូរ URL ខាងលើដោយមិនអោយ Browser វិល Refresh ទំព័រឡើយ!

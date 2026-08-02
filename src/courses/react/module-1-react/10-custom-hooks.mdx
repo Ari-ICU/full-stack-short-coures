@@ -1,0 +1,100 @@
+---
+title: Custom Hooks
+description: រៀនពីការបង្កើត Custom Hooks ដើម្បីរៀបចំកូដអោយមានសណ្តាប់ធ្នាប់ ងាយស្រួលអាន និងងាយស្រួលយកទៅប្រើប្រាស់ឡើងវិញ (Reusable Logic) នៅតាម Component ផ្សេងៗ។
+objectives:
+  - យល់ពីអត្ថប្រយោជន៍ និងច្បាប់ក្នុងការបង្កើត Custom Hooks
+  - ចេះបង្កើត Hook ដោយខ្លួនឯង (ឧទាហរណ៍៖ useFetch សម្រាប់ទាញយកទិន្នន័យ)
+  - ចេះហៅ Custom Hook ទៅប្រើក្នុង Component
+module: module-1-react
+order: 10
+quiz:
+  - question: "តើច្បាប់មួយណាដែលអ្នកត្រូវតែគោរពនៅពេលដាក់ឈ្មោះអោយ Custom Hook របស់អ្នក?"
+    options:
+      - "\"ឈ្មោះត្រូវតែចាប់ផ្តើមដោយអក្សរធំជានិច្ច ដូចជា `FetchData`\""
+      - "\"ឈ្មោះត្រូវតែមានពាក្យថា `use` នៅខាងមុខជានិច្ច ឧទាហរណ៍ `useFetch`, `useAuth`\""
+      - "\"វាជាកាតព្វកិច្ចដែលត្រូវតែមានពាក្យថា `Hook` នៅខាងចុង ឧទាហរណ៍ `fetchHook`\""
+      - "\"គ្មានច្បាប់កំណត់ទេ អ្នកអាចដាក់ឈ្មោះអ្វីក៏បាន\""
+    correctAnswer: 2
+    explanation: "ច្បាប់របស់ React គឺរាល់ Custom Hooks ទាំងអស់ត្រូវតែចាប់ផ្តើមដោយពាក្យ `use` (ឧ. `useFetch`, `useWindowSize`)។ ការធ្វើបែបនេះជួយអោយ React ដឹងថាវាជា Hook ហើយនឹងត្រួតពិនិត្យច្បាប់របស់ Hook អោយបានត្រឹមត្រូវ។"
+---
+
+## 🛠️ អ្វីទៅជា Custom Hook?
+
+ជារឿយៗ ពេលអ្នកសរសេរកូដ React អ្នកប្រហែលជាជួបប្រទះការសរសេរកូដ `useState` និង `useEffect` ដូចៗគ្នាដដែលៗនៅតាម Component ច្រើន។ ជាជាងការចម្លងកូដទាំងនោះ អ្នកអាចបំបែកវាទៅជាអនុគមន៍ដាច់ដោយឡែកមួយ ដែលគេហៅថា **Custom Hook**។ 
+
+និយាយអោយស្រួលស្តាប់ វាគឺជា Function ធម្មតាមួយដែលត្រូវបានបង្កើតឡើងដោយប្រមូលផ្តុំ Hooks ផ្សេងៗ (ដូចជា useState, useEffect) បញ្ចូលគ្នា!
+
+---
+
+## 1. ច្បាប់ក្នុងការបង្កើត Custom Hook
+- ឈ្មោះត្រូវតែចាប់ផ្តើមដោយពាក្យថា `use` ជាដាច់ខាត (ឧ. `useFetch`, `useAuth`, `useTheme`)។
+- មិនដូច Components ដែល return កូដ JSX (HTML) នោះទេ, Custom Hook ជាធម្មតានឹង return ត្រលប់មកវិញនូវ ទិន្នន័យ អថេរ ឬ Function នានា ដូចអ្នកហៅប្រើអនុគមន៍ JavaScript ធម្មតាដែរ។
+
+---
+
+## 2. ការបង្កើត `useFetch` Hook
+
+នៅក្នុងមេរៀនមុន យើងបានសរសេរកូដដ៏វែងអន្លាយក្នុងការហៅ API (មានទាំងការគ្រប់គ្រងទិន្នន័យ, គ្រប់គ្រង Loading និងការចាប់កំហុស Error)។ ចុះបើមាន Component ៣ ផ្សេងទៀតចង់ហៅ API តើយើងត្រូវសរសេរកូដនោះម្តងទៀតមែនទេ? 
+
+ទេ! យើងនឹងបង្កើត `useFetch` ទុកសម្រាប់ប្រើប្រាស់រួម។
+
+**១. បង្កើតឯកសារថ្មីមួយឈ្មោះ `useFetch.js` (ឬ `.ts`)**
+```jsx
+import { useState, useEffect } from 'react';
+
+// បង្កើត Custom Hook ទទួលយក URL ជាប៉ារ៉ាម៉ែត្រ
+export function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("ទាញយកមិនជោគជ័យ");
+        const result = await response.json();
+        setData(result);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]); // បើ URL ផ្លាស់ប្តូរ វានឹងហៅ API ម្តងទៀត
+
+  // Return អថេរទាំង ៣ នេះត្រលប់ទៅវិញ (ប្រើជា Object ងាយស្រួលចាប់យកមកប្រើ)
+  return { data, loading, error };
+}
+```
+
+---
+
+## 3. របៀបហៅ Custom Hook ទៅប្រើ
+
+ឥឡូវនេះ សូមមើលថាតើ Component របស់យើងស្រឡះ និងខ្លីប៉ុណ្ណា នៅពេលយើងហៅ `useFetch` មកប្រើ៖
+
+```jsx
+// ទាញយក Custom Hook មកប្រើ
+import { useFetch } from './useFetch';
+
+export default function UserList() {
+  // ហៅប្រើ Hook ដូចយើងប្រើ useState ដែរ!
+  const { data: users, loading, error } = useFetch("https://jsonplaceholder.typicode.com/users");
+
+  if (loading) return <p>កំពុងផ្ទុកទិន្នន័យសិស្ស...</p>;
+  if (error) return <p style={{color: 'red'}}>មានបញ្ហា: {error}</p>;
+
+  return (
+    <ul>
+      {users.map(user => <li key={user.id}>{user.name}</li>)}
+    </ul>
+  );
+}
+```
+
+អ្នកអាចប្រើប្រាស់ `useFetch` នេះនៅ Component រាប់រយផ្សេងទៀតក៏បាន! នេះហើយគឺជាថាមពលនៃការបង្កើត Custom Hooks។

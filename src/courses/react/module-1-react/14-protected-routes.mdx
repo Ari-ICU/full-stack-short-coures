@@ -1,0 +1,108 @@
+---
+title: Protected Routes
+description: រៀនពីរបៀបការពារទំព័រ (Routes) នៅក្នុង React កុំអោយអ្នកប្រើប្រាស់ដែលមិនទាន់ Login អាចចូលទៅមើលបាន។
+objectives:
+  - យល់ពីគំនិតនៃ Protected Routes នៅក្នុង SPA
+  - ចេះបង្កើត Wrapper Component សម្រាប់ការពារទំព័រ
+  - ចេះបញ្ជូនអ្នកប្រើប្រាស់ត្រលប់ទៅទំព័រ Login វិញដោយស្វ័យប្រវត្តិបើសិនជាគ្មានសិទ្ធិ
+module: module-1-react
+order: 14
+quiz:
+  - question: "តើអ្វីទៅជាតួនាទីរបស់ Component `<Navigate to=\"/login\" />` នៅក្នុង React Router?"
+    options:
+      - "\"វាបង្ហាញតំណ (Link) អោយអ្នកប្រើប្រាស់ចុចដើម្បីទៅទំព័រ Login\""
+      - "\"វាបញ្ជូនអ្នកប្រើប្រាស់ (Redirect) ទៅកាន់ទំព័រ Login ដោយស្វ័យប្រវត្តិដោយមិនចាំបាច់មានការចុច\""
+      - "\"វាលុបគណនីរបស់អ្នកប្រើប្រាស់ចោល\""
+      - "\"វាធ្វើអោយ Browser គាំង\""
+    correctAnswer: 2
+    explanation: "`<Navigate>` គឺជា Component របស់ React Router ដែលប្រើសម្រាប់ធ្វើការ Redirect អ្នកប្រើប្រាស់ទៅកាន់ទំព័រផ្សេងទៀតភ្លាមៗនៅពេលដែលវាត្រូវបានបង្ហាញនៅលើអេក្រង់ (Render)។"
+---
+
+## 🛡️ ការការពារទំព័រ (Protected Routes)
+
+នៅក្នុងមេរៀនទី ១២ យើងបានបង្កើតទំព័រជាច្រើនជាមួយ React Router។ ប៉ុន្តែនៅក្នុងកម្មវិធីពិតប្រាកដ ទំព័រខ្លះ (ឧទាហរណ៍ដូចជា ទំព័រគណនី ទំព័រគ្រប់គ្រង ទំព័របង់ប្រាក់) តម្រូវអោយអ្នកប្រើប្រាស់ Login ជាមុនសិនទើបអាចចូលមើលបាន។
+
+បច្ចេកទេសការពារទំព័រមិនអោយអ្នកខាងក្រៅចូលមើលបាន គេហៅថា **Protected Routes**។
+
+---
+
+## 1. ការបង្កើត `ProtectedRoute` Wrapper Component
+
+វិធីសាស្រ្តដែលងាយស្រួលបំផុតគឺការបង្កើត Component ថ្មីមួយ ដែលមានតួនាទីធ្វើជាសន្តិសុខយាមទ្វារ។ ប្រសិនបើមានសិទ្ធិ (មាន Token) វានឹងបើកទ្វារអោយចូលមើលមាតិកាខាងក្នុង (`children`) ប៉ុន្តែបើគ្មានសិទ្ធិទេ វានឹងដេញអោយទៅទំព័រ Login វិញ។
+
+**ឯកសារ `ProtectedRoute.jsx`:**
+```jsx
+import { Navigate } from 'react-router-dom';
+
+export default function ProtectedRoute({ children }) {
+  // ពិនិត្យមើលថាតើគាត់មានកូនសោរ (Token) ក្នុង Local Storage ដែរឬទេ
+  const token = localStorage.getItem("myToken");
+
+  // ប្រសិនបើគ្មានកូនសោរទេ បញ្ជូនគាត់ត្រលប់ទៅទំព័រ /login វិញភ្លាមៗ
+  if (!token) {
+    return <Navigate to="/login" replace />; // ប្រើ replace ដើម្បីកុំអោយមានបញ្ហាពេលចុច Back
+  }
+
+  // ប្រសិនបើមានកូនសោរ អនុញ្ញាតអោយបង្ហាញអ្វីដែលនៅខាងក្នុង (children) ជាធម្មតា
+  return children;
+}
+```
+
+---
+
+## 2. ការប្រើប្រាស់ `ProtectedRoute`
+
+ឥឡូវនេះ យើងអាចយកសន្តិសុខរបស់យើងទៅរុំព័ទ្ធទំព័រណាដែលយើងចង់ការពារនៅក្នុងឯកសារ `App.jsx` បានហើយ!
+
+**ឯកសារ `App.jsx`:**
+```jsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
+
+// ទំព័រធម្មតាៗ
+const Home = () => <h1>ទំព័រដើម (អ្នកណាក៏មើលបាន) 🏠</h1>;
+const Login = () => <h1>សូមចូលគណនី 🔑</h1>;
+
+// ទំព័រឯកជន
+const Dashboard = () => <h1>ផ្ទាំងគ្រប់គ្រង (ទាល់តែ Login ទើបមើលបាន) 📊</h1>;
+const Profile = () => <h1>គណនីរបស់ខ្ញុំ 👤</h1>;
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <nav style={{ padding: 10, background: '#eee', marginBottom: 20 }}>
+        <Link to="/">Home</Link> | {" "}
+        <Link to="/login">Login</Link> | {" "}
+        <Link to="/dashboard">Dashboard</Link> | {" "}
+        <Link to="/profile">Profile</Link>
+      </nav>
+
+      <Routes>
+        {/* ទំព័រដែលបើកចំហរ */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* ទំព័រដែលត្រូវបានការពារ (Protected) */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+សាកល្បងចុចទៅកាន់ទំព័រ Dashboard ពេលនេះមើល! ដោយសារអ្នកគ្មាន Token ក្នុង localStorage វានឹងលោតទៅទំព័រ Login វិញភ្លាមៗមួយប៉ព្រិចភ្នែក។ នេះហើយគឺជារបៀបដែល Facebook ឬកម្មវិធីធំៗការពារទំព័ររបស់ពួកគេ!

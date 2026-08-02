@@ -1,0 +1,94 @@
+---
+title: Layouts & Templates
+description: ស្វែងយល់ពីរបៀបរៀបចំរចនាសម្ព័ន្ធទំព័រនៅក្នុង Next.js ដោយប្រើប្រាស់ layout.tsx និង template.tsx ។
+objectives:
+  - យល់ពីតួនាទីរបស់ឯកសារ `layout.tsx`
+  - ចេះបង្កើត Layout សម្រាប់ទំព័រនីមួយៗ (Nested Layouts)
+  - ស្គាល់ពីភាពខុសគ្នារវាង `layout.tsx` និង `template.tsx`
+module: module-1-nextjs
+order: 2
+quiz:
+  - question: "តើអ្វីទៅជាភាពខុសគ្នាសំខាន់បំផុតរវាង `layout.tsx` និង `template.tsx` នៅក្នុង Next.js?"
+    options:
+      - "\"ពួកវាដូចគ្នាទាំងស្រុង គ្រាន់តែឈ្មោះខុសគ្នា\""
+      - "\"`layout.tsx` ត្រូវបានប្រើសម្រាប់តែទំព័រដើមប៉ុណ្ណោះ រីឯ `template.tsx` ប្រើសម្រាប់ទំព័រផ្សេងទៀត\""
+      - "\"`layout.tsx` រក្សាទុកស្ថានភាព (State) របស់វានៅពេលផ្លាស់ប្តូរទំព័រ ចំណែកឯ `template.tsx` នឹងបង្កើតឡើងវិញថ្មីជានិច្ច (Remount) រាល់ពេលដែលផ្លាស់ប្តូរទំព័រ\""
+      - "\"`layout.tsx` អាចផ្ទុកកូដ CSS បាន ឯ `template.tsx` ផ្ទុកបានតែកូដ HTML\""
+    correctAnswer: 3
+    explanation: "Layouts មិនត្រូវបាន Re-render ទេពេលប្តូរទំព័រ ដែលជួយសន្សំសំចៃល្បឿន និងរក្សាទុកទិន្នន័យ (ដូចជាការវាយអក្សរទុកក្នុងប្រអប់ Search លើ Navbar ជាដើម)។ ប៉ុន្តែបើអ្នកចង់អោយ Component មួយដំណើរការកូដ Animations ឡើងវិញរាល់ពេលប្តូរទំព័រ អ្នកគួរតែប្រើ `template.tsx`។"
+---
+
+## 🏗️ រចនាសម្ព័ន្ធសំបកក្រៅ (Layouts)
+
+នៅពេលបង្កើតគេហទំព័រ យើងតែងតែមានផ្នែកខ្លះដែលត្រូវបង្ហាញនៅគ្រប់ទំព័រទាំងអស់ ដូចជា របារខាងលើ (Navbar) និង ផ្នែកខាងក្រោមបង្អស់ (Footer)។ នៅក្នុង React ធម្មតា យើងត្រូវយកវាទៅដាក់នៅគ្រប់ទំព័រ ឬរុំព័ទ្ធ Router យ៉ាងស្មុគស្មាញ។ 
+
+ប៉ុន្តែនៅក្នុង Next.js (App Router) យើងមានឯកសារពិសេសមួយឈ្មោះថា **`layout.tsx`** ដែលដោះស្រាយបញ្ហានេះយ៉ាងងាយស្រួល។
+
+---
+
+## 1. អ្វីទៅជា `layout.tsx`?
+
+រាល់ថត (Folder) នៅក្នុង `app` សុទ្ធតែអាចមានឯកសារ `layout.tsx` រៀងៗខ្លួន។ ប៉ុន្តែអ្វីដែលសំខាន់បំផុតគឺ **Root Layout** ដែលស្ថិតនៅក្នុងថត `src/app/layout.tsx` ផ្ទាល់តែម្តង។ វារុំព័ទ្ធគម្រោងរបស់អ្នកទាំងមូល!
+
+**ឯកសារ `src/app/layout.tsx`:**
+```tsx
+import './globals.css';
+import Navbar from '@/components/Navbar'; // ឧបមាថាយើងមាន Component នេះ
+import Footer from '@/components/Footer';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Navbar />          {/* Navbar នឹងលេចឡើងគ្រប់ទំព័រទាំងអស់ */}
+        
+        <main style={{ minHeight: '80vh', padding: 20 }}>
+          {children}        {/* ទីតាំងដែលទំព័រ (page.tsx) នីមួយៗនឹងបង្ហាញខ្លួន */}
+        </main>
+        
+        <Footer />          {/* Footer នឹងលេចឡើងគ្រប់ទំព័រទាំងអស់ */}
+      </body>
+    </html>
+  );
+}
+```
+
+> **ចំណាំសំខាន់:** នៅពេលអ្នកផ្លាស់ប្តូរទំព័រ (ឧ. ពី Home ទៅ About) `layout.tsx` នឹង **មិនត្រូវបាន Re-render** (មិនដំណើរការឡើងវិញ) នោះទេ។ នេះមានន័យថា បើអ្នកមានវីដេអូកំពុងចាក់នៅលើ Navbar វានឹងនៅតែបន្តចាក់ដោយមិនរអាក់រអួលឡើយ!
+
+---
+
+## 2. Layout តូចៗតាមផ្នែក (Nested Layouts)
+
+តើអ្នកចង់អោយទំព័រផ្នែកខាងក្នុង (ឧ. `app/dashboard/...`) មាន Sidebar ផ្ទាល់ខ្លួនរបស់វាដែរឬទេ? ងាយៗ! អ្នកគ្រាន់តែបង្កើតឯកសារ `layout.tsx` ថ្មីមួយនៅក្នុងថត `dashboard` ប៉ុណ្ណោះ។
+
+**រចនាសម្ព័ន្ធថត:**
+```text
+app/
+ ├─ layout.tsx      (Root Layout: មាន Navbar និង Footer)
+ ├─ page.tsx        (ទំព័រដើម)
+ └─ dashboard/
+     ├─ layout.tsx  (Dashboard Layout: មាន Sidebar បន្ថែម)
+     └─ page.tsx    (ទំព័រខាងក្នុង Dashboard)
+```
+
+នៅពេលនេះ ពេលអ្នកចូលទំព័រ Dashboard វានឹងត្រូវរុំដោយ `Dashboard Layout` ជាមុនសិន រួចទើបយកទៅរុំដោយ `Root Layout` ម្តងទៀត (ស្រទាប់ត្រួតគ្នា)។
+
+---
+
+## 3. ពេលណាត្រូវប្រើ `template.tsx`?
+
+`template.tsx` គឺមានទម្រង់ការសរសេរដូចគ្នាបេះបិទទៅនឹង `layout.tsx` ដែរ!
+
+**ចំណុចខុសគ្នា:**
+- `layout.tsx`: រក្សាទុកកូដមិនអោយគូរឡើងវិញ (No Re-rendering) ពេលប្តូរទំព័រ។ (លឿន និងសន្សំសំចៃ)
+- `template.tsx`: **តែងតែត្រូវបានគូរឡើងវិញ (Re-rendered/Remounted)** រាល់ពេលដែលអ្នកផ្លាស់ប្តូរទំព័រ។
+
+**តើគួរប្រើ `template.tsx` ពេលណា?**
+1. ពេលអ្នកចង់អោយ **Animations** កើតឡើងជានិច្ចពេលបើកចូលទំព័រម្តងៗ (ឧ. អក្សរអណ្តែតចេញមក)។
+2. ពេលអ្នកចង់អោយទំព័រនីមួយៗមាន `useEffect` រត់ឡើងវិញរាល់ពេលចូលមើល។
+
+ជាទូទៅ ៩៩% នៃគម្រោងរបស់អ្នកនឹងប្រើប្រាស់ `layout.tsx` ជានិច្ច លើកលែងតែអ្នកមានតម្រូវការពិសេសខាងលើ។

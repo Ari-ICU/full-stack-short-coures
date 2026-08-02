@@ -1,0 +1,106 @@
+---
+title: Dynamic Routes
+description: រៀនពីការបង្កើត URL ដែលផ្លាស់ប្តូរបាន (Dynamic URLs) ដូចជាទំព័រទំនិញនីមួយៗ (products/1, products/2) ដោយប្រើប្រាស់សញ្ញាវង់ក្រចកជ្រុង `[folderName]`។
+objectives:
+  - យល់ពីគំនិតនៃ Dynamic Routing នៅក្នុង Next.js
+  - ចេះបង្កើតទំព័រដែលទទួលយកលេខសម្គាល់ (ID) ឬអក្សរពី URL តាមរយៈ `[id]`
+  - ចេះទាញយកប៉ារ៉ាម៉ែត្រ (Parameters) មកប្រើប្រាស់ដើម្បីហៅ API ត្រូវនឹងលេខនោះ
+module: module-1-nextjs
+order: 8
+quiz:
+  - question: "ដើម្បីបង្កើតទំព័រមួយដែលអាចអាន URL ដូចជា `/users/rithy` ឬ `/users/sokha` តើអ្នកត្រូវបង្កើតថត (Folder) ដែលមានឈ្មោះបែបណានៅក្នុង `app/users/`?"
+    options:
+      - "\"(username)\""
+      - "\"{username}\""
+      - "\"[username]\""
+      - "\"_username\""
+    correctAnswer: 3
+    explanation: "នៅក្នុង Next.js អ្នកត្រូវប្រើប្រាស់សញ្ញាវង់ក្រចកជ្រុង (Square Brackets) `[ឈ្មោះអថេរ]` ដើម្បីបង្កើត Dynamic Route។ ឧទាហរណ៍ `app/users/[username]/page.tsx` វានឹងចាប់យកពាក្យអ្វីក៏ដោយដែលគេវាយនៅទីនោះមកទុកក្នុងអថេរ `username`។"
+---
+
+## 🔗 អ្វីទៅជា Dynamic Routes?
+
+ប្រសិនបើអ្នកចង់បង្កើតទំព័រ "អំពីយើង" អ្នកគ្រាន់តែបង្កើតថត `about` ហើយដាក់ `page.tsx` នៅទីនោះ វាជាការស្រេច។
+ប៉ុន្តែចុះបើអ្នកចង់បង្កើតទំព័រលក់ទំនិញ ដែលមានទំនិញដល់ទៅ ១០០០ មុខ? អ្នកមិនអាចអង្គុយបង្កើតថត `product-1`, `product-2` រហូតដល់ ១០០០ នោះទេ!
+
+យើងត្រូវការ **Dynamic Route** (ទំព័រដែលអាចផ្លាស់ប្តូររូបរាងទៅតាមទិន្នន័យ) ដោយគ្រាន់តែបង្កើតទំព័រតែមួយគត់!
+
+---
+
+## 1. ការបង្កើត Dynamic Segment
+
+នៅក្នុង Next.js ប្រសិនបើអ្នកយកសញ្ញាវង់ក្រចកជ្រុង `[]` ទៅរុំឈ្មោះ Folder ណាមួយ វានឹងចាត់ទុកថាជាកន្លែងដែលអាចជំនួសដោយអក្សរអ្វីក៏បាន។
+
+**រចនាសម្ព័ន្ធថត:**
+```text
+app/
+ └─ products/
+     └─ [id]/         <-- នេះគឺជា Dynamic Folder!
+         └─ page.tsx
+```
+
+នៅពេលនេះ មិនថាគេចូលទៅ `localhost:3000/products/5` ឬ `products/apple` ឬ `products/abc` ទេ វានឹងបើកទំព័រ `page.tsx` នេះទាំងអស់។
+
+---
+
+## 2. ការទាញយកតម្លៃចេញពី URL (Params)
+
+ឥឡូវនេះទំព័ររបស់យើងបើកចេញហើយ ប៉ុន្តែតើយើងដឹងថាមួយណាជា `5` ហើយមួយណាជា `apple` យ៉ាងដូចម្តេច?
+Next.js នឹងបញ្ជូន Props មួយឈ្មោះថា `params` មកអោយ Component របស់អ្នកជានិច្ច!
+
+**ឯកសារ `app/products/[id]/page.tsx`:**
+```tsx
+type Props = {
+  // ឈ្មោះអថេរ `id` ត្រូវតែដូចគ្នាទៅនឹងឈ្មោះ Folder ដែលអ្នកបានដាក់ [id]
+  params: { id: string }
+};
+
+export default function ProductDetailPage({ params }: Props) {
+  // ទាញយកលេខសម្គាល់ពី URL
+  const productId = params.id;
+
+  return (
+    <div>
+      <h1>ព័ត៌មានលម្អិតនៃទំនិញលេខ: {productId}</h1>
+      <p>យើងនឹងយកលេខ {productId} នេះទៅហៅ API ដើម្បីទាញយកទិន្នន័យពី Database នៅទីនេះ...</p>
+    </div>
+  );
+}
+```
+
+---
+
+## 3. ការទាញយកទិន្នន័យជាក់ស្តែង (Fetching data)
+
+យើងតែងតែប្រើប្រាស់ `params` នេះដើម្បីទៅប្រាប់ Server ថាយើងចង់បានទិន្នន័យអ្វី។ ដោយសារនេះគឺជា Server Component យើងអាចប្រើប្រាស់ `async/await` ផ្ទាល់តែម្តង!
+
+```tsx
+type Props = {
+  params: { id: string }
+};
+
+export default async function ProductDetailPage({ params }: Props) {
+  const { id } = params;
+
+  // ហៅ API ដោយផ្អែកលើ ID (ឧ. ហៅយកតែទិន្នន័យទំនិញលេខ ៥ ប៉ុណ្ណោះ)
+  const res = await fetch(`https://api.example.com/products/${id}`);
+  
+  // បើទំនិញរកមិនឃើញ លោតទៅទំព័រ 404 (not-found.tsx ដែលយើងបានរៀន)
+  if (!res.ok) {
+    // ចាំបាច់ត្រូវ import { notFound } from 'next/navigation'; សិន
+    return notFound();
+  }
+
+  const product = await res.json();
+
+  return (
+    <div>
+      <h1>{product.name}</h1>
+      <p>តម្លៃ: ${product.price}</p>
+      <p>{product.description}</p>
+    </div>
+  );
+}
+```
+
+**សន្និដ្ឋាន:** Dynamic Routes គឺជាបេះដូងនៃការបង្កើតគេហទំព័រធំៗដូចជា E-commerce ឬប្លុកអត្ថបទ (Blogs) ដែលទំព័រនីមួយៗផ្លាស់ប្តូរមាតិកាទៅតាមលេខសម្គាល់ (ID) ឬឈ្មោះ (Slug) ដែលមាននៅក្នុង URL។

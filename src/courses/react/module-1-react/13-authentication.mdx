@@ -1,0 +1,110 @@
+---
+title: Authentication
+description: រៀនពីរបៀបបង្កើតប្រព័ន្ធ Login សាមញ្ញនៅក្នុង React (Mock Authentication) និងការរក្សាទុកស្ថានភាព Login (Token)។
+objectives:
+  - យល់ពីលំហូរនៃការចូលគណនី (Login Flow) របស់កម្មវិធី React
+  - ចេះប្រើប្រាស់ State ឬ Context ដើម្បីចងចាំថាអ្នកប្រើប្រាស់បាន Login រួចឬនៅ
+  - ចេះរក្សាទុក Token ឬទិន្នន័យសម្គាល់ចូលទៅក្នុង localStorage
+module: module-1-react
+order: 13
+quiz:
+  - question: "តើកន្លែងណាដែលល្អបំផុតសម្រាប់ការរក្សាទុក Token (ឬព័ត៌មាន Login) នៅក្នុង Browser ដើម្បីកុំអោយវាបាត់បង់នៅពេលអ្នកប្រើប្រាស់ Refresh ទំព័រ?"
+    options:
+      - "\"នៅក្នុងអថេរធម្មតា (let token = ...)\""
+      - "\"នៅក្នុង React State (useState)\""
+      - "\"នៅក្នុង Local Storage (localStorage.setItem)\""
+      - "\"នៅក្នុង CSS File\""
+    correctAnswer: 3
+    explanation: "អថេរ និង State នឹងត្រូវលុបចោលទាំងស្រុងនៅពេលដែល Browser ធ្វើការ Refresh។ ដើម្បីចងចាំអ្នកប្រើប្រាស់បានយូរ យើងត្រូវរក្សាទុក Token ឬទិន្នន័យរបស់គាត់ទៅក្នុង `localStorage` (ឬ Cookies)។"
+---
+
+## 🔐 ប្រព័ន្ធចូលគណនី (Authentication)
+
+នៅក្នុងកម្មវិធី Frontend ទំនើប ការ Login គឺជារឿងទូទៅបំផុត។ លំហូរការងាររបស់វាមានដូចខាងក្រោម៖
+1. អ្នកប្រើប្រាស់វាយបញ្ចូល អុីមែល និង លេខសម្ងាត់។
+2. React បញ្ជូនទិន្នន័យនេះទៅកាន់ Backend (API)។
+3. បើត្រឹមត្រូវ Backend នឹងបញ្ជូនកូនសោរមួយ (ច្រើនតែហៅថា **JWT Token**) ត្រលប់មកវិញ។
+4. React យកកូនសោរនោះមករក្សាទុកក្នុងកុំព្យូទ័រអ្នកប្រើប្រាស់ (Local Storage) ដើម្បីសម្គាល់ថាគាត់បាន Login រួច។
+
+---
+
+## 1. ការបង្កើតទម្រង់ Login ក្លែងក្លាយ (Mock Login)
+
+នៅក្នុងមេរៀននេះ ដោយសារយើងមិនទាន់មាន Backend API យើងនឹងបង្កើតការ Login បែបក្លែងក្លាយមួយដើម្បីយល់ពីលំហូរការងារសិន។
+
+```jsx
+import { useState } from 'react';
+
+export default function App() {
+  const [token, setToken] = useState(null);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // ឧបមាថាយើងបានទាក់ទងទៅ Server ហើយ Server ឆ្លើយតបមកវិញនូវ Token
+    const fakeToken = "abc.123.xyz";
+    
+    setToken(fakeToken); // ទុកក្នុង State សម្រាប់ប្រើប្រាស់ភ្លាមៗ
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      {/* បើមាន Token មានន័យថាគាត់ Login រួចហើយ */}
+      {token ? (
+        <div>
+          <h2>សូមស្វាគមន៍! អ្នកបានចូលគណនីដោយជោគជ័យ។</h2>
+          <p>Token របស់អ្នកគឺ: {token}</p>
+          <button onClick={handleLogout}>ចាកចេញ (Logout)</button>
+        </div>
+      ) : (
+        <form onSubmit={handleLogin}>
+          <h2>សូមចូលគណនី</h2>
+          <input type="text" placeholder="អុីមែល" required />
+          <br /><br />
+          <input type="password" placeholder="លេខសម្ងាត់" required />
+          <br /><br />
+          <button type="submit">Login</button>
+        </form>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 2. ការប្រើប្រាស់ `localStorage` 💾
+
+កូដខាងលើមានបញ្ហាមួយ គឺនៅពេលអ្នកចុច **Refresh (F5)** ទំព័រនោះ ស្ថានភាព Login របស់អ្នកនឹងបាត់បង់ (ដាច់ចេញមកក្រៅវិញ) ព្រោះ `useState` មិនអាចចងចាំទិន្នន័យក្រោយពេល Refresh ឡើយ។
+
+ដើម្បីដោះស្រាយ យើងត្រូវបញ្ចូល `localStorage`!
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export default function App() {
+  // នៅពេលបើកទំព័រដំបូង យើងព្យាយាមអាន Token ពី Local Storage ជាមុនសិន
+  const [token, setToken] = useState(() => localStorage.getItem("myToken"));
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    const fakeToken = "abc.123.xyz";
+    
+    setToken(fakeToken); 
+    // រក្សាទុកក្នុង Browser អោយជាប់! ទោះបីជាបិទ Browser ចោលក៏ដោយ
+    localStorage.setItem("myToken", fakeToken);
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    // កុំភ្លេចលុបវាចោលពេលគេ Logout
+    localStorage.removeItem("myToken");
+  };
+
+  // ... (កូដ JSX ខាងក្រោមគឺដូចគ្នាទៅនឹងឧទាហរណ៍មុន)
+```
+
+ឥឡូវនេះ សាកល្បង Login រួចចុច Refresh (F5) មើល។ អ្នកនឹងឃើញថាអ្នកនៅតែស្ថិតក្នុងគណនីដដែល! នេះហើយគឺជាអ្វីដែលកម្មវិធីពិតប្រាកដគេធ្វើ។
