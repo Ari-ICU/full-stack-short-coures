@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MapDiagram, FilterDiagram, ReduceDiagram } from "./JsArrayMethodsDiagrams";
 import { DomTreeDiagram, DomModifyDiagram, DomEventsDiagram } from "./JsDomDiagrams";
 import { DomCreateDiagram, DomAppendDiagram, DomRemoveReplaceDiagram } from "./JsDomUpdateDiagrams";
+import { EventListenerDiagram, EventObjectDiagram, PreventDefaultDiagram } from "./JsEventsDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2200,6 +2201,9 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsdomcreate:               DomCreateDiagram,
   jsdomappend:               DomAppendDiagram,
   jsdomremove:               DomRemoveReplaceDiagram,
+  jseventlistener:           EventListenerDiagram,
+  jseventobject:             EventObjectDiagram,
+  jspreventdefault:          PreventDefaultDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {

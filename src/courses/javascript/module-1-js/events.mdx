@@ -4,7 +4,7 @@ description: សិក្សាពីរបៀបធ្វើអោយគេហ�
 objectives:
   - យល់ពីការប្រើប្រាស់ addEventListener ដើម្បីចាប់យកសកម្មភាព
   - ស្គាល់ពីប្រភេទ Events សំខាន់ៗ (click, input, change, submit, keydown, keyup)
-  - យល់ពីតួនាទីរបស់ Event Object (e) 
+  - យល់ពីតួនាទីរបស់ Event Object (e)
   - យល់ពីមូលហេតុដែលត្រូវប្រើប្រាស់ e.preventDefault() ពេល Submit Form
 module: module-1-js
 order: 14
@@ -31,12 +31,49 @@ quiz:
 1. **ឈ្មោះ Event:** តើចង់ស្តាប់សកម្មភាពអ្វី? (ឧ. "click")
 2. **Function:** បើមានគេធ្វើសកម្មភាពហ្នឹងមែន តើអោយកូដដើរអ្វីខ្លះ?
 
-```javascript
+```tabs
+html
+<button id="my-btn">ចុចខ្ញុំ!</button>
+<p id="output"></p>
+
+---
+
+css
+#my-btn {
+  padding: 10px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#my-btn:hover {
+  background: #2563eb;
+}
+
+#output {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+---
+
+js
 const btn = document.querySelector("#my-btn");
+const output = document.querySelector("#output");
 
 btn.addEventListener("click", () => {
+  output.textContent = "អ្នកទើបតែចុចប៊ូតុង!";
   console.log("អ្នកទើបតែចុចប៊ូតុង!");
 });
+```
+
+```jsdiagram
+jseventlistener
 ```
 
 ---
@@ -52,7 +89,38 @@ btn.addEventListener("click", () => {
 *   **`keydown`**: ពេលដែលអ្នកចុចប៊ូតុងណាមួយចុះក្រោមភ្លាមៗ។
 *   **`keyup`**: ពេលដែលអ្នកព្រលែងប៊ូតុងដែលបានចុចនោះមកវិញ។
 
-```javascript
+```tabs
+html
+<input id="search" type="text" placeholder="ចុច Key ណាមួយ..." />
+<p id="key-output"></p>
+
+---
+
+css
+#search {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#search:focus {
+  border-color: #ec4899;
+}
+
+#key-output {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  font-family: monospace;
+}
+
+---
+
+js
 // ស្តាប់ការវាយអក្សរពេញមួយគេហទំព័រ
 document.addEventListener("keydown", (e) => {
   console.log("អ្នកចុចប៉ះអក្សរ: " + e.key);
@@ -64,12 +132,45 @@ document.addEventListener("keydown", (e) => {
 *   **`change`**: ដំណើរការនៅពេលតម្លៃផ្លាស់ប្តូរ **ហើយ** អ្នកប្រើប្រាស់ចុចចេញពី input នោះ (lose focus)។ ស័ក្តិសមសម្រាប់ `<select>` ជ្រើសរើសជម្រើស។
 *   **`submit`**: ដំណើរការនៅពេលចុចប៊ូតុង Submit នៅក្នុង Form។
 
-```javascript
-const searchInput = document.querySelector("#search");
+```tabs
+html
+<input id="search-input" type="text" placeholder="វាយដើម្បី search..." />
+<p id="search-result"></p>
+
+---
+
+css
+#search-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#search-input:focus {
+  border-color: #14b8a6;
+}
+
+#search-result {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #0f766e;
+  font-family: monospace;
+}
+
+---
+
+js
+const searchInput = document.querySelector("#search-input");
+const result = document.querySelector("#search-result");
 
 searchInput.addEventListener("input", (e) => {
   // ប្រើ e.target.value ដើម្បីយកតម្លៃដែលវាយបញ្ចូល
-  console.log("កំពុងស្វែងរក: ", e.target.value); 
+  result.textContent = "កំពុងស្វែងរក: " + e.target.value;
+  console.log("កំពុងស្វែងរក: ", e.target.value);
 });
 ```
 
@@ -80,6 +181,10 @@ searchInput.addEventListener("input", (e) => {
 នៅពេលមាន Event មួយកើតឡើង JavaScript តែងតែបញ្ជូន **Event Object (ច្រើនតាងដោយ `e` ឬ `event`)** ដោយស្វ័យប្រវត្តិទៅអោយ Function របស់អ្នក។ Object នេះមានផ្ទុកព័ត៌មានលម្អិតទាំងអស់អំពី Event នោះ (ឧ. ចុចចំទីតាំងណា? ចុចប៊ូតុងអ្វី? ចេញពី Element មួយណា?)។
 
 ការប្រើប្រាស់ពេញនិយមបំផុតគឺ `e.target` ដែលចង្អុលទៅកាន់ Element ដើមដែលបានបង្កើត Event នោះ (ឧទាហរណ៍ជាក់ស្តែងគឺការអាន `e.target.value` ខាងលើ)។
+
+```jsdiagram
+jseventobject
+```
 
 ---
 
@@ -92,22 +197,59 @@ searchInput.addEventListener("input", (e) => {
 ```tabs
 html
 <form id="login-form">
-  <input type="text" id="username" />
+  <input type="text" id="username" placeholder="បញ្ចូលឈ្មោះ" />
   <button type="submit">ចូលគណនី</button>
 </form>
 
 ---
 
-javascript
+css
+#login-form {
+  display: flex;
+  gap: 8px;
+}
+
+#login-form input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#login-form input:focus {
+  border-color: #22c55e;
+}
+
+#login-form button {
+  padding: 10px 20px;
+  background: #22c55e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+---
+
+js
 const form = document.querySelector("#login-form");
 const usernameInput = document.querySelector("#username");
 
 form.addEventListener("submit", (e) => {
   // បញ្ឈប់ការ Refresh ទំព័រ (Page Reload)
   e.preventDefault();
-  
+
   // យកទិន្នន័យមកធ្វើការដោយខ្លួនឯង...
   const username = usernameInput.value;
   console.log(`ស្វាគមន៍, ${username}!`);
 });
+```
+
+```jsdiagram
+jspreventdefault
 ```
