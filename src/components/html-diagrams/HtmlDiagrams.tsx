@@ -297,7 +297,7 @@ export function DivSpanDiagram() {
 const HTML_DIAGRAMS: Record<string, React.ComponentType> = {
   blockinline:          BlockInlineDiagram,
   divspan:              DivSpanDiagram,
-  semanticvsnosemantic: SemanticVsNonSemanticDiagram,
+  semanticvsnonsemantic: SemanticVsNonSemanticDiagram,
   semanticlayout:       SemanticLayoutDiagram,
   formstructure:        FormStructureDiagram,
   inputtypes:           InputTypesDiagram,
