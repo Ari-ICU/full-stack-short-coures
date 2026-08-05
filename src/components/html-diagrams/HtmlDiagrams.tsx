@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { SemanticVsNonSemanticDiagram, SemanticLayoutDiagram } from "./HtmlSemanticDiagrams";
+import { FormStructureDiagram, InputTypesDiagram, FormValidationDiagram } from "./HtmlFormsDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -293,8 +295,13 @@ export function DivSpanDiagram() {
 
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 const HTML_DIAGRAMS: Record<string, React.ComponentType> = {
-  blockinline:  BlockInlineDiagram,
-  divspan:      DivSpanDiagram,
+  blockinline:          BlockInlineDiagram,
+  divspan:              DivSpanDiagram,
+  semanticvsnosemantic: SemanticVsNonSemanticDiagram,
+  semanticlayout:       SemanticLayoutDiagram,
+  formstructure:        FormStructureDiagram,
+  inputtypes:           InputTypesDiagram,
+  formvalidation:       FormValidationDiagram,
 };
 
 export function HtmlDiagram({ name }: { name: string }) {
