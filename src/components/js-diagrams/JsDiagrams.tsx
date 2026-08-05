@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MapDiagram, FilterDiagram, ReduceDiagram } from "./JsArrayMethodsDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2188,6 +2189,9 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsnestedarray:             NestedArrayDiagram,
   jsarraydestructuring:      ArrayDestructuringDiagram,
   jsarrayspread:             ArraySpreadDiagram,
+  jsmap:                     MapDiagram,
+  jsfilter:                  FilterDiagram,
+  jsreduce:                  ReduceDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {
