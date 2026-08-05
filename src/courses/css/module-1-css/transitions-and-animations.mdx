@@ -86,16 +86,18 @@ css
 transformdemo
 ```
 
-```html
+```tabs
+html
 <div class="icon-btn">🔔</div>
 <div class="product-card">
   <img src="product.jpg" alt="Product" class="product-img">
   <div class="product-info">Product Name</div>
 </div>
 <div class="badge">NEW</div>
-```
 
-```css
+---
+
+css
 /* translate: រំកិល (ដូច position: relative ប៉ុន្តែ GPU-accelerated) */
 .icon-btn {
   transition: transform 0.2s ease;
@@ -141,13 +143,15 @@ transformdemo
 keyframesdemo
 ```
 
-```html
+```tabs
+html
 <div class="loader"></div>
 <div class="hero-text">Welcome to Full Stack Mastery</div>
 <div class="notification-dot"></div>
-```
 
-```css
+---
+
+css
 /* ១. Spinning loader */
 @keyframes spin {
   from { transform: rotate(0deg); }
@@ -205,7 +209,8 @@ keyframesdemo
 transitiontransform
 ```
 
-```html
+```tabs
+html
 <!-- ✅ ប្រើ transform + transition — GPU accelerated -->
 <div class="feature-grid">
   <div class="feature-card feature-card--lift">
@@ -221,9 +226,10 @@ transitiontransform
     <h3>Glow Effect</h3>
   </div>
 </div>
-```
 
-```css
+---
+
+css
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
