@@ -7,6 +7,7 @@ import { CodeBlock } from "./CodeBlock";
 import { Mermaid } from "./Mermaid";
 import { CssDiagram } from "./css-diagrams/CssDiagrams";
 import { JsDiagram } from "./js-diagrams/JsDiagrams";
+import { HtmlDiagram } from "./html-diagrams/HtmlDiagrams";
 
 interface LessonContentProps {
   lesson: Lesson;
@@ -72,6 +73,11 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
             if (lang === "jsdiagram") {
               const name = String(children).trim();
               return <JsDiagram name={name} />;
+            }
+
+            if (lang === "htmldiagram") {
+              const name = String(children).trim();
+              return <HtmlDiagram name={name} />;
             }
 
             return (
