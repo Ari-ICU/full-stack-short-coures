@@ -20,7 +20,7 @@ quiz:
 
 ## ⚙️ Advanced DOM Updating
 
-នៅក្នុងមេរៀនមុន (DOM Manipulation) យើងបានរៀនពីរបៀប Select និងកែប្រែ Elements ដែលមានស្រាប់។ ឥឡូវនេះ យើងនឹងរៀនពីការ **បង្កើត (Create)**, **បន្ថែម (Append)**, និង **លុប (Remove)** Elements ថ្មីៗទៅក្នុង DOM តែម្តង! 
+នៅក្នុងមេរៀនមុន (DOM Manipulation) យើងបានរៀនពីរបៀប Select និងកែប្រែ Elements ដែលមានស្រាប់។ ឥឡូវនេះ យើងនឹងរៀនពីការ **បង្កើត (Create)**, **បន្ថែម (Append)**, និង **លុប (Remove)** Elements ថ្មីៗទៅក្នុង DOM តែម្តង!
 
 ការប្រើប្រាស់វិធីសាស្ត្រទាំងនេះជួយអោយគេហទំព័រមានលក្ខណៈ Dynamic ដោយមិនចាំបាច់ Reload ទំព័រ (ឧទាហរណ៍៖ ការបន្ថែម Comment ថ្មីទៅក្នុងបញ្ជី Comments)។
 
@@ -30,7 +30,16 @@ quiz:
 
 អ្នកអាចបង្កើត HTML Element ថ្មីបានគ្រប់ប្រភេទ (ដូចជា `div`, `p`, `li`) ដោយប្រើ `document.createElement()`។ វានឹងបង្កើត Element នេះនៅក្នុង Memory ប៉ុន្តែមិនទាន់បង្ហាញនៅលើគេហទំព័រនៅឡើយទេ។
 
-```javascript
+```tabs
+html
+<!-- HTML structure that we will add nodes into -->
+<article id="main-article">
+  <h2>Original Content</h2>
+</article>
+
+---
+
+js
 // បង្កើត Element ថ្មី
 const newParagraph = document.createElement("p");
 const newButton = document.createElement("button");
@@ -41,6 +50,13 @@ newParagraph.classList.add("text-primary");
 
 newButton.textContent = "Click Me";
 newButton.className = "btn btn-success";
+
+// ✅ Now add to DOM (still invisible until here)
+document.querySelector("#main-article").appendChild(newParagraph);
+```
+
+```jsdiagram
+jsdomcreate
 ```
 
 ---
@@ -50,7 +66,16 @@ newButton.className = "btn btn-success";
 បន្ទាប់ពីបង្កើតរួចរាល់ អ្នកត្រូវបញ្ជូនវាទៅបង្ហាញនៅលើគេហទំព័រ។ អ្នកត្រូវ Select ទីតាំងណាមួយ (Parent Node) ដើម្បីដាក់វាចូល។
 
 **ប្រើប្រាស់ `appendChild()` (ដាក់នៅខាងចុងគេ):**
-```javascript
+
+```tabs
+html
+<div id="main-article">
+  <p>Existing paragraph</p>
+</div>
+
+---
+
+js
 const article = document.querySelector("#main-article");
 
 // បន្ថែម newParagraph ទៅចុងបញ្ចប់នៃ #main-article
@@ -58,7 +83,17 @@ article.appendChild(newParagraph);
 ```
 
 **ប្រើប្រាស់ `prepend()` (ដាក់នៅខាងដើមគេ):**
-```javascript
+
+```tabs
+html
+<ul class="todo-list">
+  <li>Task A</li>
+  <li>Task B</li>
+</ul>
+
+---
+
+js
 const list = document.querySelector(".todo-list");
 const newItem = document.createElement("li");
 newItem.textContent = "Task 1";
@@ -68,13 +103,28 @@ list.prepend(newItem);
 ```
 
 **ប្រើប្រាស់ `insertBefore()` (ដាក់នៅពីមុខ Element ណាមួយ):**
-```javascript
+
+```tabs
+html
+<div class="container">
+  <div class="box-1">Box 1</div>
+  <div class="box-2">Box 2</div>
+</div>
+
+---
+
+js
 const container = document.querySelector(".container");
 const oldBox = document.querySelector(".box-2");
 const newBox = document.createElement("div");
+newBox.textContent = "New Box";
 
 // បន្ថែម newBox ទៅពីមុខ oldBox នៅក្នុង container
 container.insertBefore(newBox, oldBox);
+```
+
+```jsdiagram
+jsdomappend
 ```
 
 ---
@@ -84,7 +134,15 @@ container.insertBefore(newBox, oldBox);
 ដើម្បីលុប Element ណាមួយចេញពី DOM យើងអាចប្រើ Method `remove()` (Modern Way) ឬ `removeChild()` (Old Way)។
 
 **ប្រើប្រាស់ `remove()`:**
-```javascript
+
+```tabs
+html
+<div class="alert">⚠️ This alert will be removed</div>
+<p>Other content stays</p>
+
+---
+
+js
 const alertBox = document.querySelector(".alert");
 
 // លុប Element នេះចេញពីទំព័រទាំងស្រុង
@@ -94,12 +152,27 @@ if (alertBox) {
 ```
 
 **ប្រើប្រាស់ `removeChild()` (តម្រូវអោយ Select Parent សិន):**
-```javascript
+
+```tabs
+html
+<ul id="my-list">
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+</ul>
+
+---
+
+js
 const ul = document.querySelector("ul");
 const firstLi = ul.querySelector("li");
 
 // លុប li ទីមួយចេញពី ul
 ul.removeChild(firstLi);
+```
+
+```jsdiagram
+jsdomremove
 ```
 
 ---
@@ -108,7 +181,16 @@ ul.removeChild(firstLi);
 
 យើងក៏អាចជំនួស Element ចាស់ដោយ Element ថ្មីបានផងដែរ តាមរយៈ `replaceChild()`។
 
-```javascript
+```tabs
+html
+<div id="content">
+  <h2>Old Header</h2>
+  <p>Some content below</p>
+</div>
+
+---
+
+js
 const parent = document.querySelector("#content");
 const oldHeader = document.querySelector("h2");
 
@@ -116,6 +198,7 @@ const newHeader = document.createElement("h1");
 newHeader.textContent = "New Main Header";
 
 // ជំនួស oldHeader ដោយ newHeader
+// replaceChild(newNode, oldNode)
 parent.replaceChild(newHeader, oldHeader);
 ```
 
