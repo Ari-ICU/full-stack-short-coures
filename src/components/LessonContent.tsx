@@ -5,6 +5,8 @@ import remarkGfm from "remark-gfm";
 import { Lesson } from "../types";
 import { CodeBlock } from "./CodeBlock";
 import { Mermaid } from "./Mermaid";
+import { CssDiagram } from "./css-diagrams/CssDiagrams";
+import { JsDiagram } from "./js-diagrams/JsDiagrams";
 
 interface LessonContentProps {
   lesson: Lesson;
@@ -23,10 +25,8 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
             
             if (isLogo) {
               return (
-                <div className="flex justify-center my-8 not-prose">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={src} alt={alt} className="w-32 h-auto object-contain" {...props} />
-                </div>
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={src} alt={alt} className="w-32 h-auto object-contain mx-auto block my-8" {...props} />
               );
             }
 
@@ -35,10 +35,14 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
               <img
                 src={src}
                 alt={alt || ""}
-                className={isSvg ? "inline-block w-6 h-6 object-contain align-middle not-prose" : "max-w-full sm:max-w-2xl rounded-xl shadow-md not-prose my-4"}
+                className={isSvg ? "inline-block w-6 h-6 object-contain align-middle not-prose" : "max-w-full sm:max-w-2xl rounded-xl shadow-md not-prose my-4 block mx-auto"}
                 {...props}
               />
             );
+          },
+          // Override p to avoid <div> inside <p> hydration errors
+          p({ children }) {
+            return <p>{children}</p>;
           },
           code({ className, children, ...props }) {
             const match = /language-(\w+)/.exec(className || "");
@@ -58,6 +62,16 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
 
             if (lang === "mermaid") {
               return <Mermaid chart={String(children).replace(/\n$/, "")} />;
+            }
+
+            if (lang === "diagram") {
+              const name = String(children).trim();
+              return <CssDiagram name={name} />;
+            }
+
+            if (lang === "jsdiagram") {
+              const name = String(children).trim();
+              return <JsDiagram name={name} />;
             }
 
             return (

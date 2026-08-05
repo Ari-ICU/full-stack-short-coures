@@ -14,77 +14,299 @@ quiz:
       - "position: relative;"
       - "position: fixed;"
       - "position: static;"
-    correctAnswer: 3
+    correctAnswer: 2
     explanation: "`position: fixed;` ចាប់យកទីតាំងធៀបនឹងអេក្រង់ (Viewport) ទាំងមូល ដូច្នេះវានឹងមិនរំកិលទៅណាឡើយទោះបីជាយើង Scroll អេក្រង់ក៏ដោយ។"
 ---
 
 ## 📍 CSS Position
 
-តាមលំនាំដើម Elements ទាំងអស់នៅលើ HTML គឺរៀបចំតម្រៀបគ្នាពីលើចុះក្រោម (Normal Flow)។ ប៉ុន្តែពេលខ្លះ យើងចង់យក Element ណាមួយចេញពីលំដាប់នេះ ហើយយកវាទៅដាក់នៅទីតាំងជាក់លាក់ណាមួយ (ឧ. នៅជ្រុងអេក្រង់, នៅពីលើរូបភាព)។ យើងប្រើ `position`។
+តាមលំនាំដើម Elements ទាំងអស់នៅលើ HTML រៀបចំតម្រៀបពីលើចុះក្រោម (**Normal Flow**)។ ប៉ុន្តែពេលខ្លះ យើងចង់ដាក់ Element នៅទីតាំងជាក់លាក់ (ឧ. នៅជ្រុងអេក្រង់, នៅពីលើរូបភាព)។ យើងប្រើ `position`។
 
-មានតម្លៃ ៥ សំខាន់ៗសម្រាប់ `position`:
+---
 
-### 1. `position: static;` (លំនាំដើម)
-នេះគឺជាតម្លៃធម្មតារបស់ Elements ទាំងអស់។ វាមិនអាចប្រើជាមួយ `top`, `bottom`, `left`, `right`, ឬ `z-index` បានទេ។
+### 1. `position: static` — លំនាំដើម
 
-### 2. `position: relative;` (ធៀបនឹងទីតាំងដើមរបស់វា)
-វានៅតែរក្សាកន្លែងទំនេរដើមរបស់វាដដែល ប៉ុន្តែយើងអាចរំកិលវាបានតាមរយៈ `top/left/right/bottom`។ 
-- **ការប្រើប្រាស់ដ៏សំខាន់បំផុត:** គេតែងតែប្រើវាធ្វើជាមេ (Container) ដើម្បីឃុំ Element កូនដែលមាន `position: absolute;` មិនអោយរត់ចេញក្រៅ។
+Elements ទាំងអស់ default ជា `static`។ ស្ថិតនៅ Normal Flow។ **top / left / right / bottom / z-index មិនដំណើរការ**។
 
-### 3. `position: absolute;` (ធៀបនឹងមេរបស់វា)
-វាលោតចេញពី Normal Flow ទាំងស្រុង (លែងស៊ីកន្លែងនៅលើអេក្រង់ទៀតហើយ)។ វានឹងរត់ទៅតាមការកំណត់ `top/left/right/bottom` ដោយធៀបទៅនឹង Element មេណាដែលនៅជិតវាបំផុត ដែលមាន `position: relative;`។ 
-*(បើគ្មានមេណាមាន relative ទេ វានឹងធៀបជាមួយទំព័រទាំងមូល `<HTML>`)*។
-
-```css
-.parent {
-  position: relative; /* ធ្វើជាទ្រុងឃុំកូន */
-  width: 300px;
-  height: 300px;
-}
-
-.child {
-  position: absolute; /* រំកិលខ្លួនបានសេរី */
-  top: 10px;
-  right: 10px;
-}
+```diagram
+positionstatic
 ```
 
-### 4. `position: fixed;` (ធៀបនឹងអេក្រង់ទូរស័ព្ទ/កុំព្យូទ័រ)
-វាលោតចេញពី Normal Flow ទាំងស្រុងដែរ។ ប៉ុន្តែវាមិនខ្វល់ពីមេរបស់វាទេ គឺវាធៀបនឹងអេក្រង់ (Viewport) តែម្តង។ ទោះបីជាអ្នក Scroll ទំព័រចុះក្រោម វាលក៏នៅតែស្ងៀមត្រង់កន្លែងដែលអ្នកកំណត់។
-- **ឧទាហរណ៍:** Navbar នៅខាងលើជាប់ជានិច្ច ឬ ប៊ូតុងឆាត (Chat Button) នៅជ្រុងខាងស្តាំ។
-
-### 5. `position: sticky;` (កូនកាត់ relative នឹង fixed)
-វាដើរតួជា `relative` ជាធម្មតា រហូតដល់អ្នក Scroll អេក្រង់ទៅដល់ទីតាំងរបស់វា វានឹងប្រែខ្លួនជា `fixed` (ស្អិតជាប់នឹងអេក្រង់តែម្តង)។
-- **ឧទាហរណ៍:** ចំណងជើងមាតិកាដែលអូសទៅដល់ហើយ វានៅជាប់ខាងលើជានិច្ច។
+```html
+<div class="el">Element ១</div>
+<div class="el el--static">Element ២ (static)</div>
+<div class="el">Element ៣</div>
+```
 
 ```css
-.sticky-header {
-  position: sticky;
-  top: 0; /* ពេល Scroll ទៅដល់ចម្ងាយ 0px ពីខាងលើ វានឹងស្អិតជាប់ */
+/* ជា default — Elements ទាំងអស់ ហូរពីលើចុះក្រោម */
+.el {
+  background: #e5e7eb;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.el--static {
+  position: static; /* default — មិនចាំបាច់សរសេរ */
+  /* top: 10px;  ← ignored */
+  /* z-index: 5; ← ignored */
 }
 ```
 
 ---
 
-## 🥞 ការត្រួតស៊ីគ្នា (Z-Index)
+### 2. `position: relative` — ធៀបនឹងទីតាំងដើម
 
-នៅពេលដែលអ្នកប្រើ Positioning (ក្រៅពី static), Elements អាចនឹងរត់ទៅត្រួតស៊ីគ្នា (ជាន់គ្នា)។ 
-តើធ្វើដូចម្តេចទើបដឹងថា មួយណានៅលើ មួយណានៅក្រោម?
+**រក្សា space ដើម** ក្នុង Normal Flow — ហើយអាចរំកិលពីទីតាំងនោះ។ ប្រើ **slider** ក្នុង diagram ដើម្បីឃើញ live!
 
-- យើងប្រើប្រាស់ **`z-index`** ដើម្បីកំណត់ស្រទាប់ (Layer)។
-- `z-index` ដែលមានតម្លៃលេខធំជាង នឹងស្ថិតនៅខាងលើគេ។
-- `z-index` ដំណើរការ **តែនៅពេលដែល Element នោះមាន `position` (relative, absolute, fixed, sticky) ប៉ុណ្ណោះ!**
+```diagram
+positionrelative
+```
+
+```html
+<div class="el">Element ១</div>
+<div class="el el--relative">Element ២ (relative)</div>
+<div class="el">Element ៣ — space ដើម reserve ទុក</div>
+```
 
 ```css
-.box-behind {
-  position: absolute;
-  z-index: 1;
+.el {
+  background: #e5e7eb;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
 }
 
-.box-front {
-  position: absolute;
-  z-index: 100; /* នៅលើគេ ព្រោះលេខធំជាង */
+.el--relative {
+  position: relative;
+  top: 10px;   /* ចុះក្រោម 10px ពីទីតាំងដើម */
+  left: 20px;  /* រំកិលស្ដាំ 20px */
+  background: #3b82f6;
+  color: white;
+  /* space ដើម នៅតែ reserve → Element ៣ មិនឡើងមក */
+}
+
+/* ⭐ ការប្រើ relative ដ៏ពេញនិយម: ជា parent container */
+.parent {
+  position: relative; /* ឃុំ .child absolute */
 }
 ```
 
-> 💡 **គន្លឹះ:** ជារឿយៗគេប្រើលេខកន្ទុយសូន្យ (ដូចជា 10, 20, 100, 999) សម្រាប់ `z-index` ដើម្បីងាយស្រួលក្នុងការដាក់ Element ថ្មីៗចូលនៅចន្លោះកណ្តាលនៅថ្ងៃក្រោយ។
+---
+
+### 3. `position: absolute` — ធៀបនឹង relative parent
+
+**លោតចេញពី Normal Flow** — Elements ផ្សេងបូកជិតដូចជាវាបាត់។ ធៀបនឹង **relative parent ជិតបំផុត**។ ប្រើ **sliders** ដើម្បីផ្លាស់ top/left!
+
+```diagram
+positionabsolute
+```
+
+```html
+<div class="card">
+  <img class="card__img" src="product.jpg" alt="Product" />
+  <h3 class="card__title">Product Name</h3>
+  <span class="card__badge">NEW</span>
+</div>
+
+<p class="next-el">Element បន្ទាប់ — ឡើងមកបូក</p>
+```
+
+```css
+.card {
+  position: relative; /* ⭐ ត្រូវតែមាន! .card__badge ធៀបនឹង .card */
+  width: 300px;
+  height: 200px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card__title {
+  /* static — ស្ថិតនៅ Normal Flow ក្នុង .card */
+  padding: 8px 12px;
+}
+
+.card__badge {
+  position: absolute; /* ធៀបនឹង .card (relative parent) */
+  top: 8px;           /* 8px ពីខាងលើ .card */
+  right: 8px;         /* 8px ពីខាងស្ដាំ .card */
+  background: #ef4444;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+/* .card__badge លោតចេញ Normal Flow → .next-el ឡើងមក */
+.next-el {
+  margin-top: 8px;
+  color: #6b7280;
+}
+```
+
+---
+
+### 4. `position: fixed` — ស្ងៀមជាប់នឹង Viewport
+
+**Scroll ចុះប៉ុនណា element នៅ fixed ត្រង់កន្លែង** — ធៀបនឹងអេក្រង់ (Viewport)។ ឃើញ Navbar + Chat button ក្នុង diagram!
+
+```diagram
+positionfixed
+```
+
+```html
+<nav class="navbar">
+  <span class="navbar__logo">Full Stack Mastery</span>
+  <ul class="navbar__links">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+</nav>
+
+<main class="page-content">
+  <p>Page content here...</p>
+</main>
+
+<button class="chat-btn">💬</button>
+```
+
+```css
+.navbar {
+  position: fixed; /* ស្ងៀមជាប់ខាងលើ Viewport */
+  top: 0;
+  left: 0;
+  right: 0;        /* ទទឹងពេញ */
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.navbar__logo { font-weight: bold; }
+
+.navbar__links {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+}
+
+.page-content {
+  /* ⚠️ ត្រូវ offset ព្រោះ .navbar ស៊ីទំហំ 60px */
+  padding-top: 60px;
+}
+
+.chat-btn {
+  position: fixed; /* ស្ងៀមជាប់ជ្រុងខាងស្ដាំ-ក្រោម */
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 999;
+}
+```
+
+---
+
+### 5. `position: sticky` — relative + fixed hybrid
+
+ដើរតួជា `relative` — **រហូតដល់ Scroll ទៅដល់ threshold** ហើយក្លាយជា fixed។ **Scroll ចុះក្នុង diagram** ដើម្បីឃើញ!
+
+```diagram
+positionsticky
+```
+
+```html
+<article class="content">
+  <p>Content before...</p>
+
+  <h2 class="section-header">Section ១ — Basics</h2>
+  <p>Content of section 1...</p>
+  <p>More content here...</p>
+
+  <h2 class="section-header">Section ២ — Advanced</h2>
+  <p>Content of section 2...</p>
+</article>
+```
+
+```css
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.section-header {
+  position: sticky; /* relative ជាធម្មតា → fixed ពេល scroll ដល់ */
+  top: 0;           /* ⭐ ត្រូវតែ! threshold = 0px ពីខាងលើ */
+  background: white;
+  padding: 12px 0;
+  margin: 0;
+  z-index: 10;
+  border-bottom: 2px solid #3b82f6;
+}
+```
+
+---
+
+## 🥞 Z-Index — ស្រទាប់ Layer
+
+នៅពេល Elements ត្រួតស៊ីគ្នា (overlap) — `z-index` កំណត់ **មួយណានៅលើ មួយណានៅក្រោម**។ ប្រើ **sliders** ដើម្បីបំប្ដូរ z-index live:
+
+```diagram
+zindex
+```
+
+```html
+<div class="layer-wrap">
+  <div class="layer layer--blue">Box ១</div>
+  <div class="layer layer--purple">Box ២</div>
+  <div class="layer layer--orange">Box ៣</div>
+</div>
+```
+
+```css
+.layer-wrap {
+  position: relative; /* context សម្រាប់ absolute children */
+  height: 160px;
+}
+
+/* ⚠️ z-index ត្រូវការ position ≠ static! */
+.layer {
+  position: absolute;
+  width: 120px;
+  height: 80px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+}
+
+.layer--blue   { background: #3b82f6; top: 20px; left: 20px;  z-index: 1; }
+.layer--purple { background: #a855f7; top: 50px; left: 60px;  z-index: 2; }
+.layer--orange { background: #f97316; top: 35px; left: 100px; z-index: 3; }
+
+/* z-index ៣ (orange) > ២ (purple) > ១ (blue) → orange នៅលើគេ */
+```
+
+> 💡 **គន្លឹះ:** ប្រើលេខ rounded (10, 20, 100, 999) ដើម្បីងាយបញ្ចូល Elements ថ្មីនៅចន្លោះ — ជាជាង 1, 2, 3 ដែលងាយអស់កន្លែង។

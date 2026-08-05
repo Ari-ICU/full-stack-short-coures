@@ -18,80 +18,314 @@ quiz:
     explanation: ការចាប់ផ្តើមពីទូរស័ព្ទ (Mobile-First) ជួយឱ្យយើងសរសេរកូដចាំបាច់មុនគេ កាត់បន្ថយភាពស្មុគស្មាញ និងបង្កើនល្បឿន (Performance)។
 ---
 
-## 📱 អ្វីទៅជា Responsive Web Design?
+## 📱 Responsive Web Design
 
-Responsive Web Design (RWD) គឺជាវិធីសាស្ត្រនៃការបង្កើត Website ដែលអាចផ្លាស់ប្តូររូបរាង (Layout) ដោយស្វ័យប្រវត្តិ ទៅតាមទំហំអេក្រង់ (Screen Size) របស់ឧបករណ៍អ្នកប្រើប្រាស់ (ឧទាហរណ៍៖ Mobile, Tablet និង Desktop)។ 
+Responsive Web Design (RWD) ធ្វើអោយ Layout **ផ្លាស់ប្ដូរដោយស្វ័យប្រវត្តិ** ទៅតាម Screen Size — Mobile, Tablet, Desktop។ Click device ខាងក្រោម ដើម្បីឃើញ!
 
----
+```diagram
+viewport
+```
 
-## 🎯 វិធីសាស្ត្រ Mobile-First 
+```html
+<!-- Viewport meta tag — ⭐ ត្រូវតែមាន! -->
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
 
-Mobile-First គឺជាការចាប់ផ្តើមរចនា Website សម្រាប់អេក្រង់ Mobile មុនគេ បន្ទាប់មកទើបយើងបន្ថែម CSS (តាមរយៈ Media Queries) ដើម្បីផ្លាស់ប្តូរ Layout សម្រាប់អេក្រង់ធំជាងនេះ (ដូចជា Tablet និង Desktop)។
-
-**អត្ថប្រយោជន៍របស់ Mobile-First៖**
-- ងាយស្រួលក្នុងការរៀបចំ (ព្រោះអេក្រង់តូចមានតែមួយជួរ)
-- ជួយដល់ល្បឿន (Performance) Website នៅលើ Mobile
-- កូដមានភាពស្អាត និងមិនសូវស្មុគស្មាញ
-
----
-
-## 🛠️ ការប្រើប្រាស់ Media Queries (`@media`)
-
-Media Queries គឺជាគន្លឹះសំខាន់របស់ Responsive Web Design។ វាអនុញ្ញាតឱ្យយើងសរសេរកូដ CSS ផ្សេងគ្នាសម្រាប់ Screen Size ផ្សេងគ្នា។
-
-**ឧទាហរណ៍នៃការផ្លាស់ប្តូរពី Mobile ទៅ Desktop៖**
+<!-- Responsive container -->
+<div class="page-wrapper">
+  <nav class="navbar">
+    <div class="nav-logo">MyApp</div>
+    <button class="nav-toggle">☰</button>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Products</a></li>
+    </ul>
+  </nav>
+  <main class="content">Main Content</main>
+</div>
+```
 
 ```css
-/* ១. កូដសម្រាប់ Mobile (Mobile-First) ជាទូទៅដាក់នៅខាងលើគេ */
-.container {
+/* ✅ Viewport meta = ត្រូវតែមានសម្រាប់ Responsive! */
+
+/* Base responsive container */
+.page-wrapper {
   width: 100%;
-  padding: 10px;
-  background-color: lightblue;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+  box-sizing: border-box;
 }
 
-/* ២. សម្រាប់ Tablet (ឧទាហរណ៍៖ អេក្រង់ចាប់ពី 768px ឡើងទៅ) */
+/* Mobile: hamburger visible, links hidden */
+.nav-toggle  { display: block; }
+.nav-links   { display: none; }
+
+/* Desktop: links visible, hamburger hidden */
 @media (min-width: 768px) {
-  .container {
-    width: 750px;
-    margin: 0 auto;
-    background-color: lightgreen;
+  .nav-toggle { display: none; }
+  .nav-links  { display: flex; gap: 24px; list-style: none; }
+}
+```
+
+---
+
+## 🎯 Mobile-First Approach
+
+**Mobile-First** = ចាប់ផ្ដើមសរសេរ CSS សម្រាប់ Mobile មុន — ហើយប្រើ `min-width` media queries ដើម្បីបន្ថែម styles សម្រាប់ screens ធំជាង។ Click ដើម្បីប្រៀបធៀប!
+
+```diagram
+mobilefirst
+```
+
+```html
+<nav class="site-nav">
+  <div class="nav-brand">Brand</div>
+  <ul class="nav-menu">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Work</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</nav>
+```
+
+```css
+/* ✅ Mobile-First: Base = Mobile */
+.site-nav {
+  display: flex;
+  flex-direction: column; /* Mobile: stack vertically */
+  padding: 12px 16px;
+  background: #1f2937;
+}
+
+.nav-brand {
+  color: white;
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column; /* Mobile: vertical menu */
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-menu a {
+  color: #9ca3af;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: block;
+}
+
+/* Tablet: horizontal nav */
+@media (min-width: 768px) {
+  .site-nav {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-brand   { margin-bottom: 0; }
+  .nav-menu    { flex-direction: row; gap: 4px; }
+}
+```
+
+---
+
+## 🛠️ Media Queries — `@media`
+
+`@media` ដំណើរការ CSS ផ្សេងគ្នា ទៅតាម screen size។ ទាញ slider ដើម្បីឃើញ breakpoint ផ្លាស់ប្ដូរ live!
+
+```diagram
+mediaquery
+```
+
+```html
+<section class="features">
+  <div class="feature-card">
+    <span class="feature-icon">⚡</span>
+    <h3 class="feature-title">Fast</h3>
+    <p class="feature-desc">Lightning fast performance</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🔒</span>
+    <h3 class="feature-title">Secure</h3>
+    <p class="feature-desc">Enterprise grade security</p>
+  </div>
+  <div class="feature-card">
+    <span class="feature-icon">🎨</span>
+    <h3 class="feature-title">Beautiful</h3>
+    <p class="feature-desc">Stunning modern design</p>
+  </div>
+</section>
+```
+
+```css
+/* Mobile-First base */
+.features {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 column */
+  gap: 16px;
+  padding: 24px 16px;
+}
+
+.feature-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.feature-icon  { font-size: 2.5rem; display: block; margin-bottom: 12px; }
+.feature-title { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #111827; }
+.feature-desc  { margin: 0; font-size: 14px; color: #6b7280; }
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 40px 24px;
   }
 }
 
-/* ៣. សម្រាប់ Desktop (ឧទាហរណ៍៖ អេក្រង់ចាប់ពី 1024px ឡើងទៅ) */
+/* Desktop: 3 columns */
 @media (min-width: 1024px) {
-  .container {
-    width: 960px;
-    background-color: lightcoral;
+  .features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 48px 32px;
   }
 }
 ```
 
-ក្នុងឧទាហរណ៍ខាងលើ៖
-- ជាទូទៅ `container` នឹងមានពណ៌ `lightblue` ហើយលាតសន្ធឹងពេញអេក្រង់ Mobile។
-- នៅពេលបើកលើ Tablet វាប្តូរទៅពណ៌ `lightgreen` នឹងមានទំហំ `750px`។
-- នៅពេលបើកលើ Desktop វាប្តូរទៅពណ៌ `lightcoral` នឹងមានទំហំ `960px`។
-
 ---
 
-## 📏 របៀបរៀបចំ Layout ជាទូទៅពី Mobile ទៅ Desktop
+## 📐 Responsive Page Layout
 
-នៅពេលប្រើ Flexbox ឬ Grid យើងអាចផ្លាស់ប្តូរការតម្រៀប (Direction) យ៉ាងងាយស្រួល៖
+Layout ពេញ page ដែល sidebar លេចឡើងពេល tablet+, columns ផ្លាស់ប្ដូរពេល desktop។ Click device ដើម្បីឃើញ layout progression!
+
+```diagram
+responsivelayout
+```
+
+```html
+<div class="app-layout">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-logo">MyApp</div>
+      <nav class="header-nav">
+        <a href="#">Dashboard</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="app-sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#">Overview</a></li>
+        <li><a href="#">Analytics</a></li>
+        <li><a href="#">Users</a></li>
+      </ul>
+    </aside>
+
+    <main class="app-main">
+      <div class="card-grid">
+        <article class="stat-card">Users<strong>4,821</strong></article>
+        <article class="stat-card">Revenue<strong>$12,400</strong></article>
+        <article class="stat-card">Orders<strong>284</strong></article>
+        <article class="stat-card">Growth<strong>+18%</strong></article>
+      </div>
+    </main>
+  </div>
+
+  <footer class="app-footer">Footer</footer>
+</div>
+```
 
 ```css
-/* Mobile: តម្រៀបជាជួរឈរ (Column) */
-.gallery {
+/* Mobile-First base */
+.app-layout {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  min-height: 100vh;
 }
 
-/* Desktop: តម្រៀបជាជួរដេក (Row) */
-@media (min-width: 1024px) {
-  .gallery {
-    flex-direction: row;
+.app-header { background: #1e293b; padding: 12px 16px; }
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.header-logo { color: white; font-weight: 800; font-size: 18px; }
+.header-nav  { display: flex; gap: 16px; }
+.header-nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+
+/* Mobile: sidebar hidden */
+.app-sidebar { display: none; }
+
+.app-main    { flex: 1; padding: 16px; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 column */
+  gap: 12px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-footer {
+  background: #f1f5f9;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Tablet: sidebar visible, 2-col cards */
+@media (min-width: 768px) {
+  .app-body {
+    display: flex;
+    flex: 1;
   }
+  .app-sidebar {
+    display: block;
+    width: 200px;
+    background: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    padding: 16px;
+    flex-shrink: 0;
+  }
+  .sidebar-menu { list-style: none; margin: 0; padding: 0; }
+  .sidebar-menu li { margin-bottom: 4px; }
+  .sidebar-menu a { display: block; padding: 8px 12px; border-radius: 6px; color: #475569; text-decoration: none; font-size: 14px; }
+
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Desktop: wider sidebar, 4-col cards */
+@media (min-width: 1024px) {
+  .app-sidebar { width: 240px; padding: 20px; }
+  .card-grid   { grid-template-columns: repeat(4, 1fr); }
 }
 ```
-
-ដោយប្រើវិធីសាស្ត្រនេះ អ្នកអាចបង្កើត Website ដែលមើលទៅស្រស់ស្អាតគ្រប់ Screen Size និងផ្តល់នូវ User Experience ដ៏ល្អដល់អ្នកប្រើប្រាស់!

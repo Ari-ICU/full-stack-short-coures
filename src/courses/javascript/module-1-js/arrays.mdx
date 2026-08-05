@@ -49,6 +49,10 @@ fruits[1] = "Cherry"; // ប្តូរពី Banana ទៅ Cherry
 console.log(fruits); // ["Apple", "Cherry", "Orange", "Mango"]
 ```
 
+```jsdiagram
+jsarraybasics
+```
+
 ---
 
 ## 📂 2. Nested Arrays (Arrays ត្រួតគ្នា)
@@ -65,6 +69,10 @@ const ticTacToe = [
 // ទាញយកអក្សរ "X" ដែលនៅចំកណ្តាលគេបង្អស់
 // [1] គឺជួរទីពីរ, [1] បន្ទាប់គឺទីតាំងកណ្តាលក្នុងជួរនោះ
 console.log(ticTacToe[1][1]); // "X"
+```
+
+```jsdiagram
+jsnestedarray
 ```
 
 ---
@@ -90,6 +98,10 @@ const [first, , third] = colors;
 console.log(third); // "blue"
 ```
 
+```jsdiagram
+jsarraydestructuring
+```
+
 ### Spread Operator (`...`)
 សញ្ញាចុចបី `...` អាចយកធាតុទាំងអស់ពីក្នុង Array មួយមក "ពង្រាយ" បញ្ចូលក្នុង Array មួយទៀត។
 ```javascript
@@ -101,6 +113,10 @@ const allUsers = [...oldUsers, ...newUsers, "Minea"];
 
 console.log(allUsers); 
 // ["Sok", "Sao", "Dara", "Chea", "Minea"]
+```
+
+```jsdiagram
+jsarrayspread
 ```
 
 ---

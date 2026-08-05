@@ -20,7 +20,7 @@ quiz:
 
 ## 📐 បដិវត្តន៍នៃការរៀបចំ Layout
 
-អស់រយៈពេលជាច្រើនឆ្នាំ Web Developers ត្រូវប្រើប្រាស់ "Hacks" ស្មុគស្មាញដូចជា Floats និង Table-Layouts ដើម្បីតម្រៀប Elements នានាឱ្យនៅទន្ទឹមគ្នា។ 
+អស់រយៈពេលជាច្រើនឆ្នាំ Web Developers ត្រូវប្រើប្រាស់ "Hacks" ស្មុគស្មាញដូចជា Floats និង Table-Layouts ដើម្បីតម្រៀប Elements នានាឱ្យនៅទន្ទឹមគ្នា។
 
 បច្ចុប្បន្ននេះ យើងមានប្រព័ន្ធ Layout ដ៏មានឥទ្ធិពលពីរដែលភ្ជាប់មកជាមួយ CSS ស្រាប់៖ **Flexbox** និង **CSS Grid**។
 
@@ -28,38 +28,365 @@ quiz:
 
 ## 🤸‍♀️ Flexbox (Flexible Box Layout)
 
-Flexbox ត្រូវបានរចនាឡើងសម្រាប់ Layout **១ វិមាត្រ (1-Dimensional)**—មានន័យថាវាដោះស្រាយការងារជាមួយ Row តែមួយ ឬ Column តែមួយក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់ការតម្រៀប Elements ការបែងចែកលំហ និងការបង្កើត Navbars។
+Flexbox ត្រូវបានរចនាឡើងសម្រាប់ Layout **១ វិមាត្រ (1-Dimensional)**—វាដោះស្រាយការងារជាមួយ Row តែមួយ ឬ Column តែមួយក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់ការតម្រៀប Elements ការបែងចែកលំហ និងការបង្កើត Navbars។
 
-ដើម្បីដំណើរការ Flexbox អ្នកត្រូវអនុវត្ត `display: flex;` ទៅកាន់ Parent Container។
+### ការចាប់ផ្តើមជាមួយ Flexbox
 
-### Properties សម្រាប់ Flex Container
+ដើម្បីប្រើ Flexbox អ្នកត្រូវដាក់ `display: flex` ទៅកាន់ Parent Container។ Children ទាំងអស់នឹងក្លាយជា **Flex Items**។
+
+```diagram
+flexbox
+```
+
+```html
+<nav class="navbar">
+  <div class="nav-brand">MyApp</div>
+  <ul class="nav-links">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">About</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</nav>
+```
 
 ```css
-.container {
-  display: flex;
-  
-  /* ទិសដៅ: row (លំនាំដើម) | column | row-reverse | column-reverse */
-  flex-direction: row; 
-  
-  /* ការតម្រៀបតាម Main Axis (ផ្តេកតាមលំនាំដើម): 
-     flex-start | center | flex-end | space-between | space-around */
+.navbar {
+  display: flex; /* ⭐ បើក Flexbox! */
   justify-content: space-between;
-  
-  /* ការតម្រៀបតាម Cross Axis (បញ្ឈរតាមលំនាំដើម): 
-     stretch (លំនាំដើម) | center | flex-start | flex-end */
   align-items: center;
-  
-  /* ការរុំ (Wrapping): nowrap (លំនាំដើម) | wrap */
-  flex-wrap: wrap;
+  background: #1f2937;
+  padding: 12px 24px;
+}
+
+.nav-brand {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #d1d5db;
+  text-decoration: none;
+  font-weight: 500;
 }
 ```
 
-### ភាពអស្ចារ្យនៃ `gap`
-នៅក្នុង CSS ទំនើប អ្នកមិនចាំបាច់បន្ថែម Margin ទៅ Element នីមួយៗក្នុង Flex Container ទេ។ គ្រាន់តែប្រើ `gap` Property ប៉ុណ្ណោះ!
+---
+
+### `flex-direction` — ទិសដៅ
+
+`flex-direction` កំណត់ថា Flex Items តម្រៀបតាម **Main Axis** ម្តងណា — ផ្តេក (`row`) ឬ បញ្ឈរ (`column`) ។
+
+
+```diagram
+flexdirection
+```
+
+```html
+<nav class="topbar">
+  <div class="topbar-logo">Logo</div>
+  <div class="topbar-nav">
+    <a href="#">Home</a>
+    <a href="#">Products</a>
+    <a href="#">Blog</a>
+  </div>
+</nav>
+
+<aside class="sidebar-menu">
+  <a href="#">Dashboard</a>
+  <a href="#">Reports</a>
+  <a href="#">Settings</a>
+</aside>
+```
+
 ```css
-.container {
+/* row — items ដេកផ្តេក */
+.topbar {
   display: flex;
-  gap: 16px; /* បន្ថែមគម្លាត 16px រវាង Elements ទាំងអស់ */
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.topbar-logo {
+  font-size: 18px;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.topbar-nav a {
+  color: #475569;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* column — items ឈរបញ្ឈរ */
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: #1e293b;
+  width: 200px;
+}
+
+.sidebar-menu a {
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+```
+
+---
+
+### `justify-content` — តម្រៀបតាម Main Axis
+
+`justify-content` គ្រប់គ្រងការផ្លាស់ប្តូរ Items តាមបណ្តោយ **Main Axis** (ផ្តេក ពេល `flex-direction: row`)។
+
+
+```diagram
+justifycontent
+```
+
+```html
+<div class="modal-footer">
+  <button class="btn btn-cancel">Cancel</button>
+  <button class="btn btn-primary">Save Changes</button>
+</div>
+```
+
+```css
+.modal-footer {
+  display: flex;
+  justify-content: flex-end; /* ដាក់ buttons ទៅស្ដាំ */
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.btn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-cancel {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn-primary {
+  background: #3b82f6;
+  color: white;
+}
+```
+
+---
+
+### `align-items` — តម្រៀបតាម Cross Axis
+
+`align-items` គ្រប់គ្រងការតម្រៀបតាម **Cross Axis** (បញ្ឈរ ពេល `flex-direction: row`)។ Items ដែលមានកម្ពស់ខុសគ្នានឹងតម្រៀបបញ្ឈរតាម value ដែលជ្រើស។
+
+
+```diagram
+alignitems
+```
+
+```html
+<div class="feature-card">
+  <div class="feature-icon">🚀</div>
+  <div class="feature-text">
+    <h3 class="feature-title">Fast Deployment</h3>
+    <p class="feature-desc">Deploy to production in seconds with zero downtime.</p>
+  </div>
+</div>
+```
+
+```css
+.feature-card {
+  display: flex;
+  align-items: center; /* icon + text តម្រៀបកណ្ដាល */
+  gap: 16px;
+  padding: 24px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  flex: 1;
+}
+
+.feature-title {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.feature-desc {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+```
+
+---
+
+### `flex-wrap` + `gap` — រុំ Items
+
+`flex-wrap: wrap` អនុញ្ញាតឱ្យ Items ផ្លាស់ទៅបន្ទាត់ថ្មី ពេល Container ល្មមគ្រប់ `gap` កំណត់ គម្លាតត្រឹមត្រូវដោយស្វ័យប្រវត្តិ — ដូចជា tags, badge list ។
+
+
+```diagram
+flexwrapgap
+```
+
+```html
+<section class="skills-section">
+  <h2 class="skills-heading">Tech Stack</h2>
+  <div class="skill-tags">
+    <span class="skill-tag">React</span>
+    <span class="skill-tag">TypeScript</span>
+    <span class="skill-tag">Node.js</span>
+    <span class="skill-tag">PostgreSQL</span>
+    <span class="skill-tag">Docker</span>
+    <span class="skill-tag">AWS</span>
+  </div>
+</section>
+```
+
+```css
+.skills-section {
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+}
+
+.skills-heading {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap; /* រុំ tags ទៅបន្ទាត់ថ្មី */
+  gap: 8px;        /* គម្លាត 8px រវាង tags */
+}
+
+.skill-tag {
+  padding: 6px 14px;
+  background: #dbeafe;
+  color: #1e40af;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+```
+
+---
+
+### `flex-grow`, `flex-shrink`, `flex-basis` — ទំហំ Item
+
+Properties ទាំងបីនេះកំណត់ថាតើ Item ម្នាក់ **រីក** (`flex-grow`) **ញ្ញើ** (`flex-shrink`) ឬ **ទំហំចាប់ផ្ដើម** (`flex-basis`) យ៉ាងណា។ Shorthand `flex: grow shrink basis` ងាយស្រួលប្រើ។
+
+
+```diagram
+flexgrow
+```
+
+```html
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <nav class="sidebar-nav">
+      <a href="#">Dashboard</a>
+      <a href="#">Analytics</a>
+      <a href="#">Users</a>
+    </nav>
+  </aside>
+  <main class="app-main">
+    <h1>Dashboard</h1>
+    <p>Main content area grows to fill remaining space.</p>
+  </main>
+  <aside class="app-details">Details</aside>
+</div>
+```
+
+```css
+.app-layout {
+  display: flex;
+  gap: 16px;
+  min-height: 100vh;
+  padding: 16px;
+  background: #f1f5f9;
+}
+
+.app-sidebar {
+  flex: 0 0 200px; /* grow: 0, shrink: 0, basis: 200px — ទំហំជាប់ */
+  background: #1e293b;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-nav a {
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.app-main {
+  flex: 1; /* grow: 1 — យក space ដែលនៅសល់ទាំងអស់ */
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.app-details {
+  flex: 0 0 150px; /* grow: 0, shrink: 0, basis: 150px — ទំហំជាប់ */
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
 }
 ```
 
@@ -67,42 +394,451 @@ Flexbox ត្រូវបានរចនាឡើងសម្រាប់ Layou
 
 ## 🏁 CSS Grid
 
-ខណៈដែល Flexbox គឺសម្រាប់ ១ វិមាត្រ CSS Grid គឺសម្រាប់ Layout **២ វិមាត្រ (2-Dimensional)**—វាគ្រប់គ្រងទាំង Rows និង Columns ក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់រចនាសម្ព័ន្ធ Page ទាំងមូល និង Image Gallery ស្មុគស្មាញ។
+CSS Grid ត្រូវបានរចនាឡើងសម្រាប់ Layout **២ វិមាត្រ (2-Dimensional)**—វាគ្រប់គ្រងទាំង Rows និង Columns ក្នុងពេលតែមួយ។ វាស័ក្តិសមបំផុតសម្រាប់ Page Layout ទាំងមូល Gallery ស្មុគស្មាញ និង Dashboard។
 
-### Properties សម្រាប់ Grid Container
+### Basic Grid — `display: grid`
 
-```css
-.grid-container {
-  display: grid;
-  
-  /* កំណត់ Columns។ ទីនេះយើងបង្កើត ៣ Columns ដែលមានទទឹងស្មើគ្នា។ */
-  grid-template-columns: 1fr 1fr 1fr;
-  
-  /* កំណត់ Rows។ ទីនេះយើងបង្កើត ២ Rows, នីមួយៗមានកម្ពស់ 200px។ */
-  grid-template-rows: 200px 200px;
-  
-  /* បន្ថែមគម្លាតរវាង Elements ក្នុង Grid */
-  gap: 20px;
-}
+
+```diagram
+grid
 ```
 
-### Fractional Unit (`fr`)
-Grid បានណែនាំឯកតារង្វាស់ថ្មីមួយគឺ៖ `fr` (Fractional Unit)។ វាតំណាងឱ្យប្រភាគនៃទំហំទំនេរនៅក្នុង Grid Container។
-- `grid-template-columns: 1fr 2fr 1fr;` បង្កើត ៣ Columns ដែល Column កណ្តាលមានទទឹងធំជាងគេពីរដង។
+```html
+<section class="product-gallery">
+  <article class="product-card">
+    <img src="product1.jpg" alt="Wireless Headphones" class="product-img">
+    <div class="product-body">
+      <h3 class="product-name">Wireless Headphones</h3>
+      <p class="product-price">$79</p>
+    </div>
+  </article>
+  <article class="product-card">
+    <img src="product2.jpg" alt="Smart Watch" class="product-img">
+    <div class="product-body">
+      <h3 class="product-name">Smart Watch</h3>
+      <p class="product-price">$199</p>
+    </div>
+  </article>
+  <article class="product-card">
+    <img src="product3.jpg" alt="Laptop Stand" class="product-img">
+    <div class="product-body">
+      <h3 class="product-name">Laptop Stand</h3>
+      <p class="product-price">$45</p>
+    </div>
+  </article>
+</section>
+```
 
-### អនុគមន៍ `repeat()`
-ប្រសិនបើអ្នកចង់បាន ៤ Columns ស្មើគ្នា អ្នកមិនចាំបាច់សរសេរ `1fr 1fr 1fr 1fr` ទេ។
 ```css
-.grid-container {
-  grid-template-columns: repeat(4, 1fr);
+.product-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* ៣ columns ស្មើគ្នា */
+  gap: 20px;
+  padding: 24px;
+}
+
+.product-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.product-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.product-body {
+  padding: 16px;
+}
+
+.product-name {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.product-price {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #3b82f6;
 }
 ```
 
 ---
 
-## ⚖️ Flexbox vs Grid: តើគួរជ្រើសរើសមួយណា?
+### `fr` Unit + `repeat()`
 
-- ប្រើ **Flexbox** សម្រាប់ Layout តូចៗ (Navigation Bars, ដាក់ Icon ចំកណ្តាល Button, តម្រៀប Elements ក្នុង Card)។
-- ប្រើ **CSS Grid** សម្រាប់ Layout ធំៗ (Page Layout, Gallery នៃ Product Cards, Dashboard Grids)។
+`fr` (Fractional Unit) តំណាងឱ្យប្រភាគនៃ space ទំនេរ។ `repeat()` function ជួយកាត់បន្ថយ code ដែលដដែលៗ។
 
-នៅក្នុងការរចនា Website ទំនើប ពួកវាត្រូវបានបង្កើតឡើងដើម្បីប្រើរួមគ្នា! ជាញឹកញាប់អ្នកនឹងមាន Grid Layout សម្រាប់ Page ធំ ហើយ Card នីមួយៗនៅក្នុង Grid នោះនឹងប្រើប្រាស់ Flexbox ដើម្បីតម្រៀប Content ខាងក្នុងរបស់វា។
+
+```diagram
+frunit
+```
+
+```html
+<div class="page-layout">
+  <header class="page-header">Header</header>
+  <aside class="page-sidebar">Sidebar</aside>
+  <main class="page-content">
+    <h1>Main Content</h1>
+    <p>This area expands to fill all remaining space.</p>
+  </main>
+  <footer class="page-footer">Footer</footer>
+</div>
+```
+
+```css
+.page-layout {
+  display: grid;
+  grid-template-columns: 250px 1fr; /* sidebar ជាប់ 250px, content ​យក space ដែលនៅសល់ */
+  grid-template-rows: auto 1fr auto;
+  gap: 16px;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.page-header {
+  grid-column: 1 / -1; /* span ពេញ ២ columns */
+  background: #3b82f6;
+  color: white;
+  padding: 20px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.page-sidebar {
+  background: #f3f4f6;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.page-content {
+  background: white;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.page-footer {
+  grid-column: 1 / -1; /* span ពេញ ២ columns */
+  background: #1f2937;
+  color: #9ca3af;
+  padding: 16px 24px;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 14px;
+}
+```
+
+---
+
+### `gap` — គម្លាតរវាង Cells
+
+`gap` (ឬ `column-gap` / `row-gap` ដាច់ដោយឡែក) បន្ថែមគម្លាតរវាង Grid Items ដោយស្វ័យប្រវត្តិ — ងាយជាង Margins ច្រើន។
+
+
+```diagram
+gridgap
+```
+
+```html
+<section class="photo-gallery">
+  <figure class="gallery-item">
+    <img src="photo1.jpg" alt="Mountain" class="gallery-photo">
+    <figcaption class="gallery-caption">Mountain</figcaption>
+  </figure>
+  <figure class="gallery-item">
+    <img src="photo2.jpg" alt="Ocean" class="gallery-photo">
+    <figcaption class="gallery-caption">Ocean</figcaption>
+  </figure>
+  <figure class="gallery-item">
+    <img src="photo3.jpg" alt="Forest" class="gallery-photo">
+    <figcaption class="gallery-caption">Forest</figcaption>
+  </figure>
+  <figure class="gallery-item">
+    <img src="photo4.jpg" alt="Desert" class="gallery-photo">
+    <figcaption class="gallery-caption">Desert</figcaption>
+  </figure>
+  <figure class="gallery-item">
+    <img src="photo5.jpg" alt="City" class="gallery-photo">
+    <figcaption class="gallery-caption">City</figcaption>
+  </figure>
+  <figure class="gallery-item">
+    <img src="photo6.jpg" alt="Valley" class="gallery-photo">
+    <figcaption class="gallery-caption">Valley</figcaption>
+  </figure>
+</section>
+```
+
+```css
+.photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 16px; /* គម្លាតផ្ដេករវាង columns */
+  row-gap: 24px;    /* គម្លាតបញ្ឈររវាង rows */
+  padding: 24px;
+}
+
+/* ឬប្រើ gap: row column */
+/* gap: 24px 16px; */
+
+.gallery-item {
+  margin: 0;
+}
+
+.gallery-photo {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+}
+
+.gallery-caption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+}
+```
+
+---
+
+### Spanning Cells — `grid-column` + `grid-row`
+
+ធ្វើឱ្យ Grid Item span ពេញច្រើន columns ឬ rows ។ Syntax: `grid-column: start / end` ដែល end line number លើស start ។
+
+
+```diagram
+gridspan
+```
+
+```html
+<div class="dashboard">
+  <div class="widget widget-hero">
+    <h2>Total Revenue</h2>
+    <p class="widget-value">$128,400</p>
+  </div>
+  <div class="widget">Active Users<br><strong>4,821</strong></div>
+  <div class="widget">Conversions<br><strong>12.4%</strong></div>
+  <div class="widget">New Signups<br><strong>284</strong></div>
+  <div class="widget">Bounce Rate<br><strong>34%</strong></div>
+</div>
+```
+
+```css
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 160px);
+  gap: 16px;
+  padding: 24px;
+  background: #f1f5f9;
+}
+
+.widget {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.widget-hero {
+  grid-column: 1 / 3; /* span 2 columns */
+  grid-row: 1 / 3;    /* span 2 rows */
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+}
+
+.widget-hero h2 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.widget-value {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+}
+```
+
+---
+
+## ⚖️ Flexbox vs Grid
+
+### ពេលប្រើ Flexbox
+
+Flexbox ល្អបំផុត ពេលអ្នកត្រូការ Layout **១ ទិស** ។
+
+- **Navigation bars** — items ក្នុង row តែមួយ
+- **Button groups** — buttons ស្ថិតជាប់គ្នា
+- **Card content** — icon + text តម្រៀប
+- **Center content** — element ក្នុងកណ្ដាល
+- **Tag lists** — tags wrap ដោយស្វ័យប្រវត្តិ
+
+### ពេលប្រើ Grid
+
+Grid ល្អបំផុត ពេលអ្នកត្រូការ Layout **២ ទិស (Rows + Columns)** ក្នុងពេលតែមួយ ។
+
+- **Page layouts** — header, sidebar, main, footer
+- **Product galleries** — rows + columns ច្រើន
+- **Dashboard widgets** — cards នៅ positions ជាក់លាក់
+- **Image grids** — responsive photo grid
+- **Calendar layouts** — 7 columns × rows ច្រើន
+
+### 💡 ប្រើរួមគ្នា
+
+ក្នុង Website ទំនើប Grid + Flexbox ត្រូវប្រើរួមគ្នា — Grid សម្រាប់ structure ធំ Flexbox សម្រាប់ alignment ខាងក្នុង។
+
+```html
+<!-- Grid for page structure -->
+<div class="page-grid">
+  <nav class="topnav">
+    <!-- Flexbox for nav items -->
+    <div class="nav-inner">
+      <div class="nav-logo">Brand</div>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Shop</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main-area">
+    <!-- Grid for product cards -->
+    <div class="cards-grid">
+      <!-- Flexbox for card content layout -->
+      <div class="product-card">
+        <img src="item.jpg" alt="Item" class="card-img">
+        <div class="card-body">
+          <h3 class="card-title">Product Name</h3>
+          <p class="card-desc">Short description here.</p>
+          <div class="card-footer">
+            <span class="card-price">$49</span>
+            <button class="add-btn">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+```
+
+```css
+/* Grid for page structure */
+.page-grid {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+/* Flexbox for topnav */
+.nav-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.nav-logo {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Grid for product cards */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  padding: 24px;
+}
+
+/* Flexbox for card content */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+}
+
+.card-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.card-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: #3b82f6;
+}
+
+.add-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+```
+
+> 💡 **ចងចាំ:** Grid = structure, Flexbox = alignment ។ ប្រើ Grid ដើម្បីបង្កើត layout ហើយ Flexbox ដើម្បីតម្រៀប content ខាងក្នុង!

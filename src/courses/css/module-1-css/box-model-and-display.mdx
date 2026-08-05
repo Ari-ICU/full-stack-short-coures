@@ -21,32 +21,157 @@ quiz:
 
 ## 📦 CSS Box Model (ទ្រឹស្តីប្រអប់)
 
-នៅក្នុង CSS, រាល់ HTML Element ទាំងអស់សុទ្ធតែត្រូវបានចាត់ទុកថាជា **"ប្រអប់ (Box)"**។ ការយល់ពី Box Model គឺជារឿងសំខាន់បំផុតសម្រាប់ការរៀបចំ Layout។ 
+នៅក្នុង CSS, រាល់ HTML Element ទាំងអស់សុទ្ធតែត្រូវបានចាត់ទុកថាជា **"ប្រអប់ (Box)"**។ ការយល់ពី Box Model គឺជារឿងសំខាន់បំផុតសម្រាប់ការរៀបចំ Layout។
 
-ប្រអប់មួយមានសមាសធាតុ ៤ ជាន់ (ពីក្នុងទៅក្រៅ)៖
-1. **Content:** ផ្ទៃកណ្តាលបំផុត ជាកន្លែងដែលអក្សរ ឬរូបភាពស្ថិតនៅ។
-2. **Padding:** គម្លាតពី Content ទៅកាន់ស៊ុម (Border)។ វាប្រៀបដូចជាអេប៉ុងការពារខាងក្នុង។
-3. **Border:** ស៊ុមព័ទ្ធជុំវិញ។
-4. **Margin:** គម្លាតពីស៊ុម (Border) ទៅកាន់ Elements ផ្សេងទៀត (គម្លាតខាងក្រៅ)។
+### 🗺️ រចនាសម្ព័ន្ធ Box Model
+
+```diagram
+boxmodel
+```
+
+ប្រអប់មួយមានសមាសធាតុ **៤ ជាន់** (ពីក្នុងទៅក្រៅ)៖
+
+| ជាន់ | ឈ្មោះ | តួនាទី |
+|------|-------|--------|
+| 1️⃣ | **Content** | ផ្ទៃកណ្តាលបំផុត — អក្សរ ឬ រូបភាព |
+| 2️⃣ | **Padding** | គម្លាតពី Content ទៅ Border (ខាងក្នុង) |
+| 3️⃣ | **Border** | ស៊ុមព័ទ្ធជុំវិញ |
+| 4️⃣ | **Margin** | គម្លាតពី Border ទៅ Elements ផ្សេង (ខាងក្រៅ) |
+
+### 💻 ឧទាហរណ៍ Box Model
+
+```html
+<!-- Box Model: div ជា element ប្រអប់ -->
+<div class="box">
+  ខ្ញុំជា Content!
+</div>
+```
 
 ```css
-div {
-  width: 300px;
-  padding: 20px;
-  border: 5px solid black;
-  margin: 10px;
+.box {
+  width: 200px;              /* Content width */
+  height: 100px;             /* Content height */
+  padding: 20px;             /* ✅ គម្លាតខាងក្នុង */
+  border: 5px solid #3b82f6; /* ✅ ស៊ុម */
+  margin: 10px;              /* ✅ គម្លាតខាងក្រៅ */
+  background-color: #dbeafe; /* background = Content + Padding */
 }
 ```
 
-### បញ្ហាទី ១ របស់ CSS នឹងដំណោះស្រាយ (`box-sizing`)
-តាមលំនាំដើម ប្រសិនបើអ្នកអោយ `width: 300px` ហើយបន្ថែម `padding: 20px` នោះទំហំប្រអប់សរុបនឹងកើនឡើងដល់ 340px (300 + 20 ឆ្វេង + 20 ស្តាំ)។ នេះធ្វើអោយ Layout យើងងាយនឹងបែក។
+---
 
-**ដំណោះស្រាយ:** ប្រើ `box-sizing: border-box;` ដើម្បីអោយវាគិត Padding និង Border បញ្ចូលទៅក្នុង 300px នោះតែម្តង។
+### ⚠️ `box-sizing` — ហេតុអ្វីទំហំប្រអប់ហើររីក?
+
+**`content-box` (default):** Padding + Border **រីករ** ប្រអប់ — Width: 200px → សរុប: **250px**!
+
+**`border-box` (recommended):** Padding + Border **ត្រូវបញ្ចូលរួច** — Width: 200px → សរុប: **200px** ✅
+
+```diagram
+boxsizing
+```
+
+```html
+<!-- ច្បាប់មាស: ដាក់នៅ global CSS file -->
+<!-- ␣ ␣ ␣ ␣ ␣ ␣ -->
+```
 
 ```css
-/* ច្បាប់មាសដែលគេតែងតែសរសេរនៅខាងលើគេបង្អស់នៃកូដ CSS */
-* {
+/* ✅ ច្បាប់មាស — ដាក់ជាទីមួយ reset.css ឬ global.css */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+/* លទ្ធផល: width: 300px ជា width ពិត */
+.box {
+  width: 300px;    /* = ទំហំប្រអប់ពិត (padding+border រួចហើយ) */
+  padding: 20px;   /* ✅ មិនរីក! */
+  border: 5px solid #3b82f6; /* ✅ មិនរីក! */
+}
+```
+
+---
+
+## 📐 Padding លម្អិត
+
+`padding` គឺជាគម្លាតខាងក្នុង — ចន្លោះ Content និង Border។ Click ចុះ buttons ។
+
+```diagram
+padding
+```
+
+```html
+<!-- Padding: button ដែលមាន padding សមស្រប -->
+<button class="btn">Click Me</button>
+
+<!-- Card ដែលប្រើ padding ខ្ពស់ -->
+<div class="card">
+  <h2 class="card__title">Card Title</h2>
+  <p class="card__body">Some description text here.</p>
+</div>
+```
+
+```css
+.btn {
+  padding: 10px 24px; /* top/bottom: 10px · left/right: 24px */
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card {
+  padding: 24px;  /* ✅ ជុំវិញ Content ទាំង ៤ ទិស */
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.card__title { padding-bottom: 8px; }  /* padding-bottom តែ */
+.card__body  { padding: 0; }            /* គ្មាន padding */
+```
+
+---
+
+## 📏 Margin លម្អិត
+
+`margin` គឺជាគម្លាតខាងក្រៅ — ចន្លោះ Element មួយ និង Elements ផ្សេង។
+
+### Margin Collapse
+
+ពេល Block elements ២ ជាប់គ្នា margins **collapse** — CSS ប្រើតែ value ធំបំផុត មិនបូក។
+
+```diagram
+margincollapse
+```
+
+```html
+<!-- Margin collapse: margin-bottom ១ + margin-top ២ = ធំបំផុតតែម្ដង -->
+<p class="para--top">Paragraph ១ (margin-bottom: 30px)</p>
+<p class="para--bottom">Paragraph ២ (margin-top: 20px)</p>
+
+<!-- Center element ដោយ margin: auto -->
+<div class="centered">ខ្ញុំស្ថិតនៅកណ្ដាល!</div>
+```
+
+```css
+.para--top    { margin-bottom: 30px; } /* margin-bottom */
+.para--bottom { margin-top: 20px; }    /* margin-top */
+/* ចម្ងាយជាក់ស្ដែង = 30px (មិនមែន 50px) ← Margin Collapse! */
+
+/* ✅ Center element ដោយ margin: auto */
+.centered {
+  width: 400px;
+  margin: 0 auto; /* left/right = auto → ចំកណ្ដាល */
+  background: #dbeafe;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* Negative margin */
+.overlap {
+  margin-top: -20px; /* ទាញ element ឡើងលើ 20px */
 }
 ```
 
@@ -54,49 +179,284 @@ div {
 
 ## 🖥️ Display Property
 
-Elements នីមួយៗមានទម្រង់បង្ហាញខុសៗគ្នា។ អ្នកអាចប្តូរវាបានតាមរយៈ `display`៖
+`display` គ្រប់គ្រងរបៀបដែល Element ចាប់យកទំហំ និងរៀបជាមួយ Elements ផ្សេង។ Click buttons ទាំង ៤ ។
 
-- `display: block;`
-  - ចាប់យកទំហំពេញ 100% នៃបន្ទាត់ (ដូចជា `<div>`, `<h1>`, `<p>`)។
-  - រុញ Elements ផ្សេងទៀតទៅបន្ទាត់ថ្មីខាងក្រោម។
-- `display: inline;`
-  - ចាប់យកទំហំតូចបំផុតត្រឹម Content របស់វា (ដូចជា `<span>`, `<a>`)។
-  - មិនអាចកំណត់ Width និង Height បានទេ!
-- `display: inline-block;`
-  - ដូច `inline` ដែរ វានៅលើបន្ទាត់តែមួយជាមួយគេ។
-  - ប៉ុន្តែវាអនុញ្ញាតអោយយើងកំណត់ Width និង Height បាន។ (ស័ក្តិសមសម្រាប់ធ្វើប៊ូតុង)
-- `display: none;`
-  - លាក់ Element នោះបាត់ឈឹងពីអេក្រង់ (វាលែងចាប់យកទំហំអ្វីទាំងអស់)។
+```diagram
+display
+```
 
-*(ចំណាំ៖ `display: flex;` នឹង `display: grid;` នឹងមានលម្អិតនៅក្នុងមេរៀនក្រោយដោយឡែក)*
+| Property | ចាប់ Width 100%? | Width/Height? | ស្ថិតនៅ Row? |
+|----------|-----------------|---------------|-------------|
+| `block` | ✅ | ✅ | ❌ ចុះបន្ទាត់ |
+| `inline` | ❌ | ❌ | ✅ |
+| `inline-block` | ❌ | ✅ | ✅ |
+| `none` | — | — | 🚫 លាក់ |
 
----
+```html
+<!-- block: div, p, h1 — ចាប់ width 100% -->
+<div class="block-el">Block Element</div>
+<p class="block-el">Paragraph</p>
 
-## 🌊 ការគ្រប់គ្រងការហៀរ (Overflow)
+<!-- inline: span, a — ស្ថិតក្នុង text flow -->
+<p>
+  ខ្ញុំជា text ដែលមាន
+  <span class="highlight">highlight span</span>
+  នៅខាងក្នុង។
+</p>
 
-ពេលខ្លះ Content (អក្សរ ឬ រូបភាព) ធំជាងទំហំប្រអប់ដែលអ្នកបានកំណត់ នោះវានឹងហៀរចេញមកក្រៅ។
+<!-- inline-block: buttons — row + width/height -->
+<div class="btn-group">
+  <button class="btn">Button ១</button>
+  <button class="btn">Button ២</button>
+  <button class="btn">Button ៣</button>
+</div>
 
-- `overflow: hidden;` កាត់ចោលផ្នែកដែលហៀរចេញ (លាក់មិនអោយឃើញ)។
-- `overflow: scroll;` បង្កើតរបារអូស (Scrollbar) ជានិច្ច ទោះមានការហៀរឬក៏អត់។
-- `overflow: auto;` បង្កើត Scrollbar តែនៅពេលណាដែលចាំបាច់ (មានការហៀរ) ប៉ុណ្ណោះ។
+<!-- none: លាក់ element -->
+<div class="modal" id="modal">Modal content</div>
+<button onclick="document.getElementById('modal').style.display='block'">
+  Show Modal
+</button>
+```
 
----
-
-## 🌑 ការដាក់ស្រមោល (Shadows)
-
-ការដាក់ស្រមោលជួយអោយការរចនាមើលទៅមានទម្រង់ 3D និងលេចធ្លោ (Premium)។
-
-### Box Shadow (ស្រមោលប្រអប់)
 ```css
-.card {
-  /* x-offset | y-offset | blur-radius | color */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+.block-el {
+  display: block;   /* ✅ ចាប់ width 100% · ចុះបន្ទាត់ */
+  background: #dbeafe;
+  padding: 8px 16px;
+  margin-bottom: 4px;
+}
+
+.highlight {
+  display: inline; /* ✅ ស្ថិតក្នុង text · width/height ignored */
+  background: #fef08a;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.btn-group { display: flex; gap: 8px; } /* ✅ flex ជំនួស inline-block */
+
+.btn {
+  display: inline-block; /* ✅ row + width/height */
+  width: 100px;
+  height: 40px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  line-height: 40px;
+}
+
+.modal {
+  display: none; /* 🚫 លាក់ — គ្មានទំហំ */
 }
 ```
 
-### Text Shadow (ស្រមោលអក្សរ)
+---
+
+## 🌊 Overflow — ការគ្រប់គ្រងការហៀរ
+
+ពេល Content ធំជាង box — CSS ត្រូវសម្រេច ។ Click values + toggle content!
+
+```diagram
+overflow
+```
+
+```html
+<!-- overflow: hidden — ប្រើ border-radius + overflow ជានិច្ច -->
+<div class="avatar">
+  <img src="user.jpg" alt="User" />
+</div>
+
+<!-- overflow: auto — code block / scrollable table -->
+<div class="code-block">
+  <pre><code>.very-long-css-selector { color: red; }</code></pre>
+</div>
+
+<!-- overflow: scroll — chat window -->
+<div class="chat-window">
+  <div class="message">Hello!</div>
+  <div class="message">How are you?</div>
+</div>
+```
+
 ```css
-h1 {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+/* hidden: រូបភាព circle ដោយ border-radius + overflow */
+.avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;  /* ✅ ត្រូវគូស circle */
+  overflow: hidden;    /* ✅ ✂️ កាត់ corners */
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* auto: scrollbar តែពេល code វែង */
+.code-block {
+  width: 100%;
+  overflow-x: auto;   /* horizontal scroll */
+  overflow-y: hidden;
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* auto: chat window scroll */
+.chat-window {
+  height: 300px;
+  overflow-y: auto;   /* ✅ Scrollbar ពេល messages ច្រើន */
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.message {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background: #f3f4f6;
+  border-radius: 8px;
+}
+```
+
+---
+
+## 🌑 Shadows — ស្រមោល
+
+ការដាក់ស្រមោលធ្វើអោយ UI Premium ។ ប្រើ sliders ក្នុង diagram ដើម្បី customize!
+
+```diagram
+boxshadow
+```
+
+```html
+<!-- box-shadow: cards ជាមួយ shadow levels -->
+<div class="card card--simple">Simple Card</div>
+<div class="card card--lifted">Lifted Card</div>
+<div class="card card--glow">Glow Card</div>
+<div class="card card--inset">Inset Card</div>
+
+<!-- text-shadow: heading -->
+<h1 class="hero-title">Full Stack Mastery</h1>
+<h2 class="neon-title">Neon Title</h2>
+```
+
+```css
+/* Base card style */
+.card {
+  width: 200px;
+  padding: 24px;
+  border-radius: 12px;
+  background: white;
+  text-align: center;
+  font-weight: bold;
+  margin: 8px;
+  display: inline-block;
+}
+
+/* shadow levels */
+.card--simple { box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
+.card--lifted { box-shadow: 0px 12px 28px rgba(0,0,0,0.2); }
+.card--glow   { box-shadow: 0px 0px 20px rgba(59,130,246,0.6); }
+.card--inset  { box-shadow: inset 0px 3px 8px rgba(0,0,0,0.2);
+                background: #f3f4f6; }
+
+/* hover effect */
+.card:hover {
+  box-shadow: 0px 16px 40px rgba(0,0,0,0.2);
+  transform: translateY(-4px);
+  transition: all 0.2s;
+}
+
+/* text-shadow */
+.hero-title {
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.neon-title {
+  color: white;
+  background: #0f172a;
+  padding: 8px 16px;
+  text-shadow: 0 0 7px #fff, 0 0 20px #fff, 0 0 42px #0ff;
+}
+```
+
+---
+
+## 🔗 ការប្រើ Box Model ជាមួយ Layout
+
+ការយល់ Box Model ជួយអ្នករៀបចំ Layout ។ ប្រើ sliders ដើម្បីឃើញ live!
+
+```diagram
+cardlayout
+```
+
+```html
+<!-- Card component ពេញលេញ -->
+<div class="card">
+  <div class="card__avatar">
+    <img src="avatar.jpg" alt="User" />
+  </div>
+  <h3 class="card__name">John Doe</h3>
+  <p class="card__bio">Full Stack Developer</p>
+  <button class="card__btn">Follow</button>
+</div>
+```
+
+```css
+/* ✅ ច្បាប់មាស: box-sizing ជាមុន */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.card {
+  width: 280px;
+  padding: 24px;           /* ✅ ខាងក្នុង */
+  margin: 16px auto;       /* ✅ ខាងក្រៅ + center */
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+  text-align: center;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.card:hover {
+  box-shadow: 0px 8px 32px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.card__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;        /* ✅ circle avatar */
+  margin: 0 auto 12px;
+}
+
+.card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card__name { margin: 0 0 4px; font-size: 18px; font-weight: bold; }
+.card__bio  { margin: 0 0 16px; color: #6b7280; font-size: 14px; }
+
+.card__btn {
+  display: inline-block;
+  padding: 8px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: bold;
 }
 ```

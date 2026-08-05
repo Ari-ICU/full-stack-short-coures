@@ -14,32 +14,117 @@ quiz:
       - "em"
       - "rem"
       - "vh"
-    correctAnswer: 3
+    correctAnswer: 2
     explanation: "`rem` តំណាងអោយ Root EM ដូច្នេះវាធៀបនឹងទំហំ Font របស់ `<html>` (ជាទូទៅ 16px) ជានិច្ច។ ចំណែក `em` គឺធៀបនឹងទំហំ Font របស់ Element មេដែលនៅជិតវាបំផុត។"
 ---
 
-## 📏 ខ្នាតរង្វាស់ទំនើប (Modern CSS Units)
+## 📏 ខ្នាតរង្វាស់ (CSS Units)
 
-កាលពីមុនគេតែងតែប្រើប្រាស់តែ `px` និង `%` ប៉ុណ្ណោះ ប៉ុន្តែបច្ចុប្បន្ន CSS មានខ្នាតរង្វាស់ទំនើបៗជាច្រើន ដើម្បីជួយក្នុងការធ្វើ Responsive Design៖
+CSS មានខ្នាតរង្វាស់ជាច្រើន — Click tab នីមួយៗ ដើម្បីឃើញ live demo!
 
-### ខ្នាតរឹង (Absolute Units)
-- **`px` (Pixels):** ជារង្វាស់គោល។ 1px គឺ 1px វាមិនប្រែប្រួលតាមទំហំអេក្រង់ទេ។ (ប្រើសម្រាប់ Border ឬទំហំដែលយើងចង់អោយវានៅថេរ)
+```diagram
+cssunits
+```
 
-### ខ្នាតយឺត (Relative Units)
-- **`%` (Percentage):** ធៀបនឹងទំហំរបស់ Element មេរបស់វា។ ឧទាហរណ៍ `width: 50%` មានន័យថាទំហំពាក់កណ្តាលនៃមេវា។
-- **`em`:** ធៀបនឹងទំហំ Font (`font-size`) របស់ Element **មេ** របស់វា។ 
-- **`rem` (Root EM):** ធៀបនឹងទំហំ Font របស់ `<html>` តែម្តង (តាមលំនាំដើម 1rem = 16px)។ **(ណែនាំអោយប្រើជាប្រចាំសម្រាប់ Font Size, Margin, Padding!)**
-- **`vw` (Viewport Width):** 1vw ស្មើនឹង 1% នៃទទឹងអេក្រង់។ (100vw = ទទឹងពេញអេក្រង់)
-- **`vh` (Viewport Height):** 1vh ស្មើនឹង 1% នៃកម្ពស់អេក្រង់។ (100vh = កម្ពស់ពេញអេក្រង់)
-- **`fr` (Fraction):** ប្រើនៅក្នុង CSS Grid ប៉ុណ្ណោះ ដើម្បីបែងចែកកន្លែងទំនេរ។
+```html
+<!-- Typography scale ប្រើ rem -->
+<section class="hero">
+  <h1 class="hero-title">Modern CSS</h1>
+  <p class="hero-subtitle">Build responsive layouts with ease</p>
+</section>
 
-### កំពូលអនុគមន៍ `clamp()`
-`clamp(minimum, preferred, maximum)` គឺជាវិធីដ៏អស្ចារ្យក្នុងការធ្វើ Responsive Typography ។ អក្សរនឹងរួមតូច ឫរីកធំតាមទំហំអេក្រង់ ប៉ុន្តែមិនអោយតូចពេក ឫធំពេកនោះទេ។
+<!-- Full-screen section ប្រើ vh/vw -->
+<section class="fullscreen">
+  <div class="fullscreen-content">Fullscreen Section</div>
+</section>
+```
 
 ```css
-h1 {
-  /* តូចបំផុត 24px, ល្មមបំផុត 5vw, ធំបំផុត 48px */
-  font-size: clamp(1.5rem, 5vw, 3rem);
+/* ✅ ប្រើ rem សម្រាប់ typography (ធៀប root 16px) */
+.hero {
+  padding: 4rem 2rem; /* 64px 32px */
+}
+
+.hero-title {
+  font-size: 3rem;    /* 48px */
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 1rem 0; /* 16px */
+}
+
+.hero-subtitle {
+  font-size: 1.25rem; /* 20px */
+  color: #6b7280;
+  margin: 0;
+}
+
+/* vw/vh: full-screen sections */
+.fullscreen {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.fullscreen-content {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+```
+
+---
+
+## 🔧 `clamp()` — Responsive Typography
+
+`clamp(minimum, preferred, maximum)` ធ្វើអោយ font-size **ផ្លាស់ប្ដូរដោយស្វ័យប្រវត្តិ** — ធំពេល viewport ធំ, តូចពេល viewport តូច, ប៉ុន្តែ**មិនអោយតូចឬធំពេក**។ ប្រើ slider ក្នុង diagram!
+
+```diagram
+clampdemo
+```
+
+```html
+<!-- Hero section ជាមួយ responsive typography -->
+<header class="site-header">
+  <h1 class="site-heading">Full Stack Mastery</h1>
+  <p class="site-tagline">Learn modern web development the right way</p>
+  <a href="#courses" class="cta-btn">Start Learning</a>
+</header>
+```
+
+```css
+.site-header {
+  text-align: center;
+  padding: clamp(2rem, 8vw, 6rem); /* padding ក៏ responsive */
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.site-heading {
+  /* ✅ clamp: min=1.5rem, preferred=5vw, max=3.5rem */
+  font-size: clamp(1.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin: 0 0 1rem 0;
+  line-height: 1.1;
+}
+
+.site-tagline {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  opacity: 0.9;
+  margin: 0 0 2rem 0;
+}
+
+.cta-btn {
+  display: inline-block;
+  padding: clamp(0.6rem, 2vw, 1rem) clamp(1.2rem, 4vw, 2rem);
+  background: white;
+  color: #764ba2;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  text-decoration: none;
 }
 ```
 
@@ -47,55 +132,264 @@ h1 {
 
 ## 📦 CSS Variables (Custom Properties)
 
-ជំនួសអោយការសរសេរកូដពណ៌ដដែលៗពេញកូដ CSS របស់អ្នក អ្នកអាចរក្សាទុកវាទុកក្នុង Variables បាន។ នេះជួយអោយការប្តូរពណ៌ (ឧ. ធ្វើ Dark Mode) មានភាពងាយស្រួលបំផុត!
+ជំនួស hardcoded values ដែលដដែលៗ — ប្រើ variables ដើម្បីងាយ maintain និង theme. ប្តូរ colors, spacing, radius ហើយឃើញ live preview!
+
+```diagram
+cssvariables
+```
+
+```html
+<!-- Components ប្រើ CSS variables -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">Dashboard</h2>
+    <span class="card-badge">Pro</span>
+  </div>
+  <p class="card-body">Your analytics overview for this week.</p>
+  <div class="card-footer">
+    <button class="btn btn-primary">View Details</button>
+    <button class="btn btn-outline">Dismiss</button>
+  </div>
+</div>
+```
 
 ```css
-/* ១. បង្កើត Variables ដាក់ក្នុង Root (ស្រទាប់ខ្ពស់បំផុត) */
+/* ១. ដាក់ variables ទៅ :root (global scope) */
 :root {
-  --primary-color: #3b82f6;   /* ពណ៌ខៀវ */
-  --text-dark: #1f2937;
-  --spacing-md: 16px;
+  --primary:    #3b82f6;
+  --primary-dk: #2563eb;
+  --text:       #1f2937;
+  --text-muted: #6b7280;
+  --bg:         #ffffff;
+  --border:     #e5e7eb;
+  --radius:     12px;
+  --spacing:    16px;
+  --shadow:     0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
-/* ២. ហៅយកមកប្រើតាមរយៈ var() */
-button {
-  background-color: var(--primary-color);
-  padding: var(--spacing-md);
+/* ២. ហៅប្រើ var() */
+.card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  box-shadow: var(--shadow);
+  max-width: 380px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing);
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-body {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin: 0 0 var(--spacing) 0;
+}
+
+.card-footer {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: calc(var(--radius) / 2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.btn-primary {
+  background: var(--primary);
   color: white;
 }
 
-h1 {
-  color: var(--text-dark);
+.btn-primary:hover { opacity: 0.9; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
 }
 ```
 
 ---
 
-## 🎨 ការលាយពណ៌ (Gradients)
+## 🎨 Gradients — ការចាក់ពណ៌លាយ
 
-ជំនួសអោយការប្រើពណ៌ធម្មតា (Solid Color) អ្នកអាចចាក់ពណ៌លាយបញ្ចូលគ្នាបានដោយមិនបាច់ប្រើរូបភាពឡើយ។
+ចាក់ gradient ស្រស់ស្អាតដោយមិនបាច់ប្រើរូបភាព។ ប្រើ builder ខាងក្រោម ដើម្បី customize!
+
+```diagram
+gradientdemo
+```
+
+```html
+<!-- Hero ជាមួយ linear gradient -->
+<section class="gradient-hero">
+  <h1 class="gradient-hero__title">Learn to Code</h1>
+  <p class="gradient-hero__sub">Build beautiful web apps</p>
+</section>
+
+<!-- Cards ជាមួយ gradient accents -->
+<div class="feature-cards">
+  <div class="feature-card feature-card--blue">
+    <span class="feature-icon">🚀</span>
+    <h3>Fast</h3>
+  </div>
+  <div class="feature-card feature-card--purple">
+    <span class="feature-icon">🎨</span>
+    <h3>Beautiful</h3>
+  </div>
+  <div class="feature-card feature-card--green">
+    <span class="feature-icon">🔒</span>
+    <h3>Secure</h3>
+  </div>
+</div>
+```
 
 ```css
-/* Linear Gradient (ពីឆ្វេងទៅស្តាំ ឬ លើចុះក្រោម) */
-.box-1 {
-  background: linear-gradient(to right, #ff7e5f, #feb47b);
+/* Linear gradient hero */
+.gradient-hero {
+  padding: 80px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
 }
 
-/* Radial Gradient (រង្វង់ពីកណ្តាលចេញក្រៅ) */
-.box-2 {
-  background: radial-gradient(circle, #00c6ff, #0072ff);
+.gradient-hero__title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin: 0 0 12px 0;
 }
+
+.gradient-hero__sub {
+  font-size: 1.2rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Feature cards with gradient */
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.feature-card {
+  padding: 24px;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+}
+
+.feature-card--blue   { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+.feature-card--purple { background: linear-gradient(135deg, #a855f7, #ec4899); }
+.feature-card--green  { background: linear-gradient(135deg, #22c55e, #14b8a6); }
+
+.feature-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+.feature-card h3 { margin: 0; font-size: 1.1rem; font-weight: 700; }
 ```
 
 ---
 
-## 🖼️ រូបភាព Responsive (Responsive Images)
+## 🖼️ Responsive Images
 
-រូបភាពជារឿយៗតែងតែលៀនចេញពីប្រអប់របស់វា ឬបែក Layout នៅពេលមើលលើទូរស័ព្ទ។ ដើម្បីដោះស្រាយបញ្ហានេះ អ្នកគ្រាន់តែសរសេរកូដមួយជួរនេះប៉ុណ្ណោះ៖
+រូបភាពតែងតែ**ហៀរ**ចេញពី container ប្រសិនបើ container តូចជាង natural width របស់វា។ Fix មួយជួរ CSS ដោះស្រាយ! ប្រើ slider ដើម្បីឃើញ!
+
+```diagram
+responsiveimg
+```
+
+```html
+<!-- Responsive image inside a fluid container -->
+<article class="blog-post">
+  <figure class="post-figure">
+    <img
+      src="cover.jpg"
+      alt="Blog post cover"
+      class="post-img"
+      loading="lazy"
+    />
+    <figcaption class="post-caption">Photo by the author</figcaption>
+  </figure>
+  <div class="post-content">
+    <h2 class="post-title">Understanding CSS in 2024</h2>
+    <p class="post-excerpt">Modern CSS has evolved dramatically...</p>
+  </div>
+</article>
+```
 
 ```css
-img {
-  max-width: 100%; /* កុំអោយរូបភាពធំជាងប្រអប់មេរបស់វា */
-  height: auto;    /* រក្សាទម្រង់ (Ratio) ដើមជានិច្ច */
+/* ✅ Global reset — ដាក់ជា default */
+img,
+video,
+iframe {
+  max-width: 100%; /* ✅ ព្រំដែនកំពូល */
+  height: auto;    /* ✅ ratio ដើម */
+  display: block;
+}
+
+.blog-post {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.post-figure {
+  margin: 0 0 24px 0;
+  border-radius: 12px;
+  overflow: hidden; /* ✅ ត្រូវ hidden ពេល border-radius */
+}
+
+.post-img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover; /* ✅ fill box ដោយ crop */
+}
+
+.post-caption {
+  font-size: 13px;
+  color: #6b7280;
+  padding: 8px 0;
+  text-align: center;
+}
+
+.post-title {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.post-excerpt {
+  font-size: 1rem;
+  color: #6b7280;
+  line-height: 1.7;
+  margin: 0;
 }
 ```

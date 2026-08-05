@@ -14,82 +14,259 @@ quiz:
       - "transform: scale(1.1);"
       - "animation: bigger 1s;"
       - "width: 110%;"
-    correctAnswer: 2
+    correctAnswer: 1
     explanation: "`transform: scale(1.1);` គឺសម្រាប់ពង្រីកទំហំ 1.1 ដង (110%)។ ចំណែក `transition` គ្រាន់តែជាអ្នកកំណត់រយៈពេលអោយចលនានោះរលូនប៉ុណ្ណោះ។"
 ---
 
-## ✨ CSS Transitions (ការផ្លាស់ប្តូរដោយរលូន)
+## ✨ CSS Transition — ការផ្លាស់ប្ដូរដោយរលូន
 
-ជារឿយៗនៅពេលដែលអ្នកយក Mouse ទៅដាក់លើប៊ូតុង វានឹងប្តូរពណ៌ភ្លាមៗ (កន្ត្រាក់)។ ដើម្បីអោយវាប្តូរដោយរលូនយឺតៗ យើងត្រូវប្រើ `transition`។
+ជារឿយៗ ពេល Hover ប៊ូតុង ពណ៌ប្ដូរភ្លាមៗ (kn)។ `transition` ធ្វើអោយការប្ដូរទៅ **យឺតៗ រលូន**។ ប្ដូរ duration, easing, property ហើយ hover ប៊ូតុង ដើម្បីឃើញ live!
 
-`transition` ត្រូវបានដាក់ទៅលើ State ដើម (មិនមែនដាក់លើ `:hover` ទេ)។
-
-```css
-button {
-  background-color: blue;
-  color: white;
-  padding: 10px 20px;
-  
-  /* កំណត់អោយរាល់ការផ្លាស់ប្តូរទាំងអស់ ប្រើពេល 0.3 វិនាទី (យ៉ាងរលូន) */
-  transition: all 0.3s ease-in-out;
-}
-
-button:hover {
-  background-color: red; /* វានឹងប្រែពណ៌ពីខៀវ ទៅក្រហម ក្នុងរយះពេល 0.3s */
-}
+```diagram
+transition
 ```
 
----
+```html
+<button class="btn">Hover Me</button>
+<div class="nav-link">Navigation Link</div>
+<div class="card">Card with transition</div>
+```
 
-## 🔄 CSS Transform (ការផ្លាស់ប្តូររូបរាង និងទីតាំង)
-
-`transform` អនុញ្ញាតអោយយើងកែប្រែរូបរាងរបស់ Element ដោយមិនប៉ះពាល់ដល់ទីតាំងរបស់ Elements ផ្សេងទៀតឡើយ (មិនរុញគេឯង)។
-
-តម្លៃសំខាន់ៗរបស់ `transform`:
-- `translate(x, y)`: រំកិលទីតាំង (ឆ្វេង-ស្តាំ, លើ-ក្រោម) ធៀបនឹងទីតាំងដើមរបស់វា។
-- `scale(n)`: ពង្រីក ឬបង្រួម (ឧ. `scale(1.5)` គឺពង្រីក 1.5 ដង)។
-- `rotate(deg)`: បង្វិល (ឧ. `rotate(45deg)` បង្វិល 45 ដឺក្រេ)។
-- `skew(x-deg, y-deg)`: ធ្វើអោយវៀច ឬផ្អៀង។
-
-**ឧទាហរណ៍ជាក់ស្តែង (ពង្រីកប៊ូតុងពេល Hover):**
 ```css
+/* ✅ transition ដាក់លើ state ដើម — មិនមែន :hover */
+.btn {
+  background: #3b82f6;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* ⭐ */
+}
+
+.btn:hover {
+  background: #ef4444;
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* transition specific properties (ល្អជាង "all") */
+.nav-link {
+  color: #6b7280;
+  transition: color 0.2s ease; /* transition color តែម្ដង */
+}
+
+.nav-link:hover {
+  color: #3b82f6;
+}
+
 .card {
-  transition: transform 0.2s;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  /* transition multiple properties */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .card:hover {
-  /* ពេល Hover ពង្រីកធំបន្តិច (1.05 ដង) នឹង អណ្តែតឡើងលើ (-5px) */
-  transform: scale(1.05) translateY(-5px);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
 }
 ```
 
 ---
 
-## 🎬 CSS Animations (@keyframes)
+## 🔄 CSS Transform — ការផ្លាស់ប្ដូររូបរាង
 
-`transition` ត្រូវការអ្នកប្រើប្រាស់បញ្ជា (ដូចជាយក Mouse ទៅ Hover ទើបវាដើរ)។ ប៉ុន្តែចុះបើអ្នកចង់អោយវាមានចលនាដោយស្វ័យប្រវត្តិ តាំងពីពេលបើកវេបសាយដំបូង?
-នោះគឺយើងត្រូវប្រើ **`animation`** គួបផ្សំជាមួយ **`@keyframes`**។
+`transform` ផ្លាស់ប្ដូររូបរាង **ដោយមិនប៉ះពាល់ layout** — Elements ផ្សេងមិនរំកិលឡើយ។ ប្រើ sliders ដើម្បីឃើញ translate, scale, rotate, skew live!
 
-`@keyframes` គឺជាកន្លែងដែលអ្នកគូសវាសសាច់រឿងនៃចលនា តាំងពីចំនុចចាប់ផ្តើម (0% ឬ `from`) រហូតដល់ចំនុចបញ្ចប់ (100% ឬ `to`)។
+```diagram
+transformdemo
+```
+
+```html
+<div class="icon-btn">🔔</div>
+<div class="product-card">
+  <img src="product.jpg" alt="Product" class="product-img">
+  <div class="product-info">Product Name</div>
+</div>
+<div class="badge">NEW</div>
+```
 
 ```css
-/* ១. បង្កើតសាច់រឿងនៃចលនាឈ្មោះ "fade-in-up" */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px); /* ធ្លាក់ចុះក្រោម 20px នឹងមើលមិនឃើញសោះ */
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0); /* ងើបមកកន្លែងដើមវិញ នឹងច្បាស់ 100% */
-  }
+/* translate: រំកិល (ដូច position: relative ប៉ុន្តែ GPU-accelerated) */
+.icon-btn {
+  transition: transform 0.2s ease;
+}
+.icon-btn:hover {
+  transform: translateY(-3px); /* ងើបឡើង 3px */
 }
 
-/* ២. ហៅចលនានោះមកប្រើ */
-.welcome-text {
-  /* ឈ្មោះចលនា | រយៈពេល | ល្បឿន | ពន្យារពេល (អត់មានក៏បាន) */
-  animation: fade-in-up 1s ease-out;
+/* scale: ពង្រីក/បង្រួម */
+.product-card {
+  transition: transform 0.25s ease;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.product-card:hover {
+  transform: scale(1.03);
+}
+
+/* rotate: បង្វិល */
+.badge {
+  transition: transform 0.3s ease;
+}
+.badge:hover {
+  transform: rotate(12deg) scale(1.1);
+}
+
+/* combined transforms — ✅ ល្អបំផុត */
+.product-img {
+  transition: transform 0.4s ease;
+}
+.product-card:hover .product-img {
+  transform: scale(1.08) translateY(-4px);
 }
 ```
 
-**សន្និដ្ឋាន:** ការប្រើប្រាស់ Transitions នឹង Transforms បន្តិចបន្តួច ជួយអោយវេបសាយមើលទៅទំនើប និងមានភាពរស់រវើកជាងមុនខ្លាំង។ ប៉ុន្តែសូមកុំប្រើប្រាស់ Animation ច្រើនជ្រុលពេក ព្រោះវាអាចធ្វើអោយវេបសាយដើរយឺត និងរំខានដល់ភ្នែកអ្នកអាន។
+---
+
+## 🎬 @keyframes — ចលនាស្វ័យប្រវត្តិ
+
+`transition` ចាំ user action (hover/click)។ `@keyframes` + `animation` ដំណើរការ**ដោយស្វ័យប្រវត្តិ** — ល្អសម្រាប់ loading spinners, page-load effects។ Click preset ដើម្បីឃើញ!
+
+```diagram
+keyframesdemo
+```
+
+```html
+<div class="loader"></div>
+<div class="hero-text">Welcome to Full Stack Mastery</div>
+<div class="notification-dot"></div>
+```
+
+```css
+/* ១. Spinning loader */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ២. Page-load fade-in effect */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-text {
+  animation: fade-in-up 0.8s ease-out both;
+  /* "both" = រក្សា state នៃ keyframe ចុងក្រោយ */
+}
+
+/* ៣. Pulsing notification dot */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.7; }
+}
+
+.notification-dot {
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+```
+
+---
+
+## 🎯 Transition + Transform ជាមួយគ្នា
+
+`transition` + `transform` ជាគូ Best Practice ។ `transform` ដំណើរការលើ GPU — ល្អ performance ជាង `width`, `top`, `left`។ Hover cards ខាងក្រោម!
+
+```diagram
+transitiontransform
+```
+
+```html
+<!-- ✅ ប្រើ transform + transition — GPU accelerated -->
+<div class="feature-grid">
+  <div class="feature-card feature-card--lift">
+    <span class="feature-icon">🚀</span>
+    <h3>Lift Effect</h3>
+  </div>
+  <div class="feature-card feature-card--rotate">
+    <span class="feature-icon">🎨</span>
+    <h3>Rotate Effect</h3>
+  </div>
+  <div class="feature-card feature-card--glow">
+    <span class="feature-icon">✨</span>
+    <h3>Glow Effect</h3>
+  </div>
+</div>
+```
+
+```css
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Base — transition ដាក់នៅទីនេះ */
+.feature-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  /* ✅ transition specific — ល្អជាង "all" */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.feature-card h3 {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Hover states — transform ដាក់នៅទីនេះ */
+.feature-card--lift:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 48px rgba(59, 130, 246, 0.25);
+}
+
+.feature-card--rotate:hover {
+  transform: rotate(3deg) scale(1.05);
+  box-shadow: 0 16px 40px rgba(168, 85, 247, 0.25);
+}
+
+.feature-card--glow:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 40px rgba(34, 197, 94, 0.4);
+}
+
+/* ⚠️ ចៀសវាង: កុំ animate width, height, top, left
+   ✅ ប្រើ: transform (translate, scale) — GPU ។ */
+```

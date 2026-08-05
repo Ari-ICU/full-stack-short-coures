@@ -45,6 +45,10 @@ console.log("5" / 2);   // ចេញ 2.5
 ```
 > **ការណែនាំ:** សូមកុំទុកចិត្ត JavaScript អោយធ្វើការបំប្លែងដោយស្វ័យប្រវត្តិ! អ្នកគួរតែប្រាកដថាទិន្នន័យនោះជាលេខពិតប្រាកដមុនពេលធ្វើការគណនា ដោយប្រើ Explicit Conversion។
 
+```jsdiagram
+jsimplicitconversion
+```
+
 ---
 
 ## 🛠️ 2. Explicit Conversion (ការបំប្លែងដោយដៃ)
@@ -77,6 +81,10 @@ console.log(Boolean(0)); // false
 console.log(Boolean("")); // false
 ```
 
+```jsdiagram
+jsexplicitconversion
+```
+
 ---
 
 ## 🔢 3. ការប្រើប្រាស់ parseInt() និង parseFloat()
@@ -99,3 +107,7 @@ console.log(parseFloat("10.5rem")); // 10.5
 ```
 
 > ⚠️ **ចំណាំ:** `parseInt()` និង `parseFloat()` ដំណើរការបានតែក្នុងករណីដែល **លេខនៅខាងដើម** អក្សរប៉ុណ្ណោះ។ បើអក្សរនៅមុខវិញ វាចេញ NaN ដដែល (ឧទាហរណ៍ `parseInt("width: 20px")` ចេញ NaN)។
+
+```jsdiagram
+jsparseint
+```

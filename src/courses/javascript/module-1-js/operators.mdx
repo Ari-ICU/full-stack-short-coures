@@ -40,6 +40,10 @@ console.log(2 ** 3); // 8 (2 ស្វ័យគុណ 3 ពោលគឺ 2 * 2 * 
 ```
 > **ចំណាំ:** សញ្ញា `+` ក៏អាចប្រើសម្រាប់តភ្ជាប់ String ចូលគ្នាបានដែរ (String Concatenation): `"Hello " + "World" = "Hello World"`.
 
+```jsdiagram
+jsarithmetic
+```
+
 ---
 
 ## ⚖️ 2. Comparison Operators (ប្រមាណវិធីប្រៀបធៀប)
@@ -70,6 +74,10 @@ console.log(null === undefined); // false
 ```
 > 💡 **Best Practice:** នៅក្នុង JavaScript ទំនើប សូមកុំប្រើ `==` អោយសោះ! **ត្រូវប្រើ `===` ជានិច្ច** ដើម្បីសុវត្ថិភាព។ ដូចគ្នាដែរ សម្រាប់មិនស្មើ ត្រូវប្រើ `!==` ជំនួសអោយ `!=`។
 
+```jsdiagram
+jscomparison
+```
+
 ---
 
 ## 🧠 3. Logical Operators (ប្រមាណវិធីតក្កវិទ្យា)
@@ -94,6 +102,10 @@ console.log(hasTicket || isVIP); // true
 console.log(!hasTicket); // false (ព្រោះ hasTicket គឺ true)
 ```
 
+```jsdiagram
+jslogical
+```
+
 ---
 
 ## 🚀 4. Modern Operators (ES6+)
@@ -115,4 +127,8 @@ let user = { name: "Sok" };
 // បើ user.address គ្មាន (undefined) កូដធម្មតានឹង Error ពេលអ្នកហៅ .city បន្តទៀត
 // តែប្រើ ?. វានឹងត្រឡប់ undefined ដោយសុវត្ថិភាពជំនួសអោយការបោះ Error មក។
 console.log(user.address?.city); // undefined
+```
+
+```jsdiagram
+jsmodernoperators
 ```
