@@ -286,3 +286,187 @@ export function FormValidationDiagram() {
     </div>
   );
 }
+
+// ─── 4. Form Controls Diagram (select / textarea / datalist / fieldset) ───────
+type FormControl = "select" | "textarea" | "datalist" | "fieldset";
+
+const CONTROLS: { id: FormControl; label: string; color: string; desc: string }[] = [
+  { id: "select",    color: "#3b82f6", label: "<select>",    desc: "Dropdown — ជ្រើស ១ ពីបញ្ជី" },
+  { id: "textarea",  color: "#8b5cf6", label: "<textarea>",  desc: "Text វែងៗ (comment, message)" },
+  { id: "datalist",  color: "#f97316", label: "<datalist>",  desc: "Auto-complete + free text" },
+  { id: "fieldset",  color: "#22c55e", label: "<fieldset>",  desc: "ចងក្រង inputs ជាក្រុម" },
+];
+
+export function FormControlsDiagram() {
+  const [active, setActive] = useState<FormControl>("select");
+  const [selectVal, setSelectVal] = useState("toyota");
+  const [textareaVal, setTextareaVal] = useState("");
+  const [datalistVal, setDatalistVal] = useState("");
+
+  const ctrl = CONTROLS.find((c) => c.id === active)!;
+
+  return (
+    <div className="not-prose my-8 font-sans select-none">
+      {/* Tab buttons */}
+      <div className="flex flex-wrap justify-center gap-2 mb-5">
+        {CONTROLS.map((c) => (
+          <button key={c.id} onClick={() => setActive(c.id)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold font-mono border-2 cursor-pointer transition-all
+              ${active === c.id ? "border-transparent text-white shadow-md scale-105" : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800"}`}
+            style={{ background: active === c.id ? c.color : undefined }}>
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="w-full max-w-2xl mx-auto rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="px-4 py-2.5 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-red-400" />
+            <span className="w-3 h-3 rounded-full bg-yellow-400" />
+            <span className="w-3 h-3 rounded-full bg-green-400" />
+          </div>
+          <code className="text-xs font-bold px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+            {ctrl.label} — {ctrl.desc}
+          </code>
+        </div>
+
+        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+          {/* Live preview */}
+          <div>
+            <div className="text-[10px] uppercase tracking-widest font-bold text-gray-500 dark:text-gray-400 mb-2">Live Preview</div>
+            <div className="rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50 p-4 space-y-3">
+
+              {active === "select" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">រើសឡាន៖</label>
+                  <select value={selectVal} onChange={(e) => setSelectVal(e.target.value)}
+                    className="w-full rounded-lg border-2 px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none cursor-pointer"
+                    style={{ borderColor: ctrl.color }}>
+                    <optgroup label="ឡានជប៉ុន">
+                      <option value="toyota">Toyota</option>
+                      <option value="honda">Honda</option>
+                    </optgroup>
+                    <optgroup label="ឡានអាល្លឺម៉ង់">
+                      <option value="bmw">BMW</option>
+                    </optgroup>
+                  </select>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    Selected: <span className="font-bold" style={{ color: ctrl.color }}>{selectVal}</span>
+                  </div>
+                </div>
+              )}
+
+              {active === "textarea" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">សារ / Comment:</label>
+                  <textarea rows={4} value={textareaVal}
+                    onChange={(e) => setTextareaVal(e.target.value)}
+                    placeholder="វាយសារនៅទីនេះ..."
+                    className="w-full rounded-lg border-2 px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none resize-none"
+                    style={{ borderColor: ctrl.color }} />
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {textareaVal.length} chars — resize ជ្រុងខាងក្រោម-ស្តាំ
+                  </div>
+                </div>
+              )}
+
+              {active === "datalist" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">រើស Browser (ឬវាយខ្លួនឯង):</label>
+                  <input list="preview-browsers" value={datalistVal}
+                    onChange={(e) => setDatalistVal(e.target.value)}
+                    placeholder="Chrome, Firefox..."
+                    className="w-full rounded-lg border-2 px-3 py-2 text-sm bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none"
+                    style={{ borderColor: ctrl.color }} />
+                  <datalist id="preview-browsers">
+                    <option value="Chrome" />
+                    <option value="Firefox" />
+                    <option value="Safari" />
+                    <option value="Edge" />
+                    <option value="Brave" />
+                  </datalist>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    ✏️ អ្នកអាចវាយអ្វីក៏បាន មិនត្រូវជ្រើសពីបញ្ជីទេ
+                  </div>
+                </div>
+              )}
+
+              {active === "fieldset" && (
+                <fieldset className="rounded-xl border-2 p-4" style={{ borderColor: ctrl.color }}>
+                  <legend className="px-2 text-xs font-bold" style={{ color: ctrl.color }}>ព័ត៌មានផ្ទាល់ខ្លួន</legend>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 block mb-1">ឈ្មោះ:</label>
+                      <input type="text" placeholder="វាយឈ្មោះ..."
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-600 dark:text-gray-300 block mb-1">ត្រកូល:</label>
+                      <input type="text" placeholder="វាយត្រកូល..."
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-2 py-1.5 text-xs bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:outline-none" />
+                    </div>
+                  </div>
+                </fieldset>
+              )}
+            </div>
+          </div>
+
+          {/* Code + note */}
+          <div className="space-y-3">
+            <div className="rounded-xl p-3 text-xs font-semibold"
+              style={{ background: ctrl.color + "18", color: ctrl.color, border: `1px solid ${ctrl.color}44` }}>
+              🎯 {ctrl.desc}
+            </div>
+            <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1 overflow-x-auto">
+              {active === "select" && <>
+                <div className="text-blue-400">{"<select name=\"car\">"}</div>
+                <div className="pl-3 text-yellow-300">{"<optgroup label=\"ឡានជប៉ុន\">"}</div>
+                <div className="pl-6 text-green-300">{"<option value=\"toyota\">Toyota</option>"}</div>
+                <div className="pl-3 text-yellow-300">{"</optgroup>"}</div>
+                <div className="text-blue-400">{"</select>"}</div>
+              </>}
+              {active === "textarea" && <>
+                <div className="text-blue-400">{"<textarea"}</div>
+                <div className="pl-3 text-yellow-300">{"name=\"message\""}</div>
+                <div className="pl-3 text-yellow-300">{"rows=\"4\""}</div>
+                <div className="pl-3 text-yellow-300">{"placeholder=\"...\">"}</div>
+                <div className="text-blue-400">{"</textarea>"}</div>
+              </>}
+              {active === "datalist" && <>
+                <div className="text-blue-400">{"<input list=\"opts\" name=\"browser\">"}</div>
+                <div className="mt-1 text-orange-400">{"<datalist id=\"opts\">"}</div>
+                <div className="pl-3 text-green-300">{"<option value=\"Chrome\">"}</div>
+                <div className="pl-3 text-green-300">{"<option value=\"Firefox\">"}</div>
+                <div className="text-orange-400">{"</datalist>"}</div>
+              </>}
+              {active === "fieldset" && <>
+                <div className="text-green-400">{"<fieldset>"}</div>
+                <div className="pl-3 text-yellow-300">{"<legend>ព័ត៌មានផ្ទាល់ខ្លួន</legend>"}</div>
+                <div className="pl-3 text-blue-400">{"<label for=\"fn\">ឈ្មោះ:</label>"}</div>
+                <div className="pl-3 text-blue-400">{"<input type=\"text\" id=\"fn\">"}</div>
+                <div className="text-green-400">{"</fieldset>"}</div>
+              </>}
+            </div>
+
+            {active === "select" && (
+              <div className="rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3 text-xs text-blue-800 dark:text-blue-200">
+                💡 ប្រើ <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">&lt;optgroup&gt;</code> ដើម្បីចាត់ក្រុម options ជាផ្នែក
+              </div>
+            )}
+            {active === "datalist" && (
+              <div className="rounded-xl bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 p-3 text-xs text-orange-800 dark:text-orange-200">
+                💡 ខុសពី <code className="bg-orange-100 dark:bg-orange-900 px-1 rounded">&lt;select&gt;</code> — អ្នកប្រើអាចវាយ custom text បានផងដែរ
+              </div>
+            )}
+            {active === "fieldset" && (
+              <div className="rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 text-xs text-green-800 dark:text-green-200">
+                💡 <code className="bg-green-100 dark:bg-green-900 px-1 rounded">&lt;legend&gt;</code> បង្ហាញជា title នៅជ្រុងប្រអប់
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

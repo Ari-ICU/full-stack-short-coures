@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SemanticVsNonSemanticDiagram, SemanticLayoutDiagram } from "./HtmlSemanticDiagrams";
-import { FormStructureDiagram, InputTypesDiagram, FormValidationDiagram } from "./HtmlFormsDiagrams";
+import { FormStructureDiagram, InputTypesDiagram, FormValidationDiagram, FormControlsDiagram } from "./HtmlFormsDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -302,6 +302,7 @@ const HTML_DIAGRAMS: Record<string, React.ComponentType> = {
   formstructure:        FormStructureDiagram,
   inputtypes:           InputTypesDiagram,
   formvalidation:       FormValidationDiagram,
+  formcontrols:         FormControlsDiagram,
 };
 
 export function HtmlDiagram({ name }: { name: string }) {
