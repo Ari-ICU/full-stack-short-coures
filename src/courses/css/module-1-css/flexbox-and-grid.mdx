@@ -38,7 +38,8 @@ Flexbox ត្រូវបានរចនាឡើងសម្រាប់ Layou
 flexbox
 ```
 
-```html
+```tabs
+html
 <nav class="navbar">
   <div class="nav-brand">MyApp</div>
   <ul class="nav-links">
@@ -47,9 +48,10 @@ flexbox
     <li><a href="#">Contact</a></li>
   </ul>
 </nav>
-```
 
-```css
+---
+
+css
 .navbar {
   display: flex; /* ⭐ បើក Flexbox! */
   justify-content: space-between;
@@ -90,7 +92,8 @@ flexbox
 flexdirection
 ```
 
-```html
+```tabs
+html
 <nav class="topbar">
   <div class="topbar-logo">Logo</div>
   <div class="topbar-nav">
@@ -105,9 +108,10 @@ flexdirection
   <a href="#">Reports</a>
   <a href="#">Settings</a>
 </aside>
-```
 
-```css
+---
+
+css
 /* row — items ដេកផ្តេក */
 .topbar {
   display: flex;
@@ -165,14 +169,16 @@ flexdirection
 justifycontent
 ```
 
-```html
+```tabs
+html
 <div class="modal-footer">
   <button class="btn btn-cancel">Cancel</button>
   <button class="btn btn-primary">Save Changes</button>
 </div>
-```
 
-```css
+---
+
+css
 .modal-footer {
   display: flex;
   justify-content: flex-end; /* ដាក់ buttons ទៅស្ដាំ */
@@ -214,7 +220,8 @@ justifycontent
 alignitems
 ```
 
-```html
+```tabs
+html
 <div class="feature-card">
   <div class="feature-icon">🚀</div>
   <div class="feature-text">
@@ -222,9 +229,10 @@ alignitems
     <p class="feature-desc">Deploy to production in seconds with zero downtime.</p>
   </div>
 </div>
-```
 
-```css
+---
+
+css
 .feature-card {
   display: flex;
   align-items: center; /* icon + text តម្រៀបកណ្ដាល */
@@ -271,7 +279,8 @@ alignitems
 flexwrapgap
 ```
 
-```html
+```tabs
+html
 <section class="skills-section">
   <h2 class="skills-heading">Tech Stack</h2>
   <div class="skill-tags">
@@ -283,9 +292,10 @@ flexwrapgap
     <span class="skill-tag">AWS</span>
   </div>
 </section>
-```
 
-```css
+---
+
+css
 .skills-section {
   padding: 24px;
   background: white;
@@ -327,7 +337,8 @@ Properties ទាំងបីនេះកំណត់ថាតើ Item ម្ន
 flexgrow
 ```
 
-```html
+```tabs
+html
 <div class="app-layout">
   <aside class="app-sidebar">
     <nav class="sidebar-nav">
@@ -342,9 +353,10 @@ flexgrow
   </main>
   <aside class="app-details">Details</aside>
 </div>
-```
 
-```css
+---
+
+css
 .app-layout {
   display: flex;
   gap: 16px;

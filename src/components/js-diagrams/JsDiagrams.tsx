@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MapDiagram, FilterDiagram, ReduceDiagram } from "./JsArrayMethodsDiagrams";
+import { DomTreeDiagram, DomModifyDiagram, DomEventsDiagram } from "./JsDomDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2192,6 +2193,9 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsmap:                     MapDiagram,
   jsfilter:                  FilterDiagram,
   jsreduce:                  ReduceDiagram,
+  jsdomtree:                 DomTreeDiagram,
+  jsdomselect:               DomModifyDiagram,
+  jsdomevents:               DomEventsDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {

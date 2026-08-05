@@ -22,6 +22,10 @@ quiz:
 
 **DOM (Document Object Model)** គឺជារចនាសម្ព័ន្ធដើមឈើ (Tree Structure) ដែល Browser បង្កើតឡើងនៅពេលវាអានកូដ HTML របស់អ្នក។ តាមរយៈ DOM, JavaScript អាចផ្លាស់ប្តូររចនាសម្ព័ន្ធ, Style និងមាតិការបស់គេហទំព័របានយ៉ាងងាយស្រួល។
 
+```jsdiagram
+jsdomtree
+```
+
 ---
 
 ## 1. Selecting Elements
@@ -60,6 +64,10 @@ heading.classList.add("active");
 heading.classList.remove("hidden");
 ```
 
+```jsdiagram
+jsdomselect
+```
+
 ---
 
 ## 3. Event Listeners នឹង Event Object
@@ -78,14 +86,14 @@ button.addEventListener("click", () => {
 **ការ Submit Form និងការប្រើប្រាស់ Event Object (`e`):**
 នៅពេលមាន Event មួយកើតឡើង JavaScript តែងតែបញ្ជូន **Event Object (ច្រើនតាងដោយ `e` ឬ `event`)** ដែលមានផ្ទុកព័ត៌មានលម្អិតអំពី Event នោះ។
 
-```html
+```tabs
+html
 <form id="login-form">
   <input type="text" id="username" placeholder="បញ្ចូលឈ្មោះ" />
   <button type="submit">ចូលប្រើប្រាស់</button>
 </form>
-```
-
-```javascript
+---
+js
 const form = document.querySelector("#login-form");
 const usernameInput = document.querySelector("#username");
 
@@ -100,6 +108,10 @@ form.addEventListener("submit", (e) => {
 });
 ```
 
+```jsdiagram
+jsdomevents
+```
+
 ការយល់ដឹងពីរបៀបគ្រប់គ្រង Events និង `e.preventDefault()` គឺមានសារៈសំខាន់ខ្លាំងណាស់សម្រាប់ការបង្កើត **Single Page Applications (SPA)**!
 
 ---
@@ -108,16 +120,14 @@ form.addEventListener("submit", (e) => {
 
 ដើម្បីអោយអ្នកឃើញរូបភាពកាន់តែច្បាស់ នេះគឺជាឧទាហរណ៍បង្ហាញពីការសហការគ្នារវាង HTML, CSS, និង JS ក្នុងការបង្កើតមុខងារ **Dark Mode Toggle** ដ៏សាមញ្ញមួយ៖
 
-**HTML (រចនាសម្ព័ន្ធ):**
-```html
+```tabs
+html
 <div class="card">
   <h2 id="title">សួស្តីពិភពលោក!</h2>
   <button id="theme-btn">ប្តូរពណ៌</button>
 </div>
-```
-
-**CSS (ការតុបតែង):**
-```css
+---
+css
 /* Style លំនាំដើម (Light Mode) */
 .card {
   background-color: white;
@@ -131,10 +141,8 @@ form.addEventListener("submit", (e) => {
   background-color: #333;
   color: white;
 }
-```
-
-**JavaScript (អន្តរកម្ម/តក្កវិជ្ជា):**
-```javascript
+---
+js
 // ១. ចាប់យក Elements ទាំងពីរ
 const cardElement = document.querySelector(".card");
 const themeBtn = document.querySelector("#theme-btn");

@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { Lesson } from "../types";
 import { CodeBlock } from "./CodeBlock";
 import { Mermaid } from "./Mermaid";
+import { TabbedCodeBlock, parseTabs } from "./TabbedCodeBlock";
 import { CssDiagram } from "./css-diagrams/CssDiagrams";
 import { JsDiagram } from "./js-diagrams/JsDiagrams";
 import { HtmlDiagram } from "./html-diagrams/HtmlDiagrams";
@@ -63,6 +64,10 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
 
             if (lang === "mermaid") {
               return <Mermaid chart={String(children).replace(/\n$/, "")} />;
+            }
+
+            if (lang === "tabs") {
+              return <TabbedCodeBlock raw={String(children).trim()} />;
             }
 
             if (lang === "diagram") {

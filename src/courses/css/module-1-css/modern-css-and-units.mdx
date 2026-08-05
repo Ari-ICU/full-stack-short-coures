@@ -26,7 +26,8 @@ CSS មានខ្នាតរង្វាស់ជាច្រើន — Click
 cssunits
 ```
 
-```html
+```tabs
+html
 <!-- Typography scale ប្រើ rem -->
 <section class="hero">
   <h1 class="hero-title">Modern CSS</h1>
@@ -37,9 +38,10 @@ cssunits
 <section class="fullscreen">
   <div class="fullscreen-content">Fullscreen Section</div>
 </section>
-```
 
-```css
+---
+
+css
 /* ✅ ប្រើ rem សម្រាប់ typography (ធៀប root 16px) */
 .hero {
   padding: 4rem 2rem; /* 64px 32px */
@@ -85,16 +87,18 @@ cssunits
 clampdemo
 ```
 
-```html
+```tabs
+html
 <!-- Hero section ជាមួយ responsive typography -->
 <header class="site-header">
   <h1 class="site-heading">Full Stack Mastery</h1>
   <p class="site-tagline">Learn modern web development the right way</p>
   <a href="#courses" class="cta-btn">Start Learning</a>
 </header>
-```
 
-```css
+---
+
+css
 .site-header {
   text-align: center;
   padding: clamp(2rem, 8vw, 6rem); /* padding ក៏ responsive */
@@ -138,7 +142,8 @@ clampdemo
 cssvariables
 ```
 
-```html
+```tabs
+html
 <!-- Components ប្រើ CSS variables -->
 <div class="card">
   <div class="card-header">
@@ -151,9 +156,10 @@ cssvariables
     <button class="btn btn-outline">Dismiss</button>
   </div>
 </div>
-```
 
-```css
+---
+
+css
 /* ១. ដាក់ variables ទៅ :root (global scope) */
 :root {
   --primary:    #3b82f6;
@@ -245,7 +251,8 @@ cssvariables
 gradientdemo
 ```
 
-```html
+```tabs
+html
 <!-- Hero ជាមួយ linear gradient -->
 <section class="gradient-hero">
   <h1 class="gradient-hero__title">Learn to Code</h1>
@@ -267,9 +274,10 @@ gradientdemo
     <h3>Secure</h3>
   </div>
 </div>
-```
 
-```css
+---
+
+css
 /* Linear gradient hero */
 .gradient-hero {
   padding: 80px 40px;
@@ -325,7 +333,8 @@ gradientdemo
 responsiveimg
 ```
 
-```html
+```tabs
+html
 <!-- Responsive image inside a fluid container -->
 <article class="blog-post">
   <figure class="post-figure">
@@ -342,9 +351,10 @@ responsiveimg
     <p class="post-excerpt">Modern CSS has evolved dramatically...</p>
   </div>
 </article>
-```
 
-```css
+---
+
+css
 /* ✅ Global reset — ដាក់ជា default */
 img,
 video,

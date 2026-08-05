@@ -89,14 +89,16 @@ searchInput.addEventListener("input", (e) => {
 
 នៅក្នុងការបង្កើត **Single Page Applications (SPA)** យើងមិនចង់អោយវា Refresh ទេ យើងចង់អោយ JavaScript ជាអ្នកបញ្ជូនទិន្នន័យជំនួសវិញ។ ដូច្នេះ យើងត្រូវប្រើ `e.preventDefault()`។
 
-```html
+```tabs
+html
 <form id="login-form">
   <input type="text" id="username" />
   <button type="submit">ចូលគណនី</button>
 </form>
-```
 
-```javascript
+---
+
+javascript
 const form = document.querySelector("#login-form");
 const usernameInput = document.querySelector("#username");
 

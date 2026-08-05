@@ -32,13 +32,15 @@ Elements ទាំងអស់ default ជា `static`។ ស្ថិតនៅ 
 positionstatic
 ```
 
-```html
+```tabs
+html
 <div class="el">Element ១</div>
 <div class="el el--static">Element ២ (static)</div>
 <div class="el">Element ៣</div>
-```
 
-```css
+---
+
+css
 /* ជា default — Elements ទាំងអស់ ហូរពីលើចុះក្រោម */
 .el {
   background: #e5e7eb;
@@ -64,13 +66,15 @@ positionstatic
 positionrelative
 ```
 
-```html
+```tabs
+html
 <div class="el">Element ១</div>
 <div class="el el--relative">Element ២ (relative)</div>
 <div class="el">Element ៣ — space ដើម reserve ទុក</div>
-```
 
-```css
+---
+
+css
 .el {
   background: #e5e7eb;
   padding: 8px 16px;
@@ -103,7 +107,8 @@ positionrelative
 positionabsolute
 ```
 
-```html
+```tabs
+html
 <div class="card">
   <img class="card__img" src="product.jpg" alt="Product" />
   <h3 class="card__title">Product Name</h3>
@@ -111,9 +116,10 @@ positionabsolute
 </div>
 
 <p class="next-el">Element បន្ទាប់ — ឡើងមកបូក</p>
-```
 
-```css
+---
+
+css
 .card {
   position: relative; /* ⭐ ត្រូវតែមាន! .card__badge ធៀបនឹង .card */
   width: 300px;
@@ -163,7 +169,8 @@ positionabsolute
 positionfixed
 ```
 
-```html
+```tabs
+html
 <nav class="navbar">
   <span class="navbar__logo">Full Stack Mastery</span>
   <ul class="navbar__links">
@@ -177,9 +184,10 @@ positionfixed
 </main>
 
 <button class="chat-btn">💬</button>
-```
 
-```css
+---
+
+css
 .navbar {
   position: fixed; /* ស្ងៀមជាប់ខាងលើ Viewport */
   top: 0;
@@ -234,7 +242,8 @@ positionfixed
 positionsticky
 ```
 
-```html
+```tabs
+html
 <article class="content">
   <p>Content before...</p>
 
@@ -245,9 +254,10 @@ positionsticky
   <h2 class="section-header">Section ២ — Advanced</h2>
   <p>Content of section 2...</p>
 </article>
-```
 
-```css
+---
+
+css
 .content {
   max-width: 800px;
   margin: 0 auto;
@@ -275,15 +285,17 @@ positionsticky
 zindex
 ```
 
-```html
+```tabs
+html
 <div class="layer-wrap">
   <div class="layer layer--blue">Box ១</div>
   <div class="layer layer--purple">Box ២</div>
   <div class="layer layer--orange">Box ៣</div>
 </div>
-```
 
-```css
+---
+
+css
 .layer-wrap {
   position: relative; /* context សម្រាប់ absolute children */
   height: 160px;

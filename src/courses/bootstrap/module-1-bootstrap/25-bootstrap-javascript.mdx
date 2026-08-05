@@ -52,16 +52,17 @@ setTimeout(() => {
 
 **Tooltips** គឺជាអត្ថបទតូចៗដែលលេចឡើងពេលអ្នកយកកណ្តុរទៅដាក់ពីលើ (Hover) ប៊ូតុង ឬអត្ថបទអ្វីមួយ។ ដោយសារហេតុផលល្បឿន (Performance), Bootstrap មិនបានបើកមុខងារនេះអោយដើរដោយស្វ័យប្រវត្តិទេ។
 
-ដើម្បីប្រើវា អ្នកត្រូវបន្ថែម HTML នេះសិន៖
-```html
+ដើម្បីប្រើវា អ្នកត្រូវបន្ថែម HTML នេះសិន ហើយសរសេរកូដ JS ដើម្បីប្រាប់ Bootstrap អោយស្វែងរកគ្រប់ប៊ូតុងដែលមាន `data-bs-toggle="tooltip"` ហើយបើកមុខងារអោយវា៖
+
+```tabs
+html
 <button type="button" class="btn btn-secondary" data-bs-toggle="tooltip" data-bs-title="នេះគឺជាអត្ថបទ Tooltip លាក់កំបាំង!">
   ដាក់កណ្តុរពីលើខ្ញុំ
 </button>
-```
 
-បន្ទាប់មក អ្នកត្រូវសរសេរកូដ JS ដើម្បីប្រាប់ Bootstrap អោយស្វែងរកគ្រប់ប៊ូតុងដែលមាន `data-bs-toggle="tooltip"` ហើយបើកមុខងារអោយវា៖
+---
 
-```javascript
+javascript
 // ស្វែងរកគ្រប់ Elements ទាំងអស់ដែលមាន data-bs-toggle="tooltip"
 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
 
@@ -75,14 +76,15 @@ const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstra
 
 **Popovers** ស្រដៀងនឹង Tooltips ដែរ ប៉ុន្តែវាអាចផ្ទុកព័ត៌មានបានច្រើនជាង មានចំណងជើង និងអត្ថបទ ហើយវានឹងលេចឡើងនៅពេលអ្នក **ចុច (Click)** ជំនួសអោយការ Hover។ វាក៏ត្រូវការការ Initialize តាមរយៈ JS ដូច Tooltips ដែរ។
 
-```html
+```tabs
+html
 <button type="button" class="btn btn-danger" data-bs-toggle="popover" data-bs-title="ចំណងជើង Popover" data-bs-content="នេះគឺជាព័ត៌មានលម្អិតដ៏វែងអន្លាយដែលចេញមកពេលអ្នកចុចប៊ូតុង។">
   ចុចដើម្បីអានបន្ថែម
 </button>
-```
 
-កូដ JS សម្រាប់បើកមុខងារ៖
-```javascript
+---
+
+javascript
 const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
 const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 ```

@@ -40,14 +40,16 @@ boxmodel
 
 ### 💻 ឧទាហរណ៍ Box Model
 
-```html
+```tabs
+html
 <!-- Box Model: div ជា element ប្រអប់ -->
 <div class="box">
   ខ្ញុំជា Content!
 </div>
-```
 
-```css
+---
+
+css
 .box {
   width: 200px;              /* Content width */
   height: 100px;             /* Content height */
@@ -70,12 +72,14 @@ boxmodel
 boxsizing
 ```
 
-```html
+```tabs
+html
 <!-- ច្បាប់មាស: ដាក់នៅ global CSS file -->
 <!-- ␣ ␣ ␣ ␣ ␣ ␣ -->
-```
 
-```css
+---
+
+css
 /* ✅ ច្បាប់មាស — ដាក់ជាទីមួយ reset.css ឬ global.css */
 *,
 *::before,
@@ -101,7 +105,8 @@ boxsizing
 padding
 ```
 
-```html
+```tabs
+html
 <!-- Padding: button ដែលមាន padding សមស្រប -->
 <button class="btn">Click Me</button>
 
@@ -110,9 +115,10 @@ padding
   <h2 class="card__title">Card Title</h2>
   <p class="card__body">Some description text here.</p>
 </div>
-```
 
-```css
+---
+
+css
 .btn {
   padding: 10px 24px; /* top/bottom: 10px · left/right: 24px */
   background: #3b82f6;
@@ -146,16 +152,18 @@ padding
 margincollapse
 ```
 
-```html
+```tabs
+html
 <!-- Margin collapse: margin-bottom ១ + margin-top ២ = ធំបំផុតតែម្ដង -->
 <p class="para--top">Paragraph ១ (margin-bottom: 30px)</p>
 <p class="para--bottom">Paragraph ២ (margin-top: 20px)</p>
 
 <!-- Center element ដោយ margin: auto -->
 <div class="centered">ខ្ញុំស្ថិតនៅកណ្ដាល!</div>
-```
 
-```css
+---
+
+css
 .para--top    { margin-bottom: 30px; } /* margin-bottom */
 .para--bottom { margin-top: 20px; }    /* margin-top */
 /* ចម្ងាយជាក់ស្ដែង = 30px (មិនមែន 50px) ← Margin Collapse! */
@@ -192,7 +200,8 @@ display
 | `inline-block` | ❌ | ✅ | ✅ |
 | `none` | — | — | 🚫 លាក់ |
 
-```html
+```tabs
+html
 <!-- block: div, p, h1 — ចាប់ width 100% -->
 <div class="block-el">Block Element</div>
 <p class="block-el">Paragraph</p>
@@ -216,9 +225,10 @@ display
 <button onclick="document.getElementById('modal').style.display='block'">
   Show Modal
 </button>
-```
 
-```css
+---
+
+css
 .block-el {
   display: block;   /* ✅ ចាប់ width 100% · ចុះបន្ទាត់ */
   background: #dbeafe;
@@ -263,7 +273,8 @@ display
 overflow
 ```
 
-```html
+```tabs
+html
 <!-- overflow: hidden — ប្រើ border-radius + overflow ជានិច្ច -->
 <div class="avatar">
   <img src="user.jpg" alt="User" />
@@ -279,9 +290,10 @@ overflow
   <div class="message">Hello!</div>
   <div class="message">How are you?</div>
 </div>
-```
 
-```css
+---
+
+css
 /* hidden: រូបភាព circle ដោយ border-radius + overflow */
 .avatar {
   width: 60px;
@@ -333,7 +345,8 @@ overflow
 boxshadow
 ```
 
-```html
+```tabs
+html
 <!-- box-shadow: cards ជាមួយ shadow levels -->
 <div class="card card--simple">Simple Card</div>
 <div class="card card--lifted">Lifted Card</div>
@@ -343,9 +356,10 @@ boxshadow
 <!-- text-shadow: heading -->
 <h1 class="hero-title">Full Stack Mastery</h1>
 <h2 class="neon-title">Neon Title</h2>
-```
 
-```css
+---
+
+css
 /* Base card style */
 .card {
   width: 200px;
@@ -395,7 +409,8 @@ boxshadow
 cardlayout
 ```
 
-```html
+```tabs
+html
 <!-- Card component ពេញលេញ -->
 <div class="card">
   <div class="card__avatar">
@@ -405,9 +420,10 @@ cardlayout
   <p class="card__bio">Full Stack Developer</p>
   <button class="card__btn">Follow</button>
 </div>
-```
 
-```css
+---
+
+css
 /* ✅ ច្បាប់មាស: box-sizing ជាមុន */
 *,
 *::before,
