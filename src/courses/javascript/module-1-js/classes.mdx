@@ -21,9 +21,15 @@ quiz:
 
 ## 🏛️ អ្វីទៅជា Classes?
 
-ប្រសិនបើអ្នកចង់បង្កើត Object សម្រាប់អ្នកប្រើប្រាស់ម្នាក់ អ្នកអាចសរសេរវាដោយដៃបាន។ ប៉ុន្តែចុះបើអ្នកចង់បង្កើតអ្នកប្រើប្រាស់ ១០០ នាក់ដែលមានរចនាសម្ព័ន្ធដូចគ្នា? 
+ប្រសិនបើអ្នកចង់បង្កើត Object សម្រាប់អ្នកប្រើប្រាស់ម្នាក់ អ្នកអាចសរសេរវាដោយដៃបាន។ ប៉ុន្តែចុះបើអ្នកចង់បង្កើតអ្នកប្រើប្រាស់ ១០០ នាក់ដែលមានរចនាសម្ព័ន្ធដូចគ្នា?
 
 **Class** គឺជា "ពុម្ពគំរូ" (Blueprint) សម្រាប់បង្កើត Objects ដែលមានរចនាសម្ព័ន្ធដូចៗគ្នា។ វាគឺជាបេះដូងនៃ **Object-Oriented Programming (OOP)**។
+
+ចុច **+ new User** ខាងក្រោម ដើម្បីឃើញថា Class មួយអាចបង្កើត Objects ជាច្រើនដែលឯករាជ្យពីគ្នា៖
+
+```jsdiagram
+jsclassblueprint
+```
 
 ---
 
@@ -32,7 +38,12 @@ quiz:
 យើងបង្កើត Class ដោយប្រើពាក្យគន្លឹះ `class` (ជាទូទៅឈ្មោះ Class ត្រូវផ្តើមដោយអក្សរធំ)។ នៅខាងក្នុងនោះ វាមានកន្លែងពិសេសមួយហៅថា `constructor` ដែលដើរដោយស្វ័យប្រវត្តិរាល់ពេលដែលអ្នកបង្កើត Object ថ្មីពី Class នោះ។
 
 ### តើ `this` គឺជាអ្វី?
-`this` តំណាងអោយ Object ថ្មីដែលកំពុងត្រូវបានបង្កើត។
+
+`this` តំណាងអោយ Object ថ្មីដែលកំពុងត្រូវបានបង្កើត — ចុចលើ instance នីមួយៗ ដើម្បីឃើញថា `this` ចង្អុលទៅ Object ណា៖
+
+```jsdiagram
+jsthiskeyword
+```
 
 ```javascript
 class User {
@@ -62,7 +73,11 @@ user2.greet(); // សួស្តី ខ្ញុំឈ្មោះ Dara ហើ�
 
 ឧបមាថាអ្នកចង់បង្កើត `Admin` មួយ។ `Admin` ក៏ជា `User` ដែរ តែគេមានសិទ្ធិបន្ថែម។ ជំនួសអោយការសរសេរកូដ `User` ឡើងវិញទាំងអស់ អ្នកអាចអោយ `Admin` ទទួលយកលក្ខណៈពី `User` បានដោយប្រើប្រាស់ `extends`។
 
-ហើយប្រសិនបើអ្នកចង់បន្ថែមទិន្នន័យថ្មីទៅក្នុង `constructor` របស់ `Admin` អ្នកត្រូវហៅ `super()` ដើម្បីបញ្ជូនទិន្នន័យចាំបាច់ទៅអោយ Parent Class (`User`) ជាមុនសិន។
+ចុចប៊ូតុង **Parent**, **Child**, **Instance** ដើម្បីឃើញថា properties & methods ណាខ្លះត្រូវបានទទួលពី parent ហើយណាខ្លះជារបស់ Admin ផ្ទាល់៖
+
+```jsdiagram
+jsinheritance
+```
 
 ```javascript
 // Admin បន្តពូជពី User
@@ -70,7 +85,7 @@ class Admin extends User {
   constructor(name, age, role) {
     // ហៅ super() ដើម្បីបញ្ជូន name និង age ទៅអោយ constructor របស់ User
     super(name, age);
-    
+
     // បន្ថែម Property ថ្មីផ្ទាល់ខ្លួន
     this.role = role;
   }
@@ -84,7 +99,7 @@ class Admin extends User {
 const admin1 = new Admin("Alice", 28, "SuperAdmin");
 
 // អាចហៅ Method របស់ User បាន (Inheritance)
-admin1.greet(); 
+admin1.greet();
 
 // អាចហៅ Method របស់ខ្លួនឯងបាន
 admin1.deletePost();

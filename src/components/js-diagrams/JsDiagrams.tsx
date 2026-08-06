@@ -11,6 +11,8 @@ import { NamedExportDiagram, DefaultExportDiagram, CombinedImportDiagram } from 
 import { JsonFormatDiagram, JsonStringifyDiagram, JsonParseDiagram } from "./JsJsonDiagrams";
 import { LocalStorageBasicDiagram, LocalStorageJsonDiagram } from "./JsLocalStorageDiagrams";
 import { SyncAsyncDiagram, PromiseStatesDiagram, AsyncAwaitDiagram } from "./JsAsyncDiagrams";
+import { FetchFlowDiagram, FetchStatusCodesDiagram, FetchDomRenderDiagram } from "./JsFetchDiagrams";
+import { ClassBlueprintDiagram, ThisKeywordDiagram, InheritanceDiagram } from "./JsClassesDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2228,6 +2230,12 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jssyncasync:               SyncAsyncDiagram,
   jspromisestates:           PromiseStatesDiagram,
   jsasyncawait:              AsyncAwaitDiagram,
+  jsfetchflow:               FetchFlowDiagram,
+  jsfetchstatuscodes:        FetchStatusCodesDiagram,
+  jsfetchdomrender:          FetchDomRenderDiagram,
+  jsclassblueprint:          ClassBlueprintDiagram,
+  jsthiskeyword:             ThisKeywordDiagram,
+  jsinheritance:             InheritanceDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {

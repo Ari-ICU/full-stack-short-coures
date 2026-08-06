@@ -1,58 +1,97 @@
 # Full Stack Web Development Curriculum
 
-This repository contains an interactive, modern curriculum platform for teaching Full Stack Web Development. It is built with **Next.js (App Router)** and uses **MDX (Markdown + JSX)** to render high-quality, localized course content.
+An interactive, modern curriculum platform for teaching Full Stack Web Development. Built with **Next.js (App Router)** and **MDX** to deliver high-quality, localized course content — primarily in Khmer with technical terms kept in English.
 
 ## 🚀 Tech Stack
 
-- **Framework:** Next.js 16 (App Router)
-- **Content Rendering:** MDX (`react-markdown`, `remark-gfm`)
-- **Styling:** Tailwind CSS 4 & Tailwind Typography (`@tailwindcss/typography`)
-- **Diagrams:** Mermaid.js (Client-side rendering)
-- **Language:** TypeScript
+| Category | Library / Tool |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| UI | React 19 |
+| Styling | Tailwind CSS 4 + `@tailwindcss/typography` |
+| Content | `react-markdown`, `remark-gfm`, `gray-matter` |
+| Syntax Highlighting | `prism-react-renderer` |
+| Diagrams | Mermaid.js 11 (client-side) |
+| Icons | `lucide-react` |
 
-## 📚 Curriculum Structure
+## 📁 Project Structure
 
-The curriculum is divided into comprehensive modules, with a specific focus on explaining concepts in Khmer while strictly maintaining technical terminology in English.
+```
+src/
+├── app/                   # Next.js App Router pages
+│   ├── courses/[courseSlug]/
+│   │   └── lessons/[lessonSlug]/
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/            # Reusable UI components
+│   ├── css-diagrams/
+│   ├── html-diagrams/
+│   ├── js-diagrams/
+│   ├── CodeBlock.tsx
+│   ├── TabbedCodeBlock.tsx
+│   ├── LessonContent.tsx
+│   ├── LessonSidebar.tsx
+│   ├── MobileLessonSidebar.tsx
+│   ├── ModuleAccordion.tsx
+│   ├── Mermaid.tsx
+│   ├── CourseCard.tsx
+│   └── ThemeToggle.tsx
+├── courses/               # MDX lesson content
+│   ├── course-overview/
+│   ├── html/
+│   ├── css/
+│   ├── bootstrap/
+│   ├── javascript/
+│   ├── git/
+│   ├── typescript/
+│   ├── rdbms/
+│   ├── react/
+│   ├── nextjs/
+│   ├── backend-architecture/
+│   └── deployment/
+├── lib/
+│   └── courses.ts         # Content loading utilities
+└── types/
+    └── index.ts           # Shared TypeScript types
+```
 
-Current modules include:
-- **Course Overview:** Introduction to the client-server model, HTTP/HTTPS, REST APIs, and development environment setup.
-- **Web Design:** 
-  - **HTML:** Semantic structure, attributes, forms, and tables.
-  - **CSS:** Selectors, specificity, box model, Flexbox/Grid, positioning, modern units, and animations.
-  - **Bootstrap:** 12-column grid layout, UI components (Cards, Navbar, Modals), and utility classes.
-  - **JavaScript:** Variables & Scope, DOM manipulation, array methods, modern ES6 syntax, and API Fetching.
-- **Git & GitHub:** Version control fundamentals, branching, merging, stashing, and conflict resolution.
-- **TypeScript:** Typing fundamentals, generics, utility types, and strict mode.
-- **RDBMS (PostgreSQL):** Database design, ERD diagrams, Normalization, SQL fundamentals, Joins, and JSONB.
-- **Frontend Engineering:** React fundamentals, Hooks (`useState`, `useEffect`), State Management (Redux Toolkit), Routing, Forms (Zod + React Hook Form), and Axios API Integration.
-- **Next.js (Optional):** App Router, Server vs Client Components, Data Fetching, and Vercel Deployment.
+## 📚 Curriculum
+
+| Module | Topics |
+|---|---|
+| Course Overview | Client-server model, HTTP/HTTPS, REST APIs, dev environment setup |
+| HTML | Semantic structure, attributes, forms, tables |
+| CSS | Selectors, specificity, box model, Flexbox/Grid, positioning, modern units, animations |
+| Bootstrap | 12-column grid, Cards, Navbar, Modals, utility classes |
+| JavaScript | Variables & scope, DOM, array methods, ES6+, fetch API |
+| Git & GitHub | Version control, branching, merging, stashing, conflict resolution |
+| TypeScript | Types, generics, utility types, strict mode |
+| RDBMS (PostgreSQL) | Database design, ERD, normalization, SQL, joins, JSONB |
+| React | Hooks, state management (Redux Toolkit), routing, forms (Zod + RHF), Axios |
+| Next.js | App Router, server vs client components, data fetching, Vercel deployment |
+| Backend Architecture | Server-side concepts and API design |
+| Deployment | Hosting, CI/CD, and production workflows |
 
 ## 🛠️ Getting Started
 
-First, install the dependencies:
-
 ```bash
 npm install
-```
-
-Then, run the development server:
-
-```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to explore the curriculum platform.
+Open [http://localhost:3000](http://localhost:3000) to explore the platform.
 
-## 📝 Editing Content
+Other scripts:
 
-Course contents are stored in the `src/courses/` directory. Each lesson is written in `.mdx` format. 
-To create or modify a lesson:
-1. Navigate to the relevant module inside `src/courses/`.
-2. Edit or create an `.mdx` file.
-3. Ensure the YAML frontmatter includes `title`, `description`, `objectives`, `module`, and `order`.
-4. (Optional) You can include a `quiz` block in the frontmatter to test the student's understanding.
+```bash
+npm run build   # Production build (static export)
+npm run lint    # ESLint
+```
 
-### Example Frontmatter
+## 📝 Writing Lessons
+
+Lessons are `.mdx` files inside `src/courses/<course-slug>/`. Each file requires YAML frontmatter:
 
 ```yaml
 ---
@@ -73,18 +112,20 @@ quiz:
 ---
 ```
 
-## 🗺️ Diagrams (Mermaid)
+Required fields: `title`, `description`, `objectives`, `module`, `order`.  
+The `quiz` block is optional.
 
-The platform supports **Mermaid.js** for rendering charts and diagrams (e.g., Entity Relationship Diagrams). Just use a standard markdown code block with the `mermaid` language tag:
+## 🗺️ Mermaid Diagrams
 
-```markdown
-    ```mermaid
-    erDiagram
-        USERS ||--o{ ORDERS : "places"
-    ```
+Use a standard fenced code block with the `mermaid` language tag:
+
+````markdown
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : "places"
 ```
+````
 
 ## 🚀 Deployment
 
-This platform is configured for **Static Export** (`output: "export"`) and is automatically deployed to **GitHub Pages** via GitHub Actions (`.github/workflows/nextjs.yml`). 
-Any pushes to the `main` branch will trigger a build and publish the latest MDX content directly to your GitHub Pages URL.
+The site is configured for **static export** (`output: "export"`) and deploys automatically to **GitHub Pages** via GitHub Actions on every push to `main`.
