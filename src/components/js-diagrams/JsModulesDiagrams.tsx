@@ -197,3 +197,90 @@ export function DefaultExportDiagram() {
     </div>
   );
 }
+
+// ─── 3. Combined Import Diagram ───────────────────────────────────────────────
+export function CombinedImportDiagram() {
+  const [step, setStep] = useState(0);
+
+  const steps = [
+    { label: "myModule.js", desc: "export ទាំងពីរប្រភេទ" },
+    { label: "import default", desc: "import sayHello (no {})" },
+    { label: "import named", desc: "import { name }" },
+    { label: "ប្រើប្រាស់", desc: "ហៅ sayHello() + log name" },
+  ];
+
+  return (
+    <div className="not-prose my-8 font-sans select-none">
+      <div className="w-full max-w-2xl mx-auto rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-hidden">
+        <PanelHeader label="Default + Named រួមគ្នា" badge="bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300" />
+        <div className="p-6 space-y-4">
+
+          {/* Step progress */}
+          <div className="flex gap-1.5">
+            {steps.map((s, i) => (
+              <button key={i} onClick={() => setStep(i)}
+                className={`flex-1 py-1.5 px-1 rounded-lg text-[10px] font-bold text-center cursor-pointer transition-all border-2 ${
+                  i === step ? "bg-purple-600 border-transparent text-white" :
+                  i < step   ? "border-purple-300 bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-300" :
+                  "border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800"
+                }`}>
+                {i < step ? "✓" : i + 1}
+              </button>
+            ))}
+          </div>
+          <div className="text-xs font-semibold text-gray-900 dark:text-gray-100">{steps[step].label} <span className="opacity-60">— {steps[step].desc}</span></div>
+
+          {/* myModule.js */}
+          <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
+            <div className="text-gray-500 mb-1">{"// myModule.js"}</div>
+            <div className={`transition-colors ${step >= 2 ? "text-green-400" : "text-gray-500"}`}>
+              <span className="text-blue-400">export const</span> <span className="text-white">name</span> = <span className="text-green-300">"JavaScript"</span>; <span className="text-gray-600">{"// Named"}</span>
+            </div>
+            <div className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}>
+              <span className="text-blue-400">const</span> <span className="text-white">sayHello</span> = () =&gt; console.<span className="text-yellow-300">log</span>(<span className="text-green-300">"Hello!"</span>);
+            </div>
+            <div className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}>
+              <span className="text-blue-400">export default</span> sayHello; <span className="text-gray-600">{"// Default"}</span>
+            </div>
+          </div>
+
+          {/* app.js */}
+          {step >= 1 && (
+            <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
+              <div className="text-gray-500 mb-1">{"// app.js"}</div>
+              <div>
+                <span className="text-blue-400">import</span>
+                <span className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}> sayHello</span>
+                {step >= 2 && <span className="text-white">, <span className="text-green-300">{"{ name }"}</span></span>}
+                <span className="text-blue-400"> from </span>
+                <span className="text-green-300">'./myModule.js'</span>;
+              </div>
+              {step >= 3 && <>
+                <div className="mt-1 text-yellow-300">sayHello(); <span className="text-gray-500">// Hello!</span></div>
+                <div className="text-green-300">console.log(name); <span className="text-gray-500">// JavaScript</span></div>
+              </>}
+            </div>
+          )}
+
+          {/* Nav */}
+          <div className="flex justify-between">
+            <button onClick={() => setStep(s => Math.max(0, s - 1))}
+              disabled={step === 0}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+              ← Back
+            </button>
+            <button onClick={() => setStep(s => Math.min(steps.length - 1, s + 1))}
+              disabled={step === steps.length - 1}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+              Next →
+            </button>
+          </div>
+
+          <div className="rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 px-3 py-2 text-[11px] text-purple-700 dark:text-purple-300">
+            💡 អ្នកអាច import ទាំង default <strong> និង</strong> named ក្នុង statement តែមួយ — default ត្រូវមកមុន {"{}"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

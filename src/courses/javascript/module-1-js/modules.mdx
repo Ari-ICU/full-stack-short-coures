@@ -20,34 +20,53 @@ quiz:
 
 ## 📦 អ្វីទៅជា Modules?
 
-នៅពេលដែលកម្មវិធីរបស់អ្នកកាន់តែធំ កូដ JavaScript របស់អ្នកអាចមានរាប់ពាន់បន្ទាត់ ប្រសិនបើអ្នកសរសេរវានៅក្នុង File តែមួយ វានឹងក្លាយជារញ៉េរញ៉ៃ (Spaghetti Code)! 
+នៅពេលដែលកម្មវិធីរបស់អ្នកកាន់តែធំ កូដ JavaScript របស់អ្នកអាចមានរាប់ពាន់បន្ទាត់ ប្រសិនបើអ្នកសរសេរវានៅក្នុង File តែមួយ វានឹងក្លាយជារញ៉េរញ៉ៃ (Spaghetti Code)!
 
 **ES6 Modules** អនុញ្ញាតអោយយើងបំបែកកូដធំៗ ទៅជាកូនឯកសារតូចៗ (Files) ដែលងាយស្រួលអាន ងាយស្រួលរកកំហុស និងអាចយកទៅប្រើប្រាស់ឡើងវិញបានគ្រប់ទីកន្លែង។
 
 ---
 
-## 1. Named Exports 
+## 1. Named Exports
 
 អ្នកអាច Export កូដ (ដូចជា Variables ឬ Functions) បានច្រើនចេញពី File តែមួយដោយប្រើពាក្យគន្លឹះ `export` នៅពីមុខ។ នេះហៅថា **Named Export** ព្រោះនៅពេលអ្នក Import វាទៅប្រើ អ្នកត្រូវហៅ "ឈ្មោះ" វាអោយចំ។
 
-**ឯកសារ `math.js` (កន្លែងបង្កើត):**
-```javascript
-// Export ផ្ទាល់ៗ
+```jsdiagram
+jsnamedexport
+```
+
+```tabs
+html
+<!-- ត្រូវប្រើ type="module" ក្នុង browser -->
+<script type="module" src="app.js"></script>
+<div id="output"></div>
+---
+css
+#output {
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  white-space: pre-line;
+}
+---
+js
+// ── math.js ──────────────────────────────
 export const PI = 3.14;
 
 export const add = (a, b) => {
   return a + b;
 };
-```
 
-**ឯកសារ `app.js` (កន្លែងហៅមកប្រើ):**
-នៅពេល Import ត្រូវប្រើវង់ក្រចក `{}` ហើយត្រូវប្រាកដថាឈ្មោះត្រូវគ្នាជាមួយឈ្មោះដែលបាន Export។
-```javascript
-// Import ពី math.js (បើក្នុង HTML ត្រូវប្រាកដថាដាក់ <script type="module">)
+// ── app.js ───────────────────────────────
+// import ដោយប្រើ {} ហើយឈ្មោះត្រូវដូចគ្នា
 import { PI, add } from './math.js';
 
-console.log("តម្លៃ PI គឺ:", PI);
-console.log("លទ្ធផលបូក:", add(10, 5));
+const out = document.getElementById("output");
+out.textContent =
+  "តម្លៃ PI គឺ: " + PI + "\n" +
+  "លទ្ធផលបូក: " + add(10, 5);
 ```
 
 ---
@@ -56,27 +75,48 @@ console.log("លទ្ធផលបូក:", add(10, 5));
 
 ប្រសិនបើ File មួយបង្កើតឡើងសម្រាប់តែគោលបំណងចម្បង **តែមួយគត់** (ឧទាហរណ៍ Component មួយនៅក្នុង React) អ្នកគួរតែប្រើ **Default Export**។ ក្នុងមួយ File អាចមាន Default Export តែមួយប៉ុណ្ណោះ!
 
-**ឯកសារ `User.js` (កន្លែងបង្កើត):**
-```javascript
+```jsdiagram
+jsdefaultexport
+```
+
+```tabs
+html
+<!-- type="module" ចាំបាច់សម្រាប់ import/export -->
+<script type="module" src="app.js"></script>
+<div id="userCard"></div>
+---
+css
+#userCard {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #166534;
+}
+---
+js
+// ── User.js ──────────────────────────────
 class User {
   constructor(name) {
     this.name = name;
   }
+  greet() {
+    return "👋 សួស្តី, " + this.name + "!";
+  }
 }
 
-// ប្រើ export default នៅខាងចុង
+// export default — គ្មាន {}
 export default User;
-```
 
-**ឯកសារ `app.js` (កន្លែងហៅមកប្រើ):**
-លក្ខណៈពិសេសរបស់ Default Export គឺនៅពេល Import យើង **មិនចាំបាច់ប្រើវង់ក្រចក `{}` ទេ** ហើយយើងអាចដាក់ឈ្មោះវាថាអ្វីក៏បានដែរ (តែជាទូទៅគួរតែដាក់ឈ្មោះអោយស្រដៀងនឹងដើម)!
-
-```javascript
-// Import ដោយមិនប្រើ {} ហើយអ្នកអាចដាក់ឈ្មោះវាថា MyUser ក៏បានដែរ!
+// ── app.js ───────────────────────────────
+// import ដោយគ្មាន {} — ឈ្មោះអាចផ្លាស់ប្តូរបាន
 import User from './User.js';
 
 const user1 = new User("Sok");
-console.log(user1.name); // Sok
+document.getElementById("userCard").textContent = user1.greet();
 ```
 
 ---
@@ -85,19 +125,43 @@ console.log(user1.name); // Sok
 
 ចុះបើ File មួយមានទាំង Default ផង និង Named ផង? គ្មានបញ្ហាទេ! អ្នកអាច Import ពួកវាព្រមគ្នាបាន។
 
-**ការ Export:**
-```javascript
-export const name = "JavaScript"; // Named
-const sayHello = () => console.log("Hello!");
-export default sayHello; // Default
+```jsdiagram
+jscombinedimport
 ```
 
-**ការ Import:**
-```javascript
+```tabs
+html
+<!-- ប្រើ type="module" ជានិច្ចពេលប្រើ import/export -->
+<script type="module" src="app.js"></script>
+<div id="result"></div>
+---
+css
+#result {
+  font-family: monospace;
+  font-size: 0.9rem;
+  padding: 1rem;
+  background: #faf5ff;
+  border: 2px solid #d8b4fe;
+  border-radius: 0.75rem;
+  white-space: pre-line;
+  color: #581c87;
+  font-weight: 600;
+}
+---
+js
+// ── myModule.js ──────────────────────────
+export const name = "JavaScript";       // Named
+const sayHello = () => "Hello! 👋";
+export default sayHello;                // Default
+
+// ── app.js ───────────────────────────────
+// default ត្រូវមកមុន, named នៅក្នុង {}
 import sayHello, { name } from './myModule.js';
 
-sayHello();
-console.log(name);
+const el = document.getElementById("result");
+el.textContent =
+  sayHello() + "\n" +
+  "ភាសា: " + name;
 ```
 
-> **ចំណាំសំខាន់សម្រាប់ការសរសេរ HTML ធម្មតា:** ប្រសិនបើអ្នកចង់ប្រើ `import`/`export` នៅក្នុង Browser ដោយផ្ទាល់ (ដោយមិនប្រើប្រព័ន្ធ Build Tools ដូចជា React/Vite) អ្នកត្រូវប្រាកដថាអ្នកបានបន្ថែម `type="module"` ទៅក្នុង Tag script របស់អ្នក៖ `<script type="module" src="app.js"></script>`។
+> **ចំណាំសំខាន់សម្រាប់ Browser:** ប្រសិនបើអ្នកចង់ប្រើ `import`/`export` នៅក្នុង Browser ដោយផ្ទាល់ (ដោយមិនប្រើប្រព័ន្ធ Build Tools ដូចជា React/Vite) អ្នកត្រូវប្រាកដថាអ្នកបានបន្ថែម `type="module"` ទៅក្នុង Tag script របស់អ្នក៖ `<script type="module" src="app.js"></script>`។
