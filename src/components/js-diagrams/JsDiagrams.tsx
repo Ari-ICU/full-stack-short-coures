@@ -5,6 +5,8 @@ import { MapDiagram, FilterDiagram, ReduceDiagram } from "./JsArrayMethodsDiagra
 import { DomTreeDiagram, DomModifyDiagram, DomEventsDiagram } from "./JsDomDiagrams";
 import { DomCreateDiagram, DomAppendDiagram, DomRemoveReplaceDiagram } from "./JsDomUpdateDiagrams";
 import { EventListenerDiagram, EventObjectDiagram, PreventDefaultDiagram } from "./JsEventsDiagrams";
+import { TryCatchFlowDiagram, FinallyDiagram, ThrowCustomErrorDiagram } from "./JsErrorHandlingDiagrams";
+import { SetTimeoutDiagram, SetIntervalDiagram, ClearIntervalDiagram, ClearTimeoutDiagram } from "./JsTimersDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2204,6 +2206,13 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jseventlistener:           EventListenerDiagram,
   jseventobject:             EventObjectDiagram,
   jspreventdefault:          PreventDefaultDiagram,
+  jstrycatch:                TryCatchFlowDiagram,
+  jsfinally:                 FinallyDiagram,
+  jsthrowerror:              ThrowCustomErrorDiagram,
+  jssettimeout:              SetTimeoutDiagram,
+  jssetinterval:             SetIntervalDiagram,
+  jsclearinterval:           ClearIntervalDiagram,
+  jscleartimeout:            ClearTimeoutDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {

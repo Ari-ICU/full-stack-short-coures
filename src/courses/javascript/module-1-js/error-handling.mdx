@@ -32,21 +32,26 @@ quiz:
 
 ## 1. ការប្រើប្រាស់ `try...catch`
 
-យន្តការសំខាន់បំផុតគឺ `try...catch`។ 
+យន្តការសំខាន់បំផុតគឺ `try...catch`។
 *   **`try`**: អ្នកដាក់កូដដែល "អាចនឹង" មានបញ្ហានៅទីនេះ។
 *   **`catch`**: បើកូដក្នុង `try` មានបញ្ហាមែន វានឹងលោតចូលមក `catch` ភ្លាមៗដោយមិនធ្វើអោយកម្មវិធីគាំងឡើយ។
 
-```javascript
+```jsdiagram
+jstrycatch
+```
+
+```tabs
+js
 try {
   // ព្យាយាមដំណើរការកូដនេះ
   let message = "សួស្តី!";
   console.log(message);
-  
+
   // ធ្វើអោយមានកំហុសដោយហៅ Function ដែលគ្មាននៅលើលោកនេះ!
-  nonExistentFunction(); 
-  
+  nonExistentFunction();
+
   // កូដបន្ទាប់ពី Error នឹងមិនដំណើរការទេ វានឹងលោតទៅ catch ភ្លាម
-  console.log("អ្នកនឹងមិនឃើញសារមួយនេះទេ"); 
+  console.log("អ្នកនឹងមិនឃើញសារមួយនេះទេ");
 
 } catch (error) {
   // ចាប់យកកំហុសមកបង្ហាញ
@@ -63,17 +68,22 @@ console.log("កម្មវិធីនៅដើរធម្មតា!");
 
 ជួនកាល អ្នកចង់អោយកូដមួយចំនួនដំណើរការដាច់ខាត ទោះជាមាន ឬមិនមាន Error ក៏ដោយ (ឧទាហរណ៍៖ ការលាក់ Loading Spinner ក្រោយពេលទាញយកទិន្នន័យចប់)។ នោះគឺជាតួនាទីរបស់ `finally`។
 
-```javascript
+```jsdiagram
+jsfinally
+```
+
+```tabs
+js
 let isLoading = true;
 
 try {
   console.log("កំពុងទាញយកទិន្នន័យ...");
   // ឧបមាថាមាន Error កើតឡើងទីនេះ
   throw new Error("ដាច់អុីនធឺណិត!");
-  
+
 } catch (error) {
   console.log("កំហុស៖", error.message);
-  
+
 } finally {
   // តែងតែដំណើរការជានិច្ច
   isLoading = false;
@@ -87,26 +97,31 @@ try {
 
 ពេលខ្លះ JavaScript មិនចាត់ទុកវាជា Error ទេ ប៉ុន្តែតាម Logic នៃកម្មវិធីរបស់អ្នក វាគឺជាកំហុស! អ្នកអាចប្រើពាក្យគន្លឹះ `throw` ដើម្បីបោះ Error នោះទៅក្នុង `catch` ដោយខ្លួនឯង។
 
-```javascript
+```jsdiagram
+jsthrowerror
+```
+
+```tabs
+js
 function checkAge(age) {
   try {
     if (age < 0) {
       // បង្កើត Error ដោយខ្លួនឯង ប្រសិនបើអាយុតិចជាង 0
       throw new Error("អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!");
     }
-    
+
     if (age < 18) {
       console.log("អ្នកនៅក្មេងពេក។");
     } else {
       console.log("ស្វាគមន៍មកកាន់ប្រព័ន្ធ!");
     }
-    
+
   } catch (error) {
     // ចាប់យក Custom Error ខាងលើ
     console.error("មានកំហុសផ្នែកទិន្នន័យ:", error.message);
   }
 }
 
-checkAge(20); // ស្វាគមន៍មកកាន់ប្រព័ន្ធ!
-checkAge(-5); // មានកំហុសផ្នែកទិន្នន័យ: អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!
+checkAge(20);  // ស្វាគមន៍មកកាន់ប្រព័ន្ធ!
+checkAge(-5);  // មានកំហុសផ្នែកទិន្នន័យ: អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!
 ```

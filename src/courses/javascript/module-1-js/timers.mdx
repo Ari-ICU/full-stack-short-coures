@@ -28,14 +28,19 @@ quiz:
 
 `setTimeout` ត្រូវបានប្រើដើម្បី **ពន្យារពេល** ដំណើរការកូដ។ វាមានន័យថា៖ *"រង់ចាំប៉ុណ្ណេះវិនាទី ទើបដំណើរការ Function នេះ"*។
 
-```javascript
+```jsdiagram
+jssettimeout
+```
+
+```tabs
+js
 // Function ដែលយើងចង់អោយវាដើរ
 const showPopup = () => {
   console.log("សូមស្វាគមន៍! មានចង់ចុះឈ្មោះទេ?");
 };
 
 // រង់ចាំ 3000 មីលីវិនាទី (3 វិនាទី) ទើបហៅ showPopup
-setTimeout(showPopup, 3000); 
+setTimeout(showPopup, 3000);
 
 // ការសរសេរកាត់ជាមួយ Arrow Function ផ្ទាល់
 setTimeout(() => {
@@ -51,11 +56,16 @@ setTimeout(() => {
 
 ខុសពី `setTimeout` ដែលដើរតែម្តង, `setInterval` នឹងអោយកូដរបស់អ្នកដំណើរការ **ច្រំដែលៗ** រាល់ចន្លោះពេលដែលអ្នកបានកំណត់។ វាប្រៀបបាននឹងនាឡិកាដែលលោតមួយវិនាទីម្តងអញ្ចឹង។
 
-```javascript
+```jsdiagram
+jssetinterval
+```
+
+```tabs
+js
 // ព្រីនពាក្យ "Tick!" រៀងរាល់ 1 វិនាទី (1000ms) ម្តងរហូត!
 setInterval(() => {
   console.log("Tick!");
-}, 1000); 
+}, 1000);
 ```
 
 នេះស័ក្តិសមបំផុតសម្រាប់ការបង្កើតនាឡិកា (Clock), នាឡិកាបញ្ច្រាស (Countdown Timer) ឬការផ្លាស់ប្តូររូបភាពស្លាយ (Image Slider) ដោយស្វ័យប្រវត្តិ។
@@ -69,14 +79,20 @@ setInterval(() => {
 ដើម្បីអាចបញ្ឈប់បាន យើងត្រូវរក្សាទុក ID របស់ Timer នោះទៅក្នុង Variable ជាមុនសិន។
 
 ### បញ្ឈប់ `setInterval`
-```javascript
+
+```jsdiagram
+jsclearinterval
+```
+
+```tabs
+js
 let count = 0;
 
 // រក្សាទុក ID ក្នុងអថេរ timerId
 const timerId = setInterval(() => {
   count++;
   console.log("រាប់បាន:", count);
-  
+
   if (count === 5) {
     // ពេលរាប់ដល់ 5 យើងបញ្ឈប់វា!
     clearInterval(timerId);
@@ -86,9 +102,15 @@ const timerId = setInterval(() => {
 ```
 
 ### បញ្ឈប់ `setTimeout`
+
 ការប្រើប្រាស់ `clearTimeout` គឺស្រដៀងគ្នា។ ប្រសិនបើអ្នកតាំងម៉ោងរួចរាល់ហើយ តែស្រាប់តែចង់លុបចោលវិញមុនពេលវារត់ដល់ អ្នកអាច `clear` វាបាន។
 
-```javascript
+```jsdiagram
+jscleartimeout
+```
+
+```tabs
+js
 const myTimeout = setTimeout(() => {
   console.log("មិនទាន់ដល់ពេលផង ត្រូវគេ Cancel បាត់!"); // សារនេះនឹងមិនចេញទេ
 }, 5000);
