@@ -10,6 +10,7 @@ import { SetTimeoutDiagram, SetIntervalDiagram, ClearIntervalDiagram, ClearTimeo
 import { NamedExportDiagram, DefaultExportDiagram, CombinedImportDiagram } from "./JsModulesDiagrams";
 import { JsonFormatDiagram, JsonStringifyDiagram, JsonParseDiagram } from "./JsJsonDiagrams";
 import { LocalStorageBasicDiagram, LocalStorageJsonDiagram } from "./JsLocalStorageDiagrams";
+import { SyncAsyncDiagram, PromiseStatesDiagram, AsyncAwaitDiagram } from "./JsAsyncDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2224,6 +2225,9 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsjsonparse:               JsonParseDiagram,
   jslsbasic:                 LocalStorageBasicDiagram,
   jslsjson:                  LocalStorageJsonDiagram,
+  jssyncasync:               SyncAsyncDiagram,
+  jspromisestates:           PromiseStatesDiagram,
+  jsasyncawait:              AsyncAwaitDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {
