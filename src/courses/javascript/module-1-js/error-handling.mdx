@@ -41,6 +41,25 @@ jstrycatch
 ```
 
 ```tabs
+html
+<!-- ទម្រង់ login — JS នឹង try parse ទិន្នន័យ -->
+<form id="loginForm">
+  <input type="text" id="username" placeholder="Username" />
+  <button type="submit">Login</button>
+</form>
+<p id="errorMsg"></p>
+---
+css
+#errorMsg {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+#errorMsg.show {
+  display: block;
+}
+---
 js
 try {
   // ព្យាយាមដំណើរការកូដនេះ
@@ -73,6 +92,29 @@ jsfinally
 ```
 
 ```tabs
+html
+<!-- spinner លោតចេញពេល fetch, finally លាក់វា -->
+<div id="spinner">⏳ Loading...</div>
+<div id="content" style="display:none">
+  ✅ ទិន្នន័យបានទាញយករួច
+</div>
+---
+css
+#spinner {
+  font-size: 1.25rem;
+  color: #f59e0b;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+#content {
+  color: #16a34a;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+---
 js
 let isLoading = true;
 
@@ -85,9 +127,10 @@ try {
   console.log("កំហុស៖", error.message);
 
 } finally {
-  // តែងតែដំណើរការជានិច្ច
+  // តែងតែដំណើរការជានិច្ច — លាក់ spinner
   isLoading = false;
-  console.log("បញ្ចប់ប្រតិបត្តិការ។ Loading = ", isLoading);
+  document.getElementById("spinner").style.display = "none";
+  console.log("បញ្ចប់ប្រតិបត្តិការ។ Loading =", isLoading);
 }
 ```
 
@@ -102,26 +145,64 @@ jsthrowerror
 ```
 
 ```tabs
+html
+<form id="ageForm">
+  <label>បញ្ចូលអាយុ:</label>
+  <input type="number" id="ageInput" placeholder="e.g. 20" />
+  <button type="submit">ពិនិត្យ</button>
+</form>
+<p id="ageError"></p>
+---
+css
+form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+input[type="number"] {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+button {
+  padding: 0.4rem 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+#ageError {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+#ageError.error { color: #dc2626; font-weight: 600; }
+---
 js
 function checkAge(age) {
   try {
     if (age < 0) {
-      // បង្កើត Error ដោយខ្លួនឯង ប្រសិនបើអាយុតិចជាង 0
       throw new Error("អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!");
     }
-
     if (age < 18) {
       console.log("អ្នកនៅក្មេងពេក។");
     } else {
       console.log("ស្វាគមន៍មកកាន់ប្រព័ន្ធ!");
     }
-
   } catch (error) {
-    // ចាប់យក Custom Error ខាងលើ
-    console.error("មានកំហុសផ្នែកទិន្នន័យ:", error.message);
+    // ចាប់យក custom Error
+    const msg = document.getElementById("ageError");
+    msg.textContent = "❌ " + error.message;
+    msg.className = "error";
   }
 }
 
-checkAge(20);  // ស្វាគមន៍មកកាន់ប្រព័ន្ធ!
-checkAge(-5);  // មានកំហុសផ្នែកទិន្នន័យ: អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!
+document.getElementById("ageForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const age = Number(document.getElementById("ageInput").value);
+  checkAge(age);
+});
 ```

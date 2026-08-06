@@ -33,10 +33,34 @@ jssettimeout
 ```
 
 ```tabs
+html
+<!-- popup លោតចេញក្រោយ 3 វិនាទី -->
+<div id="popup"></div>
+<p id="note" style="color: gray;">រង់ចាំ 2 វិនាទី...</p>
+---
+css
+#popup {
+  display: none;
+  background: #6366f1;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { transform: translateY(-10px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+#note { font-size: 0.875rem; }
+---
 js
 // Function ដែលយើងចង់អោយវាដើរ
 const showPopup = () => {
-  console.log("សូមស្វាគមន៍! មានចង់ចុះឈ្មោះទេ?");
+  const popup = document.getElementById("popup");
+  popup.style.display = "block";
+  popup.textContent = "🎉 សូមស្វាគមន៍! មានចង់ចុះឈ្មោះទេ?";
 };
 
 // រង់ចាំ 3000 មីលីវិនាទី (3 វិនាទី) ទើបហៅ showPopup
@@ -44,7 +68,7 @@ setTimeout(showPopup, 3000);
 
 // ការសរសេរកាត់ជាមួយ Arrow Function ផ្ទាល់
 setTimeout(() => {
-  console.log("សារនេះនឹងចេញក្រោយ 2 វិនាទី");
+  document.getElementById("note").textContent = "⏰ ចូលមើលបាន 2 វិនាទីហើយ!";
 }, 2000);
 ```
 
@@ -61,10 +85,29 @@ jssetinterval
 ```
 
 ```tabs
+html
+<!-- នាឡិកា live ដែលប្រើ setInterval update រៀងរាល់ 1s -->
+<div id="clock">🕐 --:--:--</div>
+---
+css
+#clock {
+  font-size: 2rem;
+  font-weight: bold;
+  font-family: monospace;
+  color: #6366f1;
+  background: #f0f0ff;
+  padding: 1rem 2rem;
+  border-radius: 0.75rem;
+  display: inline-block;
+  border: 2px solid #c7d2fe;
+}
+---
 js
-// ព្រីនពាក្យ "Tick!" រៀងរាល់ 1 វិនាទី (1000ms) ម្តងរហូត!
+// នាឡិកា live — update រៀងរាល់ 1 វិនាទី
 setInterval(() => {
-  console.log("Tick!");
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString();
+  document.getElementById("clock").textContent = "🕐 " + timeStr;
 }, 1000);
 ```
 
@@ -85,18 +128,36 @@ jsclearinterval
 ```
 
 ```tabs
+html
+<!-- counter display ដែលបញ្ឈប់ itself នៅ 5 -->
+<div id="counter">រាប់បាន: 0</div>
+<p id="status" class="running">⚡ running...</p>
+---
+css
+#counter {
+  font-size: 2.5rem;
+  font-weight: bold;
+  font-family: monospace;
+  color: #f97316;
+}
+#status {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+#status.running { color: #f97316; }
+#status.stopped { color: #ef4444; }
+---
 js
 let count = 0;
-
-// រក្សាទុក ID ក្នុងអថេរ timerId
 const timerId = setInterval(() => {
   count++;
-  console.log("រាប់បាន:", count);
+  document.getElementById("counter").textContent = "រាប់បាន: " + count;
 
   if (count === 5) {
-    // ពេលរាប់ដល់ 5 យើងបញ្ឈប់វា!
     clearInterval(timerId);
-    console.log("បញ្ឈប់ការរាប់!");
+    document.getElementById("status").textContent = "🛑 បញ្ឈប់ការរាប់!";
+    document.getElementById("status").className = "stopped";
   }
 }, 1000);
 ```
@@ -110,11 +171,42 @@ jscleartimeout
 ```
 
 ```tabs
+html
+<p id="msg" class="waiting">⏳ រង់ចាំ 5 វិនាទី...</p>
+<button id="cancelBtn">✕ Cancel Timer</button>
+---
+css
+#msg {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+#msg.waiting   { color: #f97316; }
+#msg.fired     { color: #16a34a; }
+#msg.cancelled { color: #ef4444; }
+
+#cancelBtn {
+  padding: 0.4rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+#cancelBtn:hover { background: #dc2626; }
+---
 js
+// ចុច "Cancel" ក្នុងរយៈ 5 វិនាទី ដើម្បី clear
 const myTimeout = setTimeout(() => {
-  console.log("មិនទាន់ដល់ពេលផង ត្រូវគេ Cancel បាត់!"); // សារនេះនឹងមិនចេញទេ
+  document.getElementById("msg").textContent = "⏰ Timer ដំណើរការ!";
+  document.getElementById("msg").className = "fired";
 }, 5000);
 
-// យើងសម្រេចចិត្តលុបវាចោលភ្លាមៗ
-clearTimeout(myTimeout);
+document.getElementById("cancelBtn").addEventListener("click", () => {
+  clearTimeout(myTimeout);
+  document.getElementById("msg").textContent = "❌ Timer ត្រូវបាន Cancel!";
+  document.getElementById("msg").className = "cancelled";
+});
 ```
