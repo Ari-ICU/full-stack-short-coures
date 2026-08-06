@@ -13,6 +13,7 @@ import { LocalStorageBasicDiagram, LocalStorageJsonDiagram } from "./JsLocalStor
 import { SyncAsyncDiagram, PromiseStatesDiagram, AsyncAwaitDiagram } from "./JsAsyncDiagrams";
 import { FetchFlowDiagram, FetchStatusCodesDiagram, FetchDomRenderDiagram } from "./JsFetchDiagrams";
 import { ClassBlueprintDiagram, ThisKeywordDiagram, InheritanceDiagram } from "./JsClassesDiagrams";
+import { ConsoleMethodsDiagram, BreakpointsDiagram, DebuggerKeywordDiagram } from "./JsDebuggingDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2236,6 +2237,9 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsclassblueprint:          ClassBlueprintDiagram,
   jsthiskeyword:             ThisKeywordDiagram,
   jsinheritance:             InheritanceDiagram,
+  jsconsolemethods:          ConsoleMethodsDiagram,
+  jsbreakpoints:             BreakpointsDiagram,
+  jsdebuggerkeyword:         DebuggerKeywordDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {
