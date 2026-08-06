@@ -8,6 +8,8 @@ import { EventListenerDiagram, EventObjectDiagram, PreventDefaultDiagram } from 
 import { TryCatchFlowDiagram, FinallyDiagram, ThrowCustomErrorDiagram } from "./JsErrorHandlingDiagrams";
 import { SetTimeoutDiagram, SetIntervalDiagram, ClearIntervalDiagram, ClearTimeoutDiagram } from "./JsTimersDiagrams";
 import { NamedExportDiagram, DefaultExportDiagram, CombinedImportDiagram } from "./JsModulesDiagrams";
+import { JsonFormatDiagram, JsonStringifyDiagram, JsonParseDiagram } from "./JsJsonDiagrams";
+import { LocalStorageBasicDiagram, LocalStorageJsonDiagram } from "./JsLocalStorageDiagrams";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -2217,6 +2219,11 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsnamedexport:             NamedExportDiagram,
   jsdefaultexport:           DefaultExportDiagram,
   jscombinedimport:          CombinedImportDiagram,
+  jsjsonformat:              JsonFormatDiagram,
+  jsjsonstringify:           JsonStringifyDiagram,
+  jsjsonparse:               JsonParseDiagram,
+  jslsbasic:                 LocalStorageBasicDiagram,
+  jslsjson:                  LocalStorageJsonDiagram,
 };
 
 export function JsDiagram({ name }: { name: string }) {

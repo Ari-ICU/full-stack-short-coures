@@ -34,9 +34,31 @@ quiz:
 2. មិនអាចប្រើប្រាស់ Single Quotes (`''`) សម្រាប់ Strings បានទេ។
 3. មិនអាចមាន Functions ទេ។
 
-**នេះគឺជាឧទាហរណ៍នៃទម្រង់ទិន្នន័យ JSON៖**
-```json
-{
+```jsdiagram
+jsjsonformat
+```
+
+```tabs
+html
+<!-- បង្ហាញ JSON data នៅក្នុង webpage -->
+<div id="profileCard"></div>
+---
+css
+#profileCard {
+  font-family: monospace;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #1e293b;
+  white-space: pre;
+}
+---
+js
+// Valid JSON — keys ត្រូវប្រើ double quotes ជានិច្ច
+const jsonData = `{
   "name": "Sok",
   "age": 25,
   "isStudent": true,
@@ -45,7 +67,9 @@ quiz:
     "city": "Phnom Penh",
     "country": "Cambodia"
   }
-}
+}`;
+
+document.getElementById("profileCard").textContent = jsonData;
 ```
 
 ---
@@ -55,33 +79,114 @@ quiz:
 នៅក្នុង JavaScript ការបញ្ជូនទិន្នន័យតាមរយៈអុីនធឺណិត ឬការរក្សាទុកទិន្នន័យក្នុង Browser (Local Storage) តម្រូវអោយទិន្នន័យនោះស្ថិតក្នុងទម្រង់ជាអត្ថបទធម្មតា (String)។ ដូច្នេះយើងត្រូវចេះបំប្លែងចុះឡើង។
 
 ### `JSON.stringify()` (ពី Object ទៅ String)
+
 ប្រសិនបើអ្នកមាន JavaScript Object ហើយអ្នកចង់បញ្ជូនវាទៅ Server អ្នកត្រូវប្រែក្លាយវាទៅជាអត្ថបទ (JSON String) ជាមុនសិន។
 
-```javascript
-const user = {
-  name: "Dara",
-  age: 30
-};
+```jsdiagram
+jsjsonstringify
+```
 
-// វាក្លាយជាអត្ថបទធម្មតា: '{"name":"Dara","age":30}'
-const jsonString = JSON.stringify(user); 
+```tabs
+html
+<div id="before"></div>
+<div id="arrow">⬇ JSON.stringify()</div>
+<div id="after"></div>
+---
+css
+#before, #after {
+  font-family: monospace;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+#before {
+  background: #eff6ff;
+  border: 2px solid #93c5fd;
+  color: #1e40af;
+}
+#after {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  color: #166534;
+}
+#arrow {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #6366f1;
+  margin: 0.25rem 0;
+}
+---
+js
+const user = { name: "Dara", age: 30 };
 
-console.log(jsonString);
-console.log(typeof jsonString); // "string"
+// មុន stringify — JS Object
+document.getElementById("before").textContent =
+  "JS Object: " + JSON.stringify(user);
+
+// ក្រោយ stringify — String
+const jsonString = JSON.stringify(user);
+document.getElementById("after").textContent =
+  "JSON String: '" + jsonString + "'" +
+  "\ntypeof: " + typeof jsonString;
 ```
 
 ### `JSON.parse()` (ពី String មក Object)
+
 ប្រសិនបើអ្នកទទួលបានទិន្នន័យពី Server វានឹងមកជាទម្រង់ JSON String។ ដើម្បីអាចទាញយកឈ្មោះ ឬអាយុមកប្រើប្រាស់ក្នុងកូដបាន អ្នកត្រូវប្រែក្លាយវាមកជា Object វិញ។
 
-```javascript
+```jsdiagram
+jsjsonparse
+```
+
+```tabs
+html
+<div id="rawJson"></div>
+<div id="arrow2">⬇ JSON.parse()</div>
+<div id="parsedResult"></div>
+---
+css
+#rawJson, #parsedResult {
+  font-family: monospace;
+  font-size: 0.875rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+#rawJson {
+  background: #fff7ed;
+  border: 2px solid #fdba74;
+  color: #9a3412;
+}
+#parsedResult {
+  background: #f0fdf4;
+  border: 2px solid #86efac;
+  color: #166534;
+}
+#arrow2 {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #22c55e;
+  margin: 0.25rem 0;
+}
+---
+js
+// JSON String ពី Server
 const jsonFromServer = '{"name":"Alice","role":"Admin"}';
 
-// ប្រែក្លាយពីអត្ថបទ មកជា JavaScript Object
+document.getElementById("rawJson").textContent =
+  "JSON String: " + jsonFromServer +
+  "\ntypeof: " + typeof jsonFromServer;
+
+// parse → JS Object
 const userObj = JSON.parse(jsonFromServer);
 
-console.log(userObj.name); // "Alice"
-console.log(userObj.role); // "Admin"
-console.log(typeof userObj); // "object"
+document.getElementById("parsedResult").textContent =
+  "userObj.name: " + userObj.name +
+  "\nuserObj.role: " + userObj.role +
+  "\ntypeof: " + typeof userObj;
 ```
 
 > 💡 **ចំណាំ៖** ការប្រើប្រាស់ `JSON.stringify()` និង `JSON.parse()` ក៏ជាវិធីដ៏សាមញ្ញមួយក្នុងការបង្កើត **Deep Copy** របស់ Object និង Array ផងដែរ!

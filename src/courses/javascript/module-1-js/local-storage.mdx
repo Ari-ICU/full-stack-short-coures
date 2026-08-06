@@ -30,58 +30,157 @@ quiz:
 
 ការធ្វើការជាមួយ Local Storage គឺងាយស្រួលបំផុត ដោយវាដំណើរការជាទម្រង់ `Key: Value`។
 
-### រក្សាទុកទិន្នន័យ (`setItem`)
-អ្នកត្រូវកំណត់ឈ្មោះ (Key) និងតម្លៃ (Value) ដែលចង់រក្សាទុក។
-```javascript
-localStorage.setItem("theme", "dark");
-localStorage.setItem("username", "Sok Dara");
+```jsdiagram
+jslsbasic
 ```
 
-### ទាញយកទិន្នន័យ (`getItem`)
-នៅពេលអ្នកចង់បានទិន្នន័យមកវិញ គ្រាន់តែប្រាប់ឈ្មោះ (Key) ជាការស្រេច។ ប្រសិនបើកូនសោរនោះមិនមាន វានឹងត្រឡប់ `null`។
-```javascript
-const currentTheme = localStorage.getItem("theme");
-console.log(currentTheme); // "dark"
-```
+```tabs
+html
+<!-- Theme toggle ដែលចងចាំ preference បន្ទាប់ពី refresh -->
+<button id="themeBtn">🌙 Switch to Dark</button>
+<p id="status">Current theme: light</p>
+---
+css
+body {
+  transition: background 0.3s, color 0.3s;
+  padding: 1rem;
+  font-family: sans-serif;
+}
+body.dark {
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+#themeBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #6366f1;
+  background: #6366f1;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+#status {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+---
+js
+// setItem — រក្សាទុក theme
+function applyTheme(theme) {
+  if (theme === "dark") {
+    document.body.classList.add("dark");
+    document.getElementById("themeBtn").textContent = "☀️ Switch to Light";
+  } else {
+    document.body.classList.remove("dark");
+    document.getElementById("themeBtn").textContent = "🌙 Switch to Dark";
+  }
+  document.getElementById("status").textContent =
+    "Current theme: " + theme;
+}
 
-### លុបទិន្នន័យ (`removeItem` និង `clear`)
-អ្នកអាចលុបទិន្នន័យជាក់លាក់ណាមួយ ឬលុបទាំងអស់តែម្តងក៏បាន។
-```javascript
-// លុបតែឈ្មោះអ្នកប្រើប្រាស់ប៉ុណ្ណោះ
-localStorage.removeItem("username");
+// getItem — ទាញ theme ពី localStorage
+const saved = localStorage.getItem("theme") || "light";
+applyTheme(saved);
 
-// លុបទិន្នន័យទាំងអស់ដែលរក្សាទុកដោយគេហទំព័រនេះ!
-localStorage.clear(); 
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const current = localStorage.getItem("theme") || "light";
+  const next = current === "light" ? "dark" : "light";
+  localStorage.setItem("theme", next);
+  applyTheme(next);
+});
 ```
 
 ---
 
-## 🔄 2. ការរក្សាទុក Objects និង Arrays 
+## 🔄 2. ការរក្សាទុក Objects និង Arrays
 
 នេះគឺជាចំណុចដែលសិស្សថ្មីៗតែងតែមានកំហុស! **Local Storage ស្គាល់តែ String ប៉ុណ្ណោះ!** បើអ្នកព្យាយាមរុញ Object ចូលផ្ទាល់ វាប្រែទៅជាពាក្យ `[object Object]` ដែលគ្មានន័យអ្វីទាំងអស់។
 
 ដើម្បីដោះស្រាយបញ្ហានេះ យើងត្រូវពឹងផ្អែកលើ **JSON** ដែលបានរៀនក្នុងមេរៀនមុន!
 
-### ជំហានទី ១៖ បំប្លែងទៅជា String មុនពេលរក្សាទុក
-យើងប្រើ `JSON.stringify()` ដើម្បីបំប្លែង Array ឬ Object អោយទៅជាអត្ថបទ (String)។
-```javascript
-const cart = ["Apple", "Banana", "Milk"];
-
-// ❌ ខុស: localStorage.setItem("myCart", cart);
-// ✅ ត្រូវ: 
-localStorage.setItem("myCart", JSON.stringify(cart));
+```jsdiagram
+jslsjson
 ```
 
-### ជំហានទី ២៖ បំប្លែងមកជា Object វិញ ក្រោយពេលទាញយក
-នៅពេលយើង `getItem` វានឹងត្រឡប់មកជា String។ យើងត្រូវប្រើ `JSON.parse()` ដើម្បីប្រែក្លាយវាមកជា Array ឬ Object ដើមវិញ។
-```javascript
-const savedCartString = localStorage.getItem("myCart");
-
-// ត្រូវប្រាកដថាទិន្នន័យមានពិតមែន (មិន null) មុននឹង Parse
-if (savedCartString) {
-  const cartArray = JSON.parse(savedCartString);
-  console.log(cartArray[0]); // "Apple"
+```tabs
+html
+<!-- Shopping cart ដែលរក្សាទុកក្នុង localStorage -->
+<div id="cartDisplay"></div>
+<div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
+  <input id="itemInput" type="text" placeholder="Add item..." />
+  <button id="addBtn">+ Add</button>
+  <button id="saveBtn">💾 Save</button>
+  <button id="loadBtn">📂 Load</button>
+  <button id="clearBtn">🗑 Clear</button>
+</div>
+---
+css
+#cartDisplay {
+  min-height: 3rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #334155;
 }
+input {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+button {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+#addBtn  { background: #6366f1; }
+#saveBtn { background: #f97316; }
+#loadBtn { background: #22c55e; }
+#clearBtn { background: #ef4444; }
+---
+js
+let cart = ["Apple", "Banana", "Milk"];
+
+function renderCart() {
+  document.getElementById("cartDisplay").textContent =
+    "cart: " + JSON.stringify(cart);
+}
+
+renderCart();
+
+document.getElementById("addBtn").addEventListener("click", () => {
+  const val = document.getElementById("itemInput").value.trim();
+  if (val) { cart.push(val); renderCart(); }
+});
+
+// ✅ ត្រូវ: JSON.stringify() មុន setItem
+document.getElementById("saveBtn").addEventListener("click", () => {
+  localStorage.setItem("myCart", JSON.stringify(cart));
+  alert("Saved to localStorage!");
+});
+
+// ✅ ត្រូវ: JSON.parse() ក្រោយ getItem
+document.getElementById("loadBtn").addEventListener("click", () => {
+  const saved = localStorage.getItem("myCart");
+  if (saved) {
+    cart = JSON.parse(saved);
+    renderCart();
+  }
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  localStorage.removeItem("myCart");
+  cart = [];
+  renderCart();
+});
 ```
 
 > 💡 **ចំណាំ៖** តែងតែប្រើ `JSON.stringify()` ពេលរុញចូល និង `JSON.parse()` ពេលទាញចេញ ប្រសិនបើទិន្នន័យរបស់អ្នកមិនមែនជាអត្ថបទធម្មតា។ វានឹងជួយសង្គ្រោះអ្នកពីបញ្ហាឈឺក្បាលជាច្រើន!
