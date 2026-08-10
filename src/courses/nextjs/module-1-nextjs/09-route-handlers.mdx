@@ -6,7 +6,7 @@ objectives:
   - ចេះបង្កើត API Routes ដោយប្រើឯកសារ `route.ts`
   - ចេះសរសេរកូដសម្រាប់ទទួលសំណើប្រភេទ GET, POST, និងលុបទិន្នន័យ (DELETE)
 module: module-1-nextjs
-order: 4
+order: 9
 quiz:
   - question: "ដើម្បីបង្កើត API នៅក្នុង Next.js (App Router) សម្រាប់ទទួលសំណើនៅទីតាំង `/api/users` តើអ្នកត្រូវបង្កើតឯកសារមួយណា?"
     options:
@@ -23,6 +23,18 @@ quiz:
 Next.js មិនមែនគ្រាន់តែជាកន្លែងសម្រាប់សរសេរ React ដើម្បីបង្ហាញ UI នោះទេ វាមានកុំព្យូទ័រ Server ផ្ទាល់ខ្លួនរបស់វា! មានន័យថាអ្នកអាចភ្ជាប់ទៅកាន់ Database និងបង្កើត **API** (Application Programming Interface) នៅទីនេះបានដោយមិនចាំបាច់បង្កើតគម្រោង Node.js/Express ថ្មីដាច់ដោយឡែកឡើយ។
 
 បច្ចេកទេសនេះគេហៅថា **Route Handlers**។
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Next.js
+    participant Database
+
+    Client->>Next.js: GET /api/users
+    Next.js->>Database: ទាញយកទិន្នន័យ
+    Database-->>Next.js: [{ id: 1, name: "រដ្ឋា" }]
+    Next.js-->>Client: JSON Response (Status 200)
+```
 
 ---
 

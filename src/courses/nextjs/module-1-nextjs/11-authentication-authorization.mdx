@@ -1,0 +1,107 @@
+---
+title: Authentication & Authorization
+description: ស្វែងយល់ពីរបៀបបង្កើតប្រព័ន្ធសុវត្ថិភាពនៅក្នុង Next.js ដោយប្រើប្រាស់ Auth.js (NextAuth) ការគ្រប់គ្រង Sessions និងសិទ្ធិអនុញ្ញាត (Roles)។
+objectives:
+  - យល់ពីអ្វីទៅជា Authentication និង Authorization
+  - ចេះរៀបចំ Auth.js នៅក្នុងគម្រោង App Router
+  - ស្គាល់ពី Sessions, Cookies និងការកំណត់សិទ្ធិប្រើប្រាស់
+module: module-1-nextjs
+order: 11
+quiz:
+  - question: "តើភាពខុសគ្នារវាង Authentication និង Authorization គឺជាអ្វី?"
+    options:
+      - "\"Authentication និង Authorization គឺជាពាក្យតែមួយ គ្រាន់តែអក្ខរាវិរុទ្ធខុសគ្នា\""
+      - "\"Authentication បញ្ជាក់ថាអ្នកជានរណា (ឧ. ការចូលគណនី) ចំណែក Authorization បញ្ជាក់ថាអ្នកមានសិទ្ធិធ្វើអ្វីខ្លះ (ឧ. សិទ្ធិជា Admin ឬ User ធម្មតា)\""
+      - "\"Authentication ប្រើសម្រាប់ Server Components ឯ Authorization ប្រើសម្រាប់ Client Components\""
+      - "\"Authentication ការពារ Database ចំណែក Authorization ការពារ Frontend\""
+    correctAnswer: 2
+    explanation: "Authentication (AuthN) គឺការបញ្ជាក់អត្តសញ្ញាណ (អ្នកគឺជានរណា) រីឯ Authorization (AuthZ) គឺការកំណត់សិទ្ធិ (តើអ្នកអាចចូលមើលទំព័រណាខ្លះ)។ អ្នកត្រូវមានទាំងពីរទើបប្រព័ន្ធមានសុវត្ថិភាព។"
+---
+
+## 🔐 ការរៀបចំប្រព័ន្ធសុវត្ថិភាព
+
+នៅក្នុងការបង្កើតកម្មវិធីពិតប្រាកដ ការប្រើប្រាស់បណ្ណាល័យដូចជា **Auth.js** (ដែលពីមុនហៅថា NextAuth.js) គឺជាជម្រើសដ៏ពេញនិយម។ ប៉ុន្តែសូមចាំថា Auth.js មិនមែនជាវេទមន្តដែលការពារគ្រប់យ៉ាងដោយស្វ័យប្រវត្តិនោះទេ អ្នកនៅតែត្រូវយល់ពីរបៀបដែលសុវត្ថិភាពដំណើរការ។
+
+```mermaid
+graph TD
+    A[អ្នកប្រើប្រាស់] -->|Login| B(Auth.js)
+    B -->|បង្កើត| C[Session & Cookies]
+    C -->|ទុកក្នុង| A
+    
+    A -->|សុំចូលទំព័រ Admin| D{Authorization Check}
+    D -->|មានសិទ្ធិ (Role=Admin)| E[បង្ហាញទំព័រ]
+    D -->|គ្មានសិទ្ធិ (Role=User)| F[បដិសេធ (Access Denied)]
+```
+
+---
+
+## 1. Authentication (ការបញ្ជាក់អត្តសញ្ញាណ)
+
+នេះគឺជាដំណើរការដែលបញ្ជាក់ថា **"អ្នកជានរណា"** តាមរយៈការវាយអុីមែល និងលេខសម្ងាត់ ឬការ Login តាមរយៈ Google/Facebook ជាដើម។ 
+
+នៅពេលអ្នកប្រើប្រាស់ Login ជោគជ័យ Auth.js នឹងបង្កើត **Session** មួយ ហើយបញ្ជូន **Cookie** ទៅរក្សាទុកនៅក្នុង Browser របស់អ្នកប្រើប្រាស់។ Cookie នេះមានសុវត្ថិភាពខ្ពស់ (HTTP-only) ដែលការពារមិនអោយ Hacker លួចបានដោយងាយតាមរយៈ JavaScript នោះទេ។
+
+```ts
+// app/api/auth/[...nextauth]/route.ts
+import NextAuth from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+
+const handler = NextAuth({
+  providers: [
+    GithubProvider({
+      clientId: process.env.GITHUB_ID as string,
+      clientSecret: process.env.GITHUB_SECRET as string,
+    }),
+  ],
+});
+
+export { handler as GET, handler as POST };
+```
+
+---
+
+## 2. ការទាញយក Session
+
+បន្ទាប់ពី Login រួចរាល់ អ្នកអាចទាញយកព័ត៌មានអ្នកប្រើប្រាស់ (Session) នៅគ្រប់កន្លែងក្នុង Next.js។
+
+```tsx
+import { getServerSession } from "next-auth";
+
+export default async function Dashboard() {
+  const session = await getServerSession();
+
+  if (!session) {
+    return <h1>សូមចូលគណនីជាមុនសិន!</h1>;
+  }
+
+  return <h1>សូមស្វាគមន៍, {session.user?.name}!</h1>;
+}
+```
+
+---
+
+## 3. Authorization (ការផ្តល់សិទ្ធិ)
+
+ការគ្រាន់តែ Login ចូលបាន មិនមែនមានន័យថាអ្នកប្រើប្រាស់អាចធ្វើអ្វីក៏បាននោះទេ។ នេះហៅថា **Authorization**។
+ឧទាហរណ៍ អ្នកប្រហែលជាចង់ការពារកុំអោយ User ធម្មតាអាចចូលទំព័រ `/admin` បាន។ យើងធ្វើបែបនេះដោយពិនិត្យមើល **Roles** ឬ **Permissions**។
+
+```tsx
+export default async function AdminPage() {
+  const session = await getServerSession();
+
+  // 1. ពិនិត្យមើលថាមាន Login ឫនៅ (Authentication)
+  if (!session) {
+    return <h1>តម្រូវអោយ Login!</h1>;
+  }
+
+  // 2. ពិនិត្យមើលថាតើគាត់មានសិទ្ធិជា Admin ដែរឬទេ (Authorization)
+  // (ឧបមាថាយើងបានកំណត់ role ទៅក្នុង session រួចរាល់)
+  if (session.user?.role !== "admin") {
+    return <h1>អ្នកគ្មានសិទ្ធិចូលទំព័រនេះទេ!</h1>;
+  }
+
+  return <h1>ទំព័រគ្រប់គ្រងសម្រាប់ Admin តែប៉ុណ្ណោះ 🔒</h1>;
+}
+```
+
+ការប្រើប្រាស់ Database ដើម្បីចងចាំអ្នកប្រើប្រាស់ និងកំណត់សិទ្ធិអោយពួកគេ គឺជារឿងសំខាន់សម្រាប់សុវត្ថិភាពប្រព័ន្ធរបស់អ្នក!

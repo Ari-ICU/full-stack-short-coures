@@ -27,7 +27,15 @@ quiz:
 4. សរសេរកូដ `fetch(...)` ដើម្បីផ្ញើទៅកាន់ API
 5. រង់ចាំចម្លើយ ហើយបង្ហាញសារជោគជ័យ។
 
-ការធ្វើបែបនេះគឺហត់នឿយខ្លាំងណាស់! ឥឡូវនេះ Next.js បានណែនាំ **Server Actions** ដែលលុបបំបាត់ API និង `fetch` ចោលទាំងស្រុង! អ្នកអាចហៅ Function របស់ Server បានដោយផ្ទាល់ពីកូដ Client។
+ការធ្វើបែបនេះគឺហត់នឿយខ្លាំងណាស់! ឥឡូវនេះ Next.js បានណែនាំ **Server Functions** (ដែលគេនិយមហៅថា **Server Actions** នៅពេលប្រើប្រាស់ភ្ជាប់ជាមួយ Form) ដែលលុបបំបាត់ API និង `fetch` ចោលទាំងស្រុង! អ្នកអាចហៅ Function របស់ Server បានដោយផ្ទាល់ពីកូដ Client។
+
+```mermaid
+graph LR
+    A[Client Component Form] -->|Submit| B(Server Action / Function)
+    B -->|រក្សាទុក| C[(Database)]
+    C -->|ឆ្លើយតប| B
+    B -->|Update UI| A
+```
 
 ---
 

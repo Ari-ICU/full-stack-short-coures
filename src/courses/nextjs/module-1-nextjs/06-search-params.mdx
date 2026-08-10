@@ -6,7 +6,7 @@ objectives:
   - ចេះទាញយក Search Params នៅក្នុង Server Components តាមរយៈ Props
   - ចេះប្រើប្រាស់ Hook `useSearchParams` នៅក្នុង Client Components
 module: module-1-nextjs
-order: 9
+order: 6
 quiz:
   - question: "ដើម្បីទាញយកពាក្យថា 'apple' ពី URL `https://mysite.com/products?query=apple` នៅក្នុងកូដ Client Component របស់ Next.js តើអ្នកត្រូវប្រើអ្វី?"
     options:
@@ -26,6 +26,15 @@ quiz:
 ឧទាហរណ៍៖ `https://example.com/shop?category=shoes&page=2`
 - `category` មានតម្លៃស្មើ `shoes`
 - `page` មានតម្លៃស្មើ `2`
+
+```mermaid
+graph LR
+    A[Dynamic Route] --> B(/products/123)
+    B --> C[លេខ 123 គឺជាផ្នែកមួយនៃ URL]
+    
+    D[Search Params] --> E(/products?search=phone)
+    E --> F[អក្សរ phone នៅខាងក្រោយសញ្ញា ?]
+```
 
 តើយើងចាប់យកតម្លៃទាំងនេះក្នុង Next.js យ៉ាងដូចម្តេច? វាមានវិធី ២ យ៉ាងទៅតាមប្រភេទ Component!
 

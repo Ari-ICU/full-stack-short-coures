@@ -1,10 +1,10 @@
 ---
-title: Layouts & Templates
-description: ស្វែងយល់ពីរបៀបរៀបចំរចនាសម្ព័ន្ធទំព័រនៅក្នុង Next.js ដោយប្រើប្រាស់ layout.tsx និង template.tsx ។
+title: Pages, Layouts & Nested Layouts
+description: ស្វែងយល់ពីរបៀបរៀបចំរចនាសម្ព័ន្ធទំព័រនៅក្នុង Next.js ដោយប្រើប្រាស់ layout.tsx និង page.tsx ។
 objectives:
-  - យល់ពីតួនាទីរបស់ឯកសារ `layout.tsx`
+  - យល់ពីតួនាទីរបស់ឯកសារ `layout.tsx` និង `page.tsx`
   - ចេះបង្កើត Layout សម្រាប់ទំព័រនីមួយៗ (Nested Layouts)
-  - ស្គាល់ពីភាពខុសគ្នារវាង `layout.tsx` និង `template.tsx`
+  - ស្គាល់ពីភាពខុសគ្នារវាង `layout.tsx` និង `template.tsx` (កម្រិតខ្ពស់)
 module: module-1-nextjs
 order: 2
 quiz:
@@ -18,15 +18,24 @@ quiz:
     explanation: "Layouts មិនត្រូវបាន Re-render ទេពេលប្តូរទំព័រ ដែលជួយសន្សំសំចៃល្បឿន និងរក្សាទុកទិន្នន័យ (ដូចជាការវាយអក្សរទុកក្នុងប្រអប់ Search លើ Navbar ជាដើម)។ ប៉ុន្តែបើអ្នកចង់អោយ Component មួយដំណើរការកូដ Animations ឡើងវិញរាល់ពេលប្តូរទំព័រ អ្នកគួរតែប្រើ `template.tsx`។"
 ---
 
-## 🏗️ រចនាសម្ព័ន្ធសំបកក្រៅ (Layouts)
+## 🏗️ រចនាសម្ព័ន្ធទំព័រ និង សំបកក្រៅ (Pages & Layouts)
 
-នៅពេលបង្កើតគេហទំព័រ យើងតែងតែមានផ្នែកខ្លះដែលត្រូវបង្ហាញនៅគ្រប់ទំព័រទាំងអស់ ដូចជា របារខាងលើ (Navbar) និង ផ្នែកខាងក្រោមបង្អស់ (Footer)។ នៅក្នុង React ធម្មតា យើងត្រូវយកវាទៅដាក់នៅគ្រប់ទំព័រ ឬរុំព័ទ្ធ Router យ៉ាងស្មុគស្មាញ។ 
+នៅក្នុង Next.js (App Router) ការបង្កើតទំព័រថ្មីគឺផ្អែកលើការបង្កើត Folder និងឯកសារឈ្មោះថា **`page.tsx`** និង **`layout.tsx`**។ 
 
-ប៉ុន្តែនៅក្នុង Next.js (App Router) យើងមានឯកសារពិសេសមួយឈ្មោះថា **`layout.tsx`** ដែលដោះស្រាយបញ្ហានេះយ៉ាងងាយស្រួល។
+```mermaid
+graph TD
+    A[app/] --> B(layout.tsx)
+    A --> C(page.tsx - ទំព័រដើម)
+    A --> D[about/]
+    D --> E(page.tsx - ទំព័រ About)
+    A --> F[dashboard/]
+    F --> G(layout.tsx - Layout សម្រាប់ Dashboard)
+    F --> H(page.tsx - ទំព័រ Dashboard)
+```
 
 ---
 
-## 1. អ្វីទៅជា `layout.tsx`?
+## 1. អ្វីទៅជា `layout.tsx` និង `page.tsx`?
 
 រាល់ថត (Folder) នៅក្នុង `app` សុទ្ធតែអាចមានឯកសារ `layout.tsx` រៀងៗខ្លួន។ ប៉ុន្តែអ្វីដែលសំខាន់បំផុតគឺ **Root Layout** ដែលស្ថិតនៅក្នុងថត `src/app/layout.tsx` ផ្ទាល់តែម្តង។ វារុំព័ទ្ធគម្រោងរបស់អ្នកទាំងមូល!
 
@@ -65,23 +74,13 @@ export default function RootLayout({
 
 តើអ្នកចង់អោយទំព័រផ្នែកខាងក្នុង (ឧ. `app/dashboard/...`) មាន Sidebar ផ្ទាល់ខ្លួនរបស់វាដែរឬទេ? ងាយៗ! អ្នកគ្រាន់តែបង្កើតឯកសារ `layout.tsx` ថ្មីមួយនៅក្នុងថត `dashboard` ប៉ុណ្ណោះ។
 
-**រចនាសម្ព័ន្ធថត:**
-```text
-app/
- ├─ layout.tsx      (Root Layout: មាន Navbar និង Footer)
- ├─ page.tsx        (ទំព័រដើម)
- └─ dashboard/
-     ├─ layout.tsx  (Dashboard Layout: មាន Sidebar បន្ថែម)
-     └─ page.tsx    (ទំព័រខាងក្នុង Dashboard)
-```
-
 នៅពេលនេះ ពេលអ្នកចូលទំព័រ Dashboard វានឹងត្រូវរុំដោយ `Dashboard Layout` ជាមុនសិន រួចទើបយកទៅរុំដោយ `Root Layout` ម្តងទៀត (ស្រទាប់ត្រួតគ្នា)។
 
 ---
 
-## 3. ពេលណាត្រូវប្រើ `template.tsx`?
+## 3. (Advanced) ពេលណាត្រូវប្រើ `template.tsx`?
 
-`template.tsx` គឺមានទម្រង់ការសរសេរដូចគ្នាបេះបិទទៅនឹង `layout.tsx` ដែរ!
+`template.tsx` គឺមានទម្រង់ការសរសេរដូចគ្នាបេះបិទទៅនឹង `layout.tsx` ដែរ តែវាត្រូវបានប្រើក្នុងករណីកម្រិតខ្ពស់។
 
 **ចំណុចខុសគ្នា:**
 - `layout.tsx`: រក្សាទុកកូដមិនអោយគូរឡើងវិញ (No Re-rendering) ពេលប្តូរទំព័រ។ (លឿន និងសន្សំសំចៃ)

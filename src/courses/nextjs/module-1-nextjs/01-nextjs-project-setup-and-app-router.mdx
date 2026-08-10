@@ -11,11 +11,11 @@ quiz:
   - question: "តើអ្វីគឺជាភាពខុសគ្នាដ៏ធំបំផុតរវាងកម្មវិធីដែលបង្កើតដោយ Vite (React ធម្មតា) និងកម្មវិធីដែលបង្កើតដោយ Next.js?"
     options:
       - "\"Next.js មិនប្រើប្រាស់ React ទេ វាប្រើភាសាថ្មី\""
-      - "\"Next.js អាចដំណើរការកូដនៅលើ Server (Server-Side Rendering) ដែលជួយអោយ SEO ល្អ និងល្បឿនលឿន ខណៈដែល Vite ដំណើរការកូដតែនៅលើ Browser របស់អតិថិជនប៉ុណ្ណោះ (Client-Side Rendering)\""
+      - "\"Next.js គាំទ្រទម្រង់ Rendering ច្រើនយ៉ាង (Server Components និង Client Components) ខណៈដែល Vite ជាទូទៅផ្តោតតែលើ Client-Side Rendering\""
       - "\"Next.js មិនត្រូវការ Node.js ដើម្បីដំណើរការទេ\""
       - "\"Vite អាចប្រើបានតែជាមួយកុំព្យូទ័រ Mac ប៉ុណ្ណោះ\""
     correctAnswer: 2
-    explanation: "អត្ថប្រយោជន៍ធំបំផុតរបស់ Next.js គឺសមត្ថភាពក្នុងការ Render គេហទំព័រនៅលើ Server មុននឹងបញ្ជូនទៅកាន់ Browser ដែលវាមានសារៈសំខាន់ខ្លាំងណាស់សម្រាប់ការស្វែងរករបស់ Google (SEO) និងល្បឿននៃការបើកទំព័រដំបូង។"
+    explanation: "Next.js មិនមែនគ្រាន់តែជា 'Server' នោះទេ តែវាផ្តល់ជម្រើសអោយអ្នកប្រើប្រាស់ទាំង Server Components (សម្រាប់ទាញទិន្នន័យ និង SEO) និង Client Components (សម្រាប់ interactivity) នៅក្នុងកម្មវិធីតែមួយ។"
 ---
 
 ## 🚀 អ្វីទៅជា Next.js?
@@ -23,6 +23,20 @@ quiz:
 React គឺជាបណ្ណាល័យ (Library) ដ៏អស្ចារ្យសម្រាប់ការសាងសង់ UI។ ប៉ុន្តែនៅពេលអ្នកចង់បង្កើតគេហទំព័រធំៗដែលមានលក្ខណៈស្តង់ដារពិតប្រាកដ អ្នកត្រូវការរបស់ជាច្រើនទៀតដូចជា៖ ការប្តូរទំព័រ (Routing), ការទាញយកទិន្នន័យពី Database, និងការធ្វើអោយ Google ងាយស្រួលរកឃើញ (SEO)។ 
 
 នេះគឺជាពេលដែល **Next.js** ចូលមកដល់! Next.js គឺជា **Framework** ដែលត្រូវបានបង្កើតឡើងនៅលើ React (មានន័យថាអ្នកនៅតែសរសេរកូដ React ដដែល) ប៉ុន្តែវាមានបញ្ចូលមុខងារពិសេសៗទាំងអស់នេះរួចជាស្រេច។
+
+```mermaid
+mindmap
+  root((Next.js))
+    React
+    Routing
+    Server Components
+    Client Components
+    Data Fetching
+    Rendering
+    API / Route Handlers
+    Optimization
+    Deployment
+```
 
 ---
 

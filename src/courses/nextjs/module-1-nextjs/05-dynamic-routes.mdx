@@ -6,7 +6,7 @@ objectives:
   - ចេះបង្កើតទំព័រដែលទទួលយកលេខសម្គាល់ (ID) ឬអក្សរពី URL តាមរយៈ `[id]`
   - ចេះទាញយកប៉ារ៉ាម៉ែត្រ (Parameters) មកប្រើប្រាស់ដើម្បីហៅ API ត្រូវនឹងលេខនោះ
 module: module-1-nextjs
-order: 8
+order: 5
 quiz:
   - question: "ដើម្បីបង្កើតទំព័រមួយដែលអាចអាន URL ដូចជា `/users/rithy` ឬ `/users/sokha` តើអ្នកត្រូវបង្កើតថត (Folder) ដែលមានឈ្មោះបែបណានៅក្នុង `app/users/`?"
     options:
@@ -40,6 +40,17 @@ app/
 ```
 
 នៅពេលនេះ មិនថាគេចូលទៅ `localhost:3000/products/5` ឬ `products/apple` ឬ `products/abc` ទេ វានឹងបើកទំព័រ `page.tsx` នេះទាំងអស់។
+
+```mermaid
+graph TD
+    A[app/] --> B[products/]
+    B --> C["[id]/"]
+    C --> D(page.tsx)
+    
+    E((/products/10)) -.-> C
+    F((/products/20)) -.-> C
+    G((/products/apple)) -.-> C
+```
 
 ---
 
