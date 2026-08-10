@@ -11,7 +11,7 @@ import { JsDiagram } from "./js-diagrams/JsDiagrams";
 import { HtmlDiagram } from "./html-diagrams/HtmlDiagrams";
 import { GitDiagram } from "./git-diagrams/GitDiagrams";
 import { ReactDiagram } from "./react-diagrams/ReactDiagrams";
-
+import { RdbmsDiagram } from "./rdbms-diagrams/RdbmsDiagrams";
 interface LessonContentProps {
   lesson: Lesson;
   content?: string;
@@ -95,6 +95,13 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
             if (lang === "reactdiagram") {
               const name = String(children).trim();
               return <ReactDiagram name={name} />;
+            }
+
+            if (lang === "rdbmsdiagram") {
+              const name = String(children).trim();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const Comp = (RdbmsDiagram as any)[name];
+              return Comp ? <Comp /> : <div className="text-red-500">Diagram not found: {name}</div>;
             }
 
             return (
