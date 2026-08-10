@@ -1,0 +1,113 @@
+---
+title: Performance Optimization
+description: កែតម្រូវការយល់ច្រឡំអំពីល្បឿនរបស់ React! រៀនពីបច្ចេកទេសពិតប្រាកដក្នុងការធ្វើអោយវេបសាយដើរលឿន (React.memo, useMemo, useCallback, Lazy Loading)។
+objectives:
+  - យល់ពីគោលការណ៍ "វាស់ស្ទង់ជាមុន សឹមជួសជុល (Measure before optimize)"
+  - យល់ពីដំណើរការ Re-render របស់ React
+  - ដឹងពីពេលណាគួរ និងមិនគួរប្រើប្រាស់ `useMemo` និង `useCallback`
+module: module-3-professional-react
+order: 22
+quiz:
+  - question: "តើអ្នកគួរតែដាក់ `useMemo` និង `useCallback` ទៅលើរាល់អថេរ និងអនុគមន៍ទាំងអស់នៅក្នុង React ដើម្បីអោយកូដដើរលឿនជាងមុនដែរឬទេ?"
+    options:
+      - "\"បាទ/ចាស គួរធ្វើបែបនេះជានិច្ច!\""
+      - "\"ទេ! ការប្រើប្រាស់ `useMemo` និង `useCallback` សុទ្ធតែទាមទារអោយកុំព្យូទ័រគិត (ស៊ី Memory)។ ការយកវាទៅរុំកូដតូចៗធម្មតា បែរជាធ្វើអោយ React កាន់តែយឺតទៅវិញ!\""
+      - "\"គួរប្រើតែលើ `useCallback` ទេ\""
+      - "\"ប្រើពេលដែលយើងអត់បានហៅ API\""
+    correctAnswer: 2
+    explanation: "Memoization (ការចងចាំ) មានតម្លៃថ្លៃរបស់វា។ អ្នកគួរប្រើប្រាស់ `useMemo` សម្រាប់តែការគណនាណាដែលស្មុគស្មាញ និងស៊ីពេលយូរ (ឧទាហរណ៍ ការតម្រៀបទិន្នន័យ ១ម៉ឺនជួរ) ឫសម្រាប់រារាំងការ Re-render របស់ Child Component ធំៗប៉ុណ្ណោះ។"
+---
+
+## 🏎️ ហេតុអ្វី Component ធ្វើការ Re-render?
+
+នៅក្នុង React, Component មួយនឹងធ្វើការ Re-render (គូរឡើងវិញ) ក្នុងករណី ៣៖
+1. State របស់វាប្រែប្រួល (ហៅ `setState`)
+2. Props របស់វាប្រែប្រួល
+3. **ឪពុករបស់វា Re-render!** (ទោះបីកូនមិនប៉ះពាល់អ្វីសោះ ក៏វា Re-render តាមឪពុកដែរ នេះជាធម្មជាតិរបស់ React)
+
+---
+
+## 🛡️ ការពារកូនៗកុំអោយ Re-render (`React.memo`)
+
+ប្រសិនបើអ្នកមាន Component មួយធំខ្លាំង (ឧ. `HeavyChart` គូរក្រាហ្វិក) អ្នកមិនចង់អោយវា Re-render ទេ ពេលដែលឪពុកគ្រាន់តែវាយអក្សរចូលក្នុង Input ដទៃ។
+
+```jsx
+import { useState, memo } from 'react';
+
+// 1. រុំកូនដោយ memo
+// React នឹងចងចាំកូននេះ! វានឹង Re-render ឡើងវិញ លុះត្រាតែ 'data' ផ្លាស់ប្តូរប៉ុណ្ណោះ
+const HeavyChart = memo(function HeavyChart({ data }) {
+  console.log("គូរក្រាហ្វិកឡើងវិញ!");
+  return <div>[ផ្ទាំងក្រាហ្វិកដ៏ធំ]</div>;
+});
+
+export default function App() {
+  const [text, setText] = useState("");
+  const chartData = [1, 2, 3];
+
+  return (
+    <div>
+      {/* 2. ពេលវាយអក្សរ មានតែ App ទេដែល Re-render ចំណែក HeavyChart នឹងនៅស្ងៀម! */}
+      <input value={text} onChange={e => setText(e.target.value)} />
+      <HeavyChart data={chartData} />
+    </div>
+  );
+}
+```
+
+---
+
+## 🧠 ការចងចាំការគណនា (`useMemo` និង `useCallback`)
+
+ចុះបើ `chartData` ខាងលើ ត្រូវការចំណាយពេលគណនា ៣វិនាទី រាល់ពេល App Re-render ម្តងៗ?
+នៅពេលនេះហើយដែលអ្នកត្រូវការ `useMemo` ដើម្បីប្រាប់ React ថា "ចាំចម្លើយទុកទៅ កុំគិតឡើងវិញរាល់ដង!"
+
+```jsx
+import { useMemo, useCallback } from 'react';
+
+function App({ users }) {
+  // 1. useMemo: ចងចាំលទ្ធផលនៃការគណនា
+  // វានឹងគិតសារថ្មី លុះត្រាតែ `users` ប្រែប្រួលប៉ុណ្ណោះ
+  const activeUsers = useMemo(() => {
+    return users.filter(user => user.isActive);
+  }, [users]);
+
+  // 2. useCallback: ចងចាំអនុគមន៍ (Function) កុំអោយបង្កើតថ្មីរាល់ដង
+  const handleDelete = useCallback((id) => {
+    console.log("លុបលេខ", id);
+  }, []);
+
+  return <UserList users={activeUsers} onDelete={handleDelete} />;
+}
+```
+
+---
+
+## ✂️ ការកាត់បំបែកកូដ (Code Splitting & Lazy Loading)
+
+បើវេបសាយអ្នកមាន ១០០ ទំព័រ ពេលអ្នកប្រើប្រាស់ចូលទំព័រ Home ហេតុអ្វីត្រូវបញ្ជូនកូដនៃទំព័រទាំង ១០០ ទៅអោយពួកគាត់? វាធ្វើអោយវេបសាយ Load យឺតណាស់!
+
+យើងអាចប្រើប្រាស់ `React.lazy` ដើម្បីប្រាប់អោយទាញយកកូដទំព័រណា ទាល់តែមានអ្នកចុចចូលទំព័រនោះ (Lazy Loading):
+
+```mermaid
+flowchart LR
+    A["ចូលវេបសាយ (Load តែ Home)"] -->|ចុចទៅទំព័រ About| B["ទាញយកកូដ About.js ទើបបង្ហាញ"]
+    
+    style B fill:#d4edda,stroke:#28a745,color:#000
+```
+
+```jsx
+import { lazy, Suspense } from 'react';
+
+// ជំនួសអោយການ Import ធម្មតា យើងប្រើ lazy
+const HeavyAdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+function App() {
+  return (
+    // ត្រូវតែមាន Suspense ដើម្បីបង្ហាញ Fallback ពេលកំពុងទាញយកឯកសារ
+    <Suspense fallback={<div>កំពុងទាញយកទំព័រ...</div>}>
+      <HeavyAdminDashboard />
+    </Suspense>
+  );
+}
+```
