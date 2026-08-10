@@ -1,0 +1,91 @@
+---
+title: React Project Architecture & Best Practices
+description: សរុបមេរៀន និងត្រៀមខ្លួនក្លាយជាអ្នកអភិវឌ្ឍន៍អាជីព! រៀនពីរបៀបរៀបចំរចនាសម្ព័ន្ធគម្រោង (Feature-based Architecture) និងស្វែងយល់ពីអនាគតដ៏ភ្លឺស្វាងជាមួយ React + TypeScript។
+objectives:
+  - យល់ពីរចនាសម្ព័ន្ធគម្រោងបែប Feature-Based
+  - ស្គាល់ពីគោលការណ៍កូដស្អាត (Clean Code) ក្នុង React
+  - ដឹងពីអត្ថប្រយោជន៍ដ៏មហាសាលនៃការបញ្ចូល TypeScript ជាមួយ React
+module: module-3-professional-react
+order: 24
+quiz:
+  - question: "ហេតុអ្វីបានជាក្រុមហ៊ុនធំៗបច្ចុប្បន្ន តែងតែតម្រូវអោយអ្នកសរសេរ React គូជាមួយ TypeScript ជាដាច់ខាត?"
+    options:
+      - "\"ព្រោះ TypeScript ធ្វើអោយវេបសាយដើរលឿនជាងមុន\""
+      - "\"ព្រោះវាជាច្បាប់របស់ក្រុមហ៊ុន Microsoft\""
+      - "\"ព្រោះ TypeScript ជួយចាប់កំហុស (Bugs) មុនពេលវាទៅដល់ដៃអតិថិជន ដោយការបំពាក់ប្រភេទ (Types) អោយ Props និង State ធ្វើអោយកូដមានភាពរឹងមាំ និងងាយស្រួលធ្វើការជាក្រុម។\""
+      - "\"ព្រោះ TypeScript អាចសរសេរកូដ HTML ផ្ទាល់\""
+    correctAnswer: 3
+    explanation: "ការប្រើប្រាស់ JavaScript សុទ្ធ ងាយស្រួលនៅពេលចាប់ផ្តើម ប៉ុន្តែពេលគម្រោងរីកធំ អ្នកនឹងវង្វេងមិនដឹងថា Component មួយត្រូវការ Props ប៉ុន្មាន និងជាអ្វីខ្លះនោះទេ។ TypeScript នឹងប្រែក្លាយ IDE (VS Code) របស់អ្នកអោយទៅជាគ្រូបង្រៀនដ៏តឹងរ៉ឹងដែលចាំជួយកែកំហុសអ្នកជានិច្ច!"
+---
+
+## 🏛️ Feature-Based Architecture (ស្តង់ដារក្រុមហ៊ុនធំៗ)
+
+កាលពីមេរៀនទី ១១ យើងបានស្គាល់ពីការរៀបចំ Folder តាមប្រភេទឯកសារ (components, hooks, utils)។ ប៉ុន្តែនៅពេលគម្រោងកាន់តែធំ រចនាសម្ព័ន្ធនោះនឹងធ្វើអោយអ្នកវិលមុខ! 
+សហគមន៍បច្ចុប្បន្ន ណែនាំអោយប្រើប្រាស់ **Feature-Based Architecture** (ការរៀបចំតាមមុខងារ)៖
+
+```text
+src/
+├── features/
+│   ├── auth/            # មុខងារ Login/Register ទាំងអស់នៅទីនេះ
+│   │   ├── components/  # - LoginForm, SignupButton
+│   │   ├── hooks/       # - useAuth
+│   │   ├── api/         # - ការហៅ Network ពាក់ព័ន្ធនឹង Auth
+│   │   └── utils/       # - validationRules
+│   │
+│   ├── products/        # មុខងារបង្ហាញទំនិញ
+│   │   ├── components/  # - ProductCard, ProductGallery
+│   │   ├── hooks/       # - useProducts
+│   │   └── api/         # - fetchProducts
+│
+├── components/          # សម្រាប់តែ Shared Components ដូចជា Button, Input
+├── layouts/             # Navbar, Footer
+├── pages/               # ផ្គុំ Features បញ្ចូលគ្នាដើម្បីចេញជាទំព័រ
+└── App.jsx
+```
+អត្ថប្រយោជន៍គឺ៖ ប្រសិនបើអ្នកចង់កែមុខងារ `Auth` អ្នកគ្រាន់តែបើក Folder `auth/` តែមួយគត់ គឺមានអ្វីៗគ្រប់យ៉ាងនៅទីនោះ!
+
+---
+
+## ✨ គោលការណ៍កូដស្អាតក្នុង React (Clean Code)
+
+1. **Keep Components Small:** កុំបណ្តោយអោយ Component មួយមានកូដលើសពី ២០០ ជួរ។ បើវាវែង ត្រូវបំបែកវាជា Presentational Components។
+2. **Extract Logic to Custom Hooks:** បើ Component មាន `useState` ឫ `useEffect` ច្រើនញឹកញាប់ពេក ចូរបំបែកវាទៅជា Custom Hook (`use...`) ដើម្បីអោយកូដ UI ស្រឡះល្អ។
+3. **Avoid Magic Numbers:** កុំសរសេរលេខឫអក្សរផ្ទាល់ (ឧ. `role === "2"`), គួរប្រើ អថេរថេរ (Constants) ដូចជា `role === ROLES.ADMIN`។
+
+```mermaid
+flowchart LR
+    A["Component ដ៏វែងអន្លាយ"] --> B["កាត់កូដ UI ទៅជា Components តូចៗ"]
+    A --> C["កាត់កូដ Logic ទៅជា Custom Hooks"]
+    
+    B --> D["Clean Component 🌟"]
+    C --> D
+```
+
+---
+
+## 🤝 ជំហានបន្ទាប់: React + TypeScript (ភាពល្អឥតខ្ចោះ)
+
+សូមអបអរសាទរដែលអ្នកបានបញ្ចប់វគ្គ React Fundamentals និង Architecture នេះ!
+ដើម្បីក្លាយជាអ្នកអភិវឌ្ឍន៍អាជីពពិតប្រាកដ អ្នកមិនអាចខ្វះ **TypeScript** បានទេ។
+
+នៅពេលអ្នកបូកបញ្ចូល React ជាមួយ TypeScript វានឹងជួយដោះស្រាយបញ្ហាឈឺក្បាលជាច្រើន៖
+
+```tsx
+// ឧទាហរណ៍នៃការប្រើប្រាស់ TypeScript ក្នុង React
+type ButtonProps = {
+  text: string;
+  variant: 'primary' | 'secondary'; // អ្នកមិនអាចវាយពាក្យផ្សេងក្រៅពី២នេះបានទេ!
+  onClick: () => void;
+};
+
+// បើមានគេហៅ <Button text={123} /> វានឹងលោតបន្ទាត់ក្រហមភ្លាមៗ!
+export function Button({ text, variant, onClick }: ButtonProps) {
+  return (
+    <button className={`btn-${variant}`} onClick={onClick}>
+      {text}
+    </button>
+  );
+}
+```
+
+ការសិក្សាអំពី TypeScript (ដូចជា Interface, Type, Generics) ហើយយកវាមកបំពាក់លើ React (Props, State, Context, Events) គឺជាស្ពានចម្លងដ៏សំខាន់បំផុត ដើម្បីឆ្ពោះទៅកាន់ការក្លាយជា Full-Stack Developer!
