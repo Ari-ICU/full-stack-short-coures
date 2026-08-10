@@ -10,6 +10,7 @@ import { CssDiagram } from "./css-diagrams/CssDiagrams";
 import { JsDiagram } from "./js-diagrams/JsDiagrams";
 import { HtmlDiagram } from "./html-diagrams/HtmlDiagrams";
 import { GitDiagram } from "./git-diagrams/GitDiagrams";
+import { ReactDiagram } from "./react-diagrams/ReactDiagrams";
 
 interface LessonContentProps {
   lesson: Lesson;
@@ -89,6 +90,11 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
             if (lang === "gitdiagram") {
               const name = String(children).trim();
               return <GitDiagram name={name} />;
+            }
+
+            if (lang === "reactdiagram") {
+              const name = String(children).trim();
+              return <ReactDiagram name={name} />;
             }
 
             return (
