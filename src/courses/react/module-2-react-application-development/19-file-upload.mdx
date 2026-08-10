@@ -6,7 +6,7 @@ objectives:
   - យល់ពីការបង្កើត `FormData` ដើម្បីវេចខ្ចប់ឯកសារ
   - ចេះបង្ហាញរូបភាពគំរូ (Image Preview) មុនពេលបញ្ជូន
 module: module-2-react-application-development
-order: 18
+order: 19
 quiz:
   - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើប្រាស់ `FormData` ជំនួសអោយ `JSON.stringify()` នៅពេលធ្វើការបញ្ជូនឯកសារ (File Upload) ទៅកាន់ API?"
     options:
@@ -82,7 +82,7 @@ const handleFileChange = (e) => {
 ```mermaid
 flowchart LR
     A["File Object<br>(ពីរូបភាព)"] -->|ដាក់ចូល| B["FormData<br>('avatar', file)"]
-    B -->|fetch(POST)| C["Server API"]
+    B -->|"fetch(POST)"| C["Server API"]
     
     style B fill:#fff3cd,stroke:#ffc107,color:#000
 ```

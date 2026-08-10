@@ -82,7 +82,7 @@ export function ReactContextDiagram() {
               <div className={`p-4 rounded-xl border-2 flex justify-between items-center bg-white dark:bg-gray-800 ${activeLevel === 0 ? "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" : "border-gray-300 dark:border-gray-600"}`}>
                 <div className="font-bold text-gray-800 dark:text-gray-200">App (Provider)</div>
                 <div className="flex gap-2">
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">theme="dark"</span>
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">theme=&quot;dark&quot;</span>
                   <button onClick={handlePass} disabled={isPassing} className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600 disabled:opacity-50">Send Data</button>
                 </div>
               </div>
@@ -109,7 +109,7 @@ export function ReactContextDiagram() {
               <div className={`p-5 rounded-xl border-4 mx-16 flex justify-between items-center bg-white dark:bg-gray-800 transition-all ${activeLevel >= 4 || (mode === "context" && activeLevel === 4) ? "border-green-500 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-105" : "border-gray-300 dark:border-gray-600"}`}>
                 <div className="font-bold text-gray-800 dark:text-gray-200">ThemeButton</div>
                 {activeLevel >= 4 || (mode === "context" && activeLevel === 4) ? (
-                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold animate-in zoom-in">Received: "dark"</span>
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded font-bold animate-in zoom-in">Received: &quot;dark&quot;</span>
                 ) : (
                   <span className="text-xs text-gray-400 italic">Waiting...</span>
                 )}
@@ -121,11 +121,11 @@ export function ReactContextDiagram() {
           <div className="mt-10 text-center max-w-xl mx-auto">
             {mode === "props" ? (
               <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                <strong>Prop Drilling:</strong> You have to pass the data manually through every single intermediate component, even if they don't need it. This makes the code messy and hard to maintain.
+                <strong>Prop Drilling:</strong> You have to pass the data manually through every single intermediate component, even if they don&apos;t need it. This makes the code messy and hard to maintain.
               </p>
             ) : (
               <p className="text-sm text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg border border-purple-200 dark:border-purple-800">
-                <strong>Context API:</strong> You "teleport" the data directly from the Provider (App) to the Consumer (ThemeButton). Intermediate components are completely unaware and unaffected!
+                <strong>Context API:</strong> You &quot;teleport&quot; the data directly from the Provider (App) to the Consumer (ThemeButton). Intermediate components are completely unaware and unaffected!
               </p>
             )}
           </div>

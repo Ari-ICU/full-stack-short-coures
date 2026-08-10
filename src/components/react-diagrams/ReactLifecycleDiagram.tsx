@@ -27,6 +27,7 @@ export function ReactLifecycleDiagram() {
   // Simulate the child component's lifecycle behavior
   useEffect(() => {
     if (isMounted) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       addLog("Component Mounted! (useEffect callback)", "mount");
       return () => {
         addLog("Component Unmounted! (Cleanup function)", "unmount");
@@ -36,6 +37,7 @@ export function ReactLifecycleDiagram() {
 
   useEffect(() => {
     if (isMounted && count > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       addLog(`Component Updated (Count: ${count})`, "render");
     }
   }, [count, isMounted]);
@@ -113,7 +115,7 @@ export function ReactLifecycleDiagram() {
             </div>
             <div className="p-4 flex-1 flex flex-col justify-end overflow-hidden font-mono text-[11px] leading-relaxed">
               <div className="space-y-2">
-                {logs.length === 0 && <div className="text-gray-500 italic">No activity yet. Click 'Mount Component'.</div>}
+                {logs.length === 0 && <div className="text-gray-500 italic">No activity yet. Click &apos;Mount Component&apos;.</div>}
                 {logs.map((log, i) => (
                   <div key={i} className="animate-in slide-in-from-bottom-2 fade-in duration-300">
                     <span className="text-gray-500 mr-2">{">"}</span>

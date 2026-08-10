@@ -89,7 +89,7 @@ export function ReactPropsDiagram() {
                 <span className="text-sm text-gray-600 dark:text-gray-400">Received Prop:</span>
                 {childData ? (
                   <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 font-bold rounded shadow-sm border border-green-300 animate-in zoom-in">
-                    "{childData}"
+                    &quot;{childData}&quot;
                   </span>
                 ) : (
                   <span className="text-xs text-gray-400 italic">Waiting...</span>

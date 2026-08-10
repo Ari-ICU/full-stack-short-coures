@@ -6,7 +6,7 @@ objectives:
   - ចេះរក្សាទុក JWT Token នៅក្នុង `localStorage`
   - ចេះបង្កើត State សម្គាល់អ្នកប្រើប្រាស់ (Auth State)
 module: module-3-professional-react
-order: 19
+order: 20
 quiz:
   - question: "តើអ្នកគួររក្សាទុក Token សម្ងាត់ (JWT Token) ដែលទទួលបានពី API នៅទីណា?"
     options:
@@ -24,7 +24,7 @@ quiz:
 
 ```mermaid
 flowchart TD
-    A["អ្នកប្រើប្រាស់បញ្ចុល Email/Password"] -->|fetch(POST)| B("Backend ពិនិត្យភាពត្រឹមត្រូវ")
+    A["អ្នកប្រើប្រាស់បញ្ចុល Email/Password"] -->|"fetch(POST)"| B("Backend ពិនិត្យភាពត្រឹមត្រូវ")
     B -- បរាជ័យ --> C["React បង្ហាញពាក្យ 'លេខសម្ងាត់ខុស'"]
     B -- ជោគជ័យ --> D["Backend ផ្តល់អោយនូវ Token (កូនសោរ)"]
     D --> E["React រក្សាទុក Token ក្នុង localStorage"]
