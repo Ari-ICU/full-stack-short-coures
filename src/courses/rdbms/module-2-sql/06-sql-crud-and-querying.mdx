@@ -1,0 +1,127 @@
+---
+title: SQL CRUD & Querying
+description: សិក្សាពីការបញ្ចូន ទាញយក កែប្រែ និងលុបទិន្នន័យ (DML) ព្រមទាំងបច្ចេកទេសទាញយកទិន្នន័យ (Querying) កម្រិតខ្ពស់។
+objectives:
+  - ស្ទាត់ជំនាញលើប្រតិបត្តិការ CRUD (INSERT, SELECT, UPDATE, DELETE)
+  - ចេះប្រើប្រាស់ WHERE ដើម្បីច្រោះទិន្នន័យ (AND, OR, IN, BETWEEN, LIKE)
+  - ចេះរៀបចំទិន្នន័យដោយប្រើ ORDER BY, LIMIT និង OFFSET
+module: module-2-sql
+order: 6
+quiz:
+  - question: "តើអ្នកគួរប្រើប្រាស់ពាក្យបញ្ជាអ្វី ដើម្បីស្វែងរកទិន្នន័យដែលគ្មានតម្លៃ (ទទេរ)?"
+    options:
+      - "WHERE column = NULL"
+      - "WHERE column IS NULL"
+      - "WHERE column == NULL"
+      - "WHERE column EQUALS NULL"
+    correctAnswer: 2
+    explanation: "នៅក្នុង SQL អ្នកមិនអាចប្រើសញ្ញាស្មើ `=` ជាមួយ NULL បានទេ។ អ្នកត្រូវប្រើពាក្យ `IS NULL` សម្រាប់ការស្វែងរកទិន្នន័យទទេរ និង `IS NOT NULL` សម្រាប់ទិន្នន័យដែលមានតម្លៃ។"
+---
+
+## 🛠️ Data Manipulation Language (DML) - CRUD
+
+DML គឺជាភាសាដែលប្រើសម្រាប់ប្រតិបត្តិការទិន្នន័យ ដែលយើងស្គាល់ជាទូទៅថា **CRUD** (Create, Read, Update, Delete)។
+
+### 1. ការបញ្ចូលទិន្នន័យ (INSERT / Create)
+
+```sql
+INSERT INTO users (name, email)
+VALUES ('Dara', 'dara@email.com');
+
+-- បញ្ចូលទិន្នន័យច្រើនក្នុងពេលតែមួយ
+INSERT INTO users (name, email)
+VALUES 
+    ('Sok', 'sok@email.com'),
+    ('Nita', 'nita@email.com');
+```
+
+### 2. ការកែប្រែទិន្នន័យ (UPDATE / Update)
+
+```sql
+UPDATE users
+SET name = 'Dara Updated', email = 'dara_new@email.com'
+WHERE id = 1;
+```
+> ⚠️ **ប្រយ័ត្ន:** ប្រសិនបើអ្នកភ្លេចដាក់លក្ខខណ្ឌ `WHERE` វានឹងកែប្រែទិន្នន័យទាំងអស់នៅក្នុងតារាង!
+
+### 3. ការលុបទិន្នន័យ (DELETE / Delete)
+
+```sql
+DELETE FROM users
+WHERE id = 1;
+```
+
+---
+
+## 🔍 បច្ចេកទេសទាញយកទិន្នន័យ (Querying - SELECT)
+
+ការទាញយកទិន្នន័យ គឺជាផ្នែកដែលសំខាន់បំផុត និងប្រើប្រាស់ច្រើនបំផុតនៅក្នុង SQL។
+
+### 1. ការជ្រើសរើសជួរឈរ (SELECT)
+```sql
+SELECT * FROM users;                  -- ទាញយកទាំងអស់
+SELECT name, email FROM users;        -- ទាញយកតែឈ្មោះ និងអុីមែល
+SELECT DISTINCT status FROM orders;   -- ទាញយកតែតម្លៃដែលមិនជាន់គ្នា (ឧ. លទ្ធផលចេញតែ 'pending', 'paid')
+```
+
+### 2. ការច្រោះទិន្នន័យ (WHERE)
+```sql
+-- ស្មើ, ធំជាង, តូចជាង
+SELECT * FROM products WHERE price >= 100;
+
+-- ប្រើ AND ឫ OR
+SELECT * FROM orders WHERE status = 'pending' AND total > 50;
+
+-- ប្រើ IN (ស្វែងរកតម្លៃច្រើនក្នុងពេលតែមួយ ជំនួសអោយការប្រើ OR ច្រើនដង)
+SELECT * FROM orders WHERE status IN ('pending', 'paid');
+
+-- ប្រើ BETWEEN (ចន្លោះពី)
+SELECT * FROM products WHERE price BETWEEN 10 AND 100;
+
+-- ប្រើ NULL 
+SELECT * FROM users WHERE phone IS NULL;       -- អត់មានលេខទូរស័ព្ទ
+SELECT * FROM users WHERE phone IS NOT NULL;   -- មានលេខទូរស័ព្ទ
+```
+
+### 3. ការស្វែងរកអក្សរ (LIKE / ILIKE)
+- `LIKE`: ស្វែងរកអក្សរដោយប្រកាន់តួអក្សរធំតូច (Case-sensitive)។
+- `ILIKE`: ស្វែងរកអក្សរដោយមិនប្រកាន់តួអក្សរធំតូច (Case-insensitive) ជាពិសេសសម្រាប់ PostgreSQL។
+
+```sql
+-- ស្វែងរកឈ្មោះដែលផ្តើមដោយ 'Da'
+SELECT * FROM users WHERE name ILIKE 'Da%';
+
+-- ស្វែងរកឈ្មោះដែលមានពាក្យ 'sok' នៅកណ្តាល
+SELECT * FROM users WHERE name ILIKE '%sok%';
+```
+
+### 4. ការរៀបលំដាប់ និងកាត់ទិន្នន័យ (ORDER BY, LIMIT, OFFSET)
+
+ការប្រើប្រាស់បច្ចេកទេសទាំងនេះ គឺចាំបាច់បំផុតសម្រាប់ការធ្វើ **Pagination** នៅលើគេហទំព័រ។
+
+```sql
+-- រៀបតាមលំដាប់ពីធំទៅតូច (DESC) ឫពីតូចទៅធំ (ASC)
+SELECT * FROM products ORDER BY price DESC;
+
+-- ទាញយកតែ ១០ ជួរដំបូង
+SELECT * FROM products LIMIT 10;
+
+-- រំលង ២០ ជួរដំបូង (រំលងទំព័រទី ១ និងទី ២ យកទំព័រទី ៣)
+SELECT * FROM products LIMIT 10 OFFSET 20;
+```
+
+---
+
+## 📝 ការអនុវត្តជាក់ស្តែង (Mini Case Study)
+
+**លំហាត់:** ចូរអ្នកសរសេរកូដ SQL ដើម្បីស្វែងរក **ទំនិញទាំង ៥ មុខដែលមានតម្លៃថ្លៃជាងគេ** ដែលមានតម្លៃចន្លោះពី $500 ដល់ $2000 ហើយឈ្មោះទំនិញនោះមានពាក្យ "Pro"។
+
+**ចម្លើយ:**
+```sql
+SELECT id, name, price 
+FROM products
+WHERE price BETWEEN 500 AND 2000 
+  AND name ILIKE '%pro%'
+ORDER BY price DESC
+LIMIT 5;
+```
