@@ -23,6 +23,17 @@ quiz:
 
 ប៉ុន្តែការពិតទៅ TypeScript ឆ្លាតជាងអ្វីដែលអ្នកគិត! វាមានសមត្ថភាពមួយហៅថា **Type Inference (ការទាញសេចក្តីសន្និដ្ឋាន)** ដែលមានន័យថាវាអាចមើលតម្លៃដែលអ្នកបញ្ចូល ហើយស្មានដឹងភ្លាមថាវាជាប្រភេទអ្វី ដោយអ្នកមិនបាច់ប្រាប់វាសូម្បីតែមួយម៉ាត់!
 
+```mermaid
+flowchart TD
+    A["let score = 100;"] --> B{TS Type Inference}
+    B -->|Infers| C["score: number"]
+    
+    D["let message = 'Hello';"] --> E{TS Type Inference}
+    E -->|Infers| F["message: string"]
+    
+    style B fill:#3178c6,stroke:#fff,color:#fff
+    style E fill:#3178c6,stroke:#fff,color:#fff
+```
 ### ឧទាហរណ៍ទី ១៖ អថេរទូទៅ
 
 ```ts

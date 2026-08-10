@@ -22,17 +22,26 @@ quiz:
 
 ដោយសារ TypeScript មិនមែនជាភាសាដើមរបស់ Browser យើងត្រូវតែដំឡើងកម្មវិធីបកប្រែ (Compiler) របស់វា ដើម្បីអាចបម្លែងកូដ `.ts` ទៅជា `.js`។ យើងអាចដំឡើងវាបានតាមរយៈ `npm` (ត្រូវប្រាកដថាអ្នកបានដំឡើង Node.js រួចរាល់)។
 
-បើក Terminal ហើយវាយពាក្យបញ្ជាខាងក្រោម ដើម្បីដំឡើង TypeScript ជាសកល (Global) នៅក្នុងកុំព្យូទ័ររបស់អ្នក៖
+```mermaid
+flowchart LR
+    A[TypeScript Code<br>.ts / .tsx] -->|Compiler<br>npx tsc| B[JavaScript Code<br>.js / .jsx]
+    B --> C((Browser / Node.js))
+    style A fill:#3178c6,stroke:#fff,stroke-width:2px,color:#fff
+    style B fill:#f7df1e,stroke:#fff,stroke-width:2px,color:#000
+```
+បើក Terminal ហើយវាយពាក្យបញ្ជាខាងក្រោម ដើម្បីដំឡើង TypeScript ជាលក្ខណៈមូលដ្ឋាន (Local Dev Dependency) នៅក្នុងថតគម្រោងរបស់អ្នក។ ការដំឡើងបែបនេះត្រូវបានណែនាំជាងការដំឡើងជាសកល (Global)៖
 
 ```bash
-npm install -g typescript
+npm install -D typescript
 ```
 
 ដើម្បីផ្ទៀងផ្ទាត់ថាអ្នកបានដំឡើងវាដោយជោគជ័យ សូមវាយ៖
 ```bash
-tsc -v
+npx tsc -v
 ```
 *(វានឹងបង្ហាញលេខ Version របស់ TypeScript ឧទាហរណ៍ `Version 5.x.x`)*
+
+> 💡 **ចំណាំ:** នៅក្នុងគម្រោងចាស់ៗ គេច្រើនតែដំឡើង TypeScript ជាសកលដោយប្រើ `npm install -g typescript` ប៉ុន្តែបច្ចុប្បន្ន ការប្រើប្រាស់ Local Installation ជាមួយ `npx` គឺមានសុវត្ថិភាពជាង ព្រោះគម្រោងនីមួយៗអាចប្រើ TypeScript ជំនាន់ (Version) ផ្សេងៗគ្នាបាន។
 
 ---
 
@@ -49,9 +58,9 @@ console.log(greeting);
 តើយើងរត់ (Run) កូដនេះយ៉ាងដូចម្តេច?
 ដូចដែលបានបញ្ជាក់ពីមុន យើងមិនអាច Run កូដ `.ts` ដោយផ្ទាល់បានទេ។ យើងត្រូវប្រាប់អោយកម្មវិធីបកប្រែ TypeScript (TSC) បម្លែងវាទៅជា `.js` សិន។
 
-បើក Terminal ក្នុងថត (Folder) តែមួយនោះ រួចវាយ៖
+បើក Terminal ក្នុងថត (Folder) តែមួយនោះ រួចវាយ (យើងប្រើ `npx` ពីមុខព្រោះយើងបានដំឡើងវាជាលក្ខណៈ Local)៖
 ```bash
-tsc hello.ts
+npx tsc hello.ts
 ```
 
 ភ្លាមៗនោះ អ្នកនឹងឃើញឯកសារថ្មីមួយទៀតបានលេចឡើងដោយស្វ័យប្រវត្តិឈ្មោះថា **`hello.js`**!
@@ -72,4 +81,4 @@ node hello.js
 *(លទ្ធផលនឹងចេញមក: `សួស្តី TypeScript!`)*
 
 > 💡 **គន្លឹះពិសេស:** អ្នកអាចប្រាប់អោយ TypeScript អង្គុយចាំមើលកូដរបស់អ្នក ហើយបម្លែងដោយស្វ័យប្រវត្តិរាល់ពេលដែលអ្នកចុច Save ដោយបន្ថែម `-w` (Watch mode):
-> `tsc hello.ts -w`
+> `npx tsc hello.ts -w`

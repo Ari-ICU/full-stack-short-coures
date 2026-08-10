@@ -19,11 +19,27 @@ quiz:
 
 ## 🧱 ប្រភេទមូលដ្ឋាន (Primitive Types)
 
-ដូចដែលអ្នកបានដឹងពី JavaScript មកហើយ ទិន្នន័យត្រូវបានបែងចែកជាច្រើនប្រភេទ។ នៅក្នុង TypeScript យើងមានប្រភេទមូលដ្ឋាន (Primitive Types) ចំនួន ៣ ដែលអ្នកនឹងត្រូវប្រើវាស្ទើរតែរៀងរាល់ថ្ងៃ៖
+ដូចដែលអ្នកបានដឹងពី JavaScript មកហើយ ទិន្នន័យត្រូវបានបែងចែកជាច្រើនប្រភេទ។ នៅក្នុង TypeScript យើងមានប្រភេទមូលដ្ឋាន (Primitive Types) ចំនួន ៧ ដែលអ្នកនឹងជួបប្រទះ៖
 
 1. **`string`**: តំណាងអោយអត្ថបទ ឬអក្សរ
 2. **`number`**: តំណាងអោយលេខ (ទាំងលេខគត់ និងលេខទសភាគ)
 3. **`boolean`**: តំណាងអោយការពិត ឬមិនពិត (`true` ឬ `false`)
+4. **`bigint`**: សម្រាប់លេខគត់ដែលធំខ្លាំង
+5. **`symbol`**: សម្រាប់បង្កើតតម្លៃដែលប្លែកពីគេ (Unique)
+6. **`null`**: តំណាងអោយតម្លៃទទេ (គ្មានទិន្នន័យដោយចេតនា)
+7. **`undefined`**: តំណាងអោយអថេរដែលមិនទាន់ត្រូវបានផ្តល់តម្លៃអោយ
+
+```mermaid
+mindmap
+  root((Primitive Types))
+    string["string ('Hello')"]
+    number["number (100, 3.14)"]
+    boolean["boolean (true, false)"]
+    bigint["bigint (100n)"]
+    symbol["symbol (Symbol())"]
+    null["null"]
+    undefined["undefined"]
+```
 
 ---
 
@@ -45,9 +61,15 @@ let negativeTemp: number = -5;
 // ប្រភេទពិត/មិនពិត
 let isStudent: boolean = true;
 let isGraduated: boolean = false;
+
+// ប្រភេទផ្សេងៗទៀត
+let bigNumber: bigint = 9007199254740991n;
+let id: symbol = Symbol("id");
+let emptyValue: null = null;
+let notSetYet: undefined = undefined;
 ```
 
-> **⚠️ ប្រយ័ត្ន:** សូមប្រាកដថាអ្នកប្រើអក្សរតូចទាំងអស់ (`string`, `number`, `boolean`)។ កុំប្រើអក្សរធំ (`String`, `Number`, `Boolean`) អោយសោះ ព្រោះវាជា Object ពិសេសនៅក្នុង JavaScript មិនមែនជា Primitive Type ទេ!
+> **⚠️ ប្រយ័ត្ន (ចៀសវាង):** សូមប្រាកដថាអ្នកប្រើអក្សរតូចទាំងអស់ (`string`, `number`, `boolean`)។ កុំប្រើអក្សរធំ (`String`, `Number`, `Boolean`) អោយសោះ! ការសរសេរអក្សរធំ សំដៅទៅលើ Object ពិសេសរបស់ JavaScript មិនមែនជា Primitive Type ទេ ហើយវានឹងធ្វើអោយកូដមានបញ្ហា។
 
 ### ការបូកបញ្ចូលគ្នា (Type Checking in Action)
 
