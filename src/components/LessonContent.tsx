@@ -9,6 +9,7 @@ import { TabbedCodeBlock, parseTabs } from "./TabbedCodeBlock";
 import { CssDiagram } from "./css-diagrams/CssDiagrams";
 import { JsDiagram } from "./js-diagrams/JsDiagrams";
 import { HtmlDiagram } from "./html-diagrams/HtmlDiagrams";
+import { GitDiagram } from "./git-diagrams/GitDiagrams";
 
 interface LessonContentProps {
   lesson: Lesson;
@@ -83,6 +84,11 @@ export function LessonContent({ lesson, content }: LessonContentProps) {
             if (lang === "htmldiagram") {
               const name = String(children).trim();
               return <HtmlDiagram name={name} />;
+            }
+
+            if (lang === "gitdiagram") {
+              const name = String(children).trim();
+              return <GitDiagram name={name} />;
             }
 
             return (
