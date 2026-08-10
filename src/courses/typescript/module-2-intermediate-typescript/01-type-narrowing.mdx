@@ -1,0 +1,91 @@
+---
+title: Type Narrowing
+description: ស្វែងយល់ពីរបៀបជួយអោយ TypeScript ប្រាកដចិត្តអំពីប្រភេទទិន្នន័យ (Type) ដែលកំពុងប្រើប្រាស់ តាមរយៈការឆែកលក្ខខណ្ឌ (Type Narrowing) ដើម្បីបញ្ចៀសកំហុសនានា។
+objectives:
+  - យល់ពីអ្វីទៅជា Type Narrowing
+  - ចេះប្រើប្រាស់ `typeof` ដើម្បីឆែកប្រភេទ Primitive
+  - យល់ពី Truthiness Narrowing
+module: module-2-intermediate-typescript
+order: 1
+quiz:
+  - question: "តើអ្វីទៅជា Type Narrowing នៅក្នុង TypeScript?"
+    options:
+      - "\"ការបង្រួមទំហំឯកសារ .ts អោយតូចជាងមុន\""
+      - "\"ការសរសេរកូដលក្ខខណ្ឌ (ដូចជា if/else) ដើម្បីអោយ TypeScript យល់ច្បាស់និងបង្រួមប្រភេទទិន្នន័យពីធំ (Union/Unknown) មកតូច និងមានសុវត្ថិភាព\""
+      - "\"ការលុបចោលនូវ Types ដែលមិនបានប្រើប្រាស់\""
+      - "\"ការកំណត់ប្រវែងអក្សរអតិបរមា\""
+    correctAnswer: 2
+    explanation: "Type Narrowing គឺជាដំណើរការនៃការច្រោះយកប្រភេទជាក់លាក់មួយចេញពីប្រភេទដែលមិនច្បាស់លាស់ (ដូចជា Union Type `string | number`) ដើម្បីធានាថាយើងអាចហៅប្រើមុខងាររបស់ប្រភេទនោះបានត្រឹមត្រូវ។"
+---
+
+## 🔍 អ្វីទៅជា Type Narrowing?
+
+នៅពេលអ្នកប្រើប្រាស់ Union Type (`string | number`) កូដរបស់អ្នកអាចនឹងមានបញ្ហា ប្រសិនបើអ្នកព្យាយាមហៅមុខងារដែលមិនមាននៅលើប្រភេទទាំងពីរ។
+
+```mermaid
+flowchart TD
+    A["id: string | number"] --> B{typeof id === 'string'}
+    B -- Yes --> C["id is definitely a 'string'<br>(Can use .toUpperCase)"]
+    B -- No --> D["id is definitely a 'number'<br>(Can use .toFixed)"]
+    
+    style B fill:#ffeeba,stroke:#ffc107
+```
+
+```ts
+function printId(id: string | number) {
+  // ❌ Error: មិនអាចប្រើ toUpperCase បានទេ ព្រោះ id អាចជាលេខ!
+  // console.log(id.toUpperCase());
+}
+```
+
+ដើម្បីដោះស្រាយបញ្ហានេះ អ្នកត្រូវ "បង្រួម" (Narrow) ប្រភេទរបស់វាសិន តាមរយៈការឆែកលក្ខខណ្ឌ៖
+
+### 1. ការប្រើប្រាស់ `typeof`
+នេះគឺជាវិធីសាមញ្ញបំផុតសម្រាប់ឆែកប្រភេទ Primitive (`string`, `number`, `boolean`)។
+
+```ts
+function printId(id: string | number) {
+  if (typeof id === "string") {
+    // នៅក្នុង block នេះ TypeScript ដឹងច្បាស់ថា id ជាអក្សរ!
+    console.log("ID របស់អ្នកគឺ៖ " + id.toUpperCase());
+  } else {
+    // បើមិនមែនជាអក្សរ នោះវាតែងតែជាលេខ!
+    console.log("លេខ ID គឺ៖", id.toFixed(2));
+  }
+}
+```
+នៅពេលដែល TypeScript ដើរតាមលក្ខខណ្ឌ `if/else` របស់អ្នកដើម្បីវិភាគកូដ យើងហៅវាថា **Control-flow analysis**។
+
+### 2. Truthiness Narrowing
+ជារឿយៗអ្នកប្រហែលជាមានអថេរដែលអាចជា `null` ឬ `undefined`។ អ្នកអាចឆែកវាដោយគ្រាន់តែប្រើ `if (value)` ព្រោះ `null` និង `undefined` គឺជា Falsy values។
+
+```ts
+function printUsers(users: string[] | null) {
+  // បើ users មានតម្លៃ (មិនមែន null ឫ undefined)
+  if (users) {
+    for (const u of users) {
+      console.log(u);
+    }
+  } else {
+    console.log("មិនមានអ្នកប្រើប្រាស់ទេ");
+  }
+}
+```
+
+### 3. ការប្រើប្រាស់ `in` Operator
+ប្រសិនបើអ្នកមាន Object ជាច្រើនប្រភេទដែលច្របាច់បញ្ចូលគ្នា (Union) អ្នកអាចឆែកមើលថា តើ Object នោះមាន Property ណាមួយឫអត់ ដោយប្រើពាក្យ `in`។
+
+```ts
+type Bird = { fly: () => void };
+type Fish = { swim: () => void };
+
+function move(animal: Bird | Fish) {
+  if ("fly" in animal) {
+    // animal គឺប្រាកដជា Bird
+    animal.fly();
+  } else {
+    // animal គឺប្រាកដជា Fish
+    animal.swim();
+  }
+}
+```

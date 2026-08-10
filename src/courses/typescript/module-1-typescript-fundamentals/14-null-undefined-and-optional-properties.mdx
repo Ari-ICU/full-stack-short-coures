@@ -21,6 +21,16 @@ quiz:
 
 នៅក្នុង JavaScript និង TypeScript យើងមានពាក្យពិសេសចំនួន ២ សម្រាប់តំណាងអោយ "គ្មានអ្វីទាំងអស់" ឬ "ទទេស្អាត"។ ពួកវាគឺ `null` និង `undefined`។ តើពួកវាខុសគ្នាដូចម្តេច?
 
+```mermaid
+flowchart LR
+    A["Variable created but<br>no value assigned"] --> B(undefined)
+    C["Explicitly set to<br>have 'no value'"] --> D(null)
+    E["Object property marked<br>with '?'"] --> F("Can be undefined")
+    
+    style B fill:#f8f9fa,stroke:#333
+    style D fill:#e2e3e5,stroke:#333
+```
+
 ### 1. `undefined` (មិនទាន់បញ្ជាក់)
 វាកើតឡើងដោយស្វ័យប្រវត្តិនៅពេលអ្នកបង្កើតអថេរមួយ ប៉ុន្តែមិនទាន់បានផ្តល់តម្លៃអោយវា។ វាដូចជាប្រអប់មួយដែលអ្នកបានទិញមក តែអ្នកមិនទាន់បានដាក់អ្វីចូលសូម្បីតែខ្យល់។
 ```ts
@@ -33,6 +43,25 @@ console.log(userAge); // លទ្ធផល: undefined
 ```ts
 let loggedInUser = null; // បញ្ជាក់ថានៅពេលនេះមិនទាន់មាននរណា Login ទេ
 ```
+
+---
+
+## ❓ Optional Properties (ទិន្នន័យអាចមានឫមិនមាន)
+
+ជាញឹកញាប់ `undefined` កើតឡើងនៅពេលដែលយើងធ្វើការជាមួយ Object ដែលមាន Optional Properties។
+នៅពេលអ្នកដាក់សញ្ញា `?` នៅពីក្រោយឈ្មោះ Property, TypeScript យល់ថាវាអាចជាប្រភេទដើមរបស់វា ឬអាចជា `undefined`។
+
+```ts
+type User = {
+  name: string;
+  email?: string; // ស្មើនឹង string | undefined
+};
+
+const user1: User = { name: "Ratha" };
+console.log(user1.email); // លទ្ធផល: undefined
+```
+
+ការប្រើប្រាស់ `?` នេះគឺជាវិធីដែលស្របច្បាប់និងមានសុវត្ថិភាពបំផុតក្នុងការប្រាប់ថាទិន្នន័យនេះមិនចាំបាច់មានជានិច្ចនោះទេ។
 
 ---
 

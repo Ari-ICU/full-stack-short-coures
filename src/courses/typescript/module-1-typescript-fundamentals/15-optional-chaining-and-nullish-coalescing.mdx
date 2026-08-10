@@ -21,6 +21,15 @@ quiz:
 
 នៅពេលយើងធ្វើការជាមួយ Object ដែលមានជម្រៅជ្រៅៗ (Nested Objects) ជាពិសេសទិន្នន័យដែលបានមកពី API កូដរបស់អ្នកងាយនឹងគាំងណាស់ ប្រសិនបើអ្នកព្យាយាមអានទិន្នន័យដែលមិនមាន។
 
+```mermaid
+flowchart TD
+    A["myUser.address?.city"] --> B{"Is address null/undefined?"}
+    B -- Yes --> C["Return undefined"]
+    B -- No --> D["Access .city"]
+    
+    style B fill:#ffeeba,stroke:#ffc107
+```
+
 ```ts
 type User = {
   name: string;

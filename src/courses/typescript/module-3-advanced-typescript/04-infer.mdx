@@ -1,78 +1,36 @@
 ---
-title: keyof, typeof, and infer
-description: ស្វែងយល់ពី Keyword ដ៏មានឥទ្ធិពលបំផុតទាំង ៣ របស់ TypeScript សម្រាប់ទាញយកនិងវិភាគ Types ដោយស្វ័យប្រវត្តិ។
+title: The infer Keyword
+description: ស្វែងយល់ពីក្បួនរបស់ `infer` ដែលប្រៀបបាននឹង "អ្នកស៊ើបអង្កេត" ក្នុងការទាញយក Type ពីក្នុងលក្ខខណ្ឌ Conditional Types ដ៏ស្មុគស្មាញ។
 objectives:
-  - យល់ពីការប្រើប្រាស់ `keyof` សម្រាប់ទាញយក Keys ពី Object
-  - យល់ពីការប្រើប្រាស់ `typeof` សម្រាប់បម្លែង Value ទៅជា Type
-  - យល់ពីក្បួនរបស់ `infer` ក្នុងការទាញយក Type ពីក្នុងលក្ខខណ្ឌ
+  - យល់ពីការប្រើប្រាស់ `infer`
+  - ចេះយក `infer` ទៅអនុវត្តក្នុងការទាញយក Return Type របស់ Function
 module: module-2-advanced-typescript
-order: 5
+order: 4
 quiz:
-  - question: "តើការប្រើប្រាស់ `typeof` នៅក្នុង TypeScript (បរិបទ Type) មានភាពខុសគ្នាពី `typeof` នៅក្នុង JavaScript យ៉ាងដូចម្តេច?"
+  - question: "តើ `infer` ត្រូវបានគេប្រើប្រាស់នៅឯណា?"
     options:
-      - "\"ពួកវាដូចគ្នាបេះបិទ\""
-      - "\"នៅក្នុង JavaScript, `typeof` ប្រគល់ត្រលប់នូវអក្សរ (ឧ. 'string', 'object')។ ឯចំណែកក្នុង TypeScript វាត្រូវបានប្រើដើម្បីបម្លែងអថេរ (Value) ដែលយើងមានស្រាប់ អោយក្លាយទៅជាទម្រង់ Type (Shape) ដើម្បីយកទៅប្រើប្រាស់ក្នុងកូដ TypeScript បន្ត។\""
-      - "\"នៅក្នុង TypeScript, `typeof` ប្រើបានតែជាមួយលេខប៉ុណ្ណោះ\""
-      - "\"`typeof` ត្រូវបានលុបចោលនៅក្នុង TypeScript\""
+      - "\"វាត្រូវបានប្រើដើម្បីបង្កើត Interface\""
+      - "\"វាត្រូវបានគេប្រើតែនៅក្នុង Conditional Types (`extends ? :`) ប៉ុណ្ណោះ ដើម្បីទាញយក Type ដែលលាក់ខ្លួនចេញមកក្រៅ\""
+      - "\"វាត្រូវបានប្រើសម្រាប់ទាញទិន្នន័យពី API\""
+      - "\"វាប្រើសម្រាប់បញ្ឈប់កម្មវិធីពីការគាំង\""
     correctAnswer: 2
-    explanation: "`typeof` នៅក្នុង TypeScript គឺជាស្ពានចម្លងដ៏អស្ចារ្យ! វាអនុញ្ញាតអោយអ្នកចាប់យករូបរាងនៃអថេរឫទិន្នន័យ (Object) ណាមួយដែលមានរួចមកហើយ ប្រែក្លាយវាទៅជា Type ដោយមិនចាំបាច់អង្គុយវាយ Type នោះឡើងវិញដោយដៃឡើយ។"
+    explanation: "`infer` មានន័យថា 'សន្និដ្ឋាន' ឬ 'ទាញយក' ហើយវាមានអំណាចតែនៅពេលស្ថិតក្នុងលក្ខខណ្ឌ (extends) ប៉ុណ្ណោះ។"
 ---
 
-## 🔑 1. `keyof` (អ្នកទាញយក Keys)
+## 🕵️‍♂️ `infer` (អ្នកស៊ើបអង្កេត)
 
-`keyof` គឺជាឧបករណ៍សម្រាប់ទាញយក **ឈ្មោះ Property ទាំងអស់ (Keys)** ចេញពី Type (Object) មួយ រួចបង្កើតវាទៅជា Union Type នៃអក្សរ (String Literals)។
+`infer` គឺជាពាក្យដែលពិបាកយល់ជាងគេបន្តិចនៅក្នុង TypeScript។ វាត្រូវបានគេប្រើតែនៅក្នុង **Conditional Types (`extends ? :`)** ប៉ុណ្ណោះ។ 
 
-```ts
-type User = {
-  name: string;
-  age: number;
-  email: string;
-};
-
-// ទាញយក Keys ទាំងអស់ពី User
-type UserKeys = keyof User; 
-// លទ្ធផល: "name" | "age" | "email"
-
-// ឥឡូវអ្នកអាចប្រើវាដើម្បីកំណត់លក្ខខណ្ឌបាន!
-let prop: UserKeys = "age"; // ✅ ត្រូវ
-// let prop2: UserKeys = "phone"; // ❌ ខុស! ព្រោះ User អត់មាន phone ទេ
-```
-
----
-
-## 🖨️ 2. `typeof` (អ្នកក្លូន Type)
-
-`typeof` គឺប្រើសម្រាប់ **ទាញយក Type ចេញពី អថេរ (Value)** ដែលមានស្រាប់។ នេះគឺមានប្រយោជន៍ណាស់ពេលអ្នកខ្ជិលសរសេរ Type ដោយខ្លួនឯង!
-
-```ts
-// នេះជាអថេរ JavaScript ធម្មតា
-const myConfig = {
-  theme: "dark",
-  fontSize: 14,
-  showSidebar: true
-};
-
-// ប្រើ typeof ដើម្បីក្លូនយករូបរាងរបស់វា មកធ្វើជា Type!
-type ConfigType = typeof myConfig;
-/*
-  លទ្ធផលដែលទទួលបាន:
-  {
-    theme: string;
-    fontSize: number;
-    showSidebar: boolean;
-  }
-*/
-```
-
-> 💡 **គន្លឹះ:** អ្នកសរសេរកម្មវិធីជើងចាស់តែងតែប្រើ `keyof typeof ...` ផ្គួបគ្នា ដើម្បីទាញយកឈ្មោះ Properties ចេញពីអថេរ Object ដោយផ្ទាល់!
-> `type ConfigKeys = keyof typeof myConfig; // "theme" | "fontSize" | "showSidebar"`
-
----
-
-## 🕵️‍♂️ 3. `infer` (អ្នកស៊ើបអង្កេត)
-
-`infer` គឺជាពាក្យដែលពិបាកយល់ជាងគេបន្តិច។ វាត្រូវបានគេប្រើតែនៅក្នុង **Conditional Types (`extends ? :`)** ប៉ុណ្ណោះ។ 
 `infer` មានតួនាទីជាអ្នកស៊ើបអង្កេត ដើម្បីលូកដៃចូលទៅចាប់ទាញយក (Extract) Type ណាមួយចេញពីក្នុងរចនាសម្ព័ន្ធដ៏ស្មុគស្មាញ រួចរក្សាទុកក្នុងអថេរមួយដើម្បីអោយយើងអាចយកវាទៅប្រើបន្ត។
+
+```mermaid
+flowchart TD
+    A["T extends (...args: any[]) => infer R ? R : any"] --> B{"Is T a function?"}
+    B -- Yes --> C["Extract its Return Type as R"]
+    B -- No --> D["Return any"]
+    
+    style C fill:#17a2b8,stroke:#fff,color:#fff
+```
 
 ឧទាហរណ៍៖ ទាញយកប្រភេទ (Return Type) ចេញពី Function
 
@@ -94,3 +52,18 @@ type MathResult = GetReturnType<typeof doMath>;
 ```
 
 *(កំណត់សម្គាល់: TypeScript មាន `ReturnType<T>` ស្រាប់សម្រាប់ធ្វើការងារខាងលើនេះ នេះគ្រាន់តែជាការពន្យល់ពីរបៀបដែល `infer` ដំណើរការនៅពីក្រោយខ្នងប៉ុណ្ណោះ)*
+
+### ការទាញយក Type ចេញពី Array ជាមួយ `infer`
+
+អ្នកក៏អាចប្រើ `infer` ដើម្បីទាញយក Type របស់សមាជិក (Elements) ដែលរស់នៅក្នុង Array ផងដែរ។
+
+```ts
+// បើ T ជា Array, ស៊ើបអង្កេតថាតើសមាជិករបស់វាជាអ្វី (U), រួចប្រគល់ U មកវិញ
+type FlattenArray<T> = T extends Array<infer U> ? U : T;
+
+type MyStringArray = Array<string>;
+type ExtractedType = FlattenArray<MyStringArray>; // លទ្ធផល: string
+
+type NotAnArray = number;
+type ExtractedType2 = FlattenArray<NotAnArray>; // លទ្ធផល: number (ព្រោះវាមិនមែនជា Array)
+```

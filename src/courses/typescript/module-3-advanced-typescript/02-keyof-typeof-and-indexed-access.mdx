@@ -1,30 +1,87 @@
 ---
-title: Indexed Access Types
-description: ស្វែងយល់ពីរបៀបចូលទៅយក (Extract) Type តូចៗ ដែលកប់ជ្រៅនៅខាងក្នុង Type ធំៗ ដោយមិនចាំបាច់សរសេរវាឡើងវិញ។
+title: keyof, typeof, and Indexed Access
+description: ស្វែងយល់ពីឧបករណ៍ដ៏មានឥទ្ធិពលបំផុតទាំង ៣ របស់ TypeScript សម្រាប់ទាញយកនិងវិភាគ Types ដោយស្វ័យប្រវត្តិ។
 objectives:
-  - យល់ពីរបៀបប្រើប្រាស់ `Type["Property"]` ដើម្បីទាញយក Type
-  - ចេះយក Type ចេញពី Array ឫ Union Type
+  - យល់ពីការប្រើប្រាស់ `keyof` សម្រាប់ទាញយក Keys ពី Object
+  - យល់ពីការប្រើប្រាស់ `typeof` សម្រាប់បម្លែង Value ទៅជា Type
+  - ចេះប្រើប្រាស់ Indexed Access `Type["Property"]`
 module: module-2-advanced-typescript
-order: 4
+order: 2
 quiz:
-  - question: "ប្រសិនបើអ្នកមាន `type User = { age: number, name: string };` តើអ្នកអាចទាញយកប្រភេទរបស់អាយុ (number) មកដាក់ក្នុង Type ថ្មីយ៉ាងដូចម្តេច?"
+  - question: "តើការប្រើប្រាស់ `typeof` នៅក្នុង TypeScript (បរិបទ Type) មានភាពខុសគ្នាពី `typeof` នៅក្នុង JavaScript យ៉ាងដូចម្តេច?"
     options:
-      - "\"type Age = User.age;\""
-      - "\"type Age = User['age'];\""
-      - "\"type Age = extract(User, age);\""
-      - "\"មិនអាចទាញយកបានទេ ត្រូវសរសេរ number ដោយខ្លួនឯង\""
+      - "\"ពួកវាដូចគ្នាបេះបិទ\""
+      - "\"នៅក្នុង JavaScript, `typeof` ប្រគល់ត្រលប់នូវអក្សរ (ឧ. 'string', 'object')។ ឯចំណែកក្នុង TypeScript វាត្រូវបានប្រើដើម្បីបម្លែងអថេរ (Value) ដែលយើងមានស្រាប់ អោយក្លាយទៅជាទម្រង់ Type (Shape) ដើម្បីយកទៅប្រើប្រាស់ក្នុងកូដ TypeScript បន្ត។\""
+      - "\"នៅក្នុង TypeScript, `typeof` ប្រើបានតែជាមួយលេខប៉ុណ្ណោះ\""
+      - "\"`typeof` ត្រូវបានលុបចោលនៅក្នុង TypeScript\""
     correctAnswer: 2
-    explanation: "ដូចគ្នានឹងការចូលអានតម្លៃ Object ក្នុង JavaScript តាមរយៈដង្កៀប `[]` (Bracket Notation) ដែរ! នៅក្នុង TypeScript យើងប្រើទម្រង់ `Type['PropertyName']` ដើម្បីចូលទៅចម្លងយកប្រភេទទិន្នន័យ (Type) របស់វាដោយផ្ទាល់។ វិធីនេះជួយអោយអ្នកមិនបាច់សរសេរកូដដដែលៗ និងងាយស្រួល Update ពេលក្រោយ។"
+    explanation: "`typeof` នៅក្នុង TypeScript គឺជាស្ពានចម្លងដ៏អស្ចារ្យ! វាអនុញ្ញាតអោយអ្នកចាប់យករូបរាងនៃអថេរឫទិន្នន័យ (Object) ណាមួយដែលមានរួចមកហើយ ប្រែក្លាយវាទៅជា Type ដោយមិនចាំបាច់អង្គុយវាយ Type នោះឡើងវិញដោយដៃឡើយ។"
 ---
 
-## 🔍 អ្វីទៅជា Indexed Access Types?
+## 🔑 1. `keyof` (អ្នកទាញយក Keys)
 
-នៅក្នុង JavaScript បើអ្នកមាន Object មួយ អ្នកអាចទាញយកតម្លៃរបស់វាតាមរយៈ `object.property` ឬ `object["property"]` មែនទេ?
+`keyof` គឺជាឧបករណ៍សម្រាប់ទាញយក **ឈ្មោះ Property ទាំងអស់ (Keys)** ចេញពី Type (Object) មួយ រួចបង្កើតវាទៅជា Union Type នៃអក្សរ (String Literals)។
+
+```mermaid
+flowchart LR
+    A["{ name: string, age: number }"] -->|keyof| B["'name' | 'age'"]
+    
+    style B fill:#3178c6,stroke:#fff,color:#fff
+```
+
+```ts
+type User = {
+  name: string;
+  age: number;
+  email: string;
+};
+
+// ទាញយក Keys ទាំងអស់ពី User
+type UserKeys = keyof User; 
+// លទ្ធផល: "name" | "age" | "email"
+
+// ឥឡូវអ្នកអាចប្រើវាដើម្បីកំណត់លក្ខខណ្ឌបាន!
+let prop: UserKeys = "age"; // ✅ ត្រូវ
+// let prop2: UserKeys = "phone"; // ❌ ខុស! ព្រោះ User អត់មាន phone ទេ
+```
+
+---
+
+## 🖨️ 2. `typeof` (អ្នកក្លូន Type)
+
+`typeof` គឺប្រើសម្រាប់ **ទាញយក Type ចេញពី អថេរ (Value)** ដែលមានស្រាប់។ នេះគឺមានប្រយោជន៍ណាស់ពេលអ្នកខ្ជិលសរសេរ Type ដោយខ្លួនឯង!
+
+```ts
+// នេះជាអថេរ JavaScript ធម្មតា
+const myConfig = {
+  theme: "dark",
+  fontSize: 14,
+  showSidebar: true
+};
+
+// ប្រើ typeof ដើម្បីក្លូនយករូបរាងរបស់វា មកធ្វើជា Type!
+type ConfigType = typeof myConfig;
+/*
+  លទ្ធផលដែលទទួលបាន:
+  {
+    theme: string;
+    fontSize: number;
+    showSidebar: boolean;
+  }
+*/
+```
+
+> 💡 **គន្លឹះ:** អ្នកសរសេរកម្មវិធីជើងចាស់តែងតែប្រើ `keyof typeof ...` ផ្គួបគ្នា ដើម្បីទាញយកឈ្មោះ Properties ចេញពីអថេរ Object ដោយផ្ទាល់!
+> `type ConfigKeys = keyof typeof myConfig; // "theme" | "fontSize" | "showSidebar"`
+
+---
+
+## 🔍 3. Indexed Access Types (ការទាញយក Type តូចៗចេញពី Type ធំ)
+
+នៅក្នុង JavaScript បើអ្នកមាន Object មួយ អ្នកអាចទាញយកតម្លៃរបស់វាតាមរយៈ `object["property"]` មែនទេ?
 ចំណែកឯនៅក្នុង TypeScript បើអ្នកមាន Type ធំមួយ អ្នកក៏អាច **"លូកដៃ"** ចូលទៅទាញយក Type តូចៗពីក្នុងនោះមកប្រើបានដែរ ដោយប្រើសញ្ញាដង្កៀប `[]`។
 
-### 1. ការទាញយក Type ពីក្នុង Object
-
-ស្រមៃថាមានអ្នកណាម្នាក់បានសរសេរ Type នេះអោយអ្នក៖
+### ការទាញយក Type ពីក្នុង Object
 
 ```ts
 type Person = {
@@ -32,12 +89,7 @@ type Person = {
   name: string;
   alive: boolean;
 };
-```
 
-ថ្ងៃមួយ អ្នកចង់បង្កើតអថេរមួយសម្រាប់ផ្ទុក "អាយុ" ដែលត្រូវតែមាន Type ដូចគ្នាទៅនឹង `age` របស់ `Person` បេះបិទ។
-ជំនួសអោយការសរសេរ `number` ដោយផ្ទាល់ អ្នកគួរតែទាញយកវាចេញពី `Person` តែម្តង៖
-
-```ts
 // យក Type ចេញពី age របស់ Person (លទ្ធផល: number)
 type Age = Person["age"]; 
 
@@ -45,9 +97,7 @@ let myAge: Age = 25; // ត្រឹមត្រូវ!
 ```
 **ហេតុអ្វីត្រូវធ្វើបែបនេះ?** ព្រោះបើថ្ងៃក្រោយ គេប្តូរ `age: number` ទៅជា `age: string` (ឧ. អាយុ "២៥ឆ្នាំ") នោះអថេរ `Age` របស់អ្នកនឹងផ្លាស់ប្តូរទៅជា `string` តាមដោយស្វ័យប្រវត្តិ!
 
----
-
-### 2. ការទាញយកប្រភេទច្រើនព្រមៗគ្នា
+### ការទាញយកប្រភេទច្រើនព្រមៗគ្នា
 
 អ្នកអាចទាញយកច្រើនជាងមួយដោយប្រើសញ្ញា `|` (Union) នៅខាងក្នុងដង្កៀប!
 
@@ -60,9 +110,7 @@ type AllTypes = Person[keyof Person];
 // លទ្ធផល: number | string | boolean
 ```
 
----
-
-### 3. ការទាញយក Type ចេញពី Array
+### ការទាញយក Type ចេញពី Array
 
 ប្រសិនបើទិន្នន័យរបស់អ្នកជាទម្រង់បញ្ជី (Array) នោះអ្នកអាចប្រើ **`[number]`** ដើម្បីទាញយកប្រភេទរបស់សមាជិកដែលនៅក្នុងនោះ!
 
@@ -84,5 +132,3 @@ type PersonInsideArray = typeof MyArray[number];
   }
 */
 ```
-
-ការចេះប្រើប្រាស់ Indexed Access Types នឹងជួយអោយអ្នកអាចរុករក និងប្រើប្រាស់កូដចាស់ៗរបស់បណ្ណាល័យ (Libraries) ធំៗដូចជា React បានយ៉ាងងាយស្រួល ដោយមិនចាំបាច់សរសេរ Type វែងៗដោយខ្លួនឯងឡើយ!

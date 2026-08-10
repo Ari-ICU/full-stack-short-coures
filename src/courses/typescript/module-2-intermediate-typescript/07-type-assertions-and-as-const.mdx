@@ -19,6 +19,13 @@ quiz:
 
 ## ✊ ការបញ្ជាក់ប្រភេទ (Type Assertions)
 
+```mermaid
+flowchart TD
+    A["document.getElementById('canvas')<br>(HTMLElement)"] --> B{"as HTMLCanvasElement"}
+    B --> C["Canvas features available<br>(.getContext)"]
+    style B fill:#ffeeba,stroke:#ffc107
+```
+
 ពេលខ្លះ ក្នុងនាមជាអ្នកសរសេរកម្មវិធី អ្នកមានព័ត៌មានច្បាស់លាស់អំពីប្រភេទទិន្នន័យណាមួយ **ច្រើនជាងអ្វីដែល TypeScript អាចដឹង** ទៅទៀត! 
 
 ឧទាហរណ៍ ពេលអ្នកចាប់យក HTML Element ចេញពីគេហទំព័រ៖
@@ -59,12 +66,14 @@ colors.primary = "BLUE"; // គ្មានបញ្ហាទេ (តែវា�
 
 **ដំណោះស្រាយជាមួយ `as const`:**
 
+> 💡 **ចំណាំសំខាន់:** `as const` ផ្តល់នូវការបង្កក (Readonly) និងការចាក់សោរប្រភេទអក្សរ (Literal typing) នៅពេល **កំពុងសរសេរកូដ (Compile-time)** ប៉ុណ្ណោះ។ វាខុសពី `Object.freeze()` ដែលបង្កកទិន្នន័យនៅពេល **កំពុងដំណើរការ (Runtime)**។
+
 ```ts
 // របៀបទំនើប និងមានសុវត្ថិភាពខ្ពស់
 const companyColors = {
   primary: "#FF0000",
   secondary: "#00FF00"
-} as const; // បញ្ជាក់ថា នេះគឺជាទិន្នន័យអចិន្ត្រៃយ៍!
+} as const; // បញ្ជាក់ថា នេះគឺជាទិន្នន័យអចិន្ត្រៃយ៍ ក្នុងកម្រិត TypeScript!
 
 // ❌ Error! TypeScript នឹងស្រែកប្រាប់ភ្លាមថា Properties ទាំងនេះគឺ readonly!
 // companyColors.primary = "BLUE"; 

@@ -19,6 +19,22 @@ quiz:
 
 ## 📚 Arrays (បញ្ជី)
 
+```mermaid
+flowchart LR
+    subgraph Array ["Array (string[])"]
+        direction LR
+        A1["Apple"] --> A2["Banana"] --> A3["Orange"] --> A4["..."]
+    end
+    
+    subgraph Tuple ["Tuple ([number, string])"]
+        direction LR
+        T1["1"] --> T2["Ratha"]
+    end
+    
+    style Array fill:#f9f9f9,stroke:#333
+    style Tuple fill:#f9f9f9,stroke:#333
+```
+
 ដើម្បីបង្កើតបញ្ជីមួយដែលមានផ្ទុកតែ "អក្សរ" ឬ "លេខ" សុទ្ធ យើងអាចសរសេរ Type របស់វាដោយបន្ថែមសញ្ញា `[]` នៅពីក្រោយប្រភេទ។
 
 ```ts
@@ -60,3 +76,20 @@ let employee: [number, string] = [1, "Ratha"];
 Tuples កម្រត្រូវបានប្រើប្រាស់ណាស់បើប្រៀបធៀបជាមួយ Objects។ ប៉ុន្តែវាមានប្រយោជន៍ខ្លាំងបំផុតនៅពេលសរសេរ **React Hooks**! 
 ឧទាហរណ៍នៅពេលអ្នកប្រើ `useState` វាប្រគល់តម្លៃត្រលប់មកវិញជាទម្រង់ Tuple ដែលមានតម្លៃទី១ ជា State និងទី២ ជាអនុគមន៍សម្រាប់ប្តូរ State:
 `const [name, setName] = useState("Ratha");`
+
+---
+
+## 🔒 Readonly Arrays (បញ្ជីមិនអាចកែប្រែបាន)
+
+ពេលខ្លះអ្នកចង់ការពារបញ្ជីរបស់អ្នកមិនអោយនរណាម្នាក់អាច `push`, `pop`, ឬផ្លាស់ប្តូរតម្លៃរបស់វាបានឡើយ។ អ្នកអាចប្រើប្រាស់ `readonly` modifier ពីមុខប្រភេទ Array ឬ Tuple បាន។
+
+```ts
+// មិនអាចបន្ថែម ឬដកទិន្នន័យបានទេ
+const colors: readonly string[] = ["Red", "Green", "Blue"];
+
+// colors.push("Yellow"); // ❌ Error! Property 'push' does not exist on type 'readonly string[]'
+// colors[0] = "Black";   // ❌ Error! Index signature in type 'readonly string[]' only permits reading.
+
+// សម្រាប់ Tuples ក៏ដូចគ្នា
+const point: readonly [number, number] = [10, 20];
+```

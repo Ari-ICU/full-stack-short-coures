@@ -19,6 +19,18 @@ quiz:
 
 ## 🤹‍♂️ អ្វីទៅជា Function Overloading?
 
+```mermaid
+flowchart TD
+    A["makeDate(123456)"] --> B{"Matches Signature 1?"}
+    B -- Yes --> C["Returns Date"]
+    
+    D["makeDate(2025, 12, 31)"] --> E{"Matches Signature 2?"}
+    E -- Yes --> F["Returns Date"]
+    
+    style C fill:#d4edda,stroke:#28a745
+    style F fill:#d4edda,stroke:#28a745
+```
+
 ជាញឹកញាប់ អ្នកប្រហែលជាចង់សរសេរ Function មួយដែលអាចធ្វើការងារច្រើនរបៀប។ 
 ឧទាហរណ៍៖ Function `makeDate` ដែលអាចទទួលយក **វិនាទី (Timestamp ជាលេខ)** ឬ **ថ្ងៃខែឆ្នាំ (Day, Month, Year ជាលេខ ៣)**។
 
@@ -77,3 +89,12 @@ const d2 = makeDate(5, 5, 5);
 ```
 
 នេះគឺជាវិធីដ៏ល្អបំផុតក្នុងការគ្រប់គ្រងអោយច្បាស់លាស់ថា តើអ្នកប្រើប្រាស់អាចបញ្ជូនអ្វីខ្លះមកកាន់ Function របស់អ្នក!
+
+---
+
+## ⚖️ Union Types vs Function Overloading
+
+ពេលខ្លះអ្នកអាចនឹងឆ្ងល់ថា តើពេលណាគួរប្រើ Union Types ហើយពេលណាគួរប្រើ Overloading?
+
+- **ប្រើ Union Types:** ពេលដែល Logic របស់កូដគឺដូចគ្នាទាំងស្រុង ទោះបីជាអ្នកបញ្ជូនអ្វីចូលក៏ដោយ។ ឧទាហរណ៍៖ `printMessage(msg: string | number)`។
+- **ប្រើ Function Overloading:** ពេលដែល ចំនួន Parameter ខុសគ្នា ឬ Return Type ប្រែប្រួលទៅតាម Parameter ដែលបញ្ជូនចូល។ ឧទាហរណ៍៖ `makeDate` ខាងលើ ដែលទាមទារ Parameter ចំនួន ១ ឫ ចំនួន ៣។ វាជួយការពារកុំអោយអ្នកប្រើប្រាស់បញ្ជូន Parameter ចំនួន ២ ដែលជាការខុសឆ្គង។

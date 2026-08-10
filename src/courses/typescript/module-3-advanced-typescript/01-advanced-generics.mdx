@@ -22,6 +22,14 @@ quiz:
 **Generics** (តំណាងដោយអក្សរ `<T>`) គឺប្រៀបដូចជា **"អថេរសម្រាប់ទុក Type"** អញ្ចឹង។ 
 វាអនុញ្ញាតអោយយើងសរសេរ Function ឬកូដម្តង តែអាចប្រើបានជាមួយប្រភេទទិន្នន័យច្រើនមុខ។
 
+```mermaid
+flowchart LR
+    A["T (Any Type)"] -->|extends| B["Constraint (Must have length)"]
+    B --> C["T (Safe to use .length)"]
+    
+    style B fill:#ffeeba,stroke:#ffc107
+```
+
 ```ts
 // T អាចជា string, number ឫប្រភេទអ្វីក៏បាន អាស្រ័យលើពេលគេហៅវា
 function identity<T>(value: T): T {

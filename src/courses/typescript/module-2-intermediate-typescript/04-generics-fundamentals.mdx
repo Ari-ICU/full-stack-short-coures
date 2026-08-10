@@ -1,0 +1,94 @@
+---
+title: Generics Fundamentals
+description: ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃ Generics ដែលជាមុខងារដ៏មានឥទ្ធិពលបំផុតមួយរបស់ TypeScript សម្រាប់បង្កើតអនុគមន៍ ឫ Components ដែលអាចបត់បែនបានជាមួយគ្រប់ប្រភេទទិន្នន័យ (Reusable).
+objectives:
+  - យល់ពីមូលហេតុដែលយើងត្រូវការ Generics
+  - ចេះបង្កើត Generic Function ងាយៗដោយប្រើ `<T>`
+  - យល់ពីការបញ្ជូន Type ទៅអោយអថេរ Generic (Type Argument)
+module: module-2-intermediate-typescript
+order: 4
+quiz:
+  - question: "តើអក្សរ `<T>` នៅក្នុងកូដ `function identity<T>(value: T): T` តំណាងអោយអ្វី?"
+    options:
+      - "\"វាជាអក្សរកាត់របស់ពាក្យថា Text\""
+      - "\"វាជាអថេរ (Variable) ពិសេសមួយដែលមិនមែនសម្រាប់ផ្ទុកទិន្នន័យទេ តែសម្រាប់ផ្ទុក 'ប្រភេទទិន្នន័យ' (Type) ដើម្បីអោយ Function អាចផ្លាស់ប្តូរ Type របស់វាទៅតាមអ្វីដែលយើងបញ្ជូនអោយនៅពេលហៅវា។\""
+      - "\"វាគ្រាន់តែជាការឌីហ្សាញ (Design) របស់កូដអោយមើលទៅស្អាត\""
+      - "\"វាមានន័យថា Function នេះអាចប្រើបានតែជាមួយអក្សរ 'T' ប៉ុណ្ណោះ\""
+    correctAnswer: 2
+    explanation: "`T` មកពីពាក្យថា Type វាក៏ដូចជាអថេរធម្មតាដែរ (`x`, `y`) គ្រាន់តែវាសម្រាប់ផ្ទុកប្រភេទ (Type)។ យើងអាចហៅវាអ្វីក៏បាន ដូចជា `<MyType>`, ប៉ុន្តែគេនិយមប្រើ `<T>` ។"
+---
+
+## 🤔 ហេតុអ្វីយើងត្រូវការ Generics?
+
+ស្រមៃថាអ្នកចង់បង្កើតអនុគមន៍មួយដែលគ្រាន់តែទទួលយកតម្លៃអ្វីមួយ រួចប្រគល់តម្លៃនោះត្រលប់មកវិញដដែល (ហៅថា Identity Function)។
+
+ប្រសិនបើអ្នកប្រើប្រាស់ប្រភេទជាក់លាក់៖
+```ts
+function identityNumber(value: number): number {
+  return value;
+}
+function identityString(value: string): string {
+  return value;
+}
+// អ្នកនឹងត្រូវសរសេរ Function ដដែលៗរាប់សិបដងសម្រាប់គ្រប់ Types!
+```
+
+ប្រសិនបើអ្នកប្រើ `any` អ្នកនឹងបាត់បង់សុវត្ថិភាពទាំងអស់៖
+```ts
+function identityAny(value: any): any {
+  return value;
+}
+const result = identityAny(10); // result ກາຍជា any! មិនមែន number ទេ
+```
+
+តើមានវិធីណាដែលអាចអោយ Function នេះទទួលយកប្រភេទអ្វីក៏បាន ប៉ុន្តែនៅតែអាចចងចាំថាវាបានទទួលប្រភេទអ្វី ដើម្បីប្រគល់មកវិញអោយត្រឹមត្រូវ?
+ចម្លើយគឺ **Generics**!
+
+---
+
+## 🧬 ការប្រើប្រាស់ Generics
+
+**Generics** អនុញ្ញាតអោយយើងបង្កើត "អថេរសម្រាប់ប្រភេទទិន្នន័យ" (Type Variable) ដែលជាទូទៅគេតំណាងដោយអក្សរ **`<T>`**។
+
+```mermaid
+flowchart TD
+    A["identity<string>('Hello')"] --> B{identity&lt;T&gt;(value: T): T}
+    B -->|T becomes string| C["Returns 'Hello' (type: string)"]
+    
+    D["identity<number>(100)"] --> B
+    B -->|T becomes number| E["Returns 100 (type: number)"]
+    
+    style B fill:#3178c6,stroke:#fff,color:#fff
+```
+
+```ts
+// យើងប្រកាសថា Function នេះមានអថេរ Type មួយឈ្មោះថា T 
+// ហើយតម្លៃដែលវាទទួល (value) គឺមានប្រភេទ T, ព្រមទាំងលទ្ធផលបញ្ចេញមកវិញក៏ T ដែរ។
+function identity<T>(value: T): T {
+  return value;
+}
+```
+
+ឥឡូវនេះនៅពេលយើងហៅវា យើងអាចប្រាប់វាពីតម្លៃនៃ `T` បាន៖
+
+```ts
+// យើងប្រាប់វាថា T គឺជា string
+const strResult = identity<string>("Hello"); // លទ្ធផល: ជាអក្សរ
+
+// យើងប្រាប់វាថា T គឺជា number
+const numResult = identity<number>(100); // លទ្ធផល: ជាលេខ
+```
+
+### ភាពវៃឆ្លាតរបស់ TypeScript (Type Argument Inference)
+
+ជាទូទៅ អ្នកមិនចាំបាច់សរសេរ `<string>` ឫ `<number>` គ្រប់ពេលនោះទេ! TypeScript ឆ្លាតគ្រប់គ្រាន់ក្នុងការមើលតម្លៃទិន្នន័យ ហើយស្មានដឹងថា `T` គួរតែជាអ្វី!
+
+```ts
+// TypeScript ឃើញ 20 ជាលេខ ដូច្នេះវាកំណត់ T = number ដោយស្វ័យប្រវត្តិ
+const autoNum = identity(20); 
+
+// TypeScript ឃើញ true ជា boolean ដូច្នេះវាកំណត់ T = boolean ដោយស្វ័យប្រវត្តិ
+const autoBool = identity(true); 
+```
+
+> 💡 **ចំណាំ:** Generics គឺប្រៀបដូចជា Parameters របស់អនុគមន៍អញ្ចឹង ប៉ុន្តែជា Parameter សម្រាប់ Type (មិនមែនសម្រាប់ Value ទេ)។ ការយល់ដឹងពី Generics មូលដ្ឋាននេះ គឺចាំបាច់បំផុតមុននឹងឈានទៅដល់ការប្រើប្រាស់ Generic ស្មុគស្មាញៗនៅក្នុង React (ដូចជា `useState<User>()`)។

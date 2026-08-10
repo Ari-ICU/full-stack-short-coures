@@ -19,6 +19,17 @@ quiz:
 
 ## 🔠 អ្វីទៅជា Template Literal Types?
 
+```mermaid
+flowchart LR
+    A["'top' | 'bottom'"] --> B{"`m-${Position}`"}
+    C["'red' | 'blue'"] --> D{"`btn-${Color}`"}
+    B --> E["'m-top' | 'm-bottom'"]
+    D --> F["'btn-red' | 'btn-blue'"]
+    
+    style E fill:#d4edda,stroke:#28a745
+    style F fill:#d4edda,stroke:#28a745
+```
+
 អ្នកប្រហែលជាធ្លាប់ប្រើ Template Literals នៅក្នុង JavaScript ហើយ ដែលយើងប្រើសញ្ញា (``) ដើម្បីបូកអក្សរនិងអថេរចូលគ្នា ឧទាហរណ៍ `` `សួស្តី ${name}` ``។
 
 នៅក្នុង TypeScript 4.1 ឡើងទៅ យើងអាចប្រើប្រាស់ក្បួននេះ **ដើម្បីបង្កើត Types** បាន! វាមានថាមពលខ្លាំងណាស់ក្នុងការបង្កើតរូបរាងអក្សរ (String Literals) ដែលមានទម្រង់ជាក់លាក់ណាមួយ។

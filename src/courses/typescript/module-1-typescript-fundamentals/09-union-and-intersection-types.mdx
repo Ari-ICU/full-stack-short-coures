@@ -1,0 +1,91 @@
+---
+title: Union & Intersection Types
+description: ស្វែងយល់ពីរបៀបច្របាច់បញ្ចូលគ្នាឫផ្សំប្រភេទ (Types) ផ្សេងៗគ្នាដោយប្រើប្រាស់ Union ( | ) និង Intersection ( & ) នៅក្នុង TypeScript។
+objectives:
+  - ចេះប្រើប្រាស់ Union (`|`) ដើម្បីអនុញ្ញាតអោយអថេរមួយមានប្រភេទច្រើនជាងមួយ
+  - ចេះប្រើប្រាស់ Intersection (`&`) ដើម្បីបូកបញ្ចូល Object Types បញ្ចូលគ្នា
+module: module-1-typescript-fundamentals
+order: 9
+quiz:
+  - question: "តើការប្រើប្រាស់សញ្ញា `|` (Union) ក្នុងកូដ `let id: string | number;` មានន័យយ៉ាងដូចម្តេច?"
+    options:
+      - "\"អថេរ `id` ត្រូវតែជាអក្សរ (string) ប៉ុន្តែវានឹងប្រែជាលេខ (number) នៅពេល Run\""
+      - "\"អថេរ `id` អាចផ្ទុកទិន្នន័យជាប្រភេទអក្សរក៏បាន ឫជាប្រភេទលេខក៏បាន\""
+      - "\"វាមានន័យថា `string` ត្រូវបានបែងចែក (Divided) ដោយ `number`\""
+      - "\"វាជាកំហុស (Error) ព្រោះអថេរមួយមិនអាចមាន Type ពីរបានទេ\""
+    correctAnswer: 2
+    explanation: "Union Type (`|`) មានន័យថា 'ឬ' (OR)។ ដូច្នេះ `string | number` មានន័យថាអថេរនោះអាចជាអក្សរ 'ឫ' ជាលេខ ដែលវាមានប្រយោជន៍ខ្លាំងពេលធ្វើការជាមួយ API ផ្សេងៗ។"
+---
+
+## 🔀 Union Types (សហភាពប្រភេទ)
+
+ពេលខ្លះ អ្នករំពឹងថាអថេរមួយអាចមានប្រភេទទិន្នន័យខុសៗគ្នាទៅតាមកាលៈទេសៈ។ 
+ឧទាហរណ៍៖ លេខកូដសម្គាល់ (ID) របស់អ្នកប្រើប្រាស់ វាអាចជាលេខ `101` ឬវាអាចជាអក្សរ `"abc-123"`។
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងប្រើប្រាស់ **Union Type** តាមរយៈសញ្ញា បន្ទាត់ត្រង់ `|` (អានថា OR)។
+
+```mermaid
+venn
+    title Union Type (A | B)
+    "string"
+    "number"
+    "id: string | number"
+```
+
+```ts
+// id អាចជា អក្សរ ក៏បាន លេខ ក៏បាន
+let id: string | number;
+
+id = 101;       // ✅ ត្រឹមត្រូវ
+id = "abc-123"; // ✅ ត្រឹមត្រូវ
+// id = true;   // ❌ Error! ព្រោះមិនមែនជាអក្សរ ឫលេខ
+```
+
+### ការប្រើប្រាស់ជាមួយ Array
+បើអ្នកចង់បានបញ្ជីមួយដែលអាចផ្ទុកទាំងអក្សរនិងលេខ អ្នកអាចសរសេរវាដោយប្រើរង្វង់ក្រចក៖
+
+```ts
+let mixedArray: (string | number)[] = [1, "Two", 3, "Four"];
+```
+
+---
+
+## 🔗 Intersection Types (ការប្រសព្វប្រភេទ)
+
+ផ្ទុយពី Union ដែលមានន័យថា "ឫ" (OR), **Intersection Type** តំណាងអោយពាក្យថា **"និង" (AND)**។ 
+វាត្រូវបានប្រើជាចម្បងដើម្បី **បូកបញ្ចូល Object Types ពីរឬច្រើន** បញ្ចូលគ្នាទៅជាមួយ តាមរយៈសញ្ញា `&`។
+
+```mermaid
+venn
+    title Intersection Type (A & B)
+    "Admin Type"
+    "User Type"
+    "AdminUser = Admin & User"
+```
+
+ឧទាហរណ៍៖ អ្នកមាន Type ទូទៅមួយឈ្មោះថា `User` ហើយអ្នកចង់បង្កើត Type ថ្មីមួយទៀតឈ្មោះ `AdminUser` ដែលមានទាំងលក្ខណៈរបស់ `User` ផង និងមានសិទ្ធិពិសេសថែមទៀត។
+
+```ts
+type User = {
+  name: string;
+  email: string;
+};
+
+type Admin = {
+  role: string;
+  manageUsers: boolean;
+};
+
+// បូកបញ្ចូល User និង Admin ទៅជាមួយគ្នា
+type AdminUser = User & Admin;
+
+// ពេលនេះ AdminUser ត្រូវតែមាន Properties ទាំងអស់ពីទាំងពីរ!
+const myAdmin: AdminUser = {
+  name: "Ratha",
+  email: "admin@test.com",
+  role: "SuperAdmin",
+  manageUsers: true
+};
+```
+
+ការប្រើប្រាស់ Intersection ធ្វើអោយអ្នកមិនបាច់សរសេរ Properties ដដែលៗឡើងវិញ ហើយវាជួយអោយកូដមានភាពម៉ត់ចត់ (DRY - Don't Repeat Yourself)។

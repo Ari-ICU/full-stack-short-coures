@@ -1,0 +1,77 @@
+---
+title: Type Guards
+description: ស្វែងយល់ពីរបៀបបង្កើតអនុគមន៍ការពារប្រភេទ (Type Guard Functions) ដើម្បីកំណត់ប្រភេទទិន្នន័យអោយច្បាស់លាស់ ពិសេសនៅពេលធ្វើការជាមួយទិន្នន័យចេញពី API (Unknown types)។
+objectives:
+  - យល់ពីអ្វីទៅជា Custom Type Guard
+  - ចេះប្រើប្រាស់ `value is Type`
+  - ចេះឆែកទិន្នន័យ `unknown` អោយមានសុវត្ថិភាព
+module: module-2-intermediate-typescript
+order: 2
+quiz:
+  - question: "តើ Syntax `value is User` នៅក្នុង Return Type របស់ Function មានន័យដូចម្តេច?"
+    options:
+      - "\"វាជាកំហុស គួរតែសរសេរ `boolean` វិញ\""
+      - "\"វាប្រាប់ TypeScript ថា ប្រសិនបើ Function នេះ Return លទ្ធផល `true` នោះមានន័យថាអថេរ `value` ពិតជាមានប្រភេទជា `User` ប្រាកដមែន!\""
+      - "\"វាធ្វើអោយតម្លៃ `value` ក្លាយទៅជា User ដោយស្វ័យប្រវត្តិទោះជាវាខុសក៏ដោយ\""
+      - "\"វាប្រើសម្រាប់ប្តូរឈ្មោះអថេរ\""
+    correctAnswer: 2
+    explanation: "`value is Type` ត្រូវបានគេហៅថា Type Predicate។ វាមានប្រយោជន៍ខ្លាំងណាស់ក្នុងការប្រាប់ (អះអាង) ទៅកាន់ប្រព័ន្ធរបស់ TypeScript នូវលទ្ធផលនៃការពិនិត្យរបស់យើង។"
+---
+
+## 🛡️ អ្វីទៅជា Type Guards?
+
+នៅក្នុងមេរៀនមុន អ្នកបានរៀនពីការប្រើប្រាស់ `typeof` ឬ `in` ដើម្បីឆែកលក្ខខណ្ឌ។ នេះគឺជា Type Guards ដែលមានស្រាប់។
+ប៉ុន្តែពេលខ្លះ ការឆែកលក្ខខណ្ឌមានភាពស្មុគស្មាញ (ឧទាហរណ៍៖ ការឆែកទិន្នន័យ `User` ដែលបានមកពី API ថាមាន `name`, `email`, និង `id` ត្រឹមត្រូវឫអត់)។ 
+ការសរសេរ `if` វែងៗរាល់ពេល គឺជារឿងហត់នឿយណាស់!
+
+ដំណោះស្រាយគឺយើងអាចបង្កើត **អនុគមន៍ផ្ទាល់ខ្លួន (Custom Type Guard Function)** សម្រាប់ធ្វើរឿងនេះ។
+
+```mermaid
+flowchart LR
+    A["API Data<br>(unknown)"] --> B{isUser(data)}
+    B -- true --> C["data is User<br>(Safe to use)"]
+    B -- false --> D["Throw Error / Handle"]
+    
+    style B fill:#17a2b8,stroke:#fff,color:#fff
+```
+
+## ការបង្កើត Type Guard (ប្រើប្រាស់ `is`)
+
+ដើម្បីអោយអនុគមន៍របស់អ្នកក្លាយជា Type Guard អ្នកត្រូវប្រើប្រាស់អ្វីដែលគេហៅថា **Type Predicate** (`អថេរ is ប្រភេទ`) ជំនួសអោយ `boolean` នៅត្រង់ Return Type។
+
+```ts
+interface User {
+  id: number;
+  name: string;
+}
+
+// នេះគឺជា Custom Type Guard
+// បើ return true នោះ 'value' គឺជា 'User' ប្រាកដមែន
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === "object" && // ត្រូវតែជា object
+    value !== null &&            // មិនមែនជា null
+    "id" in value &&             // ត្រូវមាន id
+    "name" in value              // ត្រូវមាន name
+  );
+}
+```
+
+### របៀបយកមកប្រើប្រាស់
+
+នៅពេលដែលអ្នកហៅប្រើអនុគមន៍ `isUser` នៅក្នុង `if` លក្ខខណ្ឌ TypeScript នឹងជឿជាក់លើវា ហើយបង្រួមប្រភេទ (Narrow) អោយអ្នកភ្លាមៗ!
+
+```ts
+function handleData(apiResponse: unknown) {
+  // មុនពេលឆែក apiResponse មិនអាចប្រើបានទេ ព្រោះវា unknown
+  
+  if (isUser(apiResponse)) {
+    // ចូលដល់ក្នុងនេះ apiResponse ត្រូវបានស្គាល់ថាជា User ពេញសិទ្ធិ!
+    console.log("Welcome,", apiResponse.name);
+  } else {
+    console.log("ទិន្នន័យមិនត្រឹមត្រូវ!");
+  }
+}
+```
+
+ការសរសេរ Custom Type Guards គឺជារឿងដែលអ្នកអភិវឌ្ឍន៍ Senior តែងតែធ្វើនៅពេលពួកគេទាញយកទិន្នន័យពី Server មកបង្ហាញនៅលើ Frontend (ឧទាហរណ៍ ប្រើជាមួយ `fetch` ឬ `axios`)។

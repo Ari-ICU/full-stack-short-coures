@@ -20,6 +20,13 @@ quiz:
 
 ## 🗺️ អ្វីទៅជា Mapped Types?
 
+```mermaid
+flowchart LR
+    A["User Type<br>{ name, age, email }"] -->|Mapped Type| B["UserChecklist<br>{ name: boolean, age: boolean, email: boolean }"]
+    
+    style B fill:#3178c6,stroke:#fff,color:#fff
+```
+
 ស្រមៃថាអ្នកមានរូបរាង Object (Type) មួយដែលផ្ទុកព័ត៌មានអតិថិជន។ ថ្ងៃមួយ មេរបស់អ្នកប្រាប់ថា គាត់ចង់បានរូបរាង Object ថ្មីមួយទៀតដែលមានឈ្មោះ Properties ដូចគ្នាទាំងអស់ គ្រាន់តែចង់ប្តូរប្រភេទទិន្នន័យទៅជា `boolean` សុទ្ធ (ឧ. ដើម្បីកត់ត្រាថាគាត់បានបំពេញវាហើយឫនៅ)!
 
 ```ts

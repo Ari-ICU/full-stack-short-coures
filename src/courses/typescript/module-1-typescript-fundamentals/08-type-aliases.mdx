@@ -22,6 +22,14 @@ quiz:
 
 **Type Alias** គឺគ្រាន់តែជាការបង្កើត **"ឈ្មោះហៅក្រៅ"** ផ្ទាល់ខ្លួនរបស់អ្នក សម្រាប់ប្រភេទទិន្នន័យណាមួយ ដើម្បីកុំអោយអ្នកសរសេរវាដដែលៗ។
 
+```mermaid
+flowchart LR
+    A["{ id: number, name: string }"] -->|Alias| B["type User"]
+    B -.-> C["function printUser(user: User)"]
+    B -.-> D["function updateEmail(user: User, ...)"]
+    style B fill:#3178c6,stroke:#fff,color:#fff
+```
+
 ស្រមៃមើលថាអ្នកមាន Function មួយដែលទទួលទិន្នន័យអ្នកប្រើប្រាស់ (User) ដែលមានលក្ខណៈស្មុគស្មាញ៖
 
 ```ts

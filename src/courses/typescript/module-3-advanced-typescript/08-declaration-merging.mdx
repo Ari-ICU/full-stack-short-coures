@@ -19,6 +19,15 @@ quiz:
 
 ## 🤝 អ្វីទៅជា Declaration Merging?
 
+```mermaid
+flowchart TD
+    A["interface Box { height, width }"] --> C{"Merged by TypeScript"}
+    B["interface Box { scale }"] --> C
+    C --> D["interface Box { height, width, scale }"]
+    
+    style C fill:#3178c6,stroke:#fff,color:#fff
+```
+
 **Declaration Merging** គឺជាសមត្ថភាពរបស់កម្មវិធីបកប្រែ (Compiler) របស់ TypeScript ក្នុងការយកការប្រកាស (Declarations) ពីរឫច្រើនដែលមាន **"ឈ្មោះដូចគ្នា"** មកបូកបញ្ចូលគ្នាអោយក្លាយទៅជាការប្រកាសតែមួយ (មានន័យថាវាបូកបញ្ជូល Properties ទាំងអស់ចូលគ្នា)។
 
 ក្បួននេះភាគច្រើនកើតឡើងទៅលើ **`interface`** (មិនអាចប្រើជាមួយ `type` បានទេ)!
