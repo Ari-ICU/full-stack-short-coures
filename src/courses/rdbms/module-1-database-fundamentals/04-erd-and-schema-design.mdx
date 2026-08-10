@@ -5,8 +5,8 @@ objectives:
   - "យល់ពីយន្តការគិត (Problem Solving Workflow) ក្នុងការរចនា Database"
   - "ចេះបំប្លែងតម្រូវការអាជីវកម្ម (Business Requirements) ទៅជា Entities និង Relationships"
   - "យល់ពីការគូសវាស ERD (Entity Relationship Diagram)"
-module: module-1-database-design
-order: 3
+module: module-1-database-fundamentals
+order: 4
 quiz:
   - question: នៅក្នុងដំណាក់កាលបំប្លែងតម្រូវការទៅជា ERD តើ "នាម" (Nouns) ដូចជា "សិស្ស", "គ្រូ", "ថ្នាក់រៀន" ជាទូទៅតំណាងអោយអ្វីនៅក្នុង Database?
     options:
@@ -35,7 +35,24 @@ quiz:
 ### ជំហានទី ៣៖ ស្វែងរក "កិរិយា" (Identify Relationships)
 តើ Entities ទាំងនោះមានទំនាក់ទំនងគ្នាដូចម្តេច?
 *ឧទាហរណ៍៖ "អ្នកប្រើប្រាស់ម្នាក់ អាចទិញទំនិញបានច្រើន។"*
-➡️ នេះគឺជាទំនាក់ទំនង (Relationship) ប្រភេទ **One-to-Many**។ យើងប្រហែលជាត្រូវការតារាងកណ្តាលមួយឈ្មោះថា `orders`។
+➡️ នេះគឺជាទំនាក់ទំនង (Relationship) ប្រភេទ **One-to-Many**។
+
+---
+
+## 🔗 Cardinality (ទំហំនៃទំនាក់ទំនង)
+
+នៅក្នុងការរចនា Database យើងត្រូវដឹងអោយច្បាស់ពីទំហំនៃទំនាក់ទំនង ដែលយើងហៅថា **Cardinality**:
+
+1. **One-to-One (1:1):** 
+   *ឧទាហរណ៍៖ User ម្នាក់មាន Profile តែមួយគត់។*
+2. **One-to-Many (1:N):** 
+   *ឧទាហរណ៍៖ User ម្នាក់អាចទិញទំនិញ (Orders) ច្រើនដង។* 
+   `User 1 ───── N Orders`
+3. **Many-to-Many (N:M):** 
+   *ឧទាហរណ៍៖ Order មួយអាចមានទំនិញ (Products) ច្រើន ហើយ Product មួយប្រភេទអាចស្ថិតនៅក្នុង Orders ច្រើន។*
+   `Orders N ───── M Products`
+
+> ⚠️ **ចំណាំសំខាន់:** RDBMS មិនអាចបង្កើតទំនាក់ទំនង Many-to-Many ដោយផ្ទាល់បានទេ! យើងត្រូវតែបង្កើតតារាងកណ្តាលមួយ (Junction Table)។ ដូច្នេះទំនាក់ទំនង `Orders` និង `Products` ត្រូវផ្សារភ្ជាប់គ្នាដោយតារាងកណ្តាលឈ្មោះថា `OrderItems`។
 
 ---
 
