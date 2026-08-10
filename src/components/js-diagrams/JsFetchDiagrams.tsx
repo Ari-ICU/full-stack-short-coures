@@ -452,7 +452,7 @@ export function FetchDomRenderDiagram() {
           <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1">
             <div className="text-gray-400 mb-1">{"// JavaScript code running behind the scenes:"}</div>
             <div className={state === "loading" ? "text-indigo-400 font-bold" : "text-gray-500"}>
-              btn.addEventListener(<span className="text-yellow-300">"click"</span>, handleFetch);
+              btn.addEventListener(<span className="text-yellow-300">&quot;click&quot;</span>, handleFetch);
             </div>
             <div className={state === "loading" ? "text-indigo-400 font-bold" : "text-gray-500"}>
               {"const response = await fetch(url);       "}

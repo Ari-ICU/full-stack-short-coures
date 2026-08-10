@@ -84,9 +84,9 @@ export function LocalStorageBasicDiagram() {
               {store.map(e => (
                 <div key={e.key} className={`flex items-center justify-between rounded-lg px-3 py-1.5 border transition-all ${activeOp === "get" && getKey === e.key ? "border-green-400 bg-green-50 dark:bg-green-950/20" : activeOp === "set" && newKey === e.key ? "border-blue-400 bg-blue-50 dark:bg-blue-950/20" : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"}`}>
                   <span className="text-xs font-mono">
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">"{e.key}"</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">&quot;{e.key}&quot;</span>
                     <span className="text-gray-400 mx-1">:</span>
-                    <span className="text-green-600 dark:text-green-400">"{e.value}"</span>
+                    <span className="text-green-600 dark:text-green-400">&quot;{e.value}&quot;</span>
                   </span>
                   <button onClick={() => doRemove(e.key)}
                     className="text-[10px] text-red-400 hover:text-red-600 cursor-pointer font-bold ml-2">✕</button>
@@ -221,7 +221,7 @@ export function LocalStorageJsonDiagram() {
               <div className="flex flex-wrap gap-1.5">
                 {loadedCart.map((item, i) => (
                   <span key={i} className="px-2 py-1 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-mono border border-green-200 dark:border-green-800">
-                    [{i}]: "{item}"
+                    [{i}]: &quot;{item}&quot;
                   </span>
                 ))}
               </div>

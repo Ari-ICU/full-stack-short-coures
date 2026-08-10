@@ -29,15 +29,6 @@ function PanelHeader({ label, badge }: { label: string; badge: string }) {
   );
 }
 
-function LiveCss({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/60 p-3 text-xs font-mono">
-      <div className="text-gray-700 dark:text-gray-300 text-[10px] uppercase tracking-widest font-sans mb-1 font-bold">Live Output</div>
-      {children}
-    </div>
-  );
-}
-
 // ─── 1. Data Types Diagram ────────────────────────────────────────────────────
 const JS_TYPES = [
   { name: "string",    color: "#22c55e", example: '"Hello, World!"',  desc: "អក្សរ — ស្ថិតក្នុង quotes" },
@@ -80,9 +71,9 @@ export function DataTypesDiagram() {
           <div className="space-y-3">
             <div className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Usage</div>
             <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1">
-              <div className="text-gray-400">// declare</div>
+              <div className="text-gray-400">{"// declare"}</div>
               {t.name === "string" && <>
-                <div className="text-green-400">const name = <span className="text-yellow-300">"Hello"</span>;</div>
+                <div className="text-green-400">const name = <span className="text-yellow-300">&quot;Hello&quot;</span>;</div>
                 <div className="text-green-400">const msg = <span className="text-yellow-300">`Hi, ${"{name}"}`</span>;</div>
               </>}
               {t.name === "number" && <>
@@ -94,23 +85,23 @@ export function DataTypesDiagram() {
                 <div className="text-orange-400">const isEmpty = <span className="text-purple-300">false</span>;</div>
               </>}
               {t.name === "null" && <>
-                <div className="text-purple-400">let user = <span className="text-gray-300">null</span>; <span className="text-gray-500">// empty</span></div>
+                <div className="text-purple-400">let user = <span className="text-gray-300">null</span>; <span className="text-gray-500">{"// empty"}</span></div>
               </>}
               {t.name === "undefined" && <>
-                <div className="text-gray-400">let score; <span className="text-gray-500">// undefined</span></div>
-                <div className="text-gray-400">console.log(score); <span className="text-gray-500">// undefined</span></div>
+                <div className="text-gray-400">let score; <span className="text-gray-500">{"// undefined"}</span></div>
+                <div className="text-gray-400">console.log(score); <span className="text-gray-500">{"// undefined"}</span></div>
               </>}
               {t.name === "object" && <>
                 <div className="text-pink-400">const user = {"{"}</div>
-                <div className="text-pink-400 pl-4">name: <span className="text-yellow-300">"Kim"</span>,</div>
+                <div className="text-pink-400 pl-4">name: <span className="text-yellow-300">&quot;Kim&quot;</span>,</div>
                 <div className="text-pink-400 pl-4">age: <span className="text-orange-300">25</span></div>
                 <div className="text-pink-400">{"}"};</div>
               </>}
               {t.name === "array" && <>
                 <div className="text-teal-400">const nums = [<span className="text-orange-300">1, 2, 3</span>];</div>
-                <div className="text-teal-400">nums[<span className="text-orange-300">0</span>]; <span className="text-gray-500">// 1</span></div>
+                <div className="text-teal-400">nums[<span className="text-orange-300">0</span>]; <span className="text-gray-500">{"// 1"}</span></div>
               </>}
-              <div className="text-gray-400 mt-1">typeof value → <span style={{ color: t.color }}>"{t.name}"</span></div>
+              <div className="text-gray-400 mt-1">typeof value → <span style={{ color: t.color }}>&quot;{t.name}&quot;</span></div>
             </div>
           </div>
         </div>
@@ -165,22 +156,22 @@ export function VariablesDiagram() {
           </div>
 
           <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1.5">
-            <div className="text-gray-400">// {keyword} examples</div>
+            <div className="text-gray-400">{"// "}{keyword} examples</div>
             {keyword === "const" && <>
               <div><span style={{ color: d.color }}>const</span> <span className="text-white">PI</span> = <span className="text-orange-300">3.14</span>;</div>
-              <div><span style={{ color: d.color }}>const</span> <span className="text-white">user</span> = {"{"} name: <span className="text-yellow-300">"Kim"</span> {"}"};</div>
-              <div className="text-gray-400">user.name = <span className="text-yellow-300">"Lee"</span>; <span className="text-green-500">// ✅ OK (object mutation)</span></div>
-              <div className="text-red-400">user = {"{}"}; <span className="text-gray-500">// ❌ Error: reassignment</span></div>
+              <div><span style={{ color: d.color }}>const</span> <span className="text-white">user</span> = {"{"} name: <span className="text-yellow-300">&quot;Kim&quot;</span> {"}"};</div>
+              <div className="text-gray-400">user.name = <span className="text-yellow-300">&quot;Lee&quot;</span>; <span className="text-green-500">{"// ✅ OK (object mutation)"}</span></div>
+              <div className="text-red-400">user = {"{}"}; <span className="text-gray-500">{"// ❌ Error: reassignment"}</span></div>
             </>}
             {keyword === "let" && <>
               <div><span style={{ color: d.color }}>let</span> <span className="text-white">count</span> = <span className="text-orange-300">0</span>;</div>
-              <div className="text-white">count = <span className="text-orange-300">1</span>; <span className="text-green-500">// ✅ OK</span></div>
-              <div className="text-red-400"><span style={{ color: d.color }}>let</span> count = <span className="text-orange-300">2</span>; <span className="text-gray-500">// ❌ Error: redeclare</span></div>
+              <div className="text-white">count = <span className="text-orange-300">1</span>; <span className="text-green-500">{"// ✅ OK"}</span></div>
+              <div className="text-red-400"><span style={{ color: d.color }}>let</span> count = <span className="text-orange-300">2</span>; <span className="text-gray-500">{"// ❌ Error: redeclare"}</span></div>
             </>}
             {keyword === "var" && <>
               <div><span style={{ color: d.color }}>var</span> <span className="text-white">x</span> = <span className="text-orange-300">1</span>;</div>
-              <div><span style={{ color: d.color }}>var</span> <span className="text-white">x</span> = <span className="text-orange-300">2</span>; <span className="text-yellow-400">// ⚠️ no error</span></div>
-              <div className="text-yellow-400">console.log(y); <span className="text-gray-500">// undefined (hoisted)</span></div>
+              <div><span style={{ color: d.color }}>var</span> <span className="text-white">x</span> = <span className="text-orange-300">2</span>; <span className="text-yellow-400">{"// ⚠️ no error"}</span></div>
+              <div className="text-yellow-400">console.log(y); <span className="text-gray-500">{"// undefined (hoisted)"}</span></div>
               <div><span style={{ color: d.color }}>var</span> <span className="text-white">y</span> = <span className="text-orange-300">5</span>;</div>
             </>}
           </div>
@@ -324,17 +315,17 @@ export function ArithmeticDiagram() {
           </div>
           {/* Code */}
           <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1.5">
-            <div className="text-gray-400">// JavaScript</div>
+            <div className="text-gray-400">{"// JavaScript"}</div>
             <div><span className="text-blue-400">let</span> <span className="text-white">a</span> = <span className="text-orange-300">{a}</span>;</div>
             <div><span className="text-blue-400">let</span> <span className="text-white">b</span> = <span className="text-orange-300">{b}</span>;</div>
             <div className="mt-2">
               <span className="text-white">a <span style={{ color: current.color }}>{current.op}</span> b</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span style={{ color: current.color }}>{String(result)}</span>
             </div>
             {op === "%" && <div className="text-gray-500 text-[10px] mt-2">{a} ÷ {b} = {Math.floor(a/b)} remainder {a % b}</div>}
             {op === "**" && <div className="text-gray-500 text-[10px] mt-2">{a} × {a} × … ({b} times)</div>}
-            {op === "+" && <div className="text-gray-500 text-[10px] mt-2">"hello" + "world" = "helloworld" (string concat)</div>}
+            {op === "+" && <div className="text-gray-500 text-[10px] mt-2">&quot;hello&quot; + &quot;world&quot; = &quot;helloworld&quot; (string concat)</div>}
           </div>
         </div>
       </div>
@@ -378,7 +369,7 @@ export function ComparisonDiagram() {
               <span className="text-orange-300">{pair.left}</span>
               <span className="text-yellow-400"> == </span>
               <span className="text-orange-300">{pair.right}</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span className={pair.loose ? "text-green-400" : "text-red-400"}>{String(pair.loose)}</span>
             </div>
             <div className="text-[11px] font-semibold rounded-lg px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
@@ -392,7 +383,7 @@ export function ComparisonDiagram() {
               <span className="text-orange-300">{pair.left}</span>
               <span className="text-green-400"> === </span>
               <span className="text-orange-300">{pair.right}</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span className={pair.strict ? "text-green-400" : "text-red-400"}>{String(pair.strict)}</span>
             </div>
             <div className="text-[11px] font-semibold rounded-lg px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
@@ -409,6 +400,12 @@ export function ComparisonDiagram() {
 }
 
 // ─── 6. Logical Operators Diagram ────────────────────────────────────────────
+const TruthBadge = ({ val }: { val: boolean }) => (
+  <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold ${val ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" : "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"}`}>
+    {String(val)}
+  </span>
+);
+
 export function LogicalDiagram() {
   const [a, setA] = useState(true);
   const [b, setB] = useState(false);
@@ -417,11 +414,7 @@ export function LogicalDiagram() {
   const or  = a || b;
   const notA = !a;
 
-  const TruthBadge = ({ val }: { val: boolean }) => (
-    <span className={`inline-block px-2 py-0.5 rounded-md text-xs font-bold ${val ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300" : "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400"}`}>
-      {String(val)}
-    </span>
-  );
+
 
   return (
     <div className="not-prose my-8 font-sans select-none">
@@ -452,7 +445,7 @@ export function LogicalDiagram() {
               <span className={a ? "text-green-400" : "text-red-400"}>{String(a)}</span>
               <span className="text-purple-400"> && </span>
               <span className={b ? "text-green-400" : "text-red-400"}>{String(b)}</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span className={and ? "text-green-400" : "text-red-400"}>{String(and)}</span>
             </div>
             <div className="mt-2 text-[11px] text-gray-800 dark:text-gray-200">ពិត លុះត្រាតែ <strong>ទាំងពីរ</strong> ពិតទាំងអស់</div>
@@ -468,7 +461,7 @@ export function LogicalDiagram() {
               <span className={a ? "text-green-400" : "text-red-400"}>{String(a)}</span>
               <span className="text-blue-400"> || </span>
               <span className={b ? "text-green-400" : "text-red-400"}>{String(b)}</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span className={or ? "text-green-400" : "text-red-400"}>{String(or)}</span>
             </div>
             <div className="mt-2 text-[11px] text-gray-800 dark:text-gray-200">ពិត បើ <strong>មួយណា</strong>ក៏បានពិត</div>
@@ -483,7 +476,7 @@ export function LogicalDiagram() {
             <div className="bg-gray-900 rounded-lg p-3 text-xs font-mono">
               <span className="text-orange-400">!</span>
               <span className={a ? "text-green-400" : "text-red-400"}>{String(a)}</span>
-              <span className="text-gray-400"> // </span>
+              <span className="text-gray-400">{" // "}</span>
               <span className={notA ? "text-green-400" : "text-red-400"}>{String(notA)}</span>
             </div>
             <div className="mt-2 text-[11px] text-gray-800 dark:text-gray-200">បញ្ច្រាស (flip) — true → false, false → true</div>
@@ -604,7 +597,7 @@ export function ModernOperatorsDiagram() {
                 <span className="text-white">address</span>
                 <span className="text-violet-400">?.</span>
                 <span className="text-white">city</span>
-                <span className="text-gray-400"> // </span>
+                <span className="text-gray-400">{" // "}</span>
                 <span className={hasAddress ? "text-green-400" : "text-orange-300"}>{chainResult}</span>
               </div>
             </div>
@@ -666,7 +659,7 @@ export function ImplicitConversionDiagram() {
           </div>
           {/* Code block */}
           <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-2">
-            <div className="text-gray-400">// Implicit conversion</div>
+            <div className="text-gray-400">{"// Implicit conversion"}</div>
             <div>
               <span className="text-white">console.log(</span>
               <span className={c.trap ? "text-red-400" : "text-yellow-300"}>{c.expr}</span>
@@ -770,7 +763,7 @@ export function ExplicitConversionDiagram() {
             )}
           </div>
           <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1.5">
-            <div className="text-gray-400">// Explicit conversion</div>
+            <div className="text-gray-400">{"// Explicit conversion"}</div>
             <div><span style={{ color: col }}>{fn}</span><span className="text-white">({row.val})</span></div>
             <div className="text-gray-400">{"// → "}<span style={{ color: col }}>{result}</span></div>
             <div className="mt-3 pt-3 border-t border-gray-700 space-y-1">
@@ -1158,7 +1151,7 @@ export function ForLoopDiagram() {
             </div>
             <div className="pl-4 text-yellow-300">console.log(<span className="text-green-400">&quot;ជុំទី:&quot;</span>, i);</div>
             <div className="text-white">{"}"}</div>
-            <div className="text-gray-500 mt-1">// runs {limit} times: i = 0 → {limit - 1}</div>
+            <div className="text-gray-500 mt-1">{"// runs "}{limit} times: i = 0 → {limit - 1}</div>
           </div>
         </div>
       </div>
@@ -1280,7 +1273,6 @@ const FOROFITEMS = ["Apple", "Banana", "Orange", "Mango", "Grape"];
 export function ForOfDiagram() {
   const [items, setItems] = useState(["Apple", "Banana", "Orange"]);
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
-  const [newItem, setNewItem] = useState("");
 
   return (
     <div className="not-prose my-8 font-sans select-none">
@@ -1423,7 +1415,7 @@ export function ForInDiagram() {
               console.log(<span className="text-yellow-300">`${"{"}key{"}"}: ${"{" + label}[key]{"}"}`</span>);
             </div>
             <div className="text-white">{"}"}</div>
-            <div className="mt-2 text-gray-500">// Keys: {keys.map(k => `"${k}"`).join(", ")}</div>
+            <div className="mt-2 text-gray-500">{"// Keys: "}{keys.map(k => `"${k}"`).join(", ")}</div>
           </div>
 
           <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-300 font-semibold">
@@ -1534,10 +1526,10 @@ export function ObjectCrudDiagram() {
           {/* Live code output */}
           {activeEntry && op === "read" && (
             <div className="bg-gray-900 rounded-xl p-4 text-xs font-mono space-y-1">
-              <div className="text-gray-400">// {notation} notation</div>
+              <div className="text-gray-400">{"// "}{notation} notation</div>
               {notation === "dot"
-                ? <div><span className="text-white">user.</span><span style={{ color: col }}>{activeEntry.key}</span><span className="text-gray-400"> // → </span><span className="text-yellow-300">{typeof activeEntry.value === "string" ? `"${activeEntry.value}"` : String(activeEntry.value)}</span></div>
-                : <div><span className="text-white">user[</span><span className="text-yellow-300">&quot;{activeEntry.key}&quot;</span><span className="text-white">]</span><span className="text-gray-400"> // → </span><span className="text-yellow-300">{typeof activeEntry.value === "string" ? `"${activeEntry.value}"` : String(activeEntry.value)}</span></div>}
+                ? <div><span className="text-white">user.</span><span style={{ color: col }}>{activeEntry.key}</span><span className="text-gray-400">{" // → "}</span><span className="text-yellow-300">{typeof activeEntry.value === "string" ? `"${activeEntry.value}"` : String(activeEntry.value)}</span></div>
+                : <div><span className="text-white">user[</span><span className="text-yellow-300">&quot;{activeEntry.key}&quot;</span><span className="text-white">]</span><span className="text-gray-400">{" // → "}</span><span className="text-yellow-300">{typeof activeEntry.value === "string" ? `"${activeEntry.value}"` : String(activeEntry.value)}</span></div>}
             </div>
           )}
           {op === "update" && (
@@ -1665,7 +1657,7 @@ export function ObjectDestructuringDiagram() {
               <div className="px-3 py-1.5 bg-red-50 dark:bg-red-950/30 text-[10px] uppercase font-bold text-red-600 dark:text-red-400">❌ ចាស់ (verbose)</div>
               <div className="bg-gray-900 p-3 text-xs font-mono space-y-0.5">
                 {selected.length === 0
-                  ? <div className="text-gray-500">// ជ្រើស key ខាងលើ</div>
+                  ? <div className="text-gray-500">{"// ជ្រើស key ខាងលើ"}</div>
                   : selected.map(k => (
                     <div key={k}>
                       <span className="text-blue-400">const</span>{" "}
@@ -1682,7 +1674,7 @@ export function ObjectDestructuringDiagram() {
               <div className="px-3 py-1.5 bg-violet-50 dark:bg-violet-950/30 text-[10px] uppercase font-bold text-violet-600 dark:text-violet-400">✅ Destructuring (ES6)</div>
               <div className="bg-gray-900 p-3 text-xs font-mono">
                 {selected.length === 0
-                  ? <div className="text-gray-500">// ជ្រើស key ខាងលើ</div>
+                  ? <div className="text-gray-500">{"// ជ្រើស key ខាងលើ"}</div>
                   : <>
                     <span className="text-blue-400">const</span>
                     <span className="text-white"> {"{"} </span>
@@ -1861,7 +1853,7 @@ export function ArrayBasicsDiagram() {
           {activeIdx !== null && activeIdx < items.length && editIdx === null && (
             <div className="rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-4 text-xs font-mono space-y-1">
               <div className="text-[10px] text-blue-500 uppercase font-bold mb-1">Index [{activeIdx}]</div>
-              <div><span className="text-gray-950">fruits[</span><span className="text-orange-300">{activeIdx}</span><span className="text-gray-950">]</span><span className="text-gray-400"> // → </span><span className="text-yellow-950">&quot;{items[activeIdx]}&quot;</span></div>
+              <div><span className="text-gray-950">fruits[</span><span className="text-orange-300">{activeIdx}</span><span className="text-gray-950">]</span><span className="text-gray-400">{" // → "}</span><span className="text-yellow-950">&quot;{items[activeIdx]}&quot;</span></div>
               <div className="text-gray-900 dark:text-gray-100 mt-1">array.length = {items.length} · last index = {items.length - 1}</div>
             </div>
           )}
@@ -1878,11 +1870,11 @@ export function ArrayBasicsDiagram() {
             {activeIdx !== null && activeIdx < items.length && (
               <div className="mt-1">
                 <span className="text-white">fruits[</span><span className="text-orange-300">{activeIdx}</span><span className="text-white">]</span>
-                <span className="text-gray-400"> // → </span>
+                <span className="text-gray-400">{" // → "}</span>
                 <span className="text-yellow-300">&quot;{items[activeIdx]}&quot;</span>
               </div>
             )}
-            <div className="text-gray-500 mt-1">// fruits.length = {items.length}</div>
+            <div className="text-gray-500 mt-1">{"// fruits.length = "}{items.length}</div>
           </div>
 
           <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-800 dark:text-amber-300 font-semibold">
@@ -2042,14 +2034,14 @@ export function ArrayDestructuringDiagram() {
                     <span className="text-blue-400">const</span> <span className="text-white">color{i + 1}</span> = <span className="text-white">colors[</span><span className="text-orange-300">{i}</span><span className="text-white">];</span>
                   </div>
                 ))}
-                {picks.filter((p): p is number => p !== "skip").length === 0 && <div className="text-gray-500">// ជ្រើស index</div>}
+                {picks.filter((p): p is number => p !== "skip").length === 0 && <div className="text-gray-500">{"// ជ្រើស index"}</div>}
               </div>
             </div>
             <div className="rounded-xl border-2 border-green-200 dark:border-green-800 overflow-hidden">
               <div className="px-3 py-1.5 bg-green-50 dark:bg-green-950/30 text-[10px] uppercase font-bold text-green-600">✅ Destructuring</div>
               <div className="bg-gray-900 p-3 text-xs font-mono">
                 {picks.filter((p): p is number => p !== "skip").length === 0
-                  ? <div className="text-gray-500">// ជ្រើស index</div>
+                  ? <div className="text-gray-500">{"// ជ្រើស index"}</div>
                   : <div>
                     <span className="text-blue-400">const</span> <span className="text-white">[</span>
                     <span className="text-green-400">{patternStr}</span>
@@ -2167,7 +2159,7 @@ export function ArraySpreadDiagram() {
               {extras.length > 0 && <span>, <span className="text-violet-400">{extras.map(e => `"${e}"`).join(", ")}</span></span>}
               ];
             </div>
-            <div className="text-gray-500 mt-1">// [{merged.map(i => `"${i}"`).join(", ")}]</div>
+            <div className="text-gray-500 mt-1">{"// ["}{merged.map(i => `"${i}"`).join(", ")}]</div>
           </div>
         </div>
       </div>

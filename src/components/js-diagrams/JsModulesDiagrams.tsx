@@ -85,13 +85,13 @@ export function NamedExportDiagram() {
                   <span className="text-blue-400">import</span>
                   <span className="text-yellow-300"> {"{ "}{imported.length > 0 ? imported.join(", ") : "..."}{" }"}</span>
                   <span className="text-blue-400"> from </span>
-                  <span className="text-green-300">'./math.js'</span>;
+                  <span className="text-green-300">&apos;./math.js&apos;</span>;
                 </div>
                 {imported.includes("PI") && (
-                  <div className="text-gray-300 mt-1">console.log(<span className="text-green-300">"PI:"</span>, <span className="text-blue-300">PI</span>); <span className="text-gray-500">// 3.14</span></div>
+                  <div className="text-gray-300 mt-1">console.log(<span className="text-green-300">&quot;PI:&quot;</span>, <span className="text-blue-300">PI</span>); <span className="text-gray-500">{"// 3.14"}</span></div>
                 )}
                 {imported.includes("add") && (
-                  <div className="text-gray-300">console.log(<span className="text-green-300">"add:"</span>, <span className="text-blue-300">add</span>(10, 5)); <span className="text-gray-500">// 15</span></div>
+                  <div className="text-gray-300">console.log(<span className="text-green-300">&quot;add:&quot;</span>, <span className="text-blue-300">add</span>(10, 5)); <span className="text-gray-500">{"// 15"}</span></div>
                 )}
               </div>
               {imported.length === 0 && (
@@ -148,7 +148,7 @@ export function DefaultExportDiagram() {
               <div className="pl-8"><span className="text-white">this.name</span> = <span className="text-orange-300">name</span>;</div>
               <div className="pl-4">{"}"}</div>
               <div>{"}"}</div>
-              <div className="mt-1 text-green-400"><span className="text-blue-400">export default</span> <span className="text-yellow-300">User</span>; <span className="text-gray-500">// default — no {"{ }"}</span></div>
+              <div className="mt-1 text-green-400"><span className="text-blue-400">export default</span> <span className="text-yellow-300">User</span>; <span className="text-gray-500">{"// default — no "}{"{ }"}</span></div>
             </div>
           )}
 
@@ -165,17 +165,17 @@ export function DefaultExportDiagram() {
                   <span className="text-blue-400">import</span>
                   <span className="text-yellow-300"> {importName || "User"}</span>
                   <span className="text-blue-400"> from </span>
-                  <span className="text-green-300">'./User.js'</span>;
-                  <span className="text-gray-500 ml-2">// គ្មាន {"{ }"}</span>
+                  <span className="text-green-300">&apos;./User.js&apos;</span>;
+                  <span className="text-gray-500 ml-2">{"// គ្មាន "}{"{ }"}</span>
                 </div>
                 <div className={`transition-colors ${called ? "text-green-400" : "text-gray-400"}`}>
-                  <span className="text-blue-400">const</span> user1 = <span className="text-blue-400">new</span> <span className="text-yellow-300">{importName || "User"}</span>(<span className="text-green-300">"Sok"</span>);
+                  <span className="text-blue-400">const</span> user1 = <span className="text-blue-400">new</span> <span className="text-yellow-300">{importName || "User"}</span>(<span className="text-green-300">&quot;Sok&quot;</span>);
                 </div>
-                {called && <div className="text-green-400">console.log(user1.name); <span className="text-gray-500">// "Sok"</span></div>}
+                {called && <div className="text-green-400">console.log(user1.name); <span className="text-gray-500">{"// &quot"};Sok&quot;</span></div>}
               </div>
               <button onClick={() => setCalled(true)}
                 className="px-4 py-1.5 rounded-lg text-xs font-bold text-white bg-green-600 hover:bg-green-700 cursor-pointer transition-all">
-                ▶ new {importName || "User"}("Sok")
+                ▶ new {importName || "User"}(&quot;Sok&quot;)
               </button>
             </div>
           )}
@@ -234,10 +234,10 @@ export function CombinedImportDiagram() {
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
             <div className="text-gray-500 mb-1">{"// myModule.js"}</div>
             <div className={`transition-colors ${step >= 2 ? "text-green-400" : "text-gray-500"}`}>
-              <span className="text-blue-400">export const</span> <span className="text-white">name</span> = <span className="text-green-300">"JavaScript"</span>; <span className="text-gray-600">{"// Named"}</span>
+              <span className="text-blue-400">export const</span> <span className="text-white">name</span> = <span className="text-green-300">&quot;JavaScript&quot;</span>; <span className="text-gray-600">{"// Named"}</span>
             </div>
             <div className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}>
-              <span className="text-blue-400">const</span> <span className="text-white">sayHello</span> = () =&gt; console.<span className="text-yellow-300">log</span>(<span className="text-green-300">"Hello!"</span>);
+              <span className="text-blue-400">const</span> <span className="text-white">sayHello</span> = () =&gt; console.<span className="text-yellow-300">log</span>(<span className="text-green-300">&quot;Hello!&quot;</span>);
             </div>
             <div className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}>
               <span className="text-blue-400">export default</span> sayHello; <span className="text-gray-600">{"// Default"}</span>
@@ -253,11 +253,11 @@ export function CombinedImportDiagram() {
                 <span className={`transition-colors ${step >= 1 ? "text-yellow-300" : "text-gray-500"}`}> sayHello</span>
                 {step >= 2 && <span className="text-white">, <span className="text-green-300">{"{ name }"}</span></span>}
                 <span className="text-blue-400"> from </span>
-                <span className="text-green-300">'./myModule.js'</span>;
+                <span className="text-green-300">&apos;./myModule.js&apos;</span>;
               </div>
               {step >= 3 && <>
-                <div className="mt-1 text-yellow-300">sayHello(); <span className="text-gray-500">// Hello!</span></div>
-                <div className="text-green-300">console.log(name); <span className="text-gray-500">// JavaScript</span></div>
+                <div className="mt-1 text-yellow-300">sayHello(); <span className="text-gray-500">{"// Hello!"}</span></div>
+                <div className="text-green-300">console.log(name); <span className="text-gray-500">{"// JavaScript"}</span></div>
               </>}
             </div>
           )}

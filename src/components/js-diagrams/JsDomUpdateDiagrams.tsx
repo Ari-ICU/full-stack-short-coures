@@ -64,7 +64,7 @@ export function DomCreateDiagram() {
               <div className="text-[10px] uppercase font-bold text-blue-500 mb-2">Memory (not visible)</div>
               <div className="font-mono text-xs text-blue-800 dark:text-blue-200 break-all">
                 <span className="text-blue-400">&lt;{tag}</span>
-                {className && <span className="text-yellow-600 dark:text-yellow-400"> class="{className}"</span>}
+                {className && <span className="text-yellow-600 dark:text-yellow-400"> class=&quot;{className}&quot;</span>}
                 <span className="text-blue-400">&gt;</span>
                 <span className="text-gray-700 dark:text-gray-300">{text || "…"}</span>
                 <span className="text-blue-400">&lt;/{tag}&gt;</span>
@@ -98,9 +98,9 @@ export function DomCreateDiagram() {
           {/* Code */}
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
             <div className="text-gray-400">{"// 1. Create in memory"}</div>
-            <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">"{tag}"</span>);</div>
-            <div><span className="text-white">el</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">"{text}"</span>;</div>
-            {className && <div><span className="text-white">el</span>.<span className="text-yellow-300">className</span> = <span className="text-green-300">"{className}"</span>;</div>}
+            <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">&quot;{tag}&quot;</span>);</div>
+            <div><span className="text-white">el</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">&quot;{text}&quot;</span>;</div>
+            {className && <div><span className="text-white">el</span>.<span className="text-yellow-300">className</span> = <span className="text-green-300">&quot;{className}&quot;</span>;</div>}
             <div className="text-gray-400 mt-1">{"// 2. Add to DOM"}</div>
             <div><span className="text-white">parent</span>.<span className="text-blue-400">appendChild</span>(<span className="text-white">el</span>);</div>
           </div>
@@ -205,8 +205,8 @@ export function DomAppendDiagram() {
             </div>
             <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
               <div className="text-gray-400">{"// create new node"}</div>
-              <div><span className="text-blue-400">const</span> <span className="text-white">newLi</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">"li"</span>);</div>
-              <div><span className="text-white">newLi</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">"New Item"</span>;</div>
+              <div><span className="text-blue-400">const</span> <span className="text-white">newLi</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">&quot;li&quot;</span>);</div>
+              <div><span className="text-white">newLi</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">&quot;New Item&quot;</span>;</div>
               <div className="text-gray-400 mt-1">{"// insert"}</div>
               {mode === "appendChild"  && <div><span className="text-white">ul</span>.<span style={{ color: m.color }}>appendChild</span>(<span className="text-white">newLi</span>);</div>}
               {mode === "prepend"      && <div><span className="text-white">ul</span>.<span style={{ color: m.color }}>prepend</span>(<span className="text-white">newLi</span>);</div>}
@@ -244,6 +244,7 @@ export function DomRemoveReplaceDiagram() {
       setNodes((prev) => prev.filter((_, i) => i !== index));
       setReplaced(null);
     } else {
+      // eslint-disable-next-line react-hooks/purity
       const newName = `New Element ${Date.now() % 100}`;
       setLog((l) => [`replaceChild() → "${nodes[index]}" → "${newName}"`, ...l.slice(0, 3)]);
       setNodes((prev) => prev.map((n, i) => i === index ? newName : n));
@@ -320,19 +321,19 @@ export function DomRemoveReplaceDiagram() {
             </div>
             <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
               {mode === "remove" && <>
-                <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">".alert"</span>);</div>
+                <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;.alert&quot;</span>);</div>
                 <div className="mt-1"><span className="text-white">el</span>.<span style={{ color: m.color }}>remove</span>();</div>
                 <div className="text-gray-400 mt-1">{"// ✅ modern — no parent needed"}</div>
               </>}
               {mode === "removeChild" && <>
-                <div><span className="text-blue-400">const</span> <span className="text-white">ul</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"ul"</span>);</div>
-                <div><span className="text-blue-400">const</span> <span className="text-white">li</span> = ul.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"li"</span>);</div>
+                <div><span className="text-blue-400">const</span> <span className="text-white">ul</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;ul&quot;</span>);</div>
+                <div><span className="text-blue-400">const</span> <span className="text-white">li</span> = ul.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;li&quot;</span>);</div>
                 <div className="mt-1"><span className="text-white">ul</span>.<span style={{ color: m.color }}>removeChild</span>(<span className="text-white">li</span>);</div>
                 <div className="text-gray-400 mt-1">{"// ⚠️ needs parent reference"}</div>
               </>}
               {mode === "replaceChild" && <>
-                <div><span className="text-blue-400">const</span> <span className="text-white">newEl</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">"h1"</span>);</div>
-                <div><span className="text-white">newEl</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">"New Header"</span>;</div>
+                <div><span className="text-blue-400">const</span> <span className="text-white">newEl</span> = document.<span className="text-yellow-300">createElement</span>(<span className="text-green-300">&quot;h1&quot;</span>);</div>
+                <div><span className="text-white">newEl</span>.<span className="text-yellow-300">textContent</span> = <span className="text-green-300">&quot;New Header&quot;</span>;</div>
                 <div className="mt-1"><span className="text-white">parent</span>.<span style={{ color: m.color }}>replaceChild</span>(<span className="text-white">newEl</span>, <span className="text-white">oldEl</span>);</div>
                 <div className="text-gray-400 mt-1">{"// replaceChild(new, old)"}</div>
               </>}

@@ -102,7 +102,7 @@ export function ConsoleMethodsDiagram() {
                   <>
                     <div className="flex gap-2 text-xs font-mono text-gray-300">
                       <span className="text-gray-500 shrink-0">›</span>
-                      <span>ឈ្មោះ: <span className="text-green-300">"Dara"</span></span>
+                      <span>ឈ្មោះ: <span className="text-green-300">&quot;Dara&quot;</span></span>
                     </div>
                     <div className="flex gap-2 text-xs font-mono text-gray-300">
                       <span className="text-gray-500 shrink-0">›</span>
@@ -141,8 +141,8 @@ export function ConsoleMethodsDiagram() {
                           <tr key={i} className="border-t border-gray-700 hover:bg-gray-800/50">
                             <td className="px-3 py-1 text-gray-500 border border-gray-700">{i}</td>
                             <td className="px-3 py-1 text-orange-300 border border-gray-700">{row.id}</td>
-                            <td className="px-3 py-1 text-yellow-300 border border-gray-700">"{row.name}"</td>
-                            <td className="px-3 py-1 text-green-300 border border-gray-700">"{row.role}"</td>
+                            <td className="px-3 py-1 text-yellow-300 border border-gray-700">&quot;{row.name}&quot;</td>
+                            <td className="px-3 py-1 text-green-300 border border-gray-700">&quot;{row.role}&quot;</td>
                           </tr>
                         ))}
                       </tbody>
@@ -194,7 +194,11 @@ export function BreakpointsDiagram() {
     if (paused !== null) return;
     setBreakpoints((prev) => {
       const s = new Set(prev);
-      s.has(n) ? s.delete(n) : s.add(n);
+      if (s.has(n)) {
+        s.delete(n);
+      } else {
+        s.add(n);
+      }
       return s;
     });
   }

@@ -136,7 +136,7 @@ export function MapDiagram() {
                         <div className="text-gray-400">{"// .map() always returns a NEW array of SAME length"}</div>
                         <div><span className="text-blue-400">const</span> <span className="text-red-300">input</span> = [<span className="text-orange-300">{ex.input.join(", ")}</span>];</div>
                         <div><span className="text-blue-400">const</span> <span className="text-white">output</span> = <span className="text-red-300">input.</span><span style={{ color: ex.color }}>map</span>(<span className="text-yellow-300">{ex.fnStr}</span>);</div>
-                        <div className="text-gray-400 mt-1">// output → [<span style={{ color: ex.color }}>{output.map(String).join(", ")}</span>]</div>
+                        <div className="text-gray-400 mt-1">{"// output → ["}<span style={{ color: ex.color }}>{output.map(String).join(", ")}</span>]</div>
                     </div>
 
                     <div className="rounded-xl p-3 text-xs font-semibold bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200">
@@ -257,7 +257,7 @@ export function FilterDiagram() {
                         <div className="text-gray-400">{"// .filter() returns a SHORTER (or equal) array"}</div>
                         <div><span className="text-blue-400">const</span> <span className="text-red-300">nums</span> = [<span className="text-orange-300">{ex.input.join(", ")}</span>];</div>
                         <div><span className="text-blue-400">const</span> <span className="text-white">result</span> =<span className="text-red-300">  nums.</span><span style={{ color: ex.color }}>filter</span>(<span className="text-yellow-300">{ex.fnStr}</span>);</div>
-                        <div className="text-gray-400 mt-1">// result → [<span style={{ color: ex.color }}>{passing.join(", ")}</span>]</div>
+                        <div className="text-gray-400 mt-1">{"// result → ["}<span style={{ color: ex.color }}>{passing.join(", ")}</span>]</div>
                     </div>
 
                     <div className="rounded-xl p-3 text-xs font-semibold bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200">
@@ -382,7 +382,7 @@ export function ReduceDiagram() {
                             <span className="text-yellow-300">{ex.fnStr}</span>,{" "}
                             <span className="text-orange-300">{ex.init}</span>);
                         </div>
-                        <div className="text-gray-400 mt-1">// result → <span style={{ color: ex.color }}>{finalResult}</span></div>
+                        <div className="text-gray-400 mt-1">{"// result → "}<span style={{ color: ex.color }}>{finalResult}</span></div>
                     </div>
 
                     <div className="rounded-xl p-3 text-xs font-semibold bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 text-orange-800 dark:text-orange-200">

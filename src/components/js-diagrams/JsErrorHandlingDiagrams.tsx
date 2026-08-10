@@ -360,14 +360,14 @@ export function ThrowCustomErrorDiagram() {
               <div className="bg-gray-900 rounded-lg p-2.5 space-y-1 text-xs font-mono">
                 <div className="text-gray-300">if (age &lt; 0) {"{"}</div>
                 <div className={`pl-4 transition-all duration-200 ${throwActive ? "text-red-400 font-bold" : "text-gray-500"}`}>
-                  throw new Error("អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!");
+                  throw new Error(&quot;អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!&quot;);
                 </div>
                 <div className="text-gray-300">{"}"}</div>
                 <div className={`transition-all duration-200 ${youngActive ? "text-orange-400 font-bold" : "text-gray-500"}`}>
-                  if (age &lt; 18) console.log("អ្នកនៅក្មេងពេក។");
+                  if (age &lt; 18) console.log(&quot;អ្នកនៅក្មេងពេក។&quot;);
                 </div>
                 <div className={`transition-all duration-200 ${okActive ? "text-green-400 font-bold" : "text-gray-500"}`}>
-                  else console.log("ស្វាគមន៍មកកាន់ប្រព័ន្ធ!");
+                  else console.log(&quot;ស្វាគមន៍មកកាន់ប្រព័ន្ធ!&quot;);
                 </div>
               </div>
             </div>
@@ -377,7 +377,7 @@ export function ThrowCustomErrorDiagram() {
               <div className="text-[10px] uppercase font-bold text-red-400 mb-1.5">catch (error) {"{"}</div>
               <div className="bg-gray-900 rounded-lg p-2.5 text-xs font-mono">
                 <div className={`transition-colors duration-200 ${catchActive ? "text-red-300" : "text-gray-500"}`}>
-                  console.error("មានកំហុស:", error.message);
+                  console.error(&quot;មានកំហុស:&quot;, error.message);
                 </div>
               </div>
             </div>

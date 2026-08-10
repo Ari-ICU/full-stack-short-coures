@@ -126,7 +126,7 @@ export function ClassBlueprintDiagram() {
               <span className="text-blue-400">const</span>{" "}
               <span className="text-white">user{nextId - 1}</span> = <span className="text-yellow-300">new</span>{" "}
               <span className="text-yellow-300">User</span>(
-              <span className="text-orange-300">"{name || "..."}"</span>,{" "}
+              <span className="text-orange-300">&quot;{name || "..."}&quot;</span>,{" "}
               <span className="text-orange-300">{age}</span>);
             </div>
           </div>
@@ -163,9 +163,9 @@ export function ClassBlueprintDiagram() {
                       </button>
                     </div>
                     <div className="bg-gray-900 rounded-lg px-3 py-2 text-xs font-mono space-y-0.5">
-                      <div><span className="text-pink-400">this</span>.name = <span className="text-yellow-300">"{u.name}"</span></div>
+                      <div><span className="text-pink-400">this</span>.name = <span className="text-yellow-300">&quot;{u.name}&quot;</span></div>
                       <div><span className="text-pink-400">this</span>.age = <span className="text-orange-300">{u.age}</span></div>
-                      <div className="text-gray-500 text-[10px] mt-1">greet() → "Hi, I&apos;m {u.name}"</div>
+                      <div className="text-gray-500 text-[10px] mt-1">greet() → &quot;Hi, I&apos;m {u.name}&quot;</div>
                     </div>
                   </div>
                 ))}
@@ -225,7 +225,7 @@ export function ThisKeywordDiagram() {
               <span className="text-blue-400">const</span>{" "}
               <span style={{ color: inst.color }} className="font-bold">{inst.varName}</span>{" "}
               = <span className="text-yellow-300">new User</span>(
-              <span className="text-orange-300">"{inst.name}"</span>,{" "}
+              <span className="text-orange-300">&quot;{inst.name}&quot;</span>,{" "}
               <span className="text-orange-300">{inst.age}</span>);
             </div>
             <div className="border-t border-gray-700 pt-2 text-gray-400">
@@ -233,7 +233,7 @@ export function ThisKeywordDiagram() {
               <span style={{ color: inst.color }}>{inst.varName}</span>
             </div>
             <div style={{ color: inst.color }}>
-              <span className="text-pink-400">this</span>.name = <span className="text-orange-300">"{inst.name}"</span>
+              <span className="text-pink-400">this</span>.name = <span className="text-orange-300">&quot;{inst.name}&quot;</span>
               <span className="text-gray-500">{"  // → "}{inst.varName}.name</span>
             </div>
             <div style={{ color: inst.color }}>
@@ -262,7 +262,7 @@ export function ThisKeywordDiagram() {
                 {inst.varName}
               </div>
               <div className="text-xs font-mono space-y-0.5">
-                <div style={{ color: inst.color }}>name: <span className="text-orange-400">"{inst.name}"</span></div>
+                <div style={{ color: inst.color }}>name: <span className="text-orange-400">&quot;{inst.name}&quot;</span></div>
                 <div style={{ color: inst.color }}>age: <span className="text-orange-400">{inst.age}</span></div>
                 <div className="text-gray-500 text-[10px]">greet: ƒ()</div>
               </div>
@@ -375,7 +375,7 @@ export function InheritanceDiagram() {
               {/* Own */}
               <div className="rounded-xl border-2 border-green-400 dark:border-green-600 bg-green-50 dark:bg-green-950/20 p-3">
                 <div className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wide mb-2">
-                  ➕ Admin's Own (new additions)
+                  ➕ Admin&apos;s Own (new additions)
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {[...childProps.map((p) => `this.${p}`), ...childMethods].map((item) => (
@@ -390,10 +390,10 @@ export function InheritanceDiagram() {
               <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-0.5">
                 <div className="text-blue-400">class <span className="text-yellow-300">Admin</span> <span className="text-green-400">extends</span> <span className="text-indigo-400">User</span> {"{"}</div>
                 <div className="pl-4 text-green-400">constructor(<span className="text-orange-300">name, age, role</span>) {"{"}</div>
-                <div className="pl-8 text-yellow-300">super(<span className="text-orange-300">name, age</span>); <span className="text-gray-500">// ← ហៅ User's constructor</span></div>
+                <div className="pl-8 text-yellow-300">super(<span className="text-orange-300">name, age</span>); <span className="text-gray-500">{"// ← ហៅ User&apos;s constr"}uctor</span></div>
                 <div className="pl-8 text-pink-400">this<span className="text-white">.role = <span className="text-orange-300">role</span>;</span></div>
                 <div className="pl-4 text-green-400">{"}"}</div>
-                <div className="pl-4 text-green-400">deletePost() {"{"} <span className="text-gray-500">/* Admin only */</span> {"}"}</div>
+                <div className="pl-4 text-green-400">deletePost() {"{"} <span className="text-gray-500">{"/* Admin only */"}</span> {"}"}</div>
                 <div className="text-blue-400">{"}"}</div>
               </div>
             </div>

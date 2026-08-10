@@ -61,16 +61,16 @@ export function JsonFormatDiagram() {
             <div className="text-gray-400 mb-1">{"// ✅ Valid JSON"}</div>
             <div className="text-white">{"{"}</div>
             <div className={`pl-4 transition-colors ${active === 0 ? "text-yellow-300 font-bold" : "text-gray-300"}`}>
-              <span className="text-green-300">"name"</span>: <span className="text-yellow-300">"Sok"</span>,
+              <span className="text-green-300">&quot;name&quot;</span>: <span className="text-yellow-300">&quot;Sok&quot;</span>,
             </div>
             <div className={`pl-4 transition-colors ${active === 2 ? "text-yellow-300 font-bold" : "text-gray-300"}`}>
-              <span className="text-green-300">"age"</span>: <span className="text-orange-300">25</span>,
+              <span className="text-green-300">&quot;age&quot;</span>: <span className="text-orange-300">25</span>,
             </div>
             <div className={`pl-4 transition-colors ${active === 1 ? "text-yellow-300 font-bold" : "text-gray-300"}`}>
-              <span className="text-green-300">"city"</span>: <span className="text-yellow-300">"Phnom Penh"</span>,
+              <span className="text-green-300">&quot;city&quot;</span>: <span className="text-yellow-300">&quot;Phnom Penh&quot;</span>,
             </div>
             <div className={`pl-4 transition-colors ${active === 3 ? "text-yellow-300 font-bold" : "text-gray-300"}`}>
-              <span className="text-green-300">"data"</span>: <span className="text-purple-400">null</span>
+              <span className="text-green-300">&quot;data&quot;</span>: <span className="text-purple-400">null</span>
             </div>
             <div className="text-white">{"}"}</div>
           </div>
@@ -123,7 +123,7 @@ export function JsonStringifyDiagram() {
               <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mb-2 uppercase">JS Object</div>
               <div className="font-mono text-xs text-left space-y-0.5">
                 <div className="text-gray-900 dark:text-gray-100">{"{"}</div>
-                <div className="pl-3 text-gray-900 dark:text-gray-100">name: <span className="text-blue-600 dark:text-blue-400">"{name}"</span>,</div>
+                <div className="pl-3 text-gray-900 dark:text-gray-100">name: <span className="text-blue-600 dark:text-blue-400">&quot;{name}&quot;</span>,</div>
                 <div className="pl-3 text-gray-900 dark:text-gray-100">age: <span className="text-orange-600 dark:text-orange-400">{age}</span></div>
                 <div className="text-gray-900 dark:text-gray-100">{"}"}</div>
               </div>
@@ -154,7 +154,7 @@ export function JsonStringifyDiagram() {
             </label>
             {ran && (
               <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                typeof → "string"
+                typeof → &quot;string&quot;
               </span>
             )}
           </div>
@@ -261,7 +261,7 @@ export function JsonParseDiagram() {
           {ran && !error && parsed !== null && (
             <div className="rounded-xl border-2 border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20 p-3">
               <div className="text-[10px] uppercase font-bold text-green-600 dark:text-green-400 mb-2">
-                ✅ JS Object — typeof: "{typeof parsed}"
+                ✅ JS Object — typeof: &quot;{typeof parsed}&quot;
               </div>
               {Array.isArray(parsed) ? (
                 <div className="flex flex-wrap gap-1.5">

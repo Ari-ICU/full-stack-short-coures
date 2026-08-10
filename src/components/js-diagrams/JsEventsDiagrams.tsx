@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 
 // ─── Shared helpers ────────────────────────────────────────────────────────────
 function PanelHeader({ label, badge }: { label: string; badge: string }) {
@@ -74,8 +74,8 @@ export function EventListenerDiagram() {
 
             {(ev.name === "mouseenter" || ev.name === "mouseleave") && (
               <div
-                onMouseEnter={() => { setHovered(true); ev.name === "mouseenter" && fire("mouse entered!"); }}
-                onMouseLeave={() => { setHovered(false); ev.name === "mouseleave" && fire("mouse left!"); }}
+                onMouseEnter={() => { setHovered(true); if (ev.name === "mouseenter") fire("mouse entered!"); }}
+                onMouseLeave={() => { setHovered(false); if (ev.name === "mouseleave") fire("mouse left!"); }}
                 className="w-full py-6 rounded-xl border-2 text-sm font-bold text-center transition-all duration-200 cursor-default"
                 style={{
                   borderColor: ev.color,
@@ -128,14 +128,14 @@ export function EventListenerDiagram() {
               {ev.icon} {ev.desc}
             </div>
             <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"#target"</span>);</div>
+              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;#target&quot;</span>);</div>
               <div className="mt-1">
                 <span className="text-white">el</span>.<span className="text-blue-400">addEventListener</span>(
-                <span className="text-green-300">"{ev.name}"</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}
+                <span className="text-green-300">&quot;{ev.name}&quot;</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}
               </div>
-              {ev.name === "keydown" && <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">key</span>); <span className="text-gray-400">// "{lastKey || "?"}"</span></div>}
+              {ev.name === "keydown" && <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">key</span>); <span className="text-gray-400">{"// &"}quot;{lastKey || "?"}&quot;</span></div>}
               {ev.name === "input"   && <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">target</span>.<span className="text-yellow-300">value</span>);</div>}
-              {!["keydown","input"].includes(ev.name) && <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-green-300">"{ev.name} fired!"</span>);</div>}
+              {!["keydown","input"].includes(ev.name) && <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-green-300">&quot;{ev.name} fired!&quot;</span>);</div>}
               <div>{"}"});</div>
             </div>
           </div>
@@ -147,7 +147,7 @@ export function EventListenerDiagram() {
 
 // ─── 2. Event Object Diagram ──────────────────────────────────────────────────
 export function EventObjectDiagram() {
-  const [eventType, setEventType] = useState<"click" | "key" | "input">("click");
+  const [, setEventType] = useState<"click" | "key" | "input">("click");
   const [eProps, setEProps] = useState<Record<string, string>>({});
   const [fired, setFired] = useState(false);
 
@@ -236,10 +236,10 @@ export function EventObjectDiagram() {
           {/* Code */}
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
             <div className="text-gray-400">{"// e is automatically passed to your callback"}</div>
-            <div><span className="text-white">el</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">"click"</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
-            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">type</span>);        <span className="text-gray-400">// "click"</span></div>
-            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">target</span>);      <span className="text-gray-400">// the clicked element</span></div>
-            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">target</span>.<span className="text-yellow-300">value</span>); <span className="text-gray-400">// input value</span></div>
+            <div><span className="text-white">el</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">&quot;click&quot;</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
+            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">type</span>);        <span className="text-gray-400">{"// &quot;c"}lick&quot;</span></div>
+            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">target</span>);      <span className="text-gray-400">{"// the clicked element"}</span></div>
+            <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-orange-300">e</span>.<span className="text-yellow-300">target</span>.<span className="text-yellow-300">value</span>); <span className="text-gray-400">{"// input value"}</span></div>
             <div>{"}"});</div>
           </div>
         </div>
@@ -315,8 +315,8 @@ export function PreventDefaultDiagram() {
 
           {/* Code */}
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-            <div><span className="text-white">form</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">"submit"</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
-            {prevented && <div className="pl-4"><span className="text-orange-300">e</span>.<span className="text-yellow-300">preventDefault</span>(); <span className="text-gray-400">// ⭐ stop reload</span></div>}
+            <div><span className="text-white">form</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">&quot;submit&quot;</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
+            {prevented && <div className="pl-4"><span className="text-orange-300">e</span>.<span className="text-yellow-300">preventDefault</span>(); <span className="text-gray-400">{"// ⭐ stop reload"}</span></div>}
             <div className="pl-4"><span className="text-blue-400">const</span> <span className="text-white">val</span> = input.<span className="text-yellow-300">value</span>;</div>
             <div className="pl-4">console.<span className="text-yellow-300">log</span>(<span className="text-green-300">`Hello, ${"{val}"}!`</span>);</div>
             <div>{"}"});</div>

@@ -235,7 +235,7 @@ export function SetIntervalDiagram() {
             <div className="text-gray-400">{"// ដំណើរការរៀងរាល់"} <span className="text-purple-400">{speed}ms</span></div>
             <div><span className="text-blue-400">const</span> <span className="text-white">id</span> = <span className="text-yellow-300">setInterval</span>(<span className="text-orange-300">() =&gt;</span> {"{"}</div>
             <div className="pl-4"><span className="text-white">count++</span>;</div>
-            <div className="pl-4"><span className={`transition-colors ${running ? "text-green-400" : "text-gray-500"}`}>console.<span className="text-yellow-300">log</span>(<span className="text-green-300">"Tick!"</span>, count);</span></div>
+            <div className="pl-4"><span className={`transition-colors ${running ? "text-green-400" : "text-gray-500"}`}>console.<span className="text-yellow-300">log</span>(<span className="text-green-300">&quot;Tick!&quot;</span>, count);</span></div>
             <div>{"}"}, <span className="text-purple-400">{speed}</span>);</div>
             {ticks.length > 0 && <div className="text-green-400 mt-1">{"// → Tick! " + ticks.length}</div>}
           </div>
@@ -369,7 +369,7 @@ export function ClearIntervalDiagram() {
               clearInterval(timerId);
             </div>
             <div className={`pl-8 transition-colors ${stopped ? "text-green-400" : "text-gray-500"}`}>
-              console.log("បញ្ឈប់ការរាប់!");
+              console.log(&quot;បញ្ឈប់ការរាប់!&quot;);
             </div>
             <div className="pl-4 text-gray-300">{"}"}</div>
             <div>{"}"}, <span className="text-purple-400">800</span>);</div>
@@ -502,7 +502,7 @@ export function ClearTimeoutDiagram() {
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
             <div><span className="text-blue-400">const</span> <span className="text-white">myTimeout</span> = <span className="text-yellow-300">setTimeout</span>(<span className="text-orange-300">() =&gt;</span> {"{"}</div>
             <div className={`pl-4 transition-colors ${phase === "fired" ? "text-green-400" : phase === "cancelled" ? "line-through text-gray-600" : "text-gray-400"}`}>
-              console.log("មិនទាន់ដល់ពេលផង ត្រូវគេ Cancel!");
+              console.log(&quot;មិនទាន់ដល់ពេលផង ត្រូវគេ Cancel!&quot;);
             </div>
             <div>{"}"}, <span className="text-purple-400">5000</span>);</div>
             <div className="mt-1 text-gray-400">{"// ..."}</div>

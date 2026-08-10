@@ -98,10 +98,10 @@ export function DomTreeDiagram() {
               {highlighted && <button onClick={() => setHighlighted("")} className="px-2 py-1.5 rounded-lg text-xs border border-gray-300 dark:border-gray-600 text-gray-500 cursor-pointer">✕</button>}
             </div>
             <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-              <div className="text-gray-400">// JavaScript sees HTML as objects</div>
-              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"{highlighted || "selector"}"</span>);</div>
-              <div className="text-gray-400 mt-1">// el is now a live JS object</div>
-              <div className="text-gray-400">// you can read & write its properties</div>
+              <div className="text-gray-400">{"// JavaScript sees HTML as objects"}</div>
+              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;{highlighted || "selector"}&quot;</span>);</div>
+              <div className="text-gray-400 mt-1">{"// el is now a live JS object"}</div>
+              <div className="text-gray-400">{"// you can read & write its properties"}</div>
             </div>
             <div className="rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3 text-xs text-blue-800 dark:text-blue-200">
               💡 DOM គឺជា <strong>live object</strong> — ការផ្លាស់ប្តូរ JS ចេញមកឃើញភ្លាមៗនៅ Browser
@@ -174,7 +174,7 @@ export function DomModifyDiagram() {
                 {previewText}
               </div>
               {hasActive && (
-                <div className="mt-2 text-[10px] text-green-600 dark:text-green-400 font-mono">class="active" added ✅</div>
+                <div className="mt-2 text-[10px] text-green-600 dark:text-green-400 font-mono">class=&quot;active&quot; added ✅</div>
               )}
               {mode === "classList.toggle" && (
                 <div className="mt-2 text-[10px] font-mono" style={{ color: m.color }}>
@@ -204,7 +204,7 @@ export function DomModifyDiagram() {
             </div>
             <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
               <div className="text-gray-400">{"// 1. Select"}</div>
-              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"h1"</span>);</div>
+              <div><span className="text-blue-400">const</span> <span className="text-white">el</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;h1&quot;</span>);</div>
               <div className="text-gray-400 mt-1">{"// 2. Modify"}</div>
               <div style={{ color: m.color }} className="font-bold">{m.code}</div>
             </div>
@@ -263,9 +263,9 @@ export function DomEventsDiagram() {
                 </div>
               </div>
               <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-                <div><span className="text-blue-400">const</span> <span className="text-white">btn</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">"#btn"</span>);</div>
-                <div><span className="text-white">btn</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">"click"</span>, () ={">"} {"{"}</div>
-                <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-green-300">"Clicked!"</span>);</div>
+                <div><span className="text-blue-400">const</span> <span className="text-white">btn</span> = document.<span className="text-yellow-300">querySelector</span>(<span className="text-green-300">&quot;#btn&quot;</span>);</div>
+                <div><span className="text-white">btn</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">&quot;click&quot;</span>, () ={">"} {"{"}</div>
+                <div className="pl-4 text-white">console.<span className="text-yellow-300">log</span>(<span className="text-green-300">&quot;Clicked!&quot;</span>);</div>
                 <div>{"}"});</div>
               </div>
             </div>
@@ -314,7 +314,7 @@ export function DomEventsDiagram() {
 
               {/* Code */}
               <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-                <div><span className="text-white">form</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">"submit"</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
+                <div><span className="text-white">form</span>.<span className="text-blue-400">addEventListener</span>(<span className="text-green-300">&quot;submit&quot;</span>, (<span className="text-orange-300">e</span>) ={">"} {"{"}</div>
                 {prevented && (
                   <div className="pl-4">
                     <span className="text-orange-300">e</span>.<span className="text-yellow-300">preventDefault</span>();

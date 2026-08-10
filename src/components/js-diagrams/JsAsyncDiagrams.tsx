@@ -74,12 +74,12 @@ export function SyncAsyncDiagram() {
 
           {/* Code preview */}
           <div className="bg-gray-900 rounded-xl p-3 text-xs font-mono space-y-1">
-            <div className="text-green-400">console.log(<span className="text-yellow-300">"Start"</span>);</div>
+            <div className="text-green-400">console.log(<span className="text-yellow-300">&quot;Start&quot;</span>);</div>
             <div className={mode === "sync" ? "text-red-400" : "text-indigo-400"}>
               {mode === "sync" ? "fetchData(); // ⚠️ blocks everything" : "await fetchData(); // 🚀 non-blocking"}
             </div>
-            <div className="text-green-400">console.log(<span className="text-yellow-300">"Middle"</span>);</div>
-            <div className="text-green-400">console.log(<span className="text-yellow-300">"End"</span>);</div>
+            <div className="text-green-400">console.log(<span className="text-yellow-300">&quot;Middle&quot;</span>);</div>
+            <div className="text-green-400">console.log(<span className="text-yellow-300">&quot;End&quot;</span>);</div>
           </div>
 
           {/* Execution log */}
