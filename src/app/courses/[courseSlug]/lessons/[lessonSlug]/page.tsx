@@ -9,6 +9,7 @@ import {
 import { LessonContent } from "@/components/LessonContent";
 import { LessonSidebar } from "@/components/LessonSidebar";
 import { MobileLessonSidebar } from "@/components/MobileLessonSidebar";
+import { Quiz } from "@/components/Quiz";
 import { BookOpen, ChevronLeft, ChevronRight, Target } from "lucide-react";
 
 export async function generateStaticParams() {
@@ -205,6 +206,13 @@ export default async function LessonPage({
             <div className="mb-16">
               <LessonContent lesson={lesson} content={content} />
             </div>
+
+            {/* ── Quiz ── */}
+            {lesson.quiz && lesson.quiz.length > 0 && (
+              <div className="mb-16">
+                <Quiz quiz={lesson.quiz} />
+              </div>
+            )}
 
             {/* ── Prev / Next nav ── */}
             <nav
