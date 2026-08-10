@@ -1,0 +1,69 @@
+---
+title: Professional Git Workflow
+description: សរុបមេរៀនដោយការស្វែងយល់ពីរបៀបដែលក្រុមហ៊ុនធំៗប្រើប្រាស់ Git រួមមាន GitHub Flow និងការសរសេរសារ Commit តាមស្តង់ដារ។
+objectives:
+  - ស្គាល់ពីលំហូរការងារ GitHub Flow
+  - យល់ពីការសរសេរសារ Conventional Commits
+  - យល់ពីការប្រើប្រាស់ Tags និង Releases សម្រាប់កំណែកម្មវិធី
+module: module-2-professional-git-and-github
+order: 12
+quiz:
+  - question: "តើអ្វីទៅជា 'GitHub Flow'?"
+    options:
+      - "\"កម្មវិធីមួយរបស់ GitHub សម្រាប់គូរគំនូសបំព្រួញ\""
+      - "\"វាជាក្បួនធ្វើការងារ (Workflow) ដ៏សាមញ្ញមួយ ដែលតម្រូវអោយបង្កើតសាខាថ្មី (Feature Branch) សម្រាប់រាល់ការផ្លាស់ប្តូរ រួចធ្វើការ Pull Request មុននឹងបញ្ចូលទៅក្នុងសាខា main។\""
+      - "\"វាជាឈ្មោះថ្មីរបស់ Git Flow\""
+      - "\"វាជាសេវាកម្ម Hosting របស់ GitHub\""
+    correctAnswer: 2
+    explanation: "GitHub Flow គឺជាស្តង់ដារមាសសម្រាប់ការអភិវឌ្ឍន៍វេបសាយបច្ចុប្បន្ន។ វាមានភាពសាមញ្ញ រហ័ស និងមានសុវត្ថិភាពខ្ពស់។"
+---
+
+## 🌊 GitHub Flow (ស្តង់ដារឧស្សាហកម្ម)
+
+កាលពីមុនក្រុមហ៊ុនប្រើប្រាស់ **Git Flow** ដែលមានភាពស្មុគស្មាញខ្លាំង (មានសាខា dev, release, hotfix ញ៉េរញ៉ៃ)។ បច្ចុប្បន្ន សម្រាប់ការអភិវឌ្ឍន៍វេបសាយ (Modern Web Development) ក្រុមហ៊ុនភាគច្រើនបានប្តូរមកប្រើប្រាស់ **GitHub Flow** ដែលមានភាពសាមញ្ញជាង៖
+
+```mermaid
+flowchart TD
+    A["1. Create a Branch<br>(ចេញពី main)"] --> B["2. Make Changes<br>(Add & Commit)"]
+    B --> C["3. Create Pull Request"]
+    C --> D{"4. Discuss & Review<br>(Code Review)"}
+    
+    D -- Needs changes --> B
+    D -- Approved --> E["5. Merge to main"]
+    E --> F["6. Deploy to Production"]
+```
+
+ច្បាប់តែមួយគត់គឺ៖ **"សាខា main ត្រូវតែមានស្ថេរភាព និងអាច Deploy ទៅកាន់អតិថិជនបានគ្រប់ពេលវេលា"**។
+
+---
+
+## 🏷️ ការប្រើប្រាស់ Tags និង Releases
+
+នៅពេលដែលកម្មវិធីរបស់អ្នកួឈានដល់កំណែថ្មីមួយ (Version 1.0, 2.0) ការត្រឹមតែមាន Commit គឺពិបាកចំណាំណាស់។ យើងប្រើប្រាស់ **Tags** ដើម្បីបិទស្លាកចំណាំលើចំណុចនោះ។
+
+```bash
+# បង្កើត Tag ចំណាំកំណែ 1.0.0
+git tag v1.0.0
+
+# បញ្ជូន Tag ទៅកាន់ GitHub
+git push origin v1.0.0
+```
+នៅលើ GitHub នៅពេលអ្នក Push Tag ឡើងទៅ អ្នកអាចបម្លែងវាទៅជា **Release** បាន។ វាជាកន្លែងដែលអ្នកអាចសរសេរកំណត់ហេតុ (Release Notes) ថាតើកំណែនេះមានមុខងារអ្វីថ្មីខ្លះ ដើម្បីអោយអ្នកប្រើប្រាស់បានដឹង។
+
+---
+
+## ✍️ ស្តង់ដារនៃការសរសេរសារ (Conventional Commits)
+
+ជាញឹកញាប់ក្រុមហ៊ុនតែងតែតម្រូវអោយអ្នកសរសេរសារ Commit តាមស្តង់ដារមួយឈ្មោះថា **Conventional Commits** ដើម្បីភាពងាយស្រួលក្នុងការអាន និងបង្កើត Release Notes ដោយស្វ័យប្រវត្តិ។
+
+ទម្រង់របស់វាគឺ៖ `ប្រភេទ(ទីតាំងកូដ): ការពិពណ៌នាខ្លី`
+
+**ឧទាហរណ៍៖**
+- `feat: add login screen` (បន្ថែមមុខងារថ្មី - feature)
+- `fix(navbar): resolve mobile layout issue` (កែកំហុស - bug fix)
+- `docs: update readme` (ឯកសារយោង - documentation)
+- `style: format button css` (ការរៀបចំសោភ័ណភាពកូដ ដែលមិនប៉ះពាល់មុខងារ)
+- `refactor: optimize user query` (រៀបចំរចនាសម្ព័ន្ធកូដចាស់)
+- `chore: update dependencies` (ការងាររៀបចំទូទៅ)
+
+ការអនុវត្តតាមទម្លាប់ទាំងនេះ នឹងប្រែក្លាយអ្នកពីសិស្សធម្មតា អោយទៅជាអ្នកអភិវឌ្ឍន៍ប្រកបដោយវិជ្ជាជីវៈ (Professional Developer) ដែលក្រុមហ៊ុនណាក៏ចង់បាន!
