@@ -103,7 +103,7 @@ export function RdbmsNormalizationDiagram() {
                 <div className="flex flex-col gap-4">
                   <div>
                     <div className="text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Orders Table</div>
-                    <div className="border border-blue-300 dark:border-blue-800 rounded-lg overflow-hidden shadow-sm">
+                    <div className="border border-blue-300 dark:border-blue-800 rounded-lg overflow-x-auto shadow-sm">
                       <table className="w-full text-xs text-left">
                         <thead className="bg-blue-50 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 uppercase">
                           <tr>
@@ -129,7 +129,7 @@ export function RdbmsNormalizationDiagram() {
 
                   <div>
                     <div className="text-sm font-bold mb-2 text-gray-700 dark:text-gray-300">Order_Items (Junction)</div>
-                    <div className="border border-green-300 dark:border-green-800 rounded-lg overflow-hidden shadow-sm">
+                    <div className="border border-green-300 dark:border-green-800 rounded-lg overflow-x-auto shadow-sm">
                       <table className="w-full text-xs text-left">
                         <thead className="bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-300 uppercase">
                           <tr>
@@ -159,7 +159,7 @@ export function RdbmsNormalizationDiagram() {
                       Customers Table 
                       <span className="text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 px-1.5 py-0.5 rounded">New!</span>
                     </div>
-                    <div className="border border-purple-300 dark:border-purple-800 rounded-lg overflow-hidden shadow-sm">
+                    <div className="border border-purple-300 dark:border-purple-800 rounded-lg overflow-x-auto shadow-sm">
                       <table className="w-full text-xs text-left">
                         <thead className="bg-purple-50 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 uppercase">
                           <tr>
