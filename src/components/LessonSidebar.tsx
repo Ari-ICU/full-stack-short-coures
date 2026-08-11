@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Module, Lesson } from "@/types";
 
@@ -16,6 +17,17 @@ export function LessonSidebar({
   activeLesson,
   className = "w-60",
 }: LessonSidebarProps) {
+  const activeItemRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    if (activeItemRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [activeLesson.slug, activeLesson.moduleSlug]);
+
   return (
     <aside className={`shrink-0 ${className}`}>
       <nav aria-label="Course navigation">
@@ -33,7 +45,10 @@ export function LessonSidebar({
                   lesson.moduleSlug === activeLesson.moduleSlug;
 
                 return (
-                  <li key={lesson.slug}>
+                  <li 
+                    key={lesson.slug}
+                    ref={isActive ? activeItemRef : null}
+                  >
                     <Link
                       href={`/courses/${courseSlug}/lessons/${lesson.slug}`}
                       className={`group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm xl:text-base transition-all duration-150 ${
