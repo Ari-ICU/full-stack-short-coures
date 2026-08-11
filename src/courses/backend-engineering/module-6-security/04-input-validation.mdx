@@ -1,26 +1,17 @@
 ---
 title: Input Validation
-description: ការណែនាំពី Input Validation នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ត្រូវតែចងចាំថា "Never Trust Client Input"
 module: module-6-security
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Input Validation)
+## 🔍 ការបញ្ជាក់សុវត្ថិភាពទិន្នន័យ (Input Validation & Sanitization)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Input Validation**។
+នៅក្នុង Module ទី២ យើងបានរៀនប្រើ **Zod** ដើម្បីឆែកមើល Validation ម្តងរួចមកហើយ។ 
+ចំនុចសំខាន់នៅក្នុងសុវត្ថិភាពគឺ **Sanitization (ការសំអាតទិន្នន័យ)**។ 
 
-### យន្តការ (Concept Diagram)
+Hacker អាចបញ្ជូនកូដ JavaScript (XSS) ឫកូដ SQL (SQL Injection) មកតាមរយៈទិន្នន័យធម្មតាដូចជា ឈ្មោះ ឬ អត្ថបទបញ្ចេញមតិ (Comments)។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
-```
+> ការប្រើប្រាស់ Validation Library ដូចជា Zod ឬ Joi ជួយដោះស្រាយបញ្ហានេះបានយ៉ាងច្រើន ព្រោះវាកាត់ចោល (Strip) នូវ Field ដែលយើងមិនបានកំណត់ ព្រមទាំងពិនិត្យប្រវែង និងប្រភេទអក្សរយ៉ាងត្រឹមត្រូវ។
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Input Validation
+*(យើងបានរៀនពីចំណុចនេះរួចហើយនៅក្នុង Module 2 ដូច្នេះសូមមើលមេរៀនមុនសម្រាប់កូដឧទាហរណ៍នៃការប្រើ Zod)*

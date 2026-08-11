@@ -1,26 +1,56 @@
 ---
-title: CORS
-description: ការណែនាំពី CORS នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Cross-Origin Resource Sharing (CORS)
+description: របៀបត្រួតពិនិត្យថា តើគេហទំព័រ (Domain) មួយណាខ្លះដែលអាចហៅមកកាន់ API របស់អ្នកបាន។
 module: module-6-security
 order: 2
 ---
 
-## 🚀 អំពីមេរៀននេះ (CORS)
+## 🚧 អ្វីទៅជា CORS?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **CORS**។
-
-### យន្តការ (Concept Diagram)
+**CORS (Cross-Origin Resource Sharing)** គឺជាយន្តការសុវត្ថិភាពដែលបង្កើតឡើងដោយ Browser មិនមែនដោយ Server ទេ។
+តាមលំនាំដើម Browser នឹងរារាំងមិនអោយគេហទំព័រមួយ (ឧ. `frontend.com`) ទាញទិន្នន័យពី API មួយផ្សេងទៀត (ឧ. `backend.com`) ទេ លុះត្រាតែ API នោះមានការអនុញ្ញាត (បញ្ជូន CORS Header ត្រលប់មកវិញ)។
 
 ```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+sequenceDiagram
+    participant B as Browser (Frontend - port 5173)
+    participant S as Server (Backend - port 3000)
+    
+    B->>S: OPTIONS /api/data (Preflight Request - តើខ្ញុំសុំទាញទិន្នន័យបានទេ?)
+    alt មិនអនុញ្ញាត
+        S-->>B: 403 Forbidden
+        Note over B: Browser មិនអោយកូដ React រត់ទៅមុខទៀតទេ (CORS Error)
+    else អនុញ្ញាត (CORS Setup ត្រូវ)
+        S-->>B: 204 No Content (Access-Control-Allow-Origin: *)
+        B->>S: GET /api/data (ទាញទិន្នន័យមែនទែន)
+        S-->>B: 200 OK + JSON
+    end
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+### របៀបកំណត់ CORS នៅក្នុង Express
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```bash
+npm install cors
+```
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ CORS
+```tabs
+javascript
+// app.js
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+
+// 1. បើកអោយអ្នកគ្រប់គ្នាចូលបាន (កុំប្រើបែបនេះសម្រាប់ Production API របស់អ្នក!)
+// app.use(cors()); 
+
+// 2. ការកំណត់ដែលត្រឹមត្រូវ និងមានសុវត្ថិភាព (Best Practice)
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://www.mydomain.com', 'https://admin.mydomain.com'] // អនុញ្ញាតតែ Domain ផ្លូវការប៉ុណ្ណោះ
+        : 'http://localhost:5173', // សម្រាប់ពេល Development (React/Vite)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // អនុញ្ញាតតែ Methods ប៉ុណ្ណេះ
+    credentials: true // អនុញ្ញាតអោយបញ្ជូន Cookies ឆ្លង Domain (សំខាន់បើប្រើ Refresh Token!)
+};
+
+app.use(cors(corsOptions));
+```

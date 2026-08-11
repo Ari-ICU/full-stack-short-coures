@@ -1,26 +1,71 @@
 ---
 title: Repository Pattern
-description: ការណែនាំពី Repository Pattern នៅក្នុងការអភិវឌ្ឍ Backend។
+description: របៀបរៀបចំកូដអោយមានរបៀបរៀបរយដោយបំបែក Controller ចេញពីការទាក់ទង Database។
 module: module-4-orm
 order: 5
 ---
 
-## 🚀 អំពីមេរៀននេះ (Repository Pattern)
+## 🏛️ ការរចនារចនាសម្ព័ន្ធកូដ (Architecture)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Repository Pattern**។
-
-### យន្តការ (Concept Diagram)
+ប្រសិនបើយើងសរសេរកូដទាក់ទង Database ផ្ទាល់នៅក្នុង Express Controller កូដរបស់យើងនឹងមានភាពរញ៉េរញ៉ៃ។
+យើងនឹងអនុវត្តតាមទម្រង់ដ៏ពេញនិយមគឺ **Controller → Service → Repository**។
 
 ```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+graph LR
+    REQ["Request"] --> ROUTE["Router"]
+    ROUTE --> CTRL["Controller <br/>ទទួល Request"]
+    CTRL --> SERV["Service <br/>គិតលេខ, Business Logic"]
+    SERV --> REPO["Repository <br/>សរសេរ/អាន Database"]
+    REPO --> DB[("Database")]
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+```tabs
+javascript
+// repositories/userRepository.js
+import { AppDataSource } from '../config/database.js';
+  import { User } from '../entities/User.js';
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+  // ទាញយក Repository ផ្ទាល់ពី TypeORM
+  const userRepository = AppDataSource.getRepository(User);
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Repository Pattern
+  // បង្កើត Function សាមញ្ញៗ
+  export const findUserByEmail = async (email) => {
+      return await userRepository.findOneBy({ email });
+  };
+
+  export const createUser = async (userData) => {
+      const user = userRepository.create(userData);
+      return await userRepository.save(user);
+  };
+---
+javascript
+// services/userService.js
+import { findUserByEmail, createUser } from '../repositories/userRepository.js';
+  // Service ជាកន្លែងឆែកលក្ខខណ្ឌ (Business Logic)
+  
+  export const registerUser = async (email, password) => {
+      const existingUser = await findUserByEmail(email);
+      if (existingUser) {
+          throw new Error("អុីមែលនេះមានរួចហើយ!");
+      }
+      
+      // TODO: យើងនឹងរៀន Hashing លេខសម្ងាត់នៅ Module ក្រោយ!
+      return await createUser({ email, password });
+  };
+---
+javascript
+// controllers/authController.js
+import { registerUser } from '../services/userService.js';
+  // Controller មានតួនាទីត្រឹមតែទទួល req, res ប៉ុណ្ណោះ
+  
+  export const register = async (req, res, next) => {
+      try {
+          const { email, password } = req.body;
+          const user = await registerUser(email, password);
+          
+          res.status(201).json({ success: true, data: user });
+      } catch (error) {
+          next(error); // បញ្ជូនទៅ Global Error Handler
+      }
+  };
+```

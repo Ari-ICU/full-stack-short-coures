@@ -1,26 +1,45 @@
 ---
-title: Relationships
-description: ការណែនាំពី Relationships នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Database Relationships
+description: របៀបបង្កើតទំនាក់ទំនងរវាងតារាងផ្សេងៗគ្នា និងការប្រើប្រាស់ JOIN។
 module: module-3-postgresql
 order: 3
 ---
 
-## 🚀 អំពីមេរៀននេះ (Relationships)
+## 🔗 ទំនាក់ទំនងទិន្នន័យ (Relationships)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Relationships**។
+នៅក្នុងប្រព័ន្ធ Relational Database ទិន្នន័យត្រូវបានរក្សាទុកដាច់ពីគ្នាជាតារាងតូចៗ ដើម្បីកុំអោយមានការជាន់គ្នា (Data Redundancy)។ បន្ទាប់មក យើងប្រើ **Foreign Keys** ដើម្បីភ្ជាប់ពួកវាចូលគ្នាវិញ។
 
-### យន្តការ (Concept Diagram)
+### ប្រភេទនៃទំនាក់ទំនងទាំង ៣
 
 ```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+erDiagram
+    USERS ||--o{ POSTS : "One-to-Many (អ្នកប្រើម្នាក់ មានអត្ថបទច្រើន)"
+    USERS ||--|| PROFILE : "One-to-One (អ្នកប្រើម្នាក់ មាន Profile តែមួយ)"
+    STUDENTS }|--|{ COURSES : "Many-to-Many (សិស្សច្រើននាក់ រៀនមុខវិជ្ជាច្រើន)"
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+### របៀបបង្កើត Foreign Key និងការប្រើប្រាស់ JOIN
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```tabs
+sql
+-- tables
+-- តារាងមេ (Users)
+  CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100)
+  );
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Relationships
+  -- តារាងកូន (Posts) ភ្ជាប់ទៅ Users
+  CREATE TABLE posts (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(200),
+      user_id INT,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  );
+---
+sql
+-- join
+SELECT posts.title, users.name
+  FROM posts
+  JOIN users ON posts.user_id = users.id;
+```

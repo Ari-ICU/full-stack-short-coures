@@ -1,26 +1,74 @@
 ---
-title: E-Commerce API Project
-description: ការណែនាំពី E-Commerce API Project នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Capstone - E-Commerce API
+description: គម្រោងធំចុងក្រោយ ដើម្បីយកចំណេះដឹងទាំងអស់មកអនុវត្តបង្កើតប្រព័ន្ធ REST API E-Commerce ដែលមានស្តង់ដារ។
 module: module-9-capstone
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (E-Commerce API Project)
+## 🎓 គម្រោងបញ្ចប់ការសិក្សា (Capstone Project)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **E-Commerce API Project**។
+មកដល់ចំណុចនេះ អ្នកបានសិក្សាគ្រប់គ្រាន់ពីការសាងសង់ Backend ប្រកបដោយស្តង់ដារ និងសុវត្ថិភាពខ្ពស់ហើយ។ ដល់ពេលដែលអ្នកត្រូវយកវាទាំងអស់មកផ្គុំគ្នា ដើម្បីបង្កើតគម្រោងពិតប្រាកដមួយ។
 
-### យន្តការ (Concept Diagram)
+### អំពីគម្រោង៖ ប្រព័ន្ធគ្រប់គ្រងការលក់ទំនិញអនឡាញ (E-Commerce REST API)
+
+អ្នកត្រូវសាងសង់ Backend សម្រាប់ App លក់ទំនិញ ដែលមានសមត្ថភាពដូចខាងក្រោម៖
+
+1. **Authentication:** អាច Login, Register ជាមួយ JWT (Access & Refresh tokens)។
+2. **Products Management:** Admin អាចបន្ថែម កែប្រែ លុបទំនិញ។ អ្នកទិញអាចមើល ស្វែងរក (Search) និងត្រង (Filter) តាមតម្លៃ ឫប្រភេទ។
+3. **Shopping Cart & Orders:** អ្នកទិញអាចបញ្ជាទិញទំនិញ គណនាតម្លៃសរុប។
+4. **Roles:** មាន `Admin` (អ្នកគ្រប់គ្រង) និង `Customer` (អ្នកទិញធម្មតា)។
+
+### រចនាសម្ព័ន្ធទិន្នន័យ (Database ERD)
 
 ```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+erDiagram
+    USERS ||--o{ ORDERS : "មាន"
+    USERS {
+        int id PK
+        string name
+        string email
+        string password
+        string role "enum: CUSTOMER, ADMIN"
+    }
+    CATEGORIES ||--o{ PRODUCTS : "មាន"
+    CATEGORIES {
+        int id PK
+        string name
+    }
+    PRODUCTS ||--o{ ORDER_ITEMS : "មានក្នុង"
+    PRODUCTS {
+        int id PK
+        string title
+        decimal price
+        int stock
+        int categoryId FK
+    }
+    ORDERS ||--o{ ORDER_ITEMS : "ផ្ទុក"
+    ORDERS {
+        int id PK
+        int userId FK
+        decimal total_price
+        string status "enum: PENDING, COMPLETED, CANCELLED"
+    }
+    ORDER_ITEMS {
+        int id PK
+        int orderId FK
+        int productId FK
+        int quantity
+        decimal price_at_purchase
+    }
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+### ជំហាននៃការសាងសង់ (Implementation Checklist)
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+- [ ] រៀបចំរចនាសម្ព័ន្ធ Folder (Controller, Service, Repository)
+- [ ] រៀបចំ Database Connection (TypeORM)
+- [ ] បង្កើត Entities និង Relationships
+- [ ] បង្កើត Auth Module (Register, Login ជាមួយ bcrypt និង JWT)
+- [ ] បង្កើត Middleware ការពារ Route (Auth, Role, Rate Limiter)
+- [ ] បង្កើត Products API (ប្រើ QueryBuilder សម្រាប់ Pagination និវ Search)
+- [ ] បង្កើត Order API (ប្រើប្រាស់ Transactions ពេលកាត់ស្តុកទំនិញ)
+- [ ] សរសេរ Unit / Integration Tests ខ្លះៗ
+- [ ] Deploy ទៅកាន់ Render ឫ Railway
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ E-Commerce API Project
+> នេះមិនមែនជារឿងងាយស្រួលទេ វានឹងទាមទារការអត់ធ្មត់ខ្ពស់ និងការត្រលប់ទៅមើលមេរៀនចាស់ៗឡើងវិញ។ **សូមសំណាងល្អ!** 🚀

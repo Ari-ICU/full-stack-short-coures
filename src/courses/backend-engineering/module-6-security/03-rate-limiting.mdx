@@ -1,26 +1,47 @@
 ---
 title: Rate Limiting
-description: ការណែនាំពី Rate Limiting នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ការពារកុំអោយមានការហៅ API ច្រើនហួសហេតុក្នុងពេលតែមួយ (Brute Force / Application DDoS)។
 module: module-6-security
 order: 3
 ---
 
-## 🚀 អំពីមេរៀននេះ (Rate Limiting)
+## 🚦 ហេតុអ្វីយើងត្រូវការ Rate Limiter?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Rate Limiting**។
+ប្រសិនបើអ្នកមិនមានការកម្រិតចំនួន Request ទេ Hacker អាចសរសេរកម្មវិធី (Bot) ដើម្បីហៅទៅកាន់ API របស់អ្នក ១ ម៉ឺនដងក្នុងមួយវិនាទី (Application-level DDoS Attack) ដែលធ្វើអោយ Server របស់អ្នកគាំង។
 
-### យន្តការ (Concept Diagram)
+មួយវិញទៀត ពួកគេអាចប្រើការហៅជាច្រើនដងដើម្បីទាយលេខសម្ងាត់របស់អ្នកប្រើប្រាស់ (Brute Force Attack) នៅត្រង់ចំនុច Login។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការដោះស្រាយជាមួយ `express-rate-limit`
+
+```bash
+npm install express-rate-limit
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+```tabs
+javascript
+// app.js
+import express from 'express';
+import rateLimit from 'express-rate-limit';
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+const app = express();
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Rate Limiting
+// 1. Global Rate Limiter: កំណត់លើគ្រប់ API ទាំងអស់
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // ១៥ នាទី
+    max: 100, // អនុញ្ញាតត្រឹម 100 requests ក្នុង ១៥ នាទី សម្រាប់ IP នីមួយៗ
+    message: { error: "អ្នកបានស្នើសុំច្រើនដងពេកហើយ សូមរង់ចាំ ១៥ នាទីសិន!" }
+});
+app.use(globalLimiter);
+
+// 2. Strict Rate Limiter: សម្រាប់តែ Route សំខាន់ៗ (ដូចជា Login / Register)
+const loginLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // ១ ម៉ោង
+    max: 5, // អនុញ្ញាតអោយវាយលេខសម្ងាត់ខុសតែ ៥ ដងប៉ុណ្ណោះ សម្រាប់ IP នីមួយៗ
+    message: { error: "អ្នកបានព្យាយាម Login ច្រើនដងពេកហើយ សូមរង់ចាំ ១ ម៉ោង!" }
+});
+
+// ដាក់ប្រើប្រាស់ជាក់លាក់លើ Route
+app.post('/api/login', loginLimiter, (req, res) => {
+    // ... logic ផ្ទៀងផ្ទាត់ ...
+});
+```

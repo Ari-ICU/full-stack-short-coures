@@ -1,26 +1,53 @@
 ---
-title: JWT
-description: ការណែនាំពី JWT នៅក្នុងការអភិវឌ្ឍ Backend។
+title: JSON Web Tokens (JWT)
+description: យល់ដឹងពីអ្វីទៅជា JWT និងរបៀបប្រើប្រាស់វាដើម្បីធ្វើ Authentication បែប Stateless។
 module: module-5-authentication
 order: 3
 ---
 
-## 🚀 អំពីមេរៀននេះ (JWT)
+## 🎟️ អ្វីទៅជា JWT?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **JWT**។
+**JWT (JSON Web Token)** គឺជាស្តង់ដារមួយសម្រាប់តំណាងអោយព័ត៌មានរវាងភាគីពីរ (Client និង Server) ប្រកបដោយសុវត្ថិភាព។ វាជាទូទៅត្រូវបានគេប្រើជំនួសអោយការប្រើ Session នៅក្នុងការបង្កើត API ទំនើប។
 
-### យន្តការ (Concept Diagram)
+### លក្ខណៈពិសេសរបស់ JWT (Stateless)
+ចំនុចខ្លាំងរបស់ JWT គឺ Server មិនចាំបាច់រក្សាទុកព័ត៌មាន (State) ថាអ្នកណាបាន Login នោះទេ។ 
+- ពេល Login ត្រូវ Server បង្កើត JWT (ដែលមានផ្ទុក User ID) រួចចុះហត្ថលេខា (Sign) ដោយប្រើ Secret Key ហើយបញ្ជូនទៅ Client។
+- រាល់ពេល Client ត្រូវការទាញទិន្នន័យ ពួកគេគ្រាន់តែផ្ញើ JWT នោះមកកាន់ Server វិញ។
+- Server គ្រាន់តែឆែកមើលហត្ថលេខា (Signature) បើត្រឹមត្រូវ គឺដឹងថាជានរណាភ្លាម ដោយមិនបាច់ទៅសួរ Database គ្រប់ពេលឡើយ។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### រចនាសម្ព័ន្ធរបស់ JWT
+JWT មានបីផ្នែក ចែកដាច់ពីគ្នាដោយសញ្ញាចុច (`.`): `Header.Payload.Signature`
+
+1. **Header:** ប្រាប់ពីប្រភេទ Token និងការបំប្លែងកូដ (ឧ. HS256)។
+2. **Payload:** ផ្ទុកទិន្នន័យពិតប្រាកដ (ឧ. `userId`, `role`, ម៉ោងផុតកំណត់)។
+3. **Signature:** គឺជាលេខសម្ងាត់សម្រាប់បញ្ជាក់ថា ទិន្នន័យ (Payload) មិនត្រូវបានគេកែប្រែក្លែងបន្លំ។
+
+> [!WARNING]
+> **Payload របស់ JWT មិនត្រូវបានលាក់ (Encrypt) ទេ!** អ្នកណាក៏អាចអានវាបានដែរ គ្រាន់តែគេមិនអាចកែប្រែវាបាន (ព្រោះអត់មាន Secret Key សម្រាប់ Sign ឡើងវិញ)។ ដូច្នេះ កុំដាក់ព័ត៌មានសម្ងាត់ដូចជា លេខសម្ងាត់ ឬ លេខកាតធនាគារ ចូលក្នុង JWT អោយសោះ។ ដាក់ត្រឹម `userId` បានហើយ។
+
+### ការបង្កើត និងបញ្ជាក់ JWT
+
+```bash
+npm install jsonwebtoken
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+```tabs
+javascript
+// utils/jwtHelper.js
+import jwt from 'jsonwebtoken';
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+// 1. បង្កើត Token (ពេល Login ត្រូវ)
+export const generateToken = (userId) => {
+    // ត្រូវមានព័ត៌មានសម្ងាត់ (Secret) នៅក្នុងឯកសារ .env
+    const secret = process.env.JWT_SECRET; 
+    
+    // បង្កើត Token ដែលមានសុពលភាពត្រឹម ១ ថ្ងៃ
+    return jwt.sign({ id: userId }, secret, { expiresIn: '1d' });
+};
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ JWT
+// 2. ផ្ទៀងផ្ទាត់ Token (Middleware)
+export const verifyToken = (token) => {
+    const secret = process.env.JWT_SECRET;
+    return jwt.verify(token, secret); // បើហួសម៉ោង ឫក្លែងបន្លំ វានឹងលោត Error
+};
+```

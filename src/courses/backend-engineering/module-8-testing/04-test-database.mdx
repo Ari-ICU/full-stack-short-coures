@@ -1,26 +1,43 @@
 ---
-title: Test Database
-description: ការណែនាំពី Test Database នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Test Database Strategy
+description: របៀបរៀបចំ Database សម្រាប់ទុកធ្វើតេស្តដាច់ដោយឡែក ដើម្បីកុំអោយប៉ះពាល់ទិន្នន័យពិត។
 module: module-8-testing
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Test Database)
+## 🗄️ ហេតុអ្វីត្រូវមាន Test Database?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Test Database**។
+ប្រសិនបើអ្នកធ្វើការតេស្តដោយប្រើ Database ធម្មតា នោះរាល់ពេលអ្នករត់កូដតេស្ត (ឧទាហរណ៍តេស្តលុប User) វានឹងទៅលុប User នៅក្នុង Database ពិតប្រាកដរបស់អ្នក ដែលជារឿងគ្រោះថ្នាក់បំផុត។
 
-### យន្តការ (Concept Diagram)
+ជានិច្ចកាល អ្នកត្រូវបង្កើត Database មួយទៀតសម្រាប់តែធ្វើតេស្តប៉ុណ្ណោះ ឧទាហរណ៍ `ecommerce_test`។ វានឹងត្រូវលុបចោល និងបង្កើតតារាងថ្មីរាល់ពេលតេស្តម្តងៗ។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការកំណត់នៅក្នុងបរិយាកាស (Environment Setup)
+
+អ្នកត្រូវបង្កើតឯកសារ `.env.test` មួយដាច់ដោយឡែក៖
+
+```tabs
+text
+// .env.test
+DB_NAME=ecommerce_test
+PORT=4000
+---
+javascript
+// config/database.js
+export const AppDataSource = new DataSource({
+    // ...
+    // បើជាពេល test ប្រើប្រាស់ឈ្មោះ database ផ្សេង
+    database: process.env.NODE_ENV === 'test' ? 'ecommerce_test' : process.env.DB_NAME,
+    
+    // dropSchema: true នឹងលុបតារាងចោលទាំងអស់ ហើយបង្កើតថ្មីរាល់ពេលភ្ជាប់ (ស័ក្តិសមបំផុតសម្រាប់តេស្ត)
+    dropSchema: process.env.NODE_ENV === 'test',
+    synchronize: process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+});
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Test Database
+### ដំណើរការនៃការរត់តេស្ត (CI/CD Flow)
+នៅពេលអ្នករៀបចំប្រព័ន្ធស្វ័យប្រវត្តិ (GitHub Actions) វាធ្វើការតាមលំដាប់នេះ៖
+1. Checkout កូដរបស់អ្នក។
+2. បើកកុំព្យូទ័រ Server ថ្មី និងតម្លើង PostgreSQL (ទទេរស្អាត)។
+3. រត់ Command `npm test` (ដែលកំណត់ `NODE_ENV=test`)។
+4. កូដតេស្តរត់ ធ្វើអោយ TypeORM បង្កើតតារាងថ្មីក្នុង Database នោះ រួចបញ្ចូលទិន្នន័យសាកល្បង រួចធ្វើតេស្ត។
+5. បើជោគជ័យ វានឹង Deploy ទៅ Production។ បើបរាជ័យ វានឹងរារាំងការ Deploy ភ្លាមៗ។

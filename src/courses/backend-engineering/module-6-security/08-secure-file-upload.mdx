@@ -1,26 +1,52 @@
 ---
 title: Secure File Upload
-description: ការណែនាំពី Secure File Upload នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ការការពារប្រព័ន្ធពីការបញ្ចូលឯកសារដែលមានមេរោគ។
 module: module-6-security
 order: 8
 ---
 
-## 🚀 អំពីមេរៀននេះ (Secure File Upload)
+## 📁 ហានិភ័យនៃការអនុញ្ញាតអោយបញ្ជូលឯកសារ (File Uploads)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Secure File Upload**។
+នៅពេលកម្មវិធីរបស់អ្នកអនុញ្ញាតអោយអ្នកប្រើប្រាស់បង្ហោះឯកសារ (ឧ. រូបថត Profile, ឯកសារ PDF) វាប្រឈមនឹងហានិភ័យធំៗ៖
+1. Hacker បង្ហោះឯកសារកូដ (ឧ. `virus.js`, `shell.php`) រួចអោយ Server រត់កូដនោះ។
+2. ការបង្ហោះឯកសារធំៗពេក ធ្វើអោយពេញអង្គចងចាំ (Storage) របស់ Server (DDoS)។
 
-### យន្តការ (Concept Diagram)
+### ការដោះស្រាយ និងការពារ
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+យើងតែងតែប្រើប្រាស់ Library ដូចជា **Multer** ដើម្បីទទួលយកឯកសារនៅក្នុង Express។ ដើម្បីអោយមានសុវត្ថិភាព យើងត្រូវកំណត់លក្ខខណ្ឌ៖
+
+```tabs
+javascript
+// utils/uploadMiddleware.js
+import multer from 'multer';
+import path from 'path';
+
+// 1. កំណត់ទំហំអតិបរមា (ឧទាហរណ៍ 2MB)
+const limits = { fileSize: 2 * 1024 * 1024 }; 
+
+// 2. ពិនិត្យប្រភេទឯកសារ (MIME Type និង Extension)
+const fileFilter = (req, file, cb) => {
+    // អនុញ្ញាតតែប្រភេទរូបភាពប៉ុណ្ណោះ
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    
+    const isExtnameValid = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const isMimetypeValid = allowedTypes.test(file.mimetype);
+
+    if (isExtnameValid && isMimetypeValid) {
+        cb(null, true);
+    } else {
+        cb(new Error('អនុញ្ញាតតែឯកសារប្រភេទរូបភាពប៉ុណ្ណោះ!'), false);
+    }
+};
+
+const storage = multer.memoryStorage(); // ឬកំណត់កន្លែងរក្សាទុក
+
+export const upload = multer({
+    storage,
+    limits,
+    fileFilter
+});
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Secure File Upload
+> [!TIP]
+> សម្រាប់គម្រោងធំៗ គេមិនរក្សាទុករូបភាពនៅលើ Server (ក្បែរកូដ) នោះទេ។ គេប្រើប្រាស់សេវាកម្មខាងក្រៅដូចជា **AWS S3** ឫ **Cloudinary** ដើម្បីរក្សាទុកឯកសារ ដែលជួយកាត់បន្ថយបន្ទុក Server និងមានសុវត្ថិភាពខ្ពស់ជាង។

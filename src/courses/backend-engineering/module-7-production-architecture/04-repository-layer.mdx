@@ -1,26 +1,38 @@
 ---
 title: Repository Layer
-description: ការណែនាំពី Repository Layer នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ស្រទាប់ចុងក្រោយសម្រាប់ទំនាក់ទំនងផ្ទាល់ជាមួយ Database។
 module: module-7-production-architecture
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Repository Layer)
+## 🗄️ តួនាទីរបស់ Repository
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Repository Layer**។
+**Repository Layer** មានតួនាទីតែមួយគត់គឺ ទាក់ទងជាមួយ Database។ 
+រាល់កូដ TypeORM (ឬ Raw SQL) ទាំងអស់ត្រូវសរសេរនៅទីនេះ។ Service Layer គ្រាន់តែហៅមុខងារពី Repository ប៉ុណ្ណោះ វាមិនខ្វល់ថា Repository ប្រើ Postgres, MySQL, ឫ MongoDB នោះទេ។
 
-### យន្តការ (Concept Diagram)
+ការបែងចែកនេះធ្វើអោយកម្មវិធីយើងងាយស្រួលក្នុងការធ្វើតេស្ត (Unit Testing) និងងាយស្រួលប្តូរ Database ទៅថ្ងៃក្រោយ។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```tabs
+javascript
+// repositories/productRepository.js
+import { AppDataSource } from '../config/database.js';
+import { Product } from '../entities/Product.js';
+
+const repo = AppDataSource.getRepository(Product);
+
+export const saveProduct = async (productData) => {
+    const product = repo.create(productData);
+    return await repo.save(product);
+};
+
+export const findProductById = async (id) => {
+    return await repo.findOne({ where: { id } });
+};
+
+// Query ស្មុគស្មាញក៏ត្រូវសរសេរនៅទីនេះដែរ
+export const findExpensiveProducts = async (minPrice) => {
+    return await repo.createQueryBuilder("p")
+        .where("p.price >= :price", { price: minPrice })
+        .getMany();
+};
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Repository Layer

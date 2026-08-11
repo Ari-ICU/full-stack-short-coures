@@ -1,26 +1,48 @@
 ---
 title: SQL Fundamentals
-description: ការណែនាំពី SQL Fundamentals នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃ SQL (Structured Query Language) ដើម្បីទំនាក់ទំនងជាមួយ Database។
 module: module-3-postgresql
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (SQL Fundamentals)
+## 💾 អ្វីទៅជា SQL?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **SQL Fundamentals**។
+**SQL (Structured Query Language)** គឺជាភាសាស្តង់ដារដែលប្រើសម្រាប់ទំនាក់ទំនង (អាន បញ្ចូល កែប្រែ លុប) ជាមួយ Relational Database ដូចជា PostgreSQL, MySQL, ឬ SQL Server ជាដើម។
 
-### យន្តការ (Concept Diagram)
+### ប្រភេទនៃពាក្យបញ្ជា SQL
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+SQL ត្រូវបានបែងចែកជាផ្នែកធំៗ ប៉ុន្តែអ្វីដែលយើងប្រើប្រាស់ញឹកញាប់បំផុតគឺ **DML (Data Manipulation Language)** និង **DDL (Data Definition Language)**។
+
+```tabs
+sql
+-- ddl
+-- បង្កើតតារាងថ្មីឈ្មោះ users
+  CREATE TABLE users (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150) UNIQUE NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+  -- បន្ថែមជួរឈរ (Column) ថ្មី
+  ALTER TABLE users ADD COLUMN age INT;
+---
+sql
+-- dml
+-- 1. ការបញ្ចូលទិន្នន័យ (Create)
+  INSERT INTO users (name, email) 
+  VALUES ('សុខ', 'sok@example.com'), ('សៅ', 'sao@example.com');
+
+  -- 2. ការអានទិន្នន័យ (Read)
+  SELECT id, name FROM users WHERE id = 1;
+  SELECT * FROM users ORDER BY created_at DESC LIMIT 10;
+
+  -- 3. ការកែប្រែទិន្នន័យ (Update)
+  UPDATE users SET name = 'សុខា' WHERE id = 1;
+
+  -- 4. ការលុបទិន្នន័យ (Delete)
+  DELETE FROM users WHERE id = 2;
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ SQL Fundamentals
+> [!WARNING]
+> ពេលអ្នកសរសេរពាក្យបញ្ជា `UPDATE` ឬ `DELETE` **ត្រូវតែ** ដាក់លក្ខខណ្ឌ `WHERE` ជានិច្ច! បើអ្នកភ្លេច វាអាចនឹងកែប្រែ ឬលុបទិន្នន័យក្នុងតារាងរបស់អ្នកទាំងអស់។

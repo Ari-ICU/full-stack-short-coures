@@ -1,26 +1,33 @@
 ---
-title: Migrations
-description: ការណែនាំពី Migrations នៅក្នុងការអភិវឌ្ឍ Backend។
+title: ORM Migrations
+description: របៀបប្រើប្រាស់ប្រព័ន្ធ Migrations របស់ TypeORM សម្រាប់ Production។
 module: module-4-orm
 order: 7
 ---
 
-## 🚀 អំពីមេរៀននេះ (Migrations)
+## 🏗️ ហេតុអ្វីកុំប្រើ `synchronize: true` នៅពេល Production?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Migrations**។
+នៅក្នុងមេរៀនមុនៗ យើងប្រើប្រាស់ `synchronize: true` នៅក្នុងការភ្ជាប់ TypeORM ដែលវាបង្កើត និងកែប្រែតារាងអោយយើងដោយស្វ័យប្រវត្តិ។ 
+**ប៉ុន្តែ** វាងាយនឹងធ្វើអោយបាត់បង់ទិន្នន័យ (Data Loss) ខ្លាំងណាស់ ប្រសិនបើអ្នកប្តូរឈ្មោះ Column ខុស។
 
-### យន្តការ (Concept Diagram)
+សម្រាប់បរិយាកាសពិត (Production) អ្នក **ត្រូវតែ** ប្រើប្រាស់ **Migrations**។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### របៀបដំណើរការ Migration ក្នុង TypeORM
+
+1. **បិទ Sync:** កំណត់ `synchronize: false` នៅក្នុង DataSource។
+2. **បង្កើត ឯកសារ Migration:** TypeORM នឹងប្រៀបធៀប Entities របស់អ្នក ជាមួយនឹងតារាងក្នុង Database ជាក់ស្តែង រួចវានឹងបង្កើតកូដ Migration ដោយស្វ័យប្រវត្តិ។
+
+```bash
+# ពាក្យបញ្ជាសម្រាប់បង្កើត Migration (វានឹងបង្កើតឯកសារ .ts ឫ .js នៅក្នុងថត migrations)
+typeorm migration:generate src/migrations/CreateUsersTable -d src/config/database.js
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+3. **ដំណើរការ Migration (Run):**
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```bash
+# ពាក្យបញ្ជាសម្រាប់បញ្ជូនការផ្លាស់ប្តូរនោះទៅកាន់ Database 
+typeorm migration:run -d src/config/database.js
+```
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Migrations
+> [!IMPORTANT]
+> ពេលអ្នកដាក់កម្មវិធី (Deploy) ទៅលើ Server ដូចជា AWS ឫ DigitalOcean អ្នកត្រូវប្រាកដថាបាន Run Command `migration:run` នេះមុននឹងបើកអោយ Server ដើរ ដើម្បីអោយប្រាកដថា Database ត្រូវបាន Update រួចរាល់។

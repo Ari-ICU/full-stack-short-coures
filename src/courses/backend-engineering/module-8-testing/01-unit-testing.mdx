@@ -1,26 +1,58 @@
 ---
-title: Unit Testing
-description: ការណែនាំពី Unit Testing នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Unit Testing (Jest)
+description: របៀបសរសេរតេស្តសាកល្បងទៅលើ Functions តូចៗនៃកម្មវិធីដោយស្វ័យប្រវត្តិ។
 module: module-8-testing
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (Unit Testing)
+## 🧪 អ្វីទៅជា Unit Testing?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Unit Testing**។
+**Unit Testing** គឺជាការសរសេរកូដ ដើម្បីយកទៅតេស្តកូដរបស់អ្នក។ វាមិនមែនជាការតេស្តទាំងមូលនោះទេ ប៉ុន្តែជាការតេស្តផ្នែកតូចៗ (Units) ដូចជា Function នីមួយៗ ដើម្បីប្រាកដថាវាធ្វើការបានត្រឹមត្រូវ។
 
-### យន្តការ (Concept Diagram)
+Library ដែលពេញនិយមបំផុតសម្រាប់តេស្តកូដ JavaScript គឺ **Jest**។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការដំឡើង Jest
+
+```bash
+npm install --save-dev jest
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+> ត្រូវបន្ថែម `"test": "jest"` ទៅក្នុង `package.json` ត្រង់ `scripts`។
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+### ឧទាហរណ៍នៃការសរសេរកូដ Test
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Unit Testing
+<Tabs>
+  <TabItem value="utils/math.js" label="utils/math.js" default>
+  ```javascript
+  // នេះគឺជា Function ដែលយើងចង់តេស្ត
+  export const add = (a, b) => {
+      if (typeof a !== 'number' || typeof b !== 'number') {
+          throw new Error("ត្រូវតែជាលេខ");
+      }
+      return a + b;
+  };
+  ```
+  </TabItem>
+  <TabItem value="utils/math.test.js" label="utils/math.test.js">
+  ឯកសារតេស្ត តែងតែមានកន្ទុយ `.test.js` ឬ `.spec.js` ដើម្បីអោយ Jest អាចរកឃើញ។
+
+  ```javascript
+  import { add } from './math.js';
+
+  // describe ប្រើសម្រាប់ដាក់ឈ្មោះក្រុមអោយ Tests
+  describe('Math Helper Functions', () => {
+      
+      // it (ឫ test) គឺជាការធ្វើតេស្តមួយករណី
+      it('គួរតែបូកលេខ ២ ចូលគ្នាបានត្រឹមត្រូវ', () => {
+          const result = add(2, 3);
+          expect(result).toBe(5); // រំពឹងថាវាស្មើ ៥
+      });
+
+      it('គួរតែបោះ Error ប្រសិនបើមានអថេរជាអក្សរ', () => {
+          expect(() => add(2, "3")).toThrow("ត្រូវតែជាលេខ");
+      });
+
+  });
+  ```
+  </TabItem>
+</Tabs>

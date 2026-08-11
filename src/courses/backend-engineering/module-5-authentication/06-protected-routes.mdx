@@ -1,26 +1,45 @@
 ---
-title: Protected Routes
-description: ការណែនាំពី Protected Routes នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Protected Routes Integration
+description: ការអនុវត្តជាក់ស្តែងនៃការផ្គុំ Authentication និង Authorization Middleware បញ្ចូលគ្នាជាមួយ Route។
 module: module-5-authentication
 order: 6
 ---
 
-## 🚀 អំពីមេរៀននេះ (Protected Routes)
+## 🚦 ការការពារ API Routes
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Protected Routes**។
+ឥឡូវនេះ យើងមាន `requireAuth` និង `requireRole` រួចរាល់ហើយ។ តោះយើងយកវាទៅប្រើប្រាស់ក្នុង Router ជាក់ស្តែង។
 
-### យន្តការ (Concept Diagram)
+```tabs
+javascript
+// routes/adminRoutes.js
+import express from 'express';
+import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+const router = express.Router();
+
+// Route ធម្មតា: នរណាក៏អាចចូលមើលបាន
+router.get('/public', (req, res) => {
+    res.json({ message: "ទិន្នន័យសាធារណៈ" });
+});
+
+// Route ការពារទី១: ត្រូវតែមានគណនី (Login រួច) ទើបចូលមើលបាន
+router.get('/profile', requireAuth, (req, res) => {
+    res.json({ 
+        message: "ព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក",
+        userId: req.user.id 
+    });
+});
+
+// Route ការពារទី២: ត្រូវតែជា Admin ទើបអាចលុបទិន្នន័យបាន!
+// យើងអាចដាក់ Middleware ចូលគ្នាបានច្រើនតាមចិត្ត
+router.delete('/users/:id', requireAuth, requireRole('Admin'), (req, res) => {
+    res.json({ message: `បានលុប User ${req.params.id} ដោយជោគជ័យ` });
+});
+
+// Route ការពារទី៣: Manager ក៏បាន Admin ក៏បាន
+router.get('/reports', requireAuth, requireRole('Admin', 'Manager'), (req, res) => {
+    res.json({ message: "ទិន្នន័យរបាយការណ៍ហិរញ្ញវត្ថុ" });
+});
+
+export default router;
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Protected Routes

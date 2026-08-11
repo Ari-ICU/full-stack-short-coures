@@ -1,26 +1,76 @@
 ---
 title: Error Handling
-description: ការណែនាំពី Error Handling នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ការគ្រប់គ្រងកំហុស (Error) នៅក្នុង Express និងការបង្កើត Global Error Handler។
 module: module-2-expressjs
 order: 6
 ---
 
-## 🚀 អំពីមេរៀននេះ (Error Handling)
+## 🚨 បញ្ហានៃការសរសេរ Try/Catch ច្រើនដង
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Error Handling**។
+នៅក្នុងមេរៀនមុនៗ ពេលយើងប្រើ `async/await` នៅក្នុង Route នីមួយៗ យើងត្រូវតែសរសេរ `try/catch` ដើម្បីការពារកម្មវិធីកុំអោយគាំង៖
 
-### យន្តការ (Concept Diagram)
-
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```javascript
+// ❌ វិធីចាស់ (ត្រូវសរសេរ try/catch គ្រប់ Route)
+app.get('/users', async (req, res) => {
+    try {
+        const users = await db.getUsers();
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: "មានបញ្ហានៅ Server" });
+    }
+});
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+នេះមិនមែនជា Best Practice ទេ! កូដយើងនឹងវែង ហើយស្មុគស្មាញ។
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+### ដំណោះស្រាយ: Global Error Handler & Async Wrapper
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Error Handling
+នៅក្នុង Express កាលណាយើងបង្កើត Middleware ដែលមានប៉ារ៉ាម៉ែត្រ ៤ `(err, req, res, next)` Express នឹងដឹងភ្លាមថាវាជាអ្នកចាំចាប់ Error។
+
+```tabs
+javascript
+// utils/asyncHandler.js
+// 1. បង្កើត Wrapper សម្រាប់ចាប់ Error ដោយមិនបាច់សរសេរ try/catch គ្រប់កន្លែង
+  export const asyncHandler = (fn) => (req, res, next) => {
+      Promise.resolve(fn(req, res, next)).catch(next);
+  };
+---
+javascript
+// middlewares/errorHandler.js
+// 2. បង្កើត Global Error Middleware
+  export const globalErrorHandler = (err, req, res, next) => {
+      console.error(err.stack); // Print ទុកមើលខ្លួនឯង
+
+      // កំណត់ Status Code និង Message
+      const statusCode = err.statusCode || 500;
+      const message = err.message || "មានបញ្ហាពីខាងម៉ាស៊ីនមេ (Internal Server Error)";
+
+      res.status(statusCode).json({
+          success: false,
+          error: message,
+          // បង្ហាញកំហុសលម្អិតតែពេល Development ប៉ុណ្ណោះ
+          stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+      });
+  };
+---
+javascript
+// app.js
+import express from 'express';
+  import { asyncHandler } from './utils/asyncHandler.js';
+  import { globalErrorHandler } from './middlewares/errorHandler.js';
+
+  const app = express();
+
+  // 3. ការប្រើប្រាស់នៅក្នុង Route ដោយគ្មាន try/catch
+  app.get('/users', asyncHandler(async (req, res) => {
+      // ឧបមាថាមាន Error ធ្លាក់នៅទីនេះ
+      throw new Error("ទិន្នន័យ Database ដាច់ទំនាក់ទំនង!");
+      
+      res.json({ message: "ជោគជ័យ" }); // នឹងមិនដើរដល់ទីនេះទេ
+  }));
+
+  // 4. ដាក់ Global Error Handler នៅខាងក្រោមគេបង្អស់!! (សំខាន់)
+  app.use(globalErrorHandler);
+
+  app.listen(3000);
+```

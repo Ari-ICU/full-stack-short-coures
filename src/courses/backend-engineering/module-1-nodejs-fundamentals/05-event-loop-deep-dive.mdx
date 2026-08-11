@@ -14,10 +14,10 @@ order: 5
 
 ```mermaid
 graph TD
-    JS[កូដ JavaScript របស់អ្នក] --> CALL[Call Stack <br/>(កន្លែងដែលកូដរត់ផ្ទាល់)]
-    CALL -->|បើការងារយូរ <br/>(អាន File, DB)| WEB[C++ APIs / libuv Thread Pool]
-    WEB -->|ពេលការងារចប់| Q[Callback Queue <br/>(ជួររង់ចាំ)]
-    Q -->|Event Loop ឆែកមើលបើ Call Stack ទំនេរ| CALL
+    JS["កូដ JavaScript របស់អ្នក"] --> CALL["Call Stack <br/>(កន្លែងដែលកូដរត់ផ្ទាល់)"]
+    CALL -->|"បើការងារយូរ <br/>(អាន File, DB)"| WEB["C++ APIs / libuv Thread Pool"]
+    WEB -->|"ពេលការងារចប់"| Q["Callback Queue <br/>(ជួររង់ចាំ)"]
+    Q -->|"Event Loop ឆែកមើលបើ Call Stack ទំនេរ"| CALL
 ```
 
 ### ការអនុវត្តជាក់ស្តែង៖ តើកូដមួយណាដើរមុន?

@@ -1,26 +1,42 @@
 ---
-title: Helmet & Headers
-description: ការណែនាំពី Helmet & Headers នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Security Headers (Helmet)
+description: ការការពារកម្មវិធីពីការវាយប្រហារតាមរយៈ HTTP Headers ដោយប្រើប្រាស់ Helmet។
 module: module-6-security
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (Helmet & Headers)
+## 🪖 ហេតុអ្វីបានជាត្រូវបិទបាំង Headers?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Helmet & Headers**។
+តាមលំនាំដើម (Default) Express.js តែងតែផ្ញើ HTTP Header មួយដែលមានឈ្មោះថា `X-Powered-By: Express` ត្រលប់ទៅកាន់ Client វិញ។ 
+ទោះបីជាវាមើលទៅមិនមានអ្វីធំដុំ ប៉ុន្តែវាគឺជាការប្រាប់ Hacker ថា "ខ្ញុំប្រើ Express" ដូច្នេះពួកគេអាចស្វែងរកចន្លោះប្រហោង (Vulnerabilities) របស់ Express យកមកវាយប្រហារយើងបាន។
 
-### យន្តការ (Concept Diagram)
+### ការដោះស្រាយជាមួយ Helmet
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+**Helmet** គឺជាកញ្ចប់ Middleware ដ៏តូចមួយដែលជួយលាក់បាំង Headers បែបនេះ និងបន្ថែមនូវ Headers សុវត្ថិភាពជាច្រើនទៀតដោយស្វ័យប្រវត្តិ។ 
+
+*វាមិនមែនជាថ្នាំទិព្វដែលអាចការពារកម្មវិធីរបស់អ្នក ១០០% ទេ ប៉ុន្តែវាជារបាំងការពារទី១ ដ៏មានប្រសិទ្ធភាពដែលគ្រប់គម្រោង Backend គួរតែមាន។*
+
+```bash
+npm install helmet
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+```tabs
+javascript
+// app.js
+import express from 'express';
+import helmet from 'helmet';
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+const app = express();
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Helmet & Headers
+// គ្រាន់តែដាក់វាជា Middleware នៅខាងលើគេ នោះវានឹងធ្វើការដោយស្វ័យប្រវត្តិ
+app.use(helmet());
+
+app.get('/', (req, res) => {
+    res.json({ message: "Hello Secure World!" });
+});
+
+app.listen(3000);
+```
+
+> [!TIP]
+> អ្នកក៏អាចបិទ `X-Powered-By` ដោយមិនចាំបាច់ប្រើ Helmet ក៏បាន តាមរយៈកូដ `app.disable('x-powered-by');`

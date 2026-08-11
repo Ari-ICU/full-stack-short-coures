@@ -1,26 +1,44 @@
 ---
 title: Roles & Permissions
-description: ការណែនាំពី Roles & Permissions នៅក្នុងការអភិវឌ្ឍ Backend។
+description: របៀបកំណត់សិទ្ធិ (Authorization) ថាតើអ្នកប្រើប្រាស់ណាខ្លះអាចធ្វើអ្វីបានខ្លះ (ឧ. Admin vs User)។
 module: module-5-authentication
 order: 5
 ---
 
-## 🚀 អំពីមេរៀននេះ (Roles & Permissions)
+## 🛡️ Role-Based Access Control (RBAC)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Roles & Permissions**។
+ពេលកម្មវិធីរបស់អ្នកធំឡើង អ្នកនឹងមានអ្នកប្រើប្រាស់ច្រើនប្រភេទ (Roles) ដូចជា `User`, `Manager`, និង `Admin` ជាដើម។
+យើងអាចកំណត់សិទ្ធិដោយប្រើ Middleware នៅក្នុង Express បានយ៉ាងងាយស្រួលដោយឆែកមើល Role ដែលត្រូវបានផ្ញើមកជាមួយទិន្នន័យ (ឫ Payload របស់ JWT)។
 
-### យន្តការ (Concept Diagram)
+### ការបង្កើត Authorization Middleware
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```tabs
+javascript
+// middlewares/authMiddleware.js
+// Middleware ដំបូង: សម្រាប់បញ្ជាក់អត្តសញ្ញាណ (តើមាន Token ទេ?)
+export const requireAuth = (req, res, next) => {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ error: "មិនមាន Token អនុញ្ញាតទេ" });
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // ភ្ជាប់ព័ត៌មានអ្នកប្រើប្រាស់ (ឧ. id, role) ទៅកាន់ req object ដើម្បីអោយ Route ខាងមុខយកទៅប្រើបាន
+        req.user = decoded; 
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: "Token មិនត្រឹមត្រូវ ឫផុតកំណត់" });
+    }
+};
+
+// Middleware ទីពីរ: សម្រាប់កំណត់សិទ្ធិ (តើមាន Role ត្រឹមត្រូវទេ?)
+// Function នេះទទួលយកប៉ារ៉ាម៉ែត្រ (roles) ហើយបញ្ជូនត្រលប់ទៅជា Middleware function
+export const requireRole = (...allowedRoles) => {
+    return (req, res, next) => {
+        // req.user ត្រូវបានបង្កើតដោយ requireAuth middleware មុននេះ
+        if (!req.user || !allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ error: "អ្នកមិនមានសិទ្ធិចូលមើលកន្លែងនេះទេ (Forbidden)" });
+        }
+        next();
+    };
+};
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Roles & Permissions

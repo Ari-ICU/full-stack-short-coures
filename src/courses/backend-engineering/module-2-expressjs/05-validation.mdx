@@ -1,26 +1,68 @@
 ---
-title: Validation
-description: ការណែនាំពី Validation នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Input Validation
+description: របៀបប្រើប្រាស់ Joi ឬ Zod ដើម្បីត្រួតពិនិត្យទិន្នន័យដែល Client ផ្ញើមកមុននឹងបញ្ចូលទៅក្នុង Database។
 module: module-2-expressjs
 order: 5
 ---
 
-## 🚀 អំពីមេរៀននេះ (Validation)
+## 🛡️ សារៈសំខាន់នៃ Validation
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Validation**។
+"Never Trust Client Input" (កុំទុកចិត្តទិន្នន័យដែលអ្នកប្រើប្រាស់បញ្ជូនមកអោយសោះ)។ 
+បើអ្នកប្រើប្រាស់បញ្ជូន `email` ដែលមិនមានទម្រង់ជាអុីមែល ឬក៏មិនបានបញ្ជូន `password` មក យើងមិនត្រូវអោយកូដរបស់យើងដើរទៅដល់ដំណាក់កាល Database ឡើយ។
 
-### យន្តការ (Concept Diagram)
+យើងនឹងប្រើប្រាស់ Library **Zod** ដែលកំពុងពេញនិយមខ្លាំងសម្រាប់ការធ្វើ Validation។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការដំឡើង Zod
+```bash
+npm install zod
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+### ឧទាហរណ៍ជាក់ស្តែង
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```tabs
+javascript
+// validators/userValidator.js
+import { z } from 'zod';
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Validation
+  // 1. បង្កើត Schema សម្រាប់ពិនិត្យទិន្នន័យ
+  export const registerSchema = z.object({
+      name: z.string().min(2, "ឈ្មោះត្រូវមានយ៉ាងហោចណាស់ ២ តួអក្សរ"),
+      email: z.string().email("ទម្រង់អុីមែលមិនត្រឹមត្រូវទេ"),
+      password: z.string().min(6, "លេខសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ ខ្ទង់"),
+      age: z.number().int().min(18, "អ្នកត្រូវតែមានអាយុ ១៨ ឆ្នាំឡើងទៅ").optional()
+  });
+
+  // 2. បង្កើត Middleware សម្រាប់យក Schema ទៅឆែក
+  export const validateRequest = (schema) => {
+      return (req, res, next) => {
+          try {
+              // ពិនិត្យមើល req.body
+              schema.parse(req.body);
+              next(); // បើត្រូវ អោយទៅមុខទៀត
+          } catch (error) {
+              // បើខុស បញ្ជូន Error ត្រលប់ទៅវិញ ជាមួយ Status 400
+              return res.status(400).json({
+                  message: "ទិន្នន័យមិនត្រឹមត្រូវ",
+                  errors: error.errors.map(e => e.message)
+              });
+          }
+      };
+  };
+---
+javascript
+// routes/authRoutes.js
+import express from 'express';
+  import { validateRequest, registerSchema } from '../validators/userValidator.js';
+
+  const router = express.Router();
+
+  // ប្រើប្រាស់ Validation Middleware មុននឹងដល់ (req, res)
+  router.post('/register', validateRequest(registerSchema), (req, res) => {
+      // មកដល់ទីនេះ មានន័យថាទិន្នន័យ req.body គឺត្រឹមត្រូវ ១០០% ហើយ
+      const { name, email, password, age } = req.body;
+      
+      res.status(201).json({ message: "ចុះឈ្មោះបានជោគជ័យ" });
+  });
+
+  export default router;
+```

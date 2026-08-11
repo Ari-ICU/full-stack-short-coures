@@ -1,26 +1,28 @@
 ---
-title: XSS & CSRF
-description: ការណែនាំពី XSS & CSRF នៅក្នុងការអភិវឌ្ឍ Backend។
+title: XSS and CSRF
+description: យល់ដឹងពី Cross-Site Scripting និង Cross-Site Request Forgery។
 module: module-6-security
 order: 6
 ---
 
-## 🚀 អំពីមេរៀននេះ (XSS & CSRF)
+## 👾 XSS (Cross-Site Scripting)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **XSS & CSRF**។
+**XSS** គឺជាការវាយប្រហារដែល Hacker បញ្ចូលកូដ JavaScript អាក្រក់ទៅក្នុងគេហទំព័ររបស់អ្នក (ឧ. បញ្ចូលតាមការ Comment: `<script>stealTokens()</script>`)។ 
+នៅពេលអ្នកផ្សេងចូលមកអាន Comment នោះ កូដ JavaScript នឹងដំណើរការលើ Browser របស់ពួកគេ ហើយលួចយក Token ឬទិន្នន័យសំខាន់ៗ។
 
-### យន្តការ (Concept Diagram)
+### របៀបការពារ៖
+1. **Frontend ជាអ្នកការពារចម្បង:** React.js / Vue.js ធ្វើការទប់ស្កាត់កូដ HTML អាក្រក់ (Escape HTML) ដោយស្វ័យប្រវត្តិនៅពេលបង្ហាញទិន្នន័យទៅលើអេក្រង់។
+2. **កុំទុក JWT ក្នុង LocalStorage:** បើអ្នកទុក JWT ក្នុង `localStorage` កូដ XSS អាចអានវាបានយ៉ាងងាយ។ ការប្រើ HttpOnly Cookies មានសុវត្ថិភាពជាងព្រោះ JavaScript មិនអាចអានវាបាន។
+3. **Backend Sanitization:** ប្រើប្រាស់ Library ដូចជា `xss-clean` ដើម្បីលុប Tag HTML ចោល មុននឹង Save ចូល Database។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
-```
+---
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+## 🎭 CSRF (Cross-Site Request Forgery)
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+**CSRF** គឺជាការវាយប្រហារដែល Hacker បោកបញ្ឆោតអ្នកប្រើប្រាស់អោយធ្វើសកម្មភាពណាមួយ (ឧ. វេរលុយ) ដោយមិនដឹងខ្លួន ខណៈពេលដែលអ្នកប្រើប្រាស់នោះកំពុង Login។
+បញ្ហានេះកើតឡើងជាចម្បងនៅពេលដែលយើងប្រើប្រាស់ **Cookies សម្រាប់ការធ្វើ Authentication** ព្រោះ Browser នឹងផ្ញើ Cookie ទៅដោយស្វ័យប្រវត្តិ។
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ XSS & CSRF
+### របៀបការពារ៖
+1. **SameSite Cookies:** កំណត់ HttpOnly Cookies របស់អ្នកអោយមាន `SameSite: 'Lax'` ឫ `'Strict'`។ នេះនឹងបញ្ឈប់ Browser មិនអោយផ្ញើ Cookie ទៅអោយ API របស់អ្នក ពេលដែលសំណើ (Request) នោះមកពីគេហទំព័រផ្សេង។
+2. **CSRF Tokens:** សម្រាប់ប្រព័ន្ធចាស់ៗ គេត្រូវទាញយក CSRF Token ពី Server រាល់ពេលមានការផ្លាស់ប្តូរទិន្នន័យ។ (សព្វថ្ងៃ មិនសូវប្រើទេ បើយើងកំណត់ SameSite Cookie បានត្រឹមត្រូវ)។
+3. **ប្រើ JWT តាម Header:** បើអ្នកបញ្ជូន JWT តាមរយៈ `Authorization: Bearer <token>` នៅក្នុង Header នោះការវាយប្រហារ CSRF មិនអាចកើតឡើងបានទេ! (ប៉ុន្តែវាប្រឈមនឹង XSS វិញ បើអ្នកទុកវាខុសកន្លែង)។

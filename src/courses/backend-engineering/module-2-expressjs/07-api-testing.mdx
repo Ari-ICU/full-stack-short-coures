@@ -1,26 +1,43 @@
 ---
-title: API Testing
-description: ការណែនាំពី API Testing នៅក្នុងការអភិវឌ្ឍ Backend។
+title: API Testing & Postman
+description: របៀបប្រើប្រាស់ឧបករណ៍សម្រាប់សាកល្បង API មុននឹងបញ្ជូនទៅអោយ Frontend។
 module: module-2-expressjs
 order: 7
 ---
 
-## 🚀 អំពីមេរៀននេះ (API Testing)
+## 🧪 ការធ្វើតេស្ត API ជាមួយ Postman / Thunder Client
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **API Testing**។
+ក្នុងនាមជា Backend Developer អ្នកមិនចាំបាច់មាន Frontend UI ដើម្បីដឹងថា API របស់អ្នកដើរ ឬមិនដើរនោះទេ។ អ្នកអាចប្រើប្រាស់កម្មវិធី (API Clients) ដើម្បីធ្វើការបញ្ជូនសំណើ (Requests) ដោយផ្ទាល់។
 
-### យន្តការ (Concept Diagram)
+កម្មវិធីពេញនិយមមាន៖
+1. **Postman:** កម្មវិធីដ៏ពេញនិយមបំផុត (ត្រូវដំឡើងដាច់ដោយឡែក)
+2. **Thunder Client:** ជា Extension នៅក្នុង VS Code ផ្ទាល់ (ងាយស្រួល មិនបាច់ចេញពី VS Code)
+3. **Insomnia:** ស្រដៀង Postman ដែរ តែមានល្បឿនលឿន។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### របៀបធ្វើតេស្ត POST Request ដែលមាន Body
+
+ឧបមាថាយើងមាន Route ខាងក្រោម៖
+
+```tabs
+javascript
+// app.js
+import express from 'express';
+  const app = express();
+  app.use(express.json());
+
+  app.post('/api/products', (req, res) => {
+      const { name, price } = req.body;
+      res.status(201).json({ id: 99, name, price });
+  });
+
+  app.listen(3000);
+---
+json
+{
+      "name": "MacBook Pro M3",
+      "price": 2500
+  }
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ API Testing
+> [!TIP]
+> ពេលអ្នកបង្កើត API ច្រើន អ្នកគួរតែ Save Requests ទាំងអស់ទុកនៅក្នុង Folders (Collections) ក្នុង Postman ដើម្បីងាយស្រួលធ្វើតេស្តនៅថ្ងៃក្រោយ ដោយមិនបាច់វាយបញ្ចូលថ្មីរាល់ដង។

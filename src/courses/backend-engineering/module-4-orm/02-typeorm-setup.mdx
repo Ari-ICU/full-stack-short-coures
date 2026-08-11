@@ -1,26 +1,71 @@
 ---
 title: TypeORM Setup
-description: ការណែនាំពី TypeORM Setup នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ការរៀបចំដំឡើង និងតភ្ជាប់ TypeORM នៅក្នុងគម្រោង Express។
 module: module-4-orm
 order: 2
 ---
 
-## 🚀 អំពីមេរៀននេះ (TypeORM Setup)
+## 🛠️ ការរៀបចំ TypeORM
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **TypeORM Setup**។
+នៅក្នុង Course នេះយើងនឹងប្រើប្រាស់ **TypeORM** (ទោះបីជា Prisma ក៏កំពុងពេញនិយម វាសំខាន់ណាស់ក្នុងការចេះ TypeORM ព្រោះគម្រោងធំៗប្រើ NestJS សុទ្ធតែតម្រូវអោយចេះវា)។
 
-### យន្តការ (Concept Diagram)
+### ១. ការដំឡើង Library ចាំបាច់
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```bash
+npm install typeorm pg reflect-metadata
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+> [!NOTE]  
+> ហេតុអ្វីត្រូវការ `reflect-metadata`? ព្រោះ TypeORM ប្រើប្រាស់មុខងាររបស់ TypeScript/Babel ដែលហៅថា "Decorators" (សញ្ញា `@`) ដើម្បីកំណត់ទម្រង់ទិន្នន័យ។
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+### ២. ការកំណត់ DataSource
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ TypeORM Setup
+**DataSource** គឺជាកន្លែងកំណត់ព័ត៌មាន Database របស់យើង។ 
+
+```tabs
+javascript
+// config/database.js
+import { DataSource } from 'typeorm';
+  import 'reflect-metadata'; // ចាំបាច់ត្រូវតែ Import
+  import { User } from '../entities/User.js';
+
+  export const AppDataSource = new DataSource({
+      type: "postgres",
+      host: process.env.DB_HOST || "localhost",
+      port: 5432,
+      username: process.env.DB_USER || "postgres",
+      password: process.env.DB_PASSWORD || "secret123",
+      database: process.env.DB_NAME || "ecommerce",
+      
+      // បញ្ចូល Entities ទាំងអស់នៅទីនេះ
+      entities: [User], 
+      
+      // synchronise: true នឹងបង្កើតតារាងអោយដោយស្វ័យប្រវត្តិ (កុំប្រើវានៅពេល Production!)
+      synchronize: process.env.NODE_ENV !== 'production',
+      
+      logging: false, // ប្តូរទៅ true បើចង់ឃើញ SQL ដើរនៅពីក្រោយ
+  });
+
+  export const connectDB = async () => {
+      try {
+          await AppDataSource.initialize();
+          console.log("✅ ភ្ជាប់ TypeORM ទៅកាន់ PostgreSQL ជោគជ័យ!");
+      } catch (error) {
+          console.error("❌ បរាជ័យក្នុងការភ្ជាប់ TypeORM:", error);
+      }
+  };
+---
+javascript
+// app.js
+import express from 'express';
+  import { connectDB } from './config/database.js';
+
+  const app = express();
+
+  // ហៅការតភ្ជាប់ Database ពេលបើក Server ភ្លាម
+  connectDB().then(() => {
+      app.listen(3000, () => {
+          console.log("Server is running...");
+      });
+  });
+```

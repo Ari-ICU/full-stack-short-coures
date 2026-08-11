@@ -1,26 +1,73 @@
 ---
-title: Raw SQL & pg
-description: ការណែនាំពី Raw SQL & pg នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Raw SQL with node-postgres (pg)
+description: របៀបប្រើប្រាស់ Library pg ដើម្បីសរសេរកូដ SQL ភ្ជាប់ទៅកាន់ PostgreSQL ផ្ទាល់ពី Node.js។
 module: module-3-postgresql
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Raw SQL & pg)
+## 🔌 ការភ្ជាប់ Node.js ជាមួយ PostgreSQL
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Raw SQL & pg**។
+មុននឹងឈានទៅដល់ការប្រើប្រាស់ ORM (ដែលងាយស្រួលជាង) អ្នកគួរតែចេះសរសេរ Raw SQL ភ្ជាប់ទៅ Database សិន ដើម្បីយល់ពីដំណើរការខាងក្នុង។ 
 
-### យន្តការ (Concept Diagram)
+Library ដែលពេញនិយមបំផុតសម្រាប់កិច្ចការនេះគឺ `pg` (node-postgres)។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការដំឡើង និងប្រើប្រាស់
+
+```bash
+npm install pg
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+យើងតែងតែប្រើប្រាស់ **Connection Pool** ជំនួសអោយការបង្កើត Connection ថ្មីរាល់ពេលមាន Request ចូល ព្រោះវាជួយសន្សំសំចៃធនធាន និងដំណើរការលឿនជាង។
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```tabs
+javascript
+// config/db.js
+import pkg from 'pg';
+  const { Pool } = pkg;
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Raw SQL & pg
+  // បង្កើត Pool ដែលផ្ទុក Connections ជាច្រើនត្រៀមរួចជាស្រេច
+  export const pool = new Pool({
+      user: 'postgres',
+      host: 'localhost',
+      database: 'ecommerce',
+      password: 'secretpassword',
+      port: 5432,
+      max: 20 // ចំនួន Connection ច្រើនបំផុតដែលអាចបើកក្នុងពេលតែមួយ
+  });
+
+  // សាកល្បងភ្ជាប់
+  pool.connect()
+      .then(() => console.log('✅ ភ្ជាប់ទៅកាន់ PostgreSQL ជោគជ័យ'))
+      .catch((err) => console.error('❌ បរាជ័យ:', err.message));
+---
+javascript
+// controllers/userController.js
+import { pool } from '../config/db.js';
+
+  // ការទាញទិន្នន័យ (GET)
+  export const getUsers = async (req, res) => {
+      try {
+          const result = await pool.query('SELECT id, name FROM users');
+          res.json(result.rows);
+      } catch (err) {
+          res.status(500).json({ error: err.message });
+      }
+  };
+
+  // ការបញ្ចូលទិន្នន័យ (POST) ការពារ SQL Injection តាមរយៈ $1, $2
+  export const createUser = async (req, res) => {
+      const { name, email } = req.body;
+      try {
+          const result = await pool.query(
+              'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', 
+              [name, email] // Data ត្រូវបញ្ជូនតាម Array នេះ (Parameterized Query)
+          );
+          res.status(201).json(result.rows[0]);
+      } catch (err) {
+          res.status(500).json({ error: err.message });
+      }
+  };
+```
+
+> [!IMPORTANT]
+> **ការការពារ SQL Injection:** កុំប្រើប្រាស់ការបូកបញ្ចូលអក្សរផ្ទាល់ (ឧ. `'INSERT ... VALUES (' + name + ')'`)។ ត្រូវប្រើទម្រង់ `$1, $2` (Parameterized Query) ជានិច្ច ដើម្បីការពារ Hacker បញ្ចូលកូដផ្តេសផ្តាសចូល Database។

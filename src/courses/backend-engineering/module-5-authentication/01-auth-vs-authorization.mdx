@@ -1,26 +1,29 @@
 ---
-title: Auth vs Authorization
-description: ការណែនាំពី Auth vs Authorization នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Authentication vs Authorization
+description: យល់ដឹងពីភាពខុសគ្នារវាងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (Authentication) និងការកំណត់សិទ្ធិ (Authorization)។
 module: module-5-authentication
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (Auth vs Authorization)
+## 🔑 Authentication (AuthN) ទល់នឹង Authorization (AuthZ)
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Auth vs Authorization**។
+នៅក្នុងការបង្កើតប្រព័ន្ធសុវត្ថិភាពសម្រាប់ Backend ពាក្យពីរនេះតែងតែត្រូវបានគេប្រើប្រាស់ញឹកញាប់ ប៉ុន្តែវាមានអត្ថន័យខុសគ្នាស្រឡះ។
 
-### យន្តការ (Concept Diagram)
+### 1. Authentication (ការបញ្ជាក់អត្តសញ្ញាណ)
+**សំនួរ:** តើអ្នកជានរណា? (Who are you?)
+នេះគឺជាដំណើរការផ្ទៀងផ្ទាត់ថា អ្នកពិតជាមនុស្សដែលអ្នកបានអះអាងមែន។
+*ឧទាហរណ៍:* ការបញ្ចូល Email និង Password ត្រឹមត្រូវដើម្បី Login ចូលប្រព័ន្ធ។
+
+### 2. Authorization (ការផ្តល់សិទ្ធិ)
+**សំនួរ:** តើអ្នកមានសិទ្ធិធ្វើអ្វីខ្លះ? (What are you allowed to do?)
+នេះគឺជាដំណើរការកំណត់ថា តើអ្នកត្រូវបានអនុញ្ញាតអោយមើល ឬកែប្រែទិន្នន័យជាក់លាក់ណាមួយដែរឬទេ។
+*ឧទាហរណ៍:* ថ្វីត្បិតតែអ្នកបាន Login (Authentication) ក៏ពិតមែន ប៉ុន្តែអ្នកគ្មានសិទ្ធិលុបទិន្នន័យអ្នកដទៃចេញពីប្រព័ន្ធនោះទេ លុះត្រាតែអ្នកជា Admin (Authorization)។
 
 ```mermaid
 graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+    A["អ្នកប្រើប្រាស់ (Client)"] -->|"បញ្ចូល Email/Password"| B{"Authentication <br/>(តើត្រឹមត្រូវទេ?)"}
+    B -->|"ខុស"| C["បដិសេធ (401 Unauthorized)"]
+    B -->|"ត្រូវ"| D{"Authorization <br/>(តើមានសិទ្ធិទេ?)"}
+    D -->|"គ្មានសិទ្ធិ"| E["បដិសេធ (403 Forbidden)"]
+    D -->|"មានសិទ្ធិ"| F["អនុញ្ញាតអោយចូលមើលទិន្នន័យ (200 OK)"]
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Auth vs Authorization

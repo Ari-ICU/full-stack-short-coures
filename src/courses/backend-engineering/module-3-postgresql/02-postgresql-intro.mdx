@@ -1,26 +1,41 @@
 ---
-title: PostgreSQL Intro
-description: ការណែនាំពី PostgreSQL Intro នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Introduction to PostgreSQL
+description: ស្វែងយល់ពីលក្ខណៈពិសេសរបស់ PostgreSQL និងរបៀបតភ្ជាប់វា។
 module: module-3-postgresql
 order: 2
 ---
 
-## 🚀 អំពីមេរៀននេះ (PostgreSQL Intro)
+## 🐘 ហេតុអ្វីបានជាត្រូវប្រើ PostgreSQL?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **PostgreSQL Intro**។
+**PostgreSQL (ហៅកាត់ថា Postgres)** គឺជាប្រព័ន្ធគ្រប់គ្រងមូលដ្ឋានទិន្នន័យ Open-Source ដ៏ខ្លាំងក្លា និងទំនើបបំផុតមួយនៅលើពិភពលោក។ 
 
-### យន្តការ (Concept Diagram)
+វាត្រូវបានគេពេញនិយមខ្លាំងសម្រាប់ការអភិវឌ្ឍប្រព័ន្ធខ្នាតធំដោយសារ៖
+1. **ទំនុកចិត្ត (Reliability):** អនុលោមតាមស្តង់ដារ ACID (ធានាមិនឱ្យបាត់បង់ទិន្នន័យពេលមានបញ្ហា)។
+2. **ទិន្នន័យចម្រុះ (Advanced Data Types):** គាំទ្រទិន្នន័យបែប JSONB (NoSQL-like features) ក្រៅពីទម្រង់តារាងធម្មតា។
+3. **ឥតគិតថ្លៃ (Open Source):** ប្រើដោយមិនគិតប្រាក់ ទោះជាសម្រាប់គម្រោងធំកម្រិតណាក៏ដោយ។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### រចនាសម្ព័ន្ធតភ្ជាប់ (Connection String)
+
+ដើម្បីភ្ជាប់កូដ Node.js ទៅកាន់ PostgreSQL យើងត្រូវស្គាល់ទម្រង់ **Connection URL**:
+
+```text
+postgresql://[user]:[password]@[host]:[port]/[database_name]
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+ឧទាហរណ៍៖
+```text
+postgresql://postgres:secret123@localhost:5432/ecommerce_db
+```
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+### ឧបករណ៍សម្រាប់ភ្ជាប់ទៅ Database (Database Clients)
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ PostgreSQL Intro
+អ្នកមិនចាំបាច់មើលទិន្នន័យតាមរយៈផ្ទាំងខ្មៅ (Terminal) ទេ យើងអាចប្រើកម្មវិធីដើម្បីមើលទិន្នន័យជាទម្រង់តារាងបានយ៉ាងងាយស្រួល៖
+- **DBeaver** (ឥតគិតថ្លៃ និងពេញនិយមបំផុត)
+- **pgAdmin** (ផ្លូវការពី PostgreSQL)
+- **TablePlus** (កម្មវិធីស្រាលនិងលឿន)
+
+```mermaid
+graph LR
+    NODE["Node.js App"] -->|"Connection String"| PG[("PostgreSQL Server <br/> Port 5432")]
+    DBEAVER["DBeaver / pgAdmin"] -->|"Connection String"| PG
+```

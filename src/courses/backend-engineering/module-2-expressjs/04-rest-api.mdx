@@ -1,26 +1,68 @@
 ---
-title: REST API
-description: ការណែនាំពី REST API នៅក្នុងការអភិវឌ្ឍ Backend។
+title: REST API Principles
+description: ស្វែងយល់ពីគោលការណ៍របស់ REST និងរបៀបរចនា API អោយបានត្រឹមត្រូវ។
 module: module-2-expressjs
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (REST API)
+## 🏛️ អ្វីទៅជា REST API?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **REST API**។
+**REST (Representational State Transfer)** គឺជាស្តង់ដារ ឬច្បាប់ក្នុងការរចនា (Design) API ដើម្បីអោយកម្មវិធីផ្សេងៗអាចនិយាយគ្នាបានងាយស្រួល។ API ដែលអនុវត្តតាមច្បាប់របស់ REST ត្រូវបានហៅថា **RESTful API**។
 
-### យន្តការ (Concept Diagram)
+### គោលការណ៍នៃការរចនា REST API ដែលល្អ
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+1. **ប្រើប្រាស់ Nouns (នាម) មិនមែន Verbs (កិរិយាសព្ទ) ទេ:**
+   - ❌ ខុស: `/getAllUsers`, `/createUser`, `/deleteUser/1`
+   - ✅ ត្រូវ: `/users` 
+
+2. **ប្រើប្រាស់ HTTP Methods អោយបានត្រឹមត្រូវ:**
+   - `GET`: ទាញយកទិន្នន័យ (គ្មានការប៉ះពាល់ដល់ទិន្នន័យចាស់)
+   - `POST`: បង្កើតទិន្នន័យថ្មី
+   - `PUT`: កែប្រែទិន្នន័យ (ជំនួសទាំងស្រុង)
+   - `PATCH`: កែប្រែទិន្នន័យ (ជំនួសតែចំណុចខ្លះ)
+   - `DELETE`: លុបទិន្នន័យ
+
+3. **ប្រើប្រាស់ Status Codes អោយបានត្រឹមត្រូវ:**
+   - `200 OK` សម្រាប់ការទាញយកជោគជ័យ
+   - `201 Created` សម្រាប់ការបង្កើតជោគជ័យ
+   - `400 Bad Request` សម្រាប់ការបញ្ចូលទិន្នន័យខុសទម្រង់
+   - `404 Not Found` សម្រាប់ទិន្នន័យដែលរកមិនឃើញ
+
+### ឧទាហរណ៍នៃ RESTful API ពេញលេញ
+
+```tabs
+javascript
+// routes/posts.js
+import express from 'express';
+  const router = express.Router();
+
+  // 1. ទាញយកអត្ថបទទាំងអស់ (GET /posts)
+  router.get('/', (req, res) => {
+      res.status(200).json({ data: [] });
+  });
+
+  // 2. ទាញយកអត្ថបទតែមួយតាម ID (GET /posts/:id)
+  router.get('/:id', (req, res) => {
+      res.status(200).json({ data: { id: req.params.id, title: "Hello REST" } });
+  });
+
+  // 3. បង្កើតអត្ថបទថ្មី (POST /posts)
+  router.post('/', (req, res) => {
+      const { title, body } = req.body;
+      // ... កូដរក្សាទុកក្នុង Database ...
+      res.status(201).json({ message: "បង្កើតបានជោគជ័យ", data: { id: 1, title } });
+  });
+
+  // 4. កែប្រែអត្ថបទ (PUT /posts/:id)
+  router.put('/:id', (req, res) => {
+      const { title, body } = req.body;
+      res.status(200).json({ message: "កែប្រែបានជោគជ័យ" });
+  });
+
+  // 5. លុបអត្ថបទ (DELETE /posts/:id)
+  router.delete('/:id', (req, res) => {
+      res.status(200).json({ message: "លុបបានជោគជ័យ" });
+  });
+
+  export default router;
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ REST API

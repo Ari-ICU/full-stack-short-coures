@@ -1,26 +1,61 @@
 ---
-title: Relationships
-description: ការណែនាំពី Relationships នៅក្នុងការអភិវឌ្ឍ Backend។
+title: ORM Relationships
+description: របៀបបង្កើតទំនាក់ទំនង (One-to-Many, Many-to-Many) ដោយប្រើប្រាស់ TypeORM Entities។
 module: module-4-orm
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Relationships)
+## 🔗 ការភ្ជាប់ Entities ចូលគ្នា
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Relationships**។
+នៅក្នុង TypeORM ការបង្កើត Foreign Key ត្រូវបានធ្វើឡើងតាមរយៈការកំណត់ "Relations" នៅក្នុង EntitySchema។
 
-### យន្តការ (Concept Diagram)
+ឧទាហរណ៍៖ ការបង្កើតទំនាក់ទំនង **One-to-Many** រវាង `User` និង `Post`។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```tabs
+javascript
+// entities/Post.js
+import { EntitySchema } from "typeorm";
+
+  export const Post = new EntitySchema({
+      name: "Post",
+      tableName: "posts",
+      columns: {
+          id: {
+              primary: true,
+              type: "int",
+              generated: true
+          },
+          title: {
+              type: "varchar",
+              length: 200
+          },
+      },
+      relations: {
+          // Post មួយ ជារបស់ User តែម្នាក់ (Many-to-One ពីជ្រុង Post)
+          user: {
+              target: "User",       // តំណាងអោយ Entity User
+              type: "many-to-one",  
+              joinColumn: { name: "user_id" }, // ឈ្មោះ Foreign Key ក្នុងតារាង
+              onDelete: "CASCADE"   // បើលុប User លុប Post នេះចោលដែរ
+          }
+      }
+  });
+---
+javascript
+// entities/User.js
+import { EntitySchema } from "typeorm";
+
+  export const User = new EntitySchema({
+      name: "User",
+      tableName: "users",
+      columns: { /* ... ដូចមេរៀនមុន ... */ },
+      relations: {
+          // User ម្នាក់ មាន Post ច្រើន (One-to-Many)
+          posts: {
+              target: "Post",
+              type: "one-to-many",
+              inverseSide: "user" // តភ្ជាប់ទៅកាន់ឈ្មោះ relation "user" ក្នុង Post Entity
+          }
+      }
+  });
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Relationships

@@ -1,26 +1,41 @@
 ---
 title: Access & Refresh Tokens
-description: ការណែនាំពី Access & Refresh Tokens នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ហេតុអ្វីយើងត្រូវការ Token ពីរប្រភេទដើម្បីរក្សាសុវត្ថិភាព និងភាពងាយស្រួលដល់អ្នកប្រើប្រាស់។
 module: module-5-authentication
 order: 4
 ---
 
-## 🚀 អំពីមេរៀននេះ (Access & Refresh Tokens)
+## 🔄 បញ្ហានៃការប្រើប្រាស់ Token តែមួយ
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Access & Refresh Tokens**។
+បើអ្នកកំណត់អោយ JWT (Access Token) មានអាយុកាលវែងពេក (ឧទាហរណ៍ ៣០ ថ្ងៃ) នោះបើសិនជា Hacker លួច Token នោះបាន គេអាចប្រើប្រាស់គណនីរបស់អ្នកបានរហូតដល់ ៣០ ថ្ងៃ។
+បើអ្នកកំណត់អោយវាមានអាយុកាលខ្លីពេក (១៥ នាទី) នោះអ្នកប្រើប្រាស់នឹងត្រូវវាយបញ្ចូលលេខសម្ងាត់ដើម្បី Login ម្តងទៀតរៀងរាល់ ១៥ នាទី ដែលជាការរំខានយ៉ាងខ្លាំង។
 
-### យន្តការ (Concept Diagram)
+### ដំណោះស្រាយ: Token ២ ប្រភេទ!
 
 ```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+sequenceDiagram
+    participant C as Client (React)
+    participant S as Server
+    participant DB as Database
+    
+    C->>S: 1. Login (Email + Password)
+    S-->>C: 2. ត្រលប់ Access Token (15m) & Refresh Token (7d)
+    
+    Note over C,S: រយៈពេល 15 នាទីក្រោយ...
+    
+    C->>S: 3. ទាញទិន្នន័យដោយប្រើ Access Token ចាស់
+    S-->>C: 4. បដិសេធ! 401 Unauthorized (Token ផុតកំណត់)
+    
+    C->>S: 5. ផ្ញើ Refresh Token សុំ Access Token ថ្មី
+    S->>DB: 6. ឆែកមើល Refresh Token កុំណត់ក្នុង DB
+    S-->>C: 7. ផ្តល់ Access Token ថ្មី (15m ទៀត)
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+1. **Access Token (អាយុខ្លី - 15 នាទី):** 
+   - ជា Token ស្តង់ដារដែលផ្ញើទៅ Server គ្រប់ Request។
+   - ត្រូវរក្សាទុកក្នុងកន្លែងមានសុវត្ថិភាព ឬក្នុង Memory (មិនគួរទុកក្នុង `localStorage` ទេ ដើម្បីការពារ XSS)។
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Access & Refresh Tokens
+2. **Refresh Token (អាយុវែង - 7 ថ្ងៃ):**
+   - ប្រើសម្រាប់តែយកទៅប្តូរយក Access Token ថ្មីប៉ុណ្ណោះ។
+   - ត្រូវរក្សាទុកនៅក្នុង **HttpOnly Cookies** (ការពារមិនអោយ JavaScript ពីខាងក្រៅអានបាន)។
+   - ត្រូវ Save ទុកក្នុង Database របស់ Server ដើម្បី Server អាចលុបវាចោល (Revoke) បានពេលចង់បញ្ឈប់សិទ្ធិ ឬពេលអ្នកប្រើប្រាស់ Logout។

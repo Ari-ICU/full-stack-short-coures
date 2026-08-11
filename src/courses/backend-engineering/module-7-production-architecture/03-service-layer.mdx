@@ -1,26 +1,38 @@
 ---
 title: Service Layer
-description: ការណែនាំពី Service Layer នៅក្នុងការអភិវឌ្ឍ Backend។
+description: កន្លែងដែលយើងសរសេរ Business Logic សំខាន់ៗនៃកម្មវិធី។
 module: module-7-production-architecture
 order: 3
 ---
 
-## 🚀 អំពីមេរៀននេះ (Service Layer)
+## 🍳 តួនាទីរបស់ Service
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Service Layer**។
+**Service Layer** ប្រៀបដូចជាចុងភៅ! ទីនេះជាកន្លែងដែល "ខួរក្បាល" (Business Logic) របស់កម្មវិធីស្ថិតនៅ។ 
+រាល់ការគណនា ការឆែកលក្ខខណ្ឌ ការហៅទៅកាន់ API ខាងក្រៅ (ឧ. ផ្ញើ Email) គឺត្រូវធ្វើនៅទីនេះ។
 
-### យន្តការ (Concept Diagram)
+### ហេតុអ្វីត្រូវបំបែកវាចេញពី Controller?
+ព្រោះពេលខ្លះ ការងារមួយ (ឧទាហរណ៍ការបង្កើត User ថ្មី) អាចនឹងត្រូវបានហៅតាមរយៈ API ក៏បាន ឫហៅតាមរយៈ Cron Job ក៏បាន។ បើយើងដាក់វាក្នុង Service យើងអាចហៅវាពីកន្លែងណាក៏បានដោយងាយស្រួល។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+```tabs
+javascript
+// services/productService.js
+import * as productRepo from '../repositories/productRepository.js';
+import { sendEmailAdmin } from '../utils/emailSender.js';
+
+export const createNewProduct = async (name, price) => {
+    // 1. Business Logic: តម្លៃមិនអាចអវិជ្ជមានទេ
+    if (price < 0) {
+        throw new Error("តម្លៃផលិតផលមិនអាចតិចជាងសូន្យឡើយ");
+    }
+    
+    // 2. ហៅទៅ Repository ដើម្បីរក្សាទុកក្នុង Database
+    const newProduct = await productRepo.saveProduct({ name, price });
+    
+    // 3. ធ្វើការងារបន្ទាប់បន្សំ (ឧ. ជូនដំណឹងដល់ Admin ពេលមានទំនិញថ្មី)
+    if (price > 1000) {
+        await sendEmailAdmin(`មានទំនិញតម្លៃថ្លៃថ្មី: ${name}`);
+    }
+    
+    return newProduct;
+};
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Service Layer

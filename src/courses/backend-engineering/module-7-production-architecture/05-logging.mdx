@@ -1,26 +1,54 @@
 ---
-title: Logging
-description: ការណែនាំពី Logging នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Logging (Winston)
+description: របៀបកត់ត្រាការងាររបស់ Server (Logs) ដើម្បីងាយស្រួលរកកំហុសពេលដាក់អោយដំណើរការ។
 module: module-7-production-architecture
 order: 5
 ---
 
-## 🚀 អំពីមេរៀននេះ (Logging)
+## 📝 ហេតុអ្វីយើងមិនគួរប្រើត្រឹម `console.log`?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Logging**។
+ពេលអ្នក Deploy កម្មវិធីទៅលើ Server ការប្រើប្រាស់ `console.log()` ធម្មតាគឺមិនគ្រប់គ្រាន់ទេ ព្រោះ៖
+1. វាពិបាកក្នុងការរុករកកំហុស (គ្មានម៉ោងពិតប្រាកដ)។
+2. វាមិនអាចរក្សាទុក Logs ទៅក្នុង File អោយយើងបានទេ។
+3. យើងមិនអាចបែងចែកកម្រិតនៃកំហុស (info, warn, error) បានច្បាស់លាស់។
 
-### យន្តការ (Concept Diagram)
+យើងតែងតែប្រើប្រាស់ Library ឈ្មោះ **Winston** ឫ **Pino**។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការប្រើប្រាស់ Winston
+
+```bash
+npm install winston
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+```tabs
+javascript
+// utils/logger.js
+import winston from 'winston';
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+export const logger = winston.createLogger({
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json() // បម្លែងជា JSON ដើម្បីអោយប្រព័ន្ធស្រូប Logs អានបានងាយ
+    ),
+    transports: [
+        // បង្ហាញលើ Terminal ពេល Development
+        new winston.transports.Console({
+            format: winston.format.simple()
+        }),
+        // រក្សាទុកកំហុសទៅក្នុងឯកសារ (សម្រាប់ Production)
+        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'logs/combined.log' })
+    ]
+});
+---
+javascript
+// app.js (ឧទាហរណ៍នៃការយកទៅប្រើ)
+import { logger } from './utils/logger.js';
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Logging
+app.use((err, req, res, next) => {
+    // កត់ត្រាកំហុសចូលទៅក្នុងឯកសារ error.log
+    logger.error(`មានកំហុស: ${err.message}`, { url: req.url, method: req.method });
+    res.status(500).json({ error: "Server Error" });
+});
+```

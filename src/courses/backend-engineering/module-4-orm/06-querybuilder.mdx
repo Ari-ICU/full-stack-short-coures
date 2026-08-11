@@ -1,26 +1,49 @@
 ---
-title: QueryBuilder
-description: ការណែនាំពី QueryBuilder នៅក្នុងការអភិវឌ្ឍ Backend។
+title: QueryBuilder & Pagination
+description: របៀបប្រើប្រាស់ QueryBuilder សម្រាប់ការទាញទិន្នន័យស្មុគស្មាញ និងការធ្វើ Pagination។
 module: module-4-orm
 order: 6
 ---
 
-## 🚀 អំពីមេរៀននេះ (QueryBuilder)
+## 🔍 អ្វីទៅជា QueryBuilder?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **QueryBuilder**។
+ពេលខ្លះ Function ស្តង់ដាររបស់ Repository (ដូចជា `find()`, `findOne()`) មិនអាចឆ្លើយតបទៅនឹងលក្ខខណ្ឌស្មុគស្មាញបានទេ។ 
+នៅពេលនោះ យើងត្រូវប្រើប្រាស់ **QueryBuilder** ដែលអនុញ្ញាតអោយយើងសរសេរកូដស្រដៀងទៅនឹង SQL តែវាមានសុវត្ថិភាពខ្ពស់ជាង។
 
-### យន្តការ (Concept Diagram)
+```tabs
+javascript
+// repositories/postRepository.js
+import { AppDataSource } from '../config/database.js';
+  import { Post } from '../entities/Post.js';
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+  const postRepo = AppDataSource.getRepository(Post);
+
+  export const searchActivePosts = async (keyword) => {
+      return await postRepo.createQueryBuilder("post")
+          .leftJoinAndSelect("post.user", "user") // ទាញយក User មកជាមួយ (JOIN)
+          .where("post.isActive = :active", { active: true })
+          .andWhere("post.title ILIKE :keyword", { keyword: `%${keyword}%` })
+          .orderBy("post.createdAt", "DESC")
+          .getMany(); // ទាញយកជា Array
+  };
+---
+javascript
+// pagination
+export const getPostsWithPagination = async (page = 1, limit = 10) => {
+      const skip = (page - 1) * limit;
+
+      // getManyAndCount នឹងបញ្ជូនមកវិញនូវ [ទិន្នន័យ, ចំនួនសរុប]
+      const [data, total] = await postRepo.createQueryBuilder("post")
+          .orderBy("post.createdAt", "DESC")
+          .skip(skip)   // រំលងទិន្នន័យចាស់ៗ
+          .take(limit)  // ទាញយកត្រឹមចំនួន limit
+          .getManyAndCount();
+
+      return {
+          data,
+          total,
+          currentPage: page,
+          totalPages: Math.ceil(total / limit)
+      };
+  };
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ QueryBuilder

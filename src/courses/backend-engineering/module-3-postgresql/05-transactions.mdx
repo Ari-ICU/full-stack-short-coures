@@ -1,26 +1,63 @@
 ---
-title: Transactions
-description: ការណែនាំពី Transactions នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Database Transactions
+description: ការប្រើប្រាស់ Transactions ដើម្បីធានាសុវត្ថិភាពទិន្នន័យពេលមានប្រតិបត្តិការច្រើនក្នុងពេលតែមួយ។
 module: module-3-postgresql
 order: 5
 ---
 
-## 🚀 អំពីមេរៀននេះ (Transactions)
+## 🔒 អ្វីទៅជា Transaction?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Transactions**។
+**Transaction** គឺជាការប្រមូលផ្តុំប្រតិបត្តិការ SQL ច្រើនបញ្ចូលគ្នា ទៅជាប្រតិបត្តិការតែមួយ។ 
+លក្ខខណ្ឌរបស់វាគឺ៖ **"ត្រូវតែជោគជ័យទាំងអស់ ឫ ក៏បរាជ័យទាំងអស់"**។
 
-### យន្តការ (Concept Diagram)
+ឧទាហរណ៍ជាក់ស្តែង៖ ការវេរលុយពី "ក" ទៅ "ខ" ៥០ ដុល្លារ។
+1. ដកលុយ ៥០$ ពីកុង "ក" (ជោគជ័យ)
+2. *...ស្រាប់តែភ្លើងដាច់ / Server គាំង...*
+3. បូកលុយ ៥០$ ចូលកុង "ខ" (មិនទាន់បានធ្វើ)
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+បើគ្មាន Transaction ទេ លុយ ៥០$ នោះនឹងបាត់ពីរព័ន្ធ។ បើមាន Transaction វិញ វាដឹងថាជំហានទី ២ បរាជ័យ វានឹង **Rollback** (ត្រលប់ក្រោយវិញ) លុយទៅអោយ "ក" វិញភ្លាមៗ។
+
+### របៀបប្រើប្រាស់ Transaction ជាមួយ `pg`
+
+```tabs
+javascript
+// services/bankService.js
+import { pool } from '../config/db.js';
+
+  export const transferMoney = async (fromId, toId, amount) => {
+      // 1. សុំ Connection មួយពី Pool ដើម្បីធ្វើ Transaction
+      const client = await pool.connect();
+      
+      try {
+          // 2. ចាប់ផ្តើម Transaction
+          await client.query('BEGIN');
+          
+          // 3. ប្រតិបត្តិការទី១ (ដកលុយ)
+          await client.query(
+              'UPDATE accounts SET balance = balance - $1 WHERE id = $2',
+              [amount, fromId]
+          );
+          
+          // ឧបមាថាមាន Error កើតឡើងនៅត្រង់នេះ (វាលោតទៅ catch ភ្លាម)
+          // throw new Error("ប្រព័ន្ធគាំង!"); 
+
+          // 4. ប្រតិបត្តិការទី២ (បូកលុយ)
+          await client.query(
+              'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
+              [amount, toId]
+          );
+          
+          // 5. ជោគជ័យទាំងអស់ សុំបញ្ចប់បញ្ជូនទៅ Database ពិតប្រាកដ
+          await client.query('COMMIT');
+          return "ផ្ទេរប្រាក់ជោគជ័យ";
+          
+      } catch (err) {
+          // 6. បើមានកន្លែងណាមួយបរាជ័យ ត្រូវលុបចោលប្រតិបត្តិការទាំងអស់វិញ
+          await client.query('ROLLBACK');
+          throw err;
+      } finally {
+          // 7. ប្រគល់ Connection ទៅអោយ Pool វិញ ទោះជោគជ័យឫបរាជ័យក៏ដោយ
+          client.release();
+      }
+  };
 ```
-
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Transactions

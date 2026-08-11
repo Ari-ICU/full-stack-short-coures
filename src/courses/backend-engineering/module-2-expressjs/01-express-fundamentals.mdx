@@ -1,26 +1,59 @@
 ---
 title: Express Fundamentals
-description: ការណែនាំពី Express Fundamentals នៅក្នុងការអភិវឌ្ឍ Backend។
+description: ស្វែងយល់ពី Express.js និងរបៀបប្រើប្រាស់វាដើម្បីបង្កើត Web Server បានយ៉ាងងាយស្រួល។
 module: module-2-expressjs
 order: 1
 ---
 
-## 🚀 អំពីមេរៀននេះ (Express Fundamentals)
+## 🚂 អ្វីទៅជា Express.js?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Express Fundamentals**។
+**Express.js** គឺជា Framework ដ៏ពេញនិយមបំផុតសម្រាប់បង្កើត Web Server និង APIs នៅក្នុង Node.js។ វាជួយសម្រួលដល់ភាពស្មុគស្មាញនៃការប្រើប្រាស់ Core `http` module ដោយផ្តល់នូវមុខងារចាំបាច់ជាច្រើនដូចជា Routing និង Middleware។
 
-### យន្តការ (Concept Diagram)
+### ហេតុអ្វីបានជាយើងប្រើ Express?
+1. **ងាយស្រួលសរសេរ (Simplicity):** កូដខ្លី និងងាយយល់ជាងការប្រើ `http` ផ្ទាល់។
+2. **Routing:** អាចបែងចែកផ្លូវ (URLs) និង Methods (GET, POST, PUT, DELETE) បានយ៉ាងងាយ។
+3. **Middleware:** អាចត្រួតពិនិត្យ Request មុនពេលបញ្ជូនទៅកាន់កន្លែងផ្សេង (ដូចជាឆែកមើល Token)។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### រចនាសម្ព័ន្ធគម្រោង Express ដំបូង
+
+ខាងក្រោមនេះជារបៀបបង្កើត Server ដំបូងដោយប្រើ Express ជាមួយ ES Modules។
+
+```tabs
+javascript
+// app.js
+import express from 'express';
+
+  // បង្កើត Application របស់ Express
+  const app = express();
+
+  // Route សាមញ្ញមួយ
+  app.get('/', (req, res) => {
+      res.json({ message: "សួស្តីពី Express.js! 🚀" });
+  });
+
+  // ចាប់ផ្តើម Server
+  const PORT = 3000;
+  app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+  });
+---
+json
+{
+    "name": "my-express-app",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+      "start": "node app.js",
+      "dev": "nodemon app.js"
+    },
+    "dependencies": {
+      "express": "^4.19.2"
+    },
+    "devDependencies": {
+      "nodemon": "^3.1.0"
+    }
+  }
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
-
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
-
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Express Fundamentals
+> [!TIP]
+> យើងប្រើប្រាស់ **nodemon** នៅក្នុង `devDependencies` ដើម្បីអោយ Server ធ្វើការ Restart ដោយស្វ័យប្រវត្តិរាល់ពេលដែលយើង Save កូដថ្មី ដោយមិនបាច់បិទបើក Terminal ខ្លួនឯង។

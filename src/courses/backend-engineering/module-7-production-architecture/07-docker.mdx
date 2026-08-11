@@ -1,26 +1,81 @@
 ---
-title: Docker
-description: ការណែនាំពី Docker នៅក្នុងការអភិវឌ្ឍ Backend។
+title: Containerization (Docker)
+description: របៀបវិចខ្ចប់ (Package) កម្មវិធីរបស់អ្នកចូលទៅក្នុង Docker ងាយស្រួល Deploy ទៅគ្រប់កន្លែង។
 module: module-7-production-architecture
 order: 7
 ---
 
-## 🚀 អំពីមេរៀននេះ (Docker)
+## 🐳 អ្វីទៅជា Docker?
 
-នៅក្នុងមេរៀននេះ យើងនឹងរៀនអំពី **Docker**។
+តើអ្នកធ្លាប់ជួបបញ្ហា "កូដនេះដើរនៅលើកុំព្យូទ័រខ្ញុំ តែពេលអោយមិត្តភក្តិខ្ញុំអត់ដើរ" ដែរទេ? បញ្ហានេះមកពីកុំព្យូទ័រទាំងពីរមាន Version របស់ Node.js ឫ OS ខុសគ្នា។
 
-### យន្តការ (Concept Diagram)
+**Docker** ដោះស្រាយបញ្ហានេះដោយការវេចខ្ចប់កម្មវិធីរបស់អ្នក ព្រមជាមួយ Node.js និង Library ផ្សេងៗ បញ្ចូលគ្នាទៅក្នុងប្រអប់មួយហៅថា **Container**។ Container នេះអាចយកទៅរត់នៅលើកុំព្យូទ័រណា ក៏មានលទ្ធផលដូចគ្នាបេះបិទ។
 
-```mermaid
-graph TD
-    A[Concept 1] --> B[Concept 2]
-    B --> C[Result]
+### ការសរសេរ Dockerfile សម្រាប់ Node.js
+
+អ្នកត្រូវបង្កើតឯកសារមួយឈ្មោះថា `Dockerfile` (គ្មានកន្ទុយអ្វីទាំងអស់) នៅខាងក្រៅគេបង្អស់នៃគម្រោង។
+
+```tabs
+text
+# Dockerfile
+# 1. ប្រើប្រាស់ Node.js ជំនាន់ចុងក្រោយ (ស្រាលបំផុត - alpine)
+FROM node:20-alpine
+
+# 2. បង្កើតថតសម្រាប់ដាក់កូដ
+WORKDIR /usr/src/app
+
+# 3. Copy តែ package.json មកមុន ដើម្បី Install Library 
+COPY package*.json ./
+RUN npm install --production
+
+# 4. Copy កូដទាំងអស់មក
+COPY . .
+
+# 5. បើកច្រក 3000
+EXPOSE 3000
+
+# 6. Command សម្រាប់ពេល Container ដើរ
+CMD ["node", "src/app.js"]
+---
+text
+# .dockerignore
+node_modules
+npm-debug.log
+.env
+.git
 ```
 
-> [!NOTE]
-> ខ្លឹមសារលម្អិតនឹងត្រូវបានបន្ថែមនាពេលខាងមុខ។
+### ការប្រើប្រាស់ Docker Compose
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+ដើម្បីភ្ជាប់ Node.js App ជាមួយ Database ងាយស្រួល គេប្រើ `docker-compose.yml`។
 
-- បង្កើត Project ថ្មី
-- សរសេរកូដសម្រាប់ Docker
+```tabs
+yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=postgres_db
+      - DB_USER=postgres
+      - DB_PASSWORD=secret
+    depends_on:
+      - postgres_db
+
+  postgres_db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=ecommerce
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+```
