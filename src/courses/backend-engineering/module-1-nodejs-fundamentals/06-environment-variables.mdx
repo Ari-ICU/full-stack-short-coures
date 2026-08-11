@@ -1,0 +1,53 @@
+---
+title: Environment Variables (.env)
+description: របៀបលាក់ទុកព័ត៌មានសម្ងាត់ (Secrets) ដូចជា លេខសម្ងាត់ Database និង API Keys។
+module: module-1-nodejs-fundamentals
+order: 6
+---
+
+## 🔒 ហេតុអ្វីយើងត្រូវការ Environment Variables?
+
+នៅក្នុងការសរសេរកម្មវិធី យើងតែងតែមានព័ត៌មានដែល **មិនអាចបង្ហាញជាសាធារណៈបាន** ដូចជា៖
+- លេខសម្ងាត់ភ្ជាប់ទៅកាន់ Database
+- លេខសម្ងាត់សម្រាប់បង្កើត JWT Token
+- API Keys ផ្សេងៗ (Stripe, AWS)
+
+ប្រសិនបើយើងសរសេរវាផ្ទាល់នៅក្នុងកូដ (Hardcode) នោះពេលយើង Push កូដទៅ GitHub អ្នកគ្រប់គ្នានឹងអាចយកលេខសម្ងាត់ទាំងនោះទៅប្រើប្រាស់បាន ដែលនេះជាហានិភ័យសុវត្ថិភាពធំបំផុត។
+
+> [!CAUTION]  
+> **កុំ** សរសេរលេខសម្ងាត់ផ្ទាល់នៅក្នុងកូដរបស់អ្នកអោយសោះ ឧទាហរណ៍៖ `const dbPassword = "mySuperSecretPassword"`។
+
+### ការដោះស្រាយជាមួយ `dotenv`
+
+ស្តង់ដារក្នុងការដោះស្រាយបញ្ហានេះ គឺការប្រើប្រាស់ឯកសារ `.env` តាមរយៈ Library ដែលមានឈ្មោះថា `dotenv`។
+
+```mermaid
+graph LR
+    ENV[.env File <br/>ផ្ទុកលេខសម្ងាត់] -->|dotenv| PROC[process.env <br/>Node.js Global Object]
+    PROC --> APP[ប្រើប្រាស់ក្នុងកូដ App]
+```
+
+### របៀបប្រើប្រាស់
+
+1. ដំឡើង Library `dotenv`:
+   ```bash
+   npm install dotenv
+   ```
+
+2. បង្កើតឯកសារឈ្មោះ `.env` នៅខាងក្រៅគេបង្អស់ (Root Directory) ហើយសរសេរ៖
+   ```text
+   PORT=8000
+   DATABASE_URL=postgres://user:password@localhost:5432/mydb
+   JWT_SECRET=super_secret_key_123
+   ```
+
+3. ទាញយកមកប្រើនៅក្នុងកូដរបស់អ្នក៖
+   ```javascript
+   import 'dotenv/config'; // សម្រាប់ ES Modules បច្ចុប្បន្ន
+
+   const port = process.env.PORT;
+   console.log(`Server ដំណើរការលើ Port ${port}`);
+   ```
+
+> [!IMPORTANT]
+> អ្នកត្រូវតែប្រាកដថាបានដាក់ឈ្មោះឯកសារ `.env` ចូលទៅក្នុងឯកសារ `.gitignore` ដើម្បីកុំអោយវា Push ចូលទៅកាន់ GitHub។ តែអ្នកគួរតែបង្កើតឯកសារ `.env.example` មួយសម្រាប់ទុកមើលជាគំរូ។

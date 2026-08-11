@@ -1,0 +1,59 @@
+---
+title: CommonJS vs ES Modules
+description: ស្វែងយល់ពីរបៀបចែករំលែកកូដ (Module System) នៅក្នុង Node.js រវាង CommonJS និង ES Modules។
+module: module-1-nodejs-fundamentals
+order: 3
+---
+
+## 🧩 អ្វីទៅជា Module?
+
+នៅក្នុងការសរសេរកូដជាក់ស្តែង យើងមិនអាចសរសេរកូដទាំងអស់រាប់ពាន់ជួរនៅក្នុងឯកសារតែមួយបានទេ។ យើងត្រូវបំបែកវាជាឯកសារតូចៗ ហើយឯកសារតូចៗទាំងនោះហៅថា **Modules**។
+
+នៅក្នុងប្រវត្តិសាស្ត្ររបស់ JavaScript មានវិធី ២ សំខាន់ក្នុងការធ្វើបែបនេះ៖ **CommonJS** និង **ES Modules (ESM)**។
+
+### 1. CommonJS (CJS)
+នេះគឺជាស្តង់ដារចាស់ដែល Node.js បង្កើតឡើងតាំងពីដំបូង។ វាប្រើប្រាស់ `require` និង `module.exports`។
+
+**ការបង្កើត Module (math.js):**
+```javascript
+const add = (a, b) => a + b;
+const subtract = (a, b) => a - b;
+
+module.exports = { add, subtract };
+```
+
+**ការទាញយកមកប្រើ (app.js):**
+```javascript
+const math = require('./math');
+console.log(math.add(5, 5)); // 10
+```
+
+### 2. ES Modules (ESM)
+នេះគឺជាស្តង់ដារថ្មីរបស់ JavaScript ផ្លូវការ (ដូចអ្វីដែលយើងសរសេរក្នុង React)។ វាប្រើប្រាស់ `import` និង `export`។ 
+
+> [!IMPORTANT]  
+> ដើម្បីប្រើប្រាស់ ES Modules នៅក្នុង Node.js អ្នកត្រូវកំណត់ `"type": "module"` នៅក្នុងឯកសារ `package.json` ជាមុនសិន។
+
+**ការបង្កើត Module (math.js):**
+```javascript
+export const add = (a, b) => a + b;
+export const subtract = (a, b) => a - b;
+```
+
+**ការទាញយកមកប្រើ (app.js):**
+```javascript
+// ត្រូវតែដាក់កន្ទុយ .js ពីក្រោយ
+import { add, subtract } from './math.js'; 
+console.log(add(5, 5)); // 10
+```
+
+### តើគួរប្រើមួយណា?
+
+```mermaid
+graph TD
+    A[តើគម្រោងរបស់អ្នកថ្មី ឬចាស់?]
+    A -->|គម្រោងថ្មី (ទំនើប)| ESM[ប្រើប្រាស់ ES Modules <br/>import/export]
+    A -->|គម្រោងចាស់ (Legacy)| CJS[ប្រើប្រាស់ CommonJS <br/>require/module.exports]
+```
+
+នៅក្នុង Course មួយនេះ សម្រាប់ការសរសេរ Backend ទំនើប យើងនឹងផ្តោតលើ **ES Modules** ព្រោះវាជាអនាគតរបស់ JavaScript។
