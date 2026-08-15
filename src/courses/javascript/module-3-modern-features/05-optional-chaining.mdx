@@ -1,0 +1,82 @@
+---
+title: Optional Chaining & Nullish Coalescing
+description: រៀនពីរបៀបការពារកំហុសកូដដោយប្រើប្រាស់ Optional Chaining (?.) និងរបៀបកំណត់តម្លៃ Default ដោយប្រើ Nullish Coalescing (??)។
+objectives:
+  - យល់ពីការប្រើប្រាស់ Optional Chaining (?.) ដើម្បីជៀសវាង error "Cannot read property of undefined"
+  - យល់ពីរបៀបប្រើប្រាស់ Nullish Coalescing (??)
+  - យល់ដឹងពីភាពខុសគ្នារវាង OR (||) និង Nullish Coalescing (??)
+module: module-3-modern-features
+order: 5
+quiz:
+  - question: "តើ variable `result` នឹងទទួលបានតម្លៃអ្វីខ្លះ? `const val = 0; const result = val ?? 100;`"
+    options:
+      - "100"
+      - "0"
+      - "undefined"
+      - "null"
+    correctAnswer: 2
+    explanation: "`??` នឹងយកតម្លៃលំនាំដើមតែក្នុងករណីដែលតម្លៃខាងឆ្វេងជា `null` ឬ `undefined` ប៉ុណ្ណោះ។ ដោយសារ `val = 0` (មិនមែន nullish ទេ) នោះវាទទួលបាន 0 ដូចដើម។"
+---
+
+## 🛡️ Optional Chaining & Nullish Coalescing (ES2020)
+
+ទាំង **Optional Chaining** (`?.`) និង **Nullish Coalescing** (`??`) គឺជាមុខងារដែលត្រូវបានបន្ថែមនៅក្នុង JavaScript ជំនាន់ក្រោយ ដើម្បីជួយអ្នកសរសេរកូដការពារកំហុសឆ្គង (bugs/errors) និងគ្រប់គ្រងតម្លៃទិន្នន័យដែលបាត់បង់ (missing data) ដោយសុវត្ថិភាព។
+
+---
+
+## 1. Optional Chaining (`?.`)
+
+នៅពេលយើងព្យាយាមអាន property ពីក្នុង Object ដែលជា `null` ឬ `undefined` នោះ JavaScript នឹងបោះកំហុស `TypeError` និងបញ្ឈប់ដំណើរការកម្មវិធីទាំងស្រុង។
+
+```javascript
+const user = {
+  name: "Sok",
+  // មិនមាន object address ទេ
+};
+
+// ❌ នឹងបោះកំហុស៖ TypeError: Cannot read properties of undefined (reading 'city')
+// console.log(user.address.city);
+```
+
+ដើម្បីការពារបញ្ហានេះ កាលពីមុនយើងត្រូវប្រើលក្ខខណ្ឌ `if` ឬ logical `&&` វែងៗ។ ជាមួយ **Optional Chaining (`?.`)** កូដនឹងឈប់ដំណើរការអានភ្លាមៗ និងត្រឡប់តម្លៃ `undefined` ដោយមិនបោះកំហុស (Error) ឡើយ ប្រសិនបើវាជួបតម្លៃ `null` ឬ `undefined` នៅតាមផ្លូវ។
+
+```javascript
+// ✅ ដើរដោយសុវត្ថិភាព៖ ចេញ undefined (មិនបោះ error ទេ)
+console.log(user.address?.city); 
+```
+
+អ្នកក៏អាចប្រើវាសម្រាប់ហៅ Methods ផងដែរ៖
+```javascript
+// ហៅ method តែបើគ្មាន method នោះទេ វានឹងចេញ undefined (មិន error ទេ)
+user.printDetails?.();
+```
+
+---
+
+## 2. Nullish Coalescing (`??`)
+
+**Nullish Coalescing (`??`)** គឺជា operator សម្រាប់ផ្តល់តម្លៃលំនាំដើម (Default Value) ជំនួសឱ្យតម្លៃ `null` ឬ `undefined`។
+
+```javascript
+const userTheme = null;
+const activeTheme = userTheme ?? "light";
+
+console.log(activeTheme); // "light" (ព្រោះ userTheme ជា null)
+```
+
+### ភាពខុសគ្នារវាង `||` (OR) និង `??` (Nullish)
+*   **OR Operator (`||`)**: នឹងប្រើតម្លៃខាងស្តាំដៃ ប្រសិនបើតម្លៃខាងឆ្វេងជា **Falsy** (រួមមាន `""`, `0`, `false`, `null`, `undefined`)។
+*   **Nullish Coalescing (`??`)**: នឹងប្រើតម្លៃខាងស្តាំដៃ ប្រសិនបើតម្លៃខាងឆ្វេងជា **Nullish** (មានតែ `null` និង `undefined` ប៉ុណ្ណោះ)។
+
+#### ឧទាហរណ៍៖
+```javascript
+const score = 0; // 0 គឺជាពិន្ទុត្រឹមត្រូវ មិនមែនជាការបាត់បង់ទិន្នន័យទេ
+
+// ប្រើ || (OR) 
+const finalScoreOr = score || 50; 
+console.log(finalScoreOr); // 50 (❌ ខុស! ព្រោះ 0 ជា falsy វានឹងរត់ទៅយក 50)
+
+// ប្រើ ?? (Nullish)
+const finalScoreNullish = score ?? 50;
+console.log(finalScoreNullish); // 0 (✅ ត្រឹមត្រូវ ព្រោះ 0 មិនមែន null/undefined ទេ)
+```

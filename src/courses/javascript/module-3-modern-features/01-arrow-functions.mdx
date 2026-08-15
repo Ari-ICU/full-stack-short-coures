@@ -1,0 +1,104 @@
+---
+title: Arrow Functions
+description: ស្វែងយល់ពីរបៀបសរសេរ Arrow Functions, លក្ខណៈពិសេសរបស់វា (Implicit Return) និងភាពខុសគ្នានៃ this binding ធៀបនឹង function ធម្មតា។
+objectives:
+  - យល់ពីរបៀបសរសេរ Syntax របស់ Arrow Function
+  - ចេះប្រើប្រាស់ Implicit Return សម្រាប់សរសេរកូដខ្លីៗ
+  - យល់ដឹងពីភាពខុសគ្នានៃ global/lexical `this` binding
+module: module-3-modern-features
+order: 1
+quiz:
+  - question: "តើ Syntax មួយណាដែលត្រឹមត្រូវសម្រាប់ Arrow Function ដែលទទួល parameter មួយ និងត្រឡប់តម្លៃភ្លាមៗ (implicit return)?"
+    options:
+      - "const double = x => x * 2;"
+      - "const double = (x) => { x * 2 };"
+      - "const double = x => return x * 2;"
+      - "const double = function(x) => x * 2;"
+    correctAnswer: 1
+    explanation: "ចំពោះ parameter តែមួយ យើងមិនបាច់ប្រើវង់ក្រចក `()` ទេ ហើយបើកូដមានតែមួយបន្ទាត់ យើងមិនបាច់ប្រើ `{}` និងពាក្យ `return` ឡើយ (Implicit Return)។"
+---
+
+## 🏹 Arrow Functions (ES6+)
+
+**Arrow Functions** គឺជាទម្រង់សរសេរ Function ថ្មីដែលត្រូវបានណែនាំនៅក្នុង ES6។ វាមានប្រជាប្រិយភាពខ្លាំងណាស់ក្នុងការសរសេរកូដ JavaScript ទំនើប ព្រោះវាជួយឱ្យកូដខ្លី និងស្អាត។
+
+---
+
+## 1. Syntax មូលដ្ឋាន
+
+ជំនួសឱ្យការប្រើពាក្យគន្លឹះ `function` យើងប្រើសញ្ញា `=>` (Arrow) នៅខាងក្រោយ parameter។
+
+```javascript
+// Function ធម្មតា (Traditional Function)
+const add = function(a, b) {
+  return a + b;
+};
+
+// Arrow Function
+const addArrow = (a, b) => {
+  return a + b;
+};
+```
+
+---
+
+## 2. ភាពសាមញ្ញរបស់ Arrow Function
+
+### មិនចាំបាច់ប្រើវង់ក្រចក (ចំពោះ parameter តែមួយ)
+ប្រសិនបើ Function របស់អ្នកទទួលយក parameter តែ **មួយគត់** អ្នកមិនបាច់សរសេរវង់ក្រចក `()` ព័ទ្ធជុំវិញវាឡើយ។
+
+```javascript
+// មាន parameter តែមួយ មិនបាច់ប្រើ ()
+const double = x => {
+  return x * 2;
+};
+```
+
+### Implicit Return (ការត្រឡប់តម្លៃដោយស្វ័យប្រវត្ត)
+ប្រសិនបើ logic ខាងក្នុង function មានតែ **មួយបន្ទាត់** អ្នកអាចលុបវង់ក្រចក `{}` និងពាក្យគន្លឹះ `return` បាន។ វានឹងផ្តល់តម្លៃត្រឡប់មកវិញដោយស្វ័យប្រវត្តិ។
+
+```javascript
+// សរសេរត្រឹមតែមួយបន្ទាត់ ខ្លីបំផុត
+const double = x => x * 2;
+
+console.log(double(5)); // 10
+```
+
+---
+
+## 3. ភាពខុសគ្នានៃ `this` Binding
+
+ចំណុចខុសគ្នាដ៏ធំបំផុតរវាង Function ធម្មតា និង Arrow Function គឺ **`this`** keywork៖
+
+*   **Function ធម្មតា**: បង្កើត `this` ផ្ទាល់ខ្លួនរបស់វា អាស្រ័យលើរបៀបដែលវាត្រូវបានហៅ (Dynamic `this`)។
+*   **Arrow Function**: គ្មាន `this` ផ្ទាល់ខ្លួនទេ។ វាប្រើប្រាស់ `this` របស់បរិបទខាងក្រៅដែលកំពុងរុំព័ទ្ធវា (Lexical `this`)។
+
+### ឧទាហរណ៍៖
+```javascript
+const user = {
+  name: "Sok",
+  hobbies: ["Coding", "Gaming"],
+  
+  // Traditional Method
+  printHobbies() {
+    // ប្រើ function ធម្មតានៅខាងក្នុង printHobbies
+    this.hobbies.forEach(function(hobby) {
+      // ❌ error: this.name is undefined ព្រោះ function នេះបង្កើត this ថ្មី
+      console.log(`${this.name} likes ${hobby}`);
+    });
+  },
+
+  // Solution with Arrow Function
+  printHobbiesArrow() {
+    this.hobbies.forEach((hobby) => {
+      // ✅ ដើរត្រឹមត្រូវ ព្រោះ Arrow Function ប្រើ this របស់ printHobbiesArrow (គឺ user)
+      console.log(`${this.name} likes ${hobby}`);
+    });
+  }
+};
+
+user.printHobbiesArrow();
+// Output: 
+// Sok likes Coding
+// Sok likes Gaming
+```

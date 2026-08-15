@@ -1,0 +1,56 @@
+---
+title: Variables
+description: >-
+  ស្វែងយល់ពីរបៀបប្រកាស Variables ក្នុង JavaScript និងភាពខុសគ្នារវាង var, let,
+  និង const។
+objectives:
+  - 'យល់ពីរបៀបប្រើប្រាស់ var, let, និង const'
+  - យល់ពីភាពខុសគ្នានៃការប្រើប្រាស់ Keyword នីមួយៗ
+module: module-1-fundamentals
+order: 2
+quiz:
+  - question: >-
+      តើ Keyword មួយណាដែលត្រូវបានណែនាំនៅក្នុង ES6 សម្រាប់ប្រកាស Variable
+      ដែលអាចផ្លាស់ប្តូរតម្លៃ (re-assign) បាន?
+    options:
+      - var
+      - let
+      - const
+      - static
+    correctAnswer: 2
+    explanation: >-
+      `let` ត្រូវបានប្រើប្រាស់សម្រាប់ប្រកាស Variable ដែលអាចផ្លាស់ប្តូរតម្លៃ
+      (re-assign) បាន និងមាន Block Scope។
+---
+
+## 📦 Variables
+
+នៅក្នុង JavaScript, **Variables** គឺជាប្រអប់សម្រាប់ផ្ទុកទិន្នន័យ (Data)។ ដើម្បីបង្កើត Variable យើងអាចប្រើ Keywords ៣ យ៉ាង៖ `var`, `let`, និង `const`។
+
+Click button នីមួយៗ ដើម្បីឃើញ scope, reassign, hoist rules live!
+
+```jsdiagram
+jsvariables
+```
+
+### ១. ការប្រើប្រាស់ `let`
+`let` ត្រូវបានណែនាំនៅក្នុង ES6 សម្រាប់ប្រកាសអថេរដែលអាចផ្លាស់ប្តូរតម្លៃបាន។ វាមាន **Block Scope** (មានន័យថាវាត្រូវបានស្គាល់តែក្នុងវង់ក្រចក `{}` ប៉ុណ្ណោះ)។
+
+```javascript
+let age = 25;
+age = 26; // ✅ អាចផ្លាស់ប្តូរបាន
+console.log(age); // 26
+```
+
+### ២. ការប្រើប្រាស់ `const`
+`const` (Constant) ក៏មាន **Block Scope** ដែរ ប៉ុន្តែវាត្រូវបានប្រើសម្រាប់ប្រកាសអថេរដែល **មិនអាចផ្លាស់ប្តូរតម្លៃបាន**។
+
+```javascript
+const birthYear = 1998;
+// birthYear = 1999; // ❌ Error: Assignment to constant variable.
+```
+
+> 💡 **Best Practice:** គួរប្រើប្រាស់ `const` ជានិច្ច លើកលែងតែអ្នកដឹងច្បាស់ថាតម្លៃនោះនឹងត្រូវផ្លាស់ប្តូរនៅពេលក្រោយ ទើបប្រើ `let`។ នេះជួយកាត់បន្ថយកំហុសនៅក្នុងកូដ។
+
+### ៣. ការប្រើប្រាស់ `var` (បែបចាស់)
+`var` គឺជាវិធីចាស់ (មុន ES6) ក្នុងការប្រកាសអថេរ។ វាមាន **Function Scope** មិនមែន Block Scope ទេ ព្រមទាំងមានបញ្ហាជាមួយ Hoisting ដែលធ្វើអោយមានភាពរញ៉េរញ៉ៃ។ នៅក្នុងការសរសេរកូដទំនើប យើង **មិនគួរ** ប្រើ `var` ទៀតទេ។

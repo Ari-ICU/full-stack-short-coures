@@ -1,0 +1,105 @@
+---
+title: គម្រោងទី១៖ Interactive Quiz CLI App
+description: អនុវត្តការប្រើប្រាស់ Variables, Loops, Arrays, and Functions ដើម្បីបង្កើតកម្មវិធីសួរដេញដោលសំនួរចម្លើយ (Interactive Quiz CLI App)។
+objectives:
+  - អនុវត្តការរៀបចំទិន្នន័យសំនួរដោយប្រើប្រាស់ Arrays and Objects
+  - អនុវត្តការសរសេរ Functions និង Control Flow សម្រាប់ត្រួតពិនិត្យចម្លើយ
+  - អនុវត្តការធ្វើ Loop អានសំនួរម្តងមួយៗ
+module: module-7-projects
+order: 1
+quiz:
+  - question: "តើ method មួយណាដែលយើងប្រើដើម្បីបញ្ឈប់ loop ឬចាកចេញពីដំណើរការនៅពេលអ្នកប្រើប្រាស់ចង់ឈប់?"
+    options:
+      - "return"
+      - "break"
+      - "continue"
+      - "exit"
+    correctAnswer: 2
+    explanation: "ពាក្យគន្លឹះ `break` ត្រូវបានប្រើប្រាស់ដើម្បីបញ្ឈប់ការរត់រង្វិលជុំ (Loop) ភ្លាមៗ។"
+---
+
+## 🎯 គម្រោងទី១៖ Interactive Quiz App
+
+នៅក្នុងគម្រោងដំបូងនេះ យើងនឹងសាងសង់កម្មវិធី **Interactive Quiz App** ដំណើរការនៅលើ Console/Terminal ដែលនឹងសួរនាំសំនួរដេញដោលទៅកាន់អ្នកប្រើប្រាស់ ពិនិត្យមើលថាតើចម្លើយរបស់ពួកគេត្រូវឬខុស និងគណនាពិន្ទុចុងក្រោយនៅពេលបញ្ចប់។
+
+---
+
+## 1. រចនាសម្ព័ន្ធទិន្នន័យ (Data Structure)
+
+យើងនឹងប្រើប្រាស់ **Array នៃ Objects** ដើម្បីផ្ទុកព័ត៌មាននៃសំនួរនីមួយៗ រួមមានសំនួរ ជម្រើសចម្លើយ និងចម្លើយដែលត្រឹមត្រូវ។
+
+```javascript
+const quizQuestions = [
+  {
+    question: "តើភាសាកូដមួយណាដែលរត់នៅលើ Web Browser?",
+    options: ["Python", "Java", "JavaScript", "C++"],
+    correctAnswer: 2 // JavaScript (Index 2)
+  },
+  {
+    question: "តើ HTML មកពីពាក្យពេញមួយណា?",
+    options: [
+      "Hyper Text Markup Language",
+      "Home Tool Markup Language",
+      "Hyperlinks and Text Markup Language",
+      "Hyperlink Text Management Language"
+    ],
+    correctAnswer: 0
+  },
+  {
+    question: "តើ keyword មួយណាប្រើសម្រាប់ប្រកាសតម្លៃថេរ (Constant)?",
+    options: ["var", "let", "const", "define"],
+    correctAnswer: 2
+  }
+];
+```
+
+---
+
+## 2. កូដដំណើរការកម្មវិធីទាំងស្រុង (CLI Simulation)
+
+យើងនឹងបង្កើត Function មួយឈ្មោះថា `startQuiz()` ដែលនឹងរត់ Loop ទៅលើសំនួរនីមួយៗ បង្ហាញជម្រើសចម្លើយ ទទួលយកចម្លើយពីអ្នកប្រើប្រាស់ និងបូកសរុបពិន្ទុ។
+
+```javascript
+function startQuiz(questions) {
+  let score = 0;
+  console.log("=== 🌟 ចាប់ផ្តើមកម្មវិធីសួរដេញដោលសំនួរចម្លើយ 🌟 ===\n");
+
+  for (let i = 0; i < questions.length; i++) {
+    const q = questions[i];
+    console.log(`សំនួរទី ${i + 1}: ${q.question}`);
+    
+    // បង្ហាញជម្រើសចម្លើយ 1, 2, 3, 4
+    for (let j = 0; j < q.options.length; j++) {
+      console.log(`   ${j + 1}. ${q.options[j]}`);
+    }
+
+    // សន្មត់ថាអ្នកប្រើប្រាស់ជ្រើសរើសចម្លើយ (ឧទាហរណ៍ ជ្រើសរើសយកលេខ ២)
+    // នៅក្នុងកម្មវិធីពិត យើងនឹងយក input ពី console/prompt
+    const userChoice = 3; // អ្នកប្រើជ្រើសរើសលេខ 3 (Index 2)
+    const userIndex = userChoice - 1; // ប្តូរទៅជា 0-based index
+
+    console.log(`> អ្នកជ្រើសរើស៖ ${userChoice}. ${q.options[userIndex]}`);
+
+    // ពិនិត្យមើលចម្លើយ
+    if (userIndex === q.correctAnswer) {
+      console.log("✅ ត្រឹមត្រូវ! អ្នកទទួលបាន ១ ពិន្ទុ។\n");
+      score++;
+    } else {
+      const correctText = q.options[q.correctAnswer];
+      console.log(`❌ ខុសហើយ! ចម្លើយត្រឹមត្រូវគឺ៖ ${q.correctAnswer + 1}. ${correctText}\n`);
+    }
+  }
+
+  console.log("=== 🎉 កម្មវិធីបានបញ្ចប់! 🎉 ===");
+  console.log(`ពិន្ទុសរុបរបស់អ្នកគឺ៖ ${score} / ${questions.length}`);
+}
+
+// ហៅដំណើរការកម្មវិធី
+startQuiz(quizQuestions);
+```
+
+---
+
+## 💡 កិច្ចការផ្ទះសម្រាប់អនុវត្តបន្ថែម (Challenge)
+*   បន្ថែមប្រព័ន្ធទប់ស្កាត់ (Validation)៖ ប្រសិនបើអ្នកប្រើប្រាស់វាយបញ្ចូលលេខក្រៅពី ១ ដល់ ៤ ឱ្យកម្មវិធីសួរឡើងវិញ។
+*   ប្តូរទៅជាកម្មវិធី Web៖ ប្រើប្រាស់ `prompt()` ជំនួសឱ្យការសន្មត់តម្លៃចម្លើយ ដើម្បីឱ្យមានអន្តរកម្មពិតប្រាកដជាមួយអ្នកប្រើប្រាស់។

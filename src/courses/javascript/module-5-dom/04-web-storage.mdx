@@ -1,0 +1,194 @@
+---
+title: Local Storage
+description: >-
+  សិក្សាពីរបៀបរក្សាទុកទិន្នន័យ (Data) អោយនៅជាប់នឹង Browser
+  របស់អ្នកប្រើប្រាស់ទោះបីជាពួកគេបិទគេហទំព័រ ឬ Refresh ក៏ដោយ ដោយប្រើប្រាស់ Local
+  Storage។
+objectives:
+  - យល់ពីអត្ថប្រយោជន៍នៃ Local Storage ប្រៀបធៀបនឹង Variables ធម្មតា
+  - 'ចេះប្រើប្រាស់ setItem, getItem, និង removeItem សម្រាប់គ្រប់គ្រងទិន្នន័យ'
+  - ចេះប្រើប្រាស់ JSON ដើម្បីរក្សាទុក Objects និង Arrays ទៅក្នុង Local Storage
+module: module-5-dom
+order: 4
+quiz:
+  - question: >-
+      ហេតុអ្វីបានជាយើងមិនអាចរក្សាទុក JavaScript Object ឬ Array ទៅក្នុង Local
+      Storage ដោយផ្ទាល់បាន? (ឧ. `localStorage.setItem('user', {name: \"Sok\"})`)
+    options:
+      - ព្រោះ Local Storage ទទួលយកតែលេខប៉ុណ្ណោះ
+      - ព្រោះ Local Storage អាចផ្ទុកទិន្នន័យបានត្រឹមតែជាប្រភេទ String ប៉ុណ្ណោះ
+      - ព្រោះ Object មានទំហំធំពេក
+      - ព្រោះយើងត្រូវប្រើ Session Storage ជំនួសវិញ
+    correctAnswer: 1
+    explanation: >-
+      Local Storage ទទួលយកទិន្នន័យជាទម្រង់ String (អត្ថបទ) តែប៉ុណ្ណោះ។
+      ដូច្នេះហើយទើបយើងត្រូវបំប្លែង Object ឬ Array ទៅជា JSON String (តាមរយៈ
+      `JSON.stringify()`) ជាមុនសិន ទើបអាចរក្សាទុកបាន។
+---
+
+## 💾 អ្វីទៅជា Local Storage?
+
+ធម្មតា នៅពេលអ្នក Refresh គេហទំព័រ ទិន្នន័យដែលរក្សាទុកក្នុង Variables (`let` ឬ `const`) នឹងត្រូវបាត់បង់ទាំងអស់! តើធ្វើដូចម្តេចទើបអាចរក្សាទុកទិន្នន័យដូចជា ការកំណត់ Dark Mode, ព័ត៌មាន User លៃឡក, ឬទំនិញក្នុងកន្ត្រក អោយនៅជាប់ជារហូតបាន?
+
+ចម្លើយគឺ **Local Storage**! វាគឺជាកន្លែងរក្សាទុកទិន្នន័យខ្នាតតូច (ប្រហែល 5MB) ដែលភ្ជាប់មកជាមួយ Browser នីមួយៗ (Chrome, Safari, Firefox)។ ទិន្នន័យនឹងមិនបាត់ទេ ទាល់តែអ្នកប្រើប្រាស់លុបវាដោយខ្លួនឯង (Clear Browsing Data)។
+
+---
+
+## 1. ការប្រើប្រាស់មូលដ្ឋាន
+
+ការធ្វើការជាមួយ Local Storage គឺងាយស្រួលបំផុត ដោយវាដំណើរការជាទម្រង់ `Key: Value`។
+
+```jsdiagram
+jslsbasic
+```
+
+```tabs
+html
+<!-- Theme toggle ដែលចងចាំ preference បន្ទាប់ពី refresh -->
+<button id="themeBtn">🌙 Switch to Dark</button>
+<p id="status">Current theme: light</p>
+---
+css
+body {
+  transition: background 0.3s, color 0.3s;
+  padding: 1rem;
+  font-family: sans-serif;
+}
+body.dark {
+  background: #1e1e2e;
+  color: #cdd6f4;
+}
+#themeBtn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 2px solid #6366f1;
+  background: #6366f1;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+#status {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+---
+js
+// setItem — រក្សាទុក theme
+function applyTheme(theme) {
+  if (theme === "dark") {
+    document.body.classList.add("dark");
+    document.getElementById("themeBtn").textContent = "☀️ Switch to Light";
+  } else {
+    document.body.classList.remove("dark");
+    document.getElementById("themeBtn").textContent = "🌙 Switch to Dark";
+  }
+  document.getElementById("status").textContent =
+    "Current theme: " + theme;
+}
+
+// getItem — ទាញ theme ពី localStorage
+const saved = localStorage.getItem("theme") || "light";
+applyTheme(saved);
+
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const current = localStorage.getItem("theme") || "light";
+  const next = current === "light" ? "dark" : "light";
+  localStorage.setItem("theme", next);
+  applyTheme(next);
+});
+```
+
+---
+
+## 🔄 2. ការរក្សាទុក Objects និង Arrays
+
+នេះគឺជាចំណុចដែលសិស្សថ្មីៗតែងតែមានកំហុស! **Local Storage ស្គាល់តែ String ប៉ុណ្ណោះ!** បើអ្នកព្យាយាមរុញ Object ចូលផ្ទាល់ វាប្រែទៅជាពាក្យ `[object Object]` ដែលគ្មានន័យអ្វីទាំងអស់។
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងត្រូវពឹងផ្អែកលើ **JSON** ដែលបានរៀនក្នុងមេរៀនមុន!
+
+```jsdiagram
+jslsjson
+```
+
+```tabs
+html
+<!-- Shopping cart ដែលរក្សាទុកក្នុង localStorage -->
+<div id="cartDisplay"></div>
+<div style="display:flex; gap:0.5rem; margin-top:0.75rem; flex-wrap:wrap;">
+  <input id="itemInput" type="text" placeholder="Add item..." />
+  <button id="addBtn">+ Add</button>
+  <button id="saveBtn">💾 Save</button>
+  <button id="loadBtn">📂 Load</button>
+  <button id="clearBtn">🗑 Clear</button>
+</div>
+---
+css
+#cartDisplay {
+  min-height: 3rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #334155;
+}
+input {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+button {
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+#addBtn  { background: #6366f1; }
+#saveBtn { background: #f97316; }
+#loadBtn { background: #22c55e; }
+#clearBtn { background: #ef4444; }
+---
+js
+let cart = ["Apple", "Banana", "Milk"];
+
+function renderCart() {
+  document.getElementById("cartDisplay").textContent =
+    "cart: " + JSON.stringify(cart);
+}
+
+renderCart();
+
+document.getElementById("addBtn").addEventListener("click", () => {
+  const val = document.getElementById("itemInput").value.trim();
+  if (val) { cart.push(val); renderCart(); }
+});
+
+// ✅ ត្រូវ: JSON.stringify() មុន setItem
+document.getElementById("saveBtn").addEventListener("click", () => {
+  localStorage.setItem("myCart", JSON.stringify(cart));
+  alert("Saved to localStorage!");
+});
+
+// ✅ ត្រូវ: JSON.parse() ក្រោយ getItem
+document.getElementById("loadBtn").addEventListener("click", () => {
+  const saved = localStorage.getItem("myCart");
+  if (saved) {
+    cart = JSON.parse(saved);
+    renderCart();
+  }
+});
+
+document.getElementById("clearBtn").addEventListener("click", () => {
+  localStorage.removeItem("myCart");
+  cart = [];
+  renderCart();
+});
+```
+
+> 💡 **ចំណាំ៖** តែងតែប្រើ `JSON.stringify()` ពេលរុញចូល និង `JSON.parse()` ពេលទាញចេញ ប្រសិនបើទិន្នន័យរបស់អ្នកមិនមែនជាអត្ថបទធម្មតា។ វានឹងជួយសង្គ្រោះអ្នកពីបញ្ហាឈឺក្បាលជាច្រើន!

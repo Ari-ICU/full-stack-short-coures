@@ -1,0 +1,111 @@
+---
+title: គម្រោងទី៤៖ Weather App (Async/Await & API Fetch)
+description: សាងសង់កម្មវិធីស្វែងរកអាកាសធាតុទូទាំងសកលលោក ដោយទាញយកទិន្នន័យផ្ទាល់ពី API និងបង្ហាញលទ្ធផលអាកាសធាតុដោយប្រើប្រាស់ DOM Rendering។
+objectives:
+  - អនុវត្តការប្រើប្រាស់ Fetch API ជាមួយ Async/Await
+  - អនុវត្តការគ្រប់គ្រងកំហុស (Error Handling) ដោយប្រើ try...catch
+  - អនុវត្តការផ្លាស់ប្តូររូបភាព និងពណ៌របស់គេហទំព័រទៅតាមលទ្ធផលអាកាសធាតុជាក់ស្តែង
+module: module-7-projects
+order: 4
+quiz:
+  - question: "តើប្លុក (Block) មួយណាដែលត្រូវបានប្រើប្រាស់ដើម្បីស្ទាក់ចាប់កំហុស (Errors) នៅពេលដំណើរការ fetch API មិនជោគជ័យ?"
+    options:
+      - "then...catch"
+      - "try...catch"
+      - "throw...error"
+      - "if...else"
+    correctAnswer: 2
+    explanation: "នៅក្នុង async/await syntax យើងប្រើប្រាស់ `try...catch` block ដើម្បីចាប់កំហុសនៅពេលមានបញ្ហាបណ្តាញ ឬ API មិនឆ្លើយតប។"
+---
+
+## ⛅ គម្រោងទី៤៖ Weather App Dashboard
+
+គម្រោងចុងក្រោយនេះ គឺជាការសរុបមកវិញនូវរាល់មេរៀនទាំងអស់ដែលអ្នកបានរៀន រួមមាន **DOM Manipulation**, **Events**, **Async/Await**, និង **API Integration**។ យើងនឹងបង្កើតកម្មវិធីស្វែងរកអាកាសធាតុនៃទីក្រុងនានា។
+
+---
+
+## 1. រចនាសម្ព័ន្ធ HTML មូលដ្ឋាន
+
+```html
+<div class="weather-box">
+  <input type="text" id="city-input" placeholder="វាយបញ្ចូលឈ្មោះទីក្រុង (ឧ. London)...">
+  <button id="search-btn">ស្វែងរក</button>
+  
+  <div id="loader" class="hidden">កំពុងផ្ទុកទិន្នន័យ...</div>
+  
+  <div id="weather-info" class="hidden">
+    <h3 id="city-name">London</h3>
+    <p id="temperature">20°C</p>
+    <p id="condition">Cloudy</p>
+  </div>
+</div>
+```
+
+---
+
+## 2. កូដ JavaScript និងការហៅ API (Fetch & Render)
+
+យើងនឹងប្រើប្រាស់ API សាកល្បង ឬ API ឥតគិតថ្លៃដើម្បីទាញយកទិន្នន័យអាកាសធាតុ។
+
+```javascript
+const cityInput = document.getElementById("city-input");
+const searchBtn = document.getElementById("search-btn");
+const loader = document.getElementById("loader");
+const weatherInfo = document.getElementById("weather-info");
+const cityName = document.getElementById("city-name");
+const temperature = document.getElementById("temperature");
+const condition = document.getElementById("condition");
+
+// Function ទាញយកទិន្នន័យអាកាសធាតុ (Async/Await)
+async function fetchWeather(city) {
+  // បង្ហាញ Loader និងលាក់ព័ត៌មានអាកាសធាតុចាស់
+  loader.classList.remove("hidden");
+  weatherInfo.classList.add("hidden");
+  
+  // ប្រើប្រាស់ API Mock ឬ Free API
+  const apiKey = "YOUR_API_KEY"; // បញ្ចូល API Key របស់អ្នក
+  const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+  
+  try {
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error("❌ រកមិនឃើញទីក្រុងនេះឡើយ!");
+    }
+    
+    const data = await response.json();
+    displayWeather(data); // បង្ហាញព័ត៌មានលើ screen
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    // លាក់ Loader មិនថាជោគជ័យ ឬបរាជ័យ
+    loader.classList.add("hidden");
+  }
+}
+
+// Function បង្ហាញទិន្នន័យលើ DOM
+function displayWeather(data) {
+  cityName.textContent = `${data.name}, ${data.sys.country}`;
+  temperature.textContent = `${Math.round(data.main.temp)}°C`;
+  condition.textContent = data.weather[0].description;
+  
+  // បង្ហាញប្រអប់ព័ត៌មានអាកាសធាតុ
+  weatherInfo.classList.remove("hidden");
+}
+
+// ភ្ជាប់ Event Listener ទៅលើប៊ូតុងស្វែងរក
+searchBtn.addEventListener("click", () => {
+  const city = cityInput.value.trim();
+  if (city) {
+    fetchWeather(city);
+  } else {
+    alert("សូមបញ្ចូលឈ្មោះទីក្រុង!");
+  }
+});
+```
+
+---
+
+## 🌟 ចំណុចពង្រឹងបន្ថែម (Advanced Challenge)
+*   **ប្តូរផ្ទៃខាងក្រោយតាមអាកាសធាតុ**៖ ប្រសិនបើអាកាសធាតុក្តៅ (Sunny) ប្តូរពណ៌ផ្ទៃខាងក្រោយទៅជាពណ៌លឿងក្រហម។ ប្រសិនបើត្រជាក់ ឬភ្លៀង (Rainy) ប្តូរពណ៌ផ្ទៃខាងក្រោយទៅជាពណ៌ខៀវប្រផេះ។
+*   **រក្សាទុកការស្វែងរកចុងក្រោយ**៖ ប្រើ `localStorage` ដើម្បីរក្សាទុកទីក្រុងដែលបានស្វែងរកចុងក្រោយគេបង្អស់ ដូច្នេះពេលអ្នកបើកទំព័រម្តងទៀត វានឹងស្វែងរកដោយស្វ័យប្រវត្តិតែម្តង។

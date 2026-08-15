@@ -1,0 +1,128 @@
+---
+title: ES6 Classes
+description: រៀនពីរបៀបសរសេរកូដតាមបែប Object-Oriented Programming (OOP) ដោយប្រើប្រាស់ ES6 Classes ព្រមទាំងការប្រើប្រាស់ Getters/Setters និង Static methods/properties។
+objectives:
+  - យល់ពីរបៀបបង្កើត Class, constructor, methods
+  - យល់ពីការបន្តពូជ (Inheritance) ដោយប្រើ extends និង super
+  - ចេះបង្កើត Getters & Setters ដើម្បីគ្រប់គ្រងការអាន និងសរសេរទិន្នន័យ
+  - ចេះបង្កើត Static methods និង properties សម្រាប់ប្រើនៅលើ Class ផ្ទាល់
+module: module-4-oop
+order: 2
+quiz:
+  - question: "តើ keyword មួយណាដែលយើងត្រូវប្រើប្រាស់ដើម្បីបង្កើត method ដែលអាចហៅប្រើប្រាស់ផ្ទាល់ពី Class ដោយមិនបាច់បង្កើត Object instance (new)?"
+    options:
+      - "get"
+      - "static"
+      - "set"
+      - "instanceof"
+    correctAnswer: 2
+    explanation: "keyword `static` ត្រូវបានប្រើដើម្បីកំណត់ method ឬ property ដែលជារបស់ Class ផ្ទាល់ខ្លួន មិនមែនរបស់ instances ឡើយ។"
+---
+
+## 🏛️ ES6 Classes
+
+**ES6 Class** គឺជា "ពុម្ពគំរូ" (Blueprint) សម្រាប់បង្កើត Objects ដែលមានរចនាសម្ព័ន្ធដូចៗគ្នា។ វាជួយឱ្យការសរសេរ OOP នៅក្នុង JavaScript មានភាពងាយស្រួល និងស្អាតជាងការប្រើប្រាស់ Constructor Functions ធម្មតា។
+
+---
+
+## 1. Syntax មូលដ្ឋាន និង Constructor
+
+យើងបង្កើត Class ដោយប្រើពាក្យគន្លឹះ `class`។ `constructor` គឺជា function ពិសេសដែលដើរដោយស្វ័យប្រវត្តិរាល់ពេលដែលយើងបង្កើត Object ថ្មី។
+
+```javascript
+class User {
+  constructor(name, age) {
+    this.name = name; // property
+    this.age = age;   // property
+  }
+
+  // Method
+  greet() {
+    console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name}។`);
+  }
+}
+
+// បង្កើត instance ដោយប្រើ 'new'
+const user1 = new User("Sok", 25);
+user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok។"
+```
+
+---
+
+## 2. ការបន្តពូជ (Inheritance: `extends` និង `super`)
+
+យើងអាចឱ្យ Class មួយទទួលយកលក្ខណៈពី Class មួយទៀតដោយប្រើប្រាស់ `extends`។
+
+```javascript
+class Admin extends User {
+  constructor(name, age, role) {
+    super(name, age); // ហៅ constructor របស់ User (Parent Class)
+    this.role = role;
+  }
+
+  deletePost() {
+    console.log(`${this.name} (ជា Admin) បានលុបអត្ថបទមួយ។`);
+  }
+}
+
+const admin = new Admin("Dara", 30, "SuperAdmin");
+admin.greet();      // ✅ អាចប្រើប្រាស់ greet() របស់ User បាន (Inheritance)
+admin.deletePost(); // ✅ ប្រើប្រាស់ method របស់ខ្លួនឯង
+```
+
+---
+
+## 3. Getters & Setters
+
+**Getters** (`get`) និង **Setters** (`set`) ត្រូវបានប្រើប្រាស់ដើម្បីគ្រប់គ្រងរបៀបដែលទិន្នន័យ (Properties) ត្រូវបានអាន ឬផ្លាស់ប្តូរតម្លៃ។ វាជួយការពារសុវត្ថិភាពទិន្នន័យ។
+
+```javascript
+class Account {
+  constructor(owner, balance) {
+    this.owner = owner;
+    this._balance = balance; // ប្រើសញ្ញា _ ដើម្បីបញ្ជាក់ថាជា private property (កុំឱ្យហៅផ្ទាល់)
+  }
+
+  // Getter សម្រាប់អានតម្លៃ
+  get balance() {
+    return `${this._balance} ដុល្លារ`;
+  }
+
+  // Setter សម្រាប់កែតម្លៃ
+  set balance(amount) {
+    if (amount < 0) {
+      console.log("❌ ទឹកប្រាក់មិនអាចអវិជ្ជមានទេ!");
+      return;
+    }
+    this._balance = amount;
+  }
+}
+
+const myAcc = new Account("Sok", 100);
+console.log(myAcc.balance); // "100 ដុល្លារ" (ហៅ getter)
+
+myAcc.balance = 200; // កែតម្លៃ (ហៅ setter)
+console.log(myAcc.balance); // "200 ដុល្លារ"
+
+myAcc.balance = -50; // "❌ ទឹកប្រាក់មិនអាចអវិជ្ជមានទេ!" (setter ទប់ស្កាត់)
+```
+
+---
+
+## 4. Static Methods & Properties
+
+**Static** properties និង methods គឺជារបស់ Class ផ្ទាល់ មិនមែនជារបស់ instance ដែលបង្កើតដោយ `new` ឡើយ។ យើងហៅវាប្រើដោយផ្ទាល់តាមរយៈឈ្មោះ Class។
+
+```javascript
+class MathUtility {
+  static PI = 3.14159; // Static Property
+
+  static add(a, b) {   // Static Method
+    return a + b;
+  }
+}
+
+// ហៅប្រើដោយផ្ទាល់ មិនបាច់បង្កើត new MathUtility() ឡើយ
+console.log(MathUtility.PI); // 3.14159
+console.log(MathUtility.add(10, 20)); // 30
+```

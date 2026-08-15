@@ -1,0 +1,88 @@
+---
+title: Spread & Rest Operators
+description: សិក្សាពីការប្រើប្រាស់សញ្ញាចុចបី (...) ក្នុងនាមជា Spread Operator សម្រាប់ចម្លង/បញ្ចូល Array និង Object ព្រមទាំង Rest Operator សម្រាប់ប្រមូលផ្តុំទិន្នន័យ។
+objectives:
+  - យល់ដឹងពីការប្រើប្រាស់ Spread Operator លើ Arrays និង Objects
+  - យល់ដឹងពីការប្រើប្រាស់ Rest Operator ក្នុង Function Parameters
+  - យល់ដឹងពីការប្រើប្រាស់ Rest ជាមួយ Destructuring
+module: module-3-modern-features
+order: 4
+quiz:
+  - question: "តើសញ្ញាចុចបី (...) ដើរតួជា Rest Operator នៅក្នុងស្ថានភាពមួយណា?"
+    options:
+      - "const arr2 = [...arr1];"
+      - "function sum(...numbers) {}"
+      - "const obj2 = { ...obj1 };"
+      - "console.log(...args);"
+    correctAnswer: 2
+    explanation: "នៅពេលសញ្ញា `...` ស្ថិតនៅក្នុង parameter របស់ Function វាដើរតួជា Rest Operator ដើម្បីប្រមូលផ្តុំរាល់ arguments ដែលបញ្ជូនមក ទៅជា Array តែមួយ។"
+---
+
+## ⚡ Spread & Rest Operators (ES6+)
+
+សញ្ញាចុចបី (`...`) គឺជា Syntax ដ៏មានឥទ្ធិពលមួយនៅក្នុង JavaScript។ វាអាចដើរតួជា **Spread Operator** ឬ **Rest Operator** អាស្រ័យលើទីតាំងដែលវាត្រូវបានប្រើប្រាស់។
+
+---
+
+## 1. Spread Operator (ពង្រាយ)
+
+**Spread Operator** ត្រូវបានប្រើដើម្បី "ពង្រាយ" (spread) ធាតុរបស់ Array ឬ properties របស់ Object ចូលទៅក្នុងកន្លែងថ្មីមួយទៀត។
+
+### Spread លើ Arrays (ចម្លង និងបញ្ចូលគ្នា)
+```javascript
+const fruits = ["Apple", "Banana"];
+const veggies = ["Carrot", "Potato"];
+
+// 1. ចម្លង Array (Copy)
+const fruitsCopy = [...fruits]; 
+
+// 2. បញ្ចូល Arrays ចូលគ្នា (Merge)
+const food = [...fruits, ...veggies, "Rice"];
+console.log(food); // ["Apple", "Banana", "Carrot", "Potato", "Rice"]
+```
+
+### Spread លើ Objects (ចម្លង និងកែប្រែ)
+```javascript
+const defaultSettings = { theme: "light", showSidebar: true };
+
+// ចម្លង defaultSettings តែប្តូរ theme ទៅជា dark
+const userSettings = { 
+  ...defaultSettings, 
+  theme: "dark" // Overwrite property theme
+};
+
+console.log(userSettings); // { theme: "dark", showSidebar: true }
+```
+
+---
+
+## 2. Rest Operator (ប្រមូលផ្តុំ)
+
+**Rest Operator** មានរូបរាងដូចគ្នានឹង Spread ដែរ (`...`) តែមានតួនាទីផ្ទុយគ្នា។ វាត្រូវបានប្រើដើម្បី "ប្រមូលផ្តុំ" (collect) ធាតុដែលនៅសល់ជាច្រើន មកចងក្រងជា Array តែមួយ។
+
+### Rest នៅក្នុង Function Parameters
+វាអនុញ្ញាតឱ្យ Function អាចទទួលយក Arguments ច្រើនមិនកំណត់។
+
+```javascript
+// numbers នឹងក្លាយទៅជា Array ផ្ទុកគ្រប់តម្លៃដែលបានបញ្ជូនមក
+function sum(...numbers) {
+  return numbers.reduce((total, num) => total + num, 0);
+}
+
+console.log(sum(1, 2, 3)); // 6
+console.log(sum(1, 2, 3, 4, 5)); // 15
+```
+
+### Rest ជាមួយ Destructuring
+យើងប្រើវាដើម្បីប្រមូលធាតុដែលនៅសល់បន្ទាប់ពីការ Destructure។
+
+```javascript
+const scores = [100, 95, 80, 70, 60];
+
+// top ទទួលបាន 100, runnerUp ទទួលបាន 95, ហើយ rest ទទួលបាន Array នៃតម្លៃដែលនៅសល់
+const [top, runnerUp, ...rest] = scores;
+
+console.log(top);      // 100
+console.log(runnerUp); // 95
+console.log(rest);     // [80, 70, 60]
+```

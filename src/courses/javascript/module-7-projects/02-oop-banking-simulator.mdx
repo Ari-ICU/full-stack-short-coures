@@ -1,0 +1,130 @@
+---
+title: គម្រោងទី២៖ Banking & Transaction Simulator (OOP)
+description: អនុវត្តការប្រើប្រាស់ ES6 Classes, Encapsulation (# private fields), និង Inheritance ដើម្បីបង្កើតប្រព័ន្ធត្រួតពិនិត្យគណនីធនាគារ។
+objectives:
+  - អនុវត្តការបង្កើត Class ជាមួយ properties & methods
+  - អនុវត្តការលាក់ទិន្នន័យ (Encapsulation) ដោយប្រើប្រាស់ private property #balance
+  - អនុវត្តការបន្តពូជ (Inheritance) បង្កើតគណនីសន្សំ (SavingsAccount)
+module: module-7-projects
+order: 2
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើប្រាស់ private property ដូចជា `#balance` នៅក្នុង BankAccount Class?"
+    options:
+      - "ដើម្បីកាត់បន្ថយការប្រើប្រាស់ Memory"
+      - "ដើម្បីឱ្យកូដដំណើរការលឿនជាងមុន"
+      - "ដើម្បីការពារកុំឱ្យកូដខាងក្រៅអាចចូលមកកែប្រែទិន្នន័យ balance ផ្ទាល់ដោយគ្មានការអនុញ្ញាត"
+      - "ដើម្បីឱ្យ Class កូនអាចចូលប្រើប្រាស់វាបាន"
+    correctAnswer: 3
+    explanation: "Private field (#) ការពារការកែប្រែតម្លៃពីខាងក្រៅ class ផ្ទាល់ (Encapsulation) ដែលធានាសុវត្ថិភាពទិន្នន័យគណនី។"
+---
+
+## 🏦 គម្រោងទី២៖ Banking Simulator
+
+នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើតប្រព័ន្ធគ្រប់គ្រងគណនីធនាគារដោយប្រើប្រាស់ **Object-Oriented Programming (OOP)**។ យើងនឹងបង្កើត Class មេឈ្មោះ `BankAccount` និង Class កូនឈ្មោះ `SavingsAccount` (គណនីសន្សំ) ដែលមានការប្រាក់ (Interest Rate)។
+
+---
+
+## 1. ការបង្កើត Class មេ `BankAccount`
+
+យើងនឹងលាក់បាំងចំនួនទឹកប្រាក់ (`#balance`) កុំឱ្យកូដពីខាងក្រៅអាចកែប្រែបាន។ ការដាក់ប្រាក់ ឬដកប្រាក់ត្រូវតែធ្វើឡើងតាមរយៈ methods `deposit()` និង `withdraw()` ដែលមានការផ្ទៀងផ្ទាត់ត្រឹមត្រូវ។
+
+```javascript
+class BankAccount {
+  // កំណត់ Private property សម្រាប់រក្សាទុកទឹកប្រាក់
+  #balance;
+
+  constructor(owner, initialDeposit) {
+    this.owner = owner;
+    this.#balance = initialDeposit;
+  }
+
+  // ដាក់ប្រាក់
+  deposit(amount) {
+    if (amount <= 0) {
+      console.log("❌ ចំនួនទឹកប្រាក់ដាក់ត្រូវតែធំជាង 0!");
+      return;
+    }
+    this.#balance += amount;
+    console.log(`✅ បានដាក់ប្រាក់៖ +$${amount} | ទឹកប្រាក់សរុប៖ $${this.#balance}`);
+  }
+
+  // ដកប្រាក់
+  withdraw(amount) {
+    if (amount <= 0) {
+      console.log("❌ ចំនួនទឹកប្រាក់ដកត្រូវតែធំជាង 0!");
+      return false;
+    }
+    if (amount > this.#balance) {
+      console.log("❌ ទឹកប្រាក់មិនគ្រប់គ្រាន់សម្រាប់ដកឡើយ!");
+      return false;
+    }
+    this.#balance -= amount;
+    console.log(`✅ បានដកប្រាក់៖ -$${amount} | ទឹកប្រាក់នៅសល់៖ $${this.#balance}`);
+    return true;
+  }
+
+  // អានចំនួនទឹកប្រាក់បច្ចុប្បន្ន
+  getBalance() {
+    return this.#balance;
+  }
+}
+```
+
+---
+
+## 2. ការបង្កើត Class កូន `SavingsAccount` (Inheritance)
+
+`SavingsAccount` ជាប្រភេទគណនីសន្សំដែលមានការប្រាក់ (Interest) និងមិនអនុញ្ញាតឱ្យដកលុយហួសកំណត់ឡើយ (លើសពី ៣ ដង)។
+
+```javascript
+class SavingsAccount extends BankAccount {
+  constructor(owner, initialDeposit, interestRate) {
+    super(owner, initialDeposit);
+    this.interestRate = interestRate; // ឧទាហរណ៍៖ 0.05 ស្មើនឹង 5% ក្នុងមួយឆ្នាំ
+    this.withdrawCount = 0;
+  }
+
+  // គណនា និងបូកការប្រាក់បញ្ចូលក្នុងគណនី
+  applyInterest() {
+    const interest = this.getBalance() * this.interestRate;
+    this.deposit(interest);
+    console.log(`💰 ការប្រាក់ត្រូវបានគណនា៖ +$${interest} (អត្រាការប្រាក់៖ ${this.interestRate * 100}%)`);
+  }
+
+  // សរសេរជាន់លើ (Override) withdraw method របស់ Class មេ
+  withdraw(amount) {
+    if (this.withdrawCount >= 3) {
+      console.log("❌ គណនីសន្សំនេះមិនអនុញ្ញាតអោយដកប្រាក់លើសពី ៣ ដងឡើយ!");
+      return false;
+    }
+    
+    // ហៅ withdraw របស់ Class មេ
+    const success = super.withdraw(amount);
+    if (success) {
+      this.withdrawCount++;
+    }
+    return success;
+  }
+}
+```
+
+---
+
+## 3. ការសាកល្បងដំណើរការកូដ
+
+```javascript
+// បង្កើតគណនីធម្មតា
+const sokAccount = new BankAccount("Sok", 500);
+sokAccount.deposit(100);
+sokAccount.withdraw(200);
+
+console.log("------------------------");
+
+// បង្កើតគណនីសន្សំ
+const daraSavings = new SavingsAccount("Dara", 1000, 0.05);
+daraSavings.applyInterest(); // គណនាការប្រាក់ 5%
+daraSavings.withdraw(100); // ដកលើកទី១
+daraSavings.withdraw(100); // ដកលើកទី២
+daraSavings.withdraw(100); // ដកលើកទី៣
+daraSavings.withdraw(100); // ដកលើកទី៤ (❌ នឹងត្រូវទប់ស្កាត់)
+```

@@ -1,0 +1,128 @@
+---
+title: គម្រោងទី៣៖ To-Do App with LocalStorage
+description: រៀនសាងសង់កម្មវិធី To-Do List ដែលអាចឱ្យបន្ថែម លុប និងរក្សាទុកកិច្ចការងារដោយស្វ័យប្រវត្តិតាមរយៈ LocalStorage។
+objectives:
+  - យល់ពីការចាប់យក (Select) និងកែប្រែ (Modify) DOM elements
+  - ចេះបង្កើត HTML dynamic elements ដោយប្រើ createElement
+  - យល់ដឹងពីការរក្សាទុកទិន្នន័យជា JSON នៅក្នុង LocalStorage
+module: module-7-projects
+order: 3
+quiz:
+  - question: "តើ method មួយណាដែលយើងត្រូវប្រើដើម្បីបម្លែង Array នៃ To-Do items ទៅជា String មុនពេលរក្សាទុកក្នុង LocalStorage?"
+    options:
+      - "JSON.parse()"
+      - "JSON.stringify()"
+      - "localStorage.setItem()"
+      - "toString()"
+    correctAnswer: 2
+    explanation: "LocalStorage អាចរក្សាទុកបានតែទិន្នន័យជាប្រភេទ String ផ្លូវការប៉ុណ្ណោះ ដូច្នេះយើងត្រូវប្រើ `JSON.stringify()` ដើម្បីបម្លែង object/array ទៅជា JSON string សិន។"
+---
+
+## 📝 គម្រោងទី៣៖ To-Do App with LocalStorage
+
+នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **To-Do Web App** មួយដែលអនុញ្ញាតឱ្យអ្នកប្រើប្រាស់វាយបញ្ចូលកិច្ចការងារ បន្ថែមវាទៅក្នុងបញ្ជី ដកវាចេញ (លុបចោល) និងរក្សាទុកទិន្នន័យជាប់ជានិច្ចនៅលើ browser (ទោះបីជា reload page ក៏ទិន្នន័យមិនបាត់បង់ដែរ)។
+
+---
+
+## 1. រចនាសម្ព័ន្ធ HTML មូលដ្ឋាន
+
+បង្កើត HTML elements សាមញ្ញសម្រាប់ទទួល inputs និងបង្ហាញបញ្ជីការងារ៖
+
+```html
+<div class="todo-container">
+  <h2>📝 បញ្ជីការងាររបស់ខ្ញុំ</h2>
+  <div class="input-section">
+    <input type="text" id="todo-input" placeholder="វាយបញ្ចូលកិច្ចការងារថ្មី...">
+    <button id="add-btn">បន្ថែម</button>
+  </div>
+  <ul id="todo-list">
+    <!-- Items នឹងបង្ហាញនៅទីនេះជាលក្ខណៈ dynamic -->
+  </ul>
+</div>
+```
+
+---
+
+## 2. កូដ JavaScript ដំណើរការ និងរក្សាទុកទិន្នន័យ
+
+យើងនឹងប្រើប្រាស់ `localStorage` សម្រាប់ការរក្សាទុកទិន្នន័យជាអចិន្ត្រៃយ៍។
+
+```javascript
+// 1. ចាប់យក DOM Elements
+const todoInput = document.getElementById("todo-input");
+const addBtn = document.getElementById("add-btn");
+const todoList = document.getElementById("todo-list");
+
+// 2. ទាញយកទិន្នន័យចាស់ពី LocalStorage (បើមាន) ឬកំណត់ជា Array ទទេរ
+let todos = JSON.parse(localStorage.getItem("todos")) || [];
+
+// 3. បង្ហាញទិន្នន័យចាស់ឡើងលើ screen នៅពេលបើកដំបូង
+function renderTodos() {
+  todoList.innerHTML = ""; // សំអាតបញ្ជីចាស់
+  
+  todos.forEach((todo, index) => {
+    const li = document.createElement("li");
+    li.textContent = todo;
+    
+    // បង្កើតប៊ូតុងលុប (Delete Button)
+    const deleteBtn = document.createElement("button");
+    deleteBtn.textContent = "❌";
+    deleteBtn.className = "delete-btn";
+    
+    // ភ្ជាប់ Event Listener សម្រាប់លុប item នេះ
+    deleteBtn.addEventListener("click", () => {
+      deleteTodo(index);
+    });
+    
+    li.appendChild(deleteBtn);
+    todoList.appendChild(li);
+  });
+}
+
+// 4. Function បន្ថែមការងារថ្មី (Add)
+function addTodo() {
+  const text = todoInput.value.trim();
+  if (text === "") {
+    alert("សូមវាយបញ្ចូលការងារសិន!");
+    return;
+  }
+  
+  todos.push(text); // បន្ថែមចូល Array
+  saveToStorage();  // រក្សាទុកក្នុង LocalStorage
+  renderTodos();    // បង្ហាញឡើងវិញ
+  todoInput.value = ""; // សំអាត input box
+}
+
+// 5. Function លុបការងារ (Delete)
+function deleteTodo(index) {
+  todos.splice(index, 1); // លុបចេញពី Array
+  saveToStorage();        // រក្សាទុក
+  renderTodos();          // បង្ហាញឡើងវិញ
+}
+
+// 6. Function រក្សាទុកទិន្នន័យក្នុង LocalStorage
+function saveToStorage() {
+  localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+// 7. ភ្ជាប់ Events ទៅកាន់ប៊ូតុង និង Input
+addBtn.addEventListener("click", addTodo);
+
+// អាចចុច Enter លើ Input ដើម្បីបន្ថែមបានដូចគ្នា
+todoInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    addTodo();
+  }
+});
+
+// ចាប់ផ្តើមដំណើរការបង្ហាញដំបូង
+renderTodos();
+```
+
+---
+
+## 🎨 គំនិតតុបតែងបន្ថែម (CSS Styling)
+ដើម្បីឱ្យ To-Do App របស់អ្នកមានសោភ័ណភាពស្រស់ស្អាត អ្នកអាចបន្ថែម CSS បន្តិចបន្តួចដូចជា៖
+*   ប្តូរពណ៌ប៊ូតុងពេល hover
+*   បន្ថែមស្ទីលចុចក្បៀស (Strikethrough) ទៅលើកិច្ចការដែលបានធ្វើរួច (Completed tasks)
+*   ប្រើប្រាស់ Flexbox ដើម្បីរៀបចំ layout ឱ្យមានលំនឹង។

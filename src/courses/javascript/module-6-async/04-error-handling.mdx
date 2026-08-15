@@ -1,0 +1,216 @@
+---
+title: Error Handling
+description: >-
+  សិក្សាពីរបៀបគ្រប់គ្រងកំហុសនៅក្នុង JavaScript ដោយប្រើប្រាស់ try, catch, finally
+  និងរបៀបបង្កើតកំហុសដោយខ្លួនឯង (Throwing Errors)
+  ដើម្បីអោយកម្មវិធីដើរដោយរលូនទោះមានបញ្ហាក៏ដោយ។
+objectives:
+  - យល់ពីសារៈសំខាន់នៃការចាប់យកកំហុស (Error Handling)
+  - ចេះប្រើប្រាស់ block `try...catch` ដើម្បីការពារកម្មវិធីកុំអោយគាំង
+  - ស្គាល់ពីតួនាទីរបស់ `finally`
+  - ចេះប្រើប្រាស់ពាក្យគន្លឹះ `throw` ដើម្បីបង្កើត Custom Errors
+module: module-6-async
+order: 4
+quiz:
+  - question: >-
+      តើកូដនៅក្នុង block មួយណានៃ `try...catch...finally` ដែលនឹងដំណើរការជានិច្ច
+      ទោះបីជាមាន Error ឬគ្មាន Error ក៏ដោយ?
+    options:
+      - try
+      - catch
+      - finally
+      - គ្មានចម្លើយណាត្រូវទេ
+    correctAnswer: 2
+    explanation: >-
+      កូដនៅក្នុង `finally`
+      ត្រូវបានធានាថានឹងដំណើរការជានិច្ចនៅចុងបញ្ចប់នៃប្រតិបត្តិការ ទោះបីជាកូដក្នុង
+      `try` ជោគជ័យ ឬធ្លាក់ចូល `catch` ដោយសារមានកំហុសក៏ដោយ។
+---
+
+## 🛑 ហេតុអ្វីត្រូវមាន Error Handling?
+
+នៅក្នុងការសរសេរកូដ កំហុស (Errors) គឺជារឿងដែលមិនអាចចៀសផុត។ វាអាចមកពី៖
+*   កូដមានបញ្ហា (Syntax Error, Reference Error)
+*   បញ្ហាបណ្តាញអុីនធឺណិត (Network Issue) ពេលកំពុងទាញយកទិន្នន័យ
+*   អ្នកប្រើប្រាស់បញ្ចូលទិន្នន័យខុសទម្រង់
+
+ប្រសិនបើមាន Error កើតឡើង ហើយយើងមិនបានរៀបចំទុកមុនទេ នោះ **JavaScript នឹងបញ្ឈប់ការដំណើរការកូដទាំងស្រុង (Crash)**។ ការធ្វើ **Error Handling** អនុញ្ញាតអោយយើងចាប់យកកំហុសនោះ ដោះស្រាយវាដោយសន្តិវិធី និងបន្តដំណើរការកម្មវិធីទៅមុខទៀត។
+
+---
+
+## 1. ការប្រើប្រាស់ `try...catch`
+
+យន្តការសំខាន់បំផុតគឺ `try...catch`។
+*   **`try`**: អ្នកដាក់កូដដែល "អាចនឹង" មានបញ្ហានៅទីនេះ។
+*   **`catch`**: បើកូដក្នុង `try` មានបញ្ហាមែន វានឹងលោតចូលមក `catch` ភ្លាមៗដោយមិនធ្វើអោយកម្មវិធីគាំងឡើយ។
+
+```jsdiagram
+jstrycatch
+```
+
+```tabs
+html
+<!-- ទម្រង់ login — JS នឹង try parse ទិន្នន័យ -->
+<form id="loginForm">
+  <input type="text" id="username" placeholder="Username" />
+  <button type="submit">Login</button>
+</form>
+<p id="errorMsg"></p>
+---
+css
+#errorMsg {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+#errorMsg.show {
+  display: block;
+}
+---
+js
+try {
+  // ព្យាយាមដំណើរការកូដនេះ
+  let message = "សួស្តី!";
+  console.log(message);
+
+  // ធ្វើអោយមានកំហុសដោយហៅ Function ដែលគ្មាននៅលើលោកនេះ!
+  nonExistentFunction();
+
+  // កូដបន្ទាប់ពី Error នឹងមិនដំណើរការទេ វានឹងលោតទៅ catch ភ្លាម
+  console.log("អ្នកនឹងមិនឃើញសារមួយនេះទេ");
+
+} catch (error) {
+  // ចាប់យកកំហុសមកបង្ហាញ
+  console.log("មានបញ្ហាកើតឡើង! នេះជាព័ត៌មានលម្អិត៖", error.message);
+}
+
+// កម្មវិធីនៅតែបន្តដំណើរការជាធម្មតា ដោយមិន Crash ទេ
+console.log("កម្មវិធីនៅដើរធម្មតា!");
+```
+
+---
+
+## 2. ការប្រើប្រាស់ `finally`
+
+ជួនកាល អ្នកចង់អោយកូដមួយចំនួនដំណើរការដាច់ខាត ទោះជាមាន ឬមិនមាន Error ក៏ដោយ (ឧទាហរណ៍៖ ការលាក់ Loading Spinner ក្រោយពេលទាញយកទិន្នន័យចប់)។ នោះគឺជាតួនាទីរបស់ `finally`។
+
+```jsdiagram
+jsfinally
+```
+
+```tabs
+html
+<!-- spinner លោតចេញពេល fetch, finally លាក់វា -->
+<div id="spinner">⏳ Loading...</div>
+<div id="content" style="display:none">
+  ✅ ទិន្នន័យបានទាញយករួច
+</div>
+---
+css
+#spinner {
+  font-size: 1.25rem;
+  color: #f59e0b;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+#content {
+  color: #16a34a;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+---
+js
+let isLoading = true;
+
+try {
+  console.log("កំពុងទាញយកទិន្នន័យ...");
+  // ឧបមាថាមាន Error កើតឡើងទីនេះ
+  throw new Error("ដាច់អុីនធឺណិត!");
+
+} catch (error) {
+  console.log("កំហុស៖", error.message);
+
+} finally {
+  // តែងតែដំណើរការជានិច្ច — លាក់ spinner
+  isLoading = false;
+  document.getElementById("spinner").style.display = "none";
+  console.log("បញ្ចប់ប្រតិបត្តិការ។ Loading =", isLoading);
+}
+```
+
+---
+
+## 3. ការបង្កើតកំហុសដោយខ្លួនឯង (Throwing Custom Errors)
+
+ពេលខ្លះ JavaScript មិនចាត់ទុកវាជា Error ទេ ប៉ុន្តែតាម Logic នៃកម្មវិធីរបស់អ្នក វាគឺជាកំហុស! អ្នកអាចប្រើពាក្យគន្លឹះ `throw` ដើម្បីបោះ Error នោះទៅក្នុង `catch` ដោយខ្លួនឯង។
+
+```jsdiagram
+jsthrowerror
+```
+
+```tabs
+html
+<form id="ageForm">
+  <label>បញ្ចូលអាយុ:</label>
+  <input type="number" id="ageInput" placeholder="e.g. 20" />
+  <button type="submit">ពិនិត្យ</button>
+</form>
+<p id="ageError"></p>
+---
+css
+form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+input[type="number"] {
+  padding: 0.4rem 0.75rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+button {
+  padding: 0.4rem 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+#ageError {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+#ageError.error { color: #dc2626; font-weight: 600; }
+---
+js
+function checkAge(age) {
+  try {
+    if (age < 0) {
+      throw new Error("អាយុមិនអាចជាលេខអវិជ្ជមានបានទេ!");
+    }
+    if (age < 18) {
+      console.log("អ្នកនៅក្មេងពេក។");
+    } else {
+      console.log("ស្វាគមន៍មកកាន់ប្រព័ន្ធ!");
+    }
+  } catch (error) {
+    // ចាប់យក custom Error
+    const msg = document.getElementById("ageError");
+    msg.textContent = "❌ " + error.message;
+    msg.className = "error";
+  }
+}
+
+document.getElementById("ageForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const age = Number(document.getElementById("ageInput").value);
+  checkAge(age);
+});
+```

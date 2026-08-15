@@ -1,0 +1,83 @@
+---
+title: Arrays
+description: សិក្សាពីរបៀបបង្កើត Arrays ដើម្បីផ្ទុកទិន្នន័យជាបញ្ជី ការប្រើប្រាស់ Indexes, និង Nested Arrays។
+objectives:
+  - យល់ពីរបៀបបង្កើត និងទាញយកទិន្នន័យពីក្នុង Array
+  - ចេះធ្វើការជាមួយ Nested Arrays (Arrays ត្រួតគ្នា)
+  - ស្គាល់ពីការប្រើប្រាស់ទូទៅ (Common use cases)
+module: module-2-functions-data-structures
+order: 2
+quiz:
+  - question: តើ Index ទីមួយរបស់ Array ក្នុង JavaScript គឺលេខប៉ុន្មាន?
+    options:
+      - 1
+      - 0
+      - -1
+      - អាចជាលេខអ្វីក៏បាន
+    correctAnswer: 1
+    explanation: "នៅក្នុង JavaScript និងភាសាកូដភាគច្រើន ការរាប់ទីតាំង (Index) នៅក្នុង Array គឺតែងតែចាប់ផ្តើមពីលេខ 0 ជានិច្ច មិនមែនលេខ 1 ទេ។"
+---
+
+## 📚 អ្វីទៅជា Arrays?
+
+ប្រសិនបើ Object ជាទូសម្រាប់ដាក់ឯកសារមានឈ្មោះត្រឹមត្រូវ នោះ **Array** គឺជាធ្នើរដាក់សៀវភៅដែលរៀបជាជួរៗ។ Array គឺជាប្រភេទ Structural Data Type មួយដែលអនុញ្ញាតអោយយើងផ្ទុកទិន្នន័យច្រើនប្រភេទបញ្ចូលគ្នា ជាទម្រង់បញ្ជី (List) ហើយមានលំដាប់លំដោយច្បាស់លាស់។
+
+---
+
+## 1. ការបង្កើត និងប្រើប្រាស់ Arrays
+
+យើងបង្កើត Array ដោយប្រើប្រាស់សញ្ញា `[]` (Square brackets)។ តម្លៃនីមួយៗត្រូវបានខណ្ឌចែកដោយសញ្ញាក្បៀស (`,`)។
+
+```javascript
+// Array ផ្ទុក String ទាំងអស់
+const fruits = ["Apple", "Banana", "Orange", "Mango"];
+
+// Array អាចផ្ទុកទិន្នន័យចម្រុះគ្នាបាន
+const mixedArray = ["Sok", 25, true, null];
+```
+
+### ការទាញយកទិន្នន័យតាម Index
+ដើម្បីយកទិន្នន័យណាមួយចេញមកប្រើ យើងត្រូវបញ្ជាក់ពីទីតាំង (Index) របស់វា។ **សំខាន់បំផុត៖ Index តែងតែចាប់ផ្តើមពីលេខ 0!**
+
+```javascript
+console.log(fruits[0]); // "Apple" (ផ្លែឈើទី១)
+console.log(fruits[2]); // "Orange" (ផ្លែឈើទី៣)
+
+// កែប្រែតម្លៃនៅក្នុង Array
+fruits[1] = "Cherry"; // ប្តូរពី Banana ទៅ Cherry
+console.log(fruits); // ["Apple", "Cherry", "Orange", "Mango"]
+```
+
+```jsdiagram
+jsarraybasics
+```
+
+---
+
+## 📂 2. Nested Arrays (Arrays ត្រួតគ្នា)
+
+Array ក៏អាចផ្ទុក Array ផ្សេងទៀតនៅខាងក្នុងវាបានដែរ។ វាប្រៀបបាននឹងតារាង (Matrix ឬ Table)។
+
+```javascript
+const ticTacToe = [
+  ["X", "O", "X"],
+  ["O", "X", "O"],
+  ["O", "O", "X"]
+];
+
+// ទាញយកអក្សរ "X" ដែលនៅចំកណ្តាលគេបង្អស់
+// [1] គឺជួរទីពីរ, [1] បន្ទាប់គឺទីតាំងកណ្តាលក្នុងជួរនោះ
+console.log(ticTacToe[1][1]); // "X"
+```
+
+```jsdiagram
+jsnestedarray
+```
+
+---
+
+## 📌 ការប្រើប្រាស់ទូទៅ (Common Use Cases)
+
+*   **រក្សាទុកបញ្ជីទិន្នន័យពី Database៖** ឧទាហរណ៍ បញ្ជីអត្ថបទ បញ្ជីទំនិញ បញ្ជីអ្នកប្រើប្រាស់។
+*   **ធ្វើការរួមគ្នាជាមួយ Loops៖** យើងតែងតែយក Loop (ដូចជា `for...of`) មកប្រើដើម្បីដើរអានតម្លៃនីមួយៗក្នុង Array ដោយស្វ័យប្រវត្តិ។
+*   **បម្លែង និងត្រងទិន្នន័យ៖** នៅក្នុងមេរៀនបន្ទាប់ អ្នកនឹងរៀនពី Array Methods (`map`, `filter`, `reduce`) ដែលមានប្រយោជន៍ខ្លាំងបំផុត!

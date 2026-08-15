@@ -1,0 +1,98 @@
+---
+title: Destructuring
+description: រៀនពីរបៀបប្រើប្រាស់ Array និង Object Destructuring ដើម្បីទាញយកទិន្នន័យមកផ្ទុកក្នុងអថេរដាច់ដោយឡែកយ៉ាងរហ័ស។
+objectives:
+  - យល់ដឹងពីការប្រើប្រាស់ Object Destructuring និងការប្តូរឈ្មោះ variable
+  - យល់ដឹងពីការប្រើប្រាស់ Array Destructuring និងការរំលងធាតុមួយចំនួន
+  - ចេះកំណត់តម្លៃលំនាំដើម (Default Values) ក្នុងពេល Destructure
+module: module-3-modern-features
+order: 3
+quiz:
+  - question: "តើ Syntax មួយណាដែលត្រូវប្រើដើម្បីទាញយកតម្លៃ `price` ពី Object `product` ហើយប្តូរឈ្មោះអថេរនោះទៅជា `cost`?"
+    options:
+      - "const { price as cost } = product;"
+      - "const { price: cost } = product;"
+      - "const { cost = price } = product;"
+      - "const [ price, cost ] = product;"
+    correctAnswer: 2
+    explanation: "យើងប្រើ syntax `{ propertyName: newVariableName }` ដើម្បីប្តូរឈ្មោះអថេរនៅពេលធ្វើ Object Destructuring។"
+---
+
+## 📦 Destructuring (ES6+)
+
+**Destructuring** គឺជា Syntax ថ្មីរបស់ ES6 ដែលអនុញ្ញាតឱ្យយើង "ពន្លា" (unpack) ឬទាញយកតម្លៃពីក្នុង Arrays ឬ Objects មកដាក់ចូលទៅក្នុង Variables ដាច់ដោយឡែកពីគ្នា យ៉ាងខ្លី និងរហ័សបំផុត។
+
+---
+
+## 1. Object Destructuring
+
+Object Destructuring ប្រើប្រាស់សញ្ញាវង់ក្រចកទ្រុងជ្រូក `{}` នៅខាងឆ្វេងសញ្ញាស្មើ។
+
+```javascript
+const user = {
+  fullName: "Sok Dara",
+  age: 20,
+  city: "Phnom Penh"
+};
+
+// របៀបចាស់
+// const fullName = user.fullName;
+// const age = user.age;
+
+// របៀបថ្មី (Destructuring)
+const { fullName, age, city } = user;
+
+console.log(fullName); // "Sok Dara"
+console.log(age);      // 20
+```
+
+### ការប្តូរឈ្មោះ Variable និងការផ្តល់តម្លៃលំនាំដើម (Default Values)
+*   **ប្តូរឈ្មោះ Variable**: ប្រើប្រាស់សញ្ញាពីរចុច `:`
+*   **តម្លៃលំនាំដើម**: ប្រើប្រាស់សញ្ញាស្មើ `=` (ករណីគ្មាន key នោះក្នុង object)
+
+```javascript
+const { fullName: name, country = "Cambodia" } = user;
+
+console.log(name);    // "Sok Dara" (fullName ត្រូវបានប្តូរឈ្មោះជា name)
+console.log(country); // "Cambodia" (ព្រោះក្នុង user គ្មាន country ទេ វាយកតម្លៃលំនាំដើម)
+```
+
+---
+
+## 2. Array Destructuring
+
+Array Destructuring ប្រើប្រាស់សញ្ញា `[]` នៅខាងឆ្វេងសញ្ញាស្មើ។ វាទាញយកតម្លៃទៅតាមលំដាប់លំដោយ (Index) នៃ Array។
+
+```javascript
+const colors = ["Red", "Green", "Blue", "Yellow"];
+
+// ទាញយកពណ៌ទី១ និងទី២
+const [firstColor, secondColor] = colors;
+console.log(firstColor);  // "Red"
+console.log(secondColor); // "Green"
+```
+
+### ការរំលងធាតុ (Skipping Elements)
+អ្នកអាចរំលងធាតុមួយចំនួនបានដោយគ្រាន់តែប្រើសញ្ញាក្បៀស `,` និងទុកចន្លោះទទេរ។
+
+```javascript
+// រំលងធាតុទី២ (Green) ហើយយកធាតុទី៣ (Blue)
+const [first, , third] = colors;
+console.log(third); // "Blue"
+```
+
+---
+
+## 3. Destructuring នៅក្នុង Function Parameters
+
+យើងអាចប្រើ Destructuring ផ្ទាល់នៅលើ parameter របស់ functions បាន ដែលពេញនិយមខ្លាំងណាស់ក្នុងការសរសេរ React components។
+
+```javascript
+// ទទួលយក Object តែធ្វើ Destructuring ភ្លាមៗក្នុង parameter
+function printUserDetails({ fullName, age }) {
+  console.log(`ឈ្មោះ៖ ${fullName}, អាយុ៖ ${age}`);
+}
+
+const person = { fullName: "Alice", age: 30, email: "alice@example.com" };
+printUserDetails(person); // "ឈ្មោះ៖ Alice, អាយុ៖ 30"
+```

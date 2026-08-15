@@ -1,0 +1,73 @@
+---
+title: Template Literals
+description: រៀនពីរបៀបសរសេរ String ដោយប្រើប្រាស់សញ្ញា Backticks (`) សម្រាប់ធ្វើ String Interpolation និងការបង្កើត Multi-line Strings។
+objectives:
+  - យល់ពីការប្រើប្រាស់ Backticks (`) ជំនួសឱ្យ Quotes ធម្មតា
+  - ចេះបញ្ចូល variables ឬ expressions ទៅក្នុង String ផ្ទាល់ (${})
+  - យល់ពីការបង្កើត Multi-line Strings ដោយមិនបាច់ប្រើ \n
+module: module-3-modern-features
+order: 2
+quiz:
+  - question: "តើ Syntax មួយណាដែលត្រឹមត្រូវសម្រាប់បញ្ចូល variable `name` ទៅក្នុង Template Literal?"
+    options:
+      - '`Hello (name)`'
+      - '`Hello {name}`'
+      - '`Hello ${name}`'
+      - '`Hello $name`'
+    correctAnswer: 3
+    explanation: "យើងប្រើប្រាស់ Syntax `${name}` នៅខាងក្នុង backticks (`) ដើម្បីបញ្ចូលតម្លៃរបស់ variable ទៅក្នុង String។"
+---
+
+## 📝 Template Literals (ES6+)
+
+**Template Literals** គឺជាវិធីសាស្ត្រថ្មីដ៏ងាយស្រួលក្នុងការធ្វើការជាមួយ Strings នៅក្នុង JavaScript។ ជំនួសឱ្យការប្រើ Single quotes (`'`) ឬ Double quotes (`"`), Template Literals ប្រើប្រាស់សញ្ញា **Backticks** (`` ` ``)។
+
+---
+
+## 1. String Interpolation (ការបញ្ចូលតម្លៃអថេរ)
+
+កាលពីមុន ដើម្បីភ្ជាប់ String ជាមួយ Variable យើងត្រូវប្រើសញ្ញាបូក (`+`) ដែលស្មុគស្មាញ និងងាយនឹងភាន់ច្រឡំ។ ជាមួយ Template Literals យើងអាចបញ្ចូល variable ឬ expression ទៅក្នុង String ផ្ទាល់ដោយប្រើប្រាស់ `${expression}`។
+
+```javascript
+const name = "Sok";
+const age = 25;
+
+// របៀបចាស់ (Concatenation)
+const greetingOld = "សួស្តី ខ្ញុំឈ្មោះ " + name + " ហើយខ្ញុំមានអាយុ " + age + " ឆ្នាំ។";
+
+// របៀបថ្មី (Template Literals)
+const greetingNew = `សួស្តី ខ្ញុំឈ្មោះ ${name} ហើយខ្ញុំមានអាយុ ${age} ឆ្នាំ។`;
+
+console.log(greetingNew);
+```
+
+អ្នកក៏អាចសរសេរប្រមាណវិធី ឬហៅ function នៅក្នុង `${}` បានផងដែរ៖
+```javascript
+const price = 10;
+const qty = 3;
+console.log(`តម្លៃសរុបគឺ៖ ${price * qty} ដុល្លារ`); // "តម្លៃសរុបគឺ៖ 30 ដុល្លារ"
+```
+
+---
+
+## 2. Multi-line Strings (String ច្រើនបន្ទាត់)
+
+កាលពីមុន ដើម្បីសរសេរ String ដែលមានចុះបន្ទាត់ យើងត្រូវប្រើប្រាស់និមិត្តសញ្ញា `\n`។ ជាមួយ backticks យើងអាចចុះបន្ទាត់ធម្មតាបានភ្លាមៗ។
+
+```javascript
+// របៀបចាស់
+const htmlOld = "<div>\n" +
+                "  <h1>Hello</h1>\n" +
+                "</div>";
+
+// របៀបថ្មី
+const htmlNew = `
+<div>
+  <h1>Hello</h1>
+</div>
+`;
+
+console.log(htmlNew);
+```
+
+នេះមានប្រយោជន៍ខ្លាំងណាស់នៅពេលដែលយើងចង់បង្កើត HTML elements ពីកូដ JavaScript ទៅបិទភ្ជាប់ក្នុងគេហទំព័រ។

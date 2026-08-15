@@ -1,0 +1,119 @@
+---
+title: Debugging
+description: >-
+  ស្វែងយល់ពីគន្លឹះ និងបច្ចេកទេសក្នុងការស្វែងរក និងជួសជុលកំហុស (Bugs) នៅក្នុងកូដ
+  JavaScript របស់អ្នកដោយប្រើប្រាស់ Console និង Browser DevTools។
+objectives:
+  - 'ស្គាល់ប្រភេទនៃ Console methods ផ្សេងៗ (log, error, warn, table)'
+  - ចេះប្រើប្រាស់ Browser DevTools ដើម្បីតាមដានកូដ
+  - យល់ពីការប្រើប្រាស់ពាក្យគន្លឹះ debugger
+module: module-6-async
+order: 5
+quiz:
+  - question: >-
+      តើ `console` method មួយណាដែលល្អបំផុតសម្រាប់បង្ហាញទិន្នន័យជាទម្រង់ Array of
+      Objects អោយងាយស្រួលអាន?
+    options:
+      - console.log()
+      - console.error()
+      - console.table()
+      - console.group()
+    correctAnswer: 2
+    explanation: >-
+      `console.table()` នឹងគូរទិន្នន័យ Array ឬ Object
+      របស់អ្នកទៅជាតារាងយ៉ាងស្អាតនៅក្នុង Console ដែលងាយស្រួលមើលជាងការប្រើ
+      `console.log()`។
+---
+
+## 🐛 អ្វីទៅជា Debugging?
+
+នៅក្នុងការសរសេរកូដ កំហុស (ដែលគេហៅថា **Bugs**) គឺជារឿងធម្មតាបំផុត។ សូម្បីតែ Developer ដែលមានបទពិសោធន៍ ១០ ឆ្នាំក៏នៅតែបង្កើត Bugs ជារៀងរាល់ថ្ងៃដែរ!
+
+**Debugging** គឺជាដំណើរការនៃការស្វែងរកមូលហេតុដែលធ្វើអោយកូដដើរខុស និងការជួសជុលវា។ ខាងក្រោមនេះគឺជាឧបករណ៍សំខាន់ៗដែលអ្នកត្រូវដឹង។
+
+---
+
+## 1. វេទមន្តនៃ `console`
+
+ជាទូទៅអ្នកប្រហែលជាស្គាល់ត្រឹមតែ `console.log()` ប៉ុន្តែ Object `console` មានមុខងារពិសេសៗជាច្រើនទៀតដែលជួយអ្នកបានយ៉ាងច្រើន។
+
+ចុចបន្ទាប់ **.log / .warn / .error / .table** ហើយចុច **▶ Run** ដើម្បីឃើញ output ដូចក្នុង DevTools Console ពិតប្រាកដ៖
+
+```jsdiagram
+jsconsolemethods
+```
+
+### `console.error()` និង `console.warn()`
+ប្រើនៅពេលអ្នកចង់លេចធ្លោសារព្រមាន ឬកំហុស។ វានឹងចេញពណ៌ក្រហម ឬពណ៌លឿងនៅក្នុង DevTools។
+```javascript
+const age = 15;
+
+if (age < 18) {
+  console.warn("ប្រយ័ត្ន! អ្នកប្រើប្រាស់មិនទាន់គ្រប់អាយុ។");
+}
+
+try {
+  callFakeAPI();
+} catch (err) {
+  console.error("មានកំហុសធ្ងន់ធ្ងរ៖", err.message);
+}
+```
+
+### `console.table()`
+នេះគឺជាចំណូលចិត្តរបស់ Developers ជាច្រើន! នៅពេលអ្នកមាន Array ដែលផ្ទុក Objects ច្រើន វាពិបាកមើលខ្លាំងណាស់បើប្រើ `log` ធម្មតា។ សាកល្បងប្រើ `table` មើល៖
+
+```javascript
+const users = [
+  { id: 1, name: "Sok", role: "Admin" },
+  { id: 2, name: "Dara", role: "User" },
+  { id: 3, name: "Alice", role: "User" }
+];
+
+// វានឹងគូរចេញជាតារាងយ៉ាងស្អាតក្នុង Console
+console.table(users);
+```
+
+---
+
+## 2. ការប្រើប្រាស់ Browser DevTools
+
+Browser ទំនើបៗ (ដូចជា Chrome) មានភ្ជាប់មកជាមួយនូវឧបករណ៍ដ៏មានឥទ្ធិពលបំផុតសម្រាប់ Developers គឺ **DevTools**។
+
+អ្នកអាចបើកវាដោយចុច `F12` ឬ `Right Click → Inspect` រួចចូលទៅកាន់ Tab **Sources**។
+
+ចុចលើ **លេខបន្ទាត់** ខាងក្រោម ដើម្បីដាក់ Breakpoint (🔴) រួចចុច **▶ Run** — ប្រើ **Step Over** ដើម្បីដើរម្តងមួយជំហាន ហើយមើល Variables ផ្លាស់ប្តូរ៖
+
+```jsdiagram
+jsbreakpoints
+```
+
+### ការកំណត់ Breakpoints ដោយដៃ
+អ្នកអាចចុចលើលេខបន្ទាត់កូដណាមួយនៅក្នុង DevTools ដើម្បីអោយ Browser បញ្ឈប់ដំណើរការត្រង់បន្ទាត់នោះ។ បន្ទាប់មកអ្នកអាចមើលតម្លៃរបស់អថេរនីមួយៗ (Variables) យ៉ាងច្បាស់លាស់នៅខណៈពេលនោះ (ហៅថា Scope inspection)។
+
+---
+
+## 3. ពាក្យគន្លឹះ `debugger`
+
+ប្រសិនបើអ្នកមិនចង់ចូលទៅចុច Breakpoints ក្នុង Browser ទេ អ្នកអាចសរសេរពាក្យ `debugger;` ផ្ទាល់នៅក្នុងកូដតែម្តង!
+
+ចុច **▶ Run** ហើយអង្គុយមើល Browser ឈប់ដោយស្វ័យប្រវត្តិ — ប្រើ **Step Over** ដើម្បីដើរម្តងមួយជំហាន ហើយពិនិត្យ variables នៅ Scope panel៖
+
+```jsdiagram
+jsdebuggerkeyword
+```
+
+```javascript
+function calculateTotal(price, tax) {
+  let subtotal = price;
+  
+  // ពេល Browser រត់មកដល់ទីនេះ វានឹង Pause កម្មវិធីទាំងមូលភ្លាមៗ (ប្រសិនបើ DevTools កំពុងបើក)
+  debugger;
+  
+  let total = subtotal + tax;
+  return total;
+}
+
+calculateTotal(100, 10);
+```
+
+> 💡 **គន្លឹះសំខាន់៖** ការរៀនប្រើប្រាស់ Breakpoints និង `debugger` អោយបានស្ទាត់ជំនាញ នឹងជួយសន្សំពេលវេលាអ្នកបានច្រើនម៉ោង ប្រសើរជាងការអង្គុយសរសេរ `console.log()` គ្រប់កន្លែង!

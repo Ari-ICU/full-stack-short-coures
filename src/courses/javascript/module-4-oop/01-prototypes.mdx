@@ -1,0 +1,77 @@
+---
+title: Prototypes & Prototypal Inheritance
+description: ស្វែងយល់ពីរបៀបដែល JavaScript ដំណើរការ inheritance ពីក្រោយខ្នង តាមរយៈ prototype chain និងការប្រើប្រាស់ Constructor Functions។
+objectives:
+  - យល់ពីគំនិតនៃ Prototypes និង properties ពិសេស `__proto__` និង `prototype`
+  - ចេះបង្កើត Constructor Functions ដើម្បីបង្កើត Objects
+  - យល់ដឹងពីដំណើរការ Prototype Chain
+module: module-4-oop
+order: 1
+quiz:
+  - question: "តើ properties មួយណាដែលនៅលើ Object instances ប្រើសម្រាប់ចង្អុលទៅកាន់ Prototype របស់វា?"
+    options:
+      - "prototype"
+      - "__proto__"
+      - "constructor"
+      - "parent"
+    correctAnswer: 2
+    explanation: "Object instance ប្រើប្រាស់ property `__proto__` ដើម្បីចង្អុលទៅកាន់ prototype របស់វា ចំណែកឯ constructor functions ប្រើប្រាស់ property `prototype`។"
+---
+
+## 🧬 Prototypes & Constructor Functions
+
+នៅក្នុង JavaScript, Inheritance (ការបន្តពូជ/ការចែករំលែកលក្ខណៈ) មិនដំណើរការដូចភាសាដទៃ (ដូចជា Java ឬ C++) ឡើយ។ JavaScript ប្រើប្រាស់ប្រព័ន្ធម្យ៉ាងហៅថា **Prototypal Inheritance**។
+
+---
+
+## 1. Constructor Functions (បែបចាស់មុន ES6)
+
+មុនពេល JavaScript មាន `class` (ES6), យើងបង្កើត object ពុម្ពគំរូដោយប្រើប្រាស់ **Constructor Function** (សរសេរអក្សរធំនៅខាងដើមឈ្មោះ) រួមជាមួយ keyword `new`។
+
+```javascript
+// បង្កើត Constructor Function
+function User(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+// ប្រើ keyword 'new' ដើម្បីបង្កើត instance ថ្មី
+const user1 = new User("Sok", 20);
+const user2 = new User("Dara", 25);
+
+console.log(user1.name); // "Sok"
+```
+
+---
+
+## 2. អ្វីទៅជា Prototypes?
+
+រាល់ពេលដែលយើងបង្កើត User ថ្មី ប្រសិនបើយើងបង្កើត method (function) នៅខាងក្នុង `User` ផ្ទាល់ វានឹងចម្លង method នោះចូលទៅក្នុងរាល់ object ថ្មីទាំងអស់ ដែលនាំឱ្យខ្ជះខ្ជាយ memory (RAM)។
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងអាចបន្ថែម method ទៅកាន់ **`prototype`** របស់ Constructor Function វិញ។ រាល់ instances ទាំងអស់នឹងប្រើប្រាស់ method រួមគ្នាមួយនេះ។
+
+```javascript
+// បន្ថែម method ទៅក្នុង prototype
+User.prototype.greet = function() {
+  console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name}។`);
+};
+
+user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok។"
+user2.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Dara។"
+```
+
+---
+
+## 3. Prototype Chain (`__proto__`)
+
+នៅពេលយើងហៅ `user1.greet()`, JavaScript នឹងធ្វើការស្វែងរកតាមលំដាប់លំដោយ៖
+1. ជាដំបូង វាស្វែងរកមើលថាតើ `greet` មាននៅលើ object `user1` ផ្ទាល់ខ្លួនដែរឬទេ?
+2. បើគ្មានទេ វានឹងស្វែងរកនៅលើ prototype របស់វា (ចង្អុលបង្ហាញដោយ `user1.__proto__` ដែលស្មើនឹង `User.prototype`)។
+3. បើនៅតែគ្មានទៀត វានឹងស្វែងរកបន្តទៅលើ `Object.prototype` (កំពូលខ្សែសង្វាក់) រហូតដល់រកឃើញ ឬចេញ `undefined`។
+
+ដំណើរការស្វែងរកជាបន្តបន្ទាប់ពីក្រោមឡើងលើនេះ ហៅថា **Prototype Chain**។
+
+```jsdiagram
+jsprototypechain
+```
+*(ចំណាំ៖ ES6 Classes គ្រាន់តែជា "ស្ករគ្រាប់ Syntax" (Syntactic Sugar) ដែលស្រោបពីលើប្រព័ន្ធ Prototype នេះប៉ុណ្ណោះ។ ពីក្រោយខ្នង វានៅតែដំណើរការតាមរបៀបដដែល។)*

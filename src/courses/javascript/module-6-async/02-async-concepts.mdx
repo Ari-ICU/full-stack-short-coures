@@ -1,0 +1,284 @@
+---
+title: Asynchronous JavaScript (Promises & Async/Await)
+description: >-
+  ស្វែងយល់ពីរបៀបដែល JavaScript គ្រប់គ្រងការងារដែលត្រូវការចំណាយពេលយូរ
+  ដូចជាការទាញយកទិន្នន័យ ដោយមិនធ្វើអោយកម្មវិធីគាំង តាមរយៈការប្រើប្រាស់ Promises
+  និង async/await។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Synchronous និង Asynchronous កូដ
+  - 'ស្វែងយល់ពីគំនិតនៃ Promise និងស្ថានភាពរបស់វា (Pending, Resolved, Rejected)'
+  - ចេះសរសេរកូដ Asynchronous តាមរបៀបទំនើបដោយប្រើ async / await
+module: module-6-async
+order: 2
+quiz:
+  - question: >-
+      តើពាក្យគន្លឹះ (Keyword) `await` ត្រូវតែប្រើប្រាស់នៅខាងក្នុង Function
+      ប្រភេទណាជានិច្ច?
+    options:
+      - Arrow function ធម្មតា
+      - async function
+      - Callback function
+      - Promise function
+    correctAnswer: 1
+    explanation: >-
+      `await` មិនអាចឈរតែឯងបានទេ វាទាមទារអោយ Function
+      របស់វាត្រូវបានប្រកាសដោយប្រើពាក្យ `async` នៅពីមុខជានិច្ច (ឧ. `async
+      function fetchData() {}`)។
+---
+
+## ⏳ អ្វីទៅជា Asynchronous JavaScript?
+
+តាមធម្មជាតិ JavaScript គឺ **Synchronous** ពោលគឺវាធ្វើការម្តងមួយបន្ទាត់ៗពីលើចុះក្រោម។ បើបន្ទាត់ទី ១ ដើរមិនទាន់ចប់ទេ បន្ទាត់ទី ២ ត្រូវតែឈរចាំ។
+
+ចុះបើបន្ទាត់ទី ១ ជាការទាញយកទិន្នន័យពី Server ដែលត្រូវចំណាយពេល ៥ វិនាទី? តើគេហទំព័រទាំងមូលត្រូវគាំង ៥ វិនាទីដែរឬ? ចម្លើយគឺ **អត់ទេ!** នេះហើយជាមូលហេតុដែលយើងមាន **Asynchronous**។
+
+```jsdiagram
+jssyncasync
+```
+
+```tabs
+html
+<!-- Sync vs Async comparison -->
+<div id="syncDemo">
+  <h3>Synchronous</h3>
+  <div id="syncLog"></div>
+  <button id="syncBtn">▶ Run Sync</button>
+</div>
+<div id="asyncDemo">
+  <h3>Asynchronous</h3>
+  <div id="asyncLog"></div>
+  <button id="asyncBtn">▶ Run Async</button>
+</div>
+---
+css
+#syncDemo, #asyncDemo {
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  border: 2px solid;
+}
+#syncDemo  { border-color: #fca5a5; background: #fff1f2; }
+#asyncDemo { border-color: #a5b4fc; background: #f5f3ff; }
+h3 { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: bold; }
+.log-line { font-family: monospace; font-size: 0.75rem; margin: 2px 0; }
+button { padding: 0.4rem 0.75rem; border-radius: 0.5rem; border: none; cursor: pointer; font-weight: bold; color: white; margin-top: 0.5rem; }
+#syncBtn  { background: #ef4444; }
+#asyncBtn { background: #6366f1; }
+---
+js
+function addLog(id, text, color) {
+  const el = document.createElement("div");
+  el.className = "log-line";
+  el.style.color = color;
+  el.textContent = text;
+  document.getElementById(id).appendChild(el);
+}
+
+// Synchronous — blocks
+document.getElementById("syncBtn").onclick = () => {
+  document.getElementById("syncLog").innerHTML = "";
+  addLog("syncLog", "▶ Start", "#16a34a");
+  addLog("syncLog", "⏳ fetching... (blocks 2s)", "#dc2626");
+  // simulate blocking
+  const start = Date.now();
+  while (Date.now() - start < 50) {} // tiny block for demo
+  addLog("syncLog", "✅ data received", "#16a34a");
+  addLog("syncLog", "▶ End (runs after fetch)", "#16a34a");
+};
+
+// Asynchronous — non-blocking
+document.getElementById("asyncBtn").onclick = () => {
+  document.getElementById("asyncLog").innerHTML = "";
+  addLog("asyncLog", "▶ Start", "#16a34a");
+  addLog("asyncLog", "🚀 fetchData() called (non-blocking)", "#6366f1");
+  setTimeout(() => addLog("asyncLog", "✅ data received (after 1.5s)", "#6366f1"), 1500);
+  addLog("asyncLog", "▶ End (runs immediately!)", "#16a34a");
+};
+```
+
+---
+
+## 🤝 1. អ្វីទៅជា Promise?
+
+ដើម្បីគ្រប់គ្រង Asynchronous កូដ អោយមានរបៀបរៀបរយ JavaScript បង្កើតនូវ **Promise** (ការសន្យា)។
+
+*   **Pending:** កំពុងឆុងកាហ្វេ (មិនទាន់បានលទ្ធផល)
+*   **Fulfilled:** ឆុងឆ្អិន អ្នកទទួលបានកាហ្វេ (ជោគជ័យ)
+*   **Rejected:** អស់កាហ្វេ (បរាជ័យ/Error)
+
+```jsdiagram
+jspromisestates
+```
+
+```tabs
+html
+<!-- Promise result display -->
+<div id="promiseStatus">⏳ Pending...</div>
+<div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+  <button id="resolveBtn">✅ Resolve</button>
+  <button id="rejectBtn">❌ Reject</button>
+  <button id="resetBtn">↺ Reset</button>
+</div>
+---
+css
+#promiseStatus {
+  font-size: 1.25rem;
+  font-weight: bold;
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid #fed7aa;
+  background: #fff7ed;
+  color: #ea580c;
+  transition: all 0.4s ease;
+}
+#promiseStatus.fulfilled {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+#promiseStatus.rejected {
+  border-color: #fca5a5;
+  background: #fff1f2;
+  color: #dc2626;
+}
+button {
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+}
+#resolveBtn { background: #22c55e; }
+#rejectBtn  { background: #ef4444; }
+#resetBtn   { background: #6b7280; }
+---
+js
+const status = document.getElementById("promiseStatus");
+
+function makePromise(shouldResolve) {
+  status.className = "";
+  status.textContent = "⏳ Pending — Promise is pending...";
+
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (shouldResolve) resolve({ name: "Sok", age: 25 });
+      else reject(new Error("Network Error"));
+    }, 1500);
+  });
+}
+
+document.getElementById("resolveBtn").onclick = () => {
+  makePromise(true)
+    .then(data => {
+      status.className = "fulfilled";
+      status.textContent = "✅ Fulfilled — data: " + JSON.stringify(data);
+    });
+};
+
+document.getElementById("rejectBtn").onclick = () => {
+  makePromise(false)
+    .catch(err => {
+      status.className = "rejected";
+      status.textContent = "❌ Rejected — " + err.message;
+    });
+};
+
+document.getElementById("resetBtn").onclick = () => {
+  status.className = "";
+  status.textContent = "⏳ Pending...";
+};
+```
+
+---
+
+## 🚀 2. ការប្រើប្រាស់ `async` / `await`
+
+`async/await` ធ្វើអោយកូដ Asynchronous មើលទៅស្រួលអានដូចកូដ Synchronous ធម្មតា!
+
+1. ដាក់ `async` នៅពីមុខ Function
+2. ដាក់ `await` នៅពីមុខ Promise — ផ្អាករង់ចាំតែ function ខាងក្នុង
+3. ប្រើ `try/catch` ចាប់ error
+
+```jsdiagram
+jsasyncawait
+```
+
+```tabs
+html
+<!-- async/await fetch simulation -->
+<div id="loadingSpinner" style="display:none">⏳ Fetching data...</div>
+<div id="userData"></div>
+<div id="outsideCode"></div>
+<button id="fetchBtn">▶ fetchUserData()</button>
+---
+css
+#userData {
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 0.875rem;
+  margin: 0.5rem 0;
+  min-height: 2.5rem;
+}
+#outsideCode {
+  font-size: 0.75rem;
+  color: #22c55e;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+#loadingSpinner {
+  color: #f97316;
+  font-weight: bold;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+button {
+  padding: 0.5rem 1.25rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+---
+js
+async function fetchUserData() {
+  const spinner = document.getElementById("loadingSpinner");
+  const userData = document.getElementById("userData");
+
+  spinner.style.display = "block";
+  userData.textContent = "";
+  userData.style.background = "";
+
+  try {
+    // simulate fetch delay
+    const data = await new Promise(resolve =>
+      setTimeout(() => resolve({ name: "Sok", age: 25, role: "Admin" }), 2000)
+    );
+
+    spinner.style.display = "none";
+    userData.textContent = "✅ " + JSON.stringify(data);
+    userData.style.background = "#f0fdf4";
+    userData.style.border = "2px solid #86efac";
+    userData.style.color = "#166534";
+
+  } catch (error) {
+    spinner.style.display = "none";
+    userData.textContent = "❌ Error: " + error.message;
+    userData.style.background = "#fff1f2";
+    userData.style.color = "#dc2626";
+  }
+}
+
+document.getElementById("fetchBtn").onclick = () => {
+  const outside = document.getElementById("outsideCode");
+  outside.textContent = "";
+  fetchUserData();
+  // This runs immediately — doesn't wait for fetchUserData
+  outside.textContent = "▶ ខ្ញុំជាកូដខាងក្រៅ ខ្ញុំរត់មុន await!";
+};
+```
+
+> 💡 **សរុបមក៖** `async/await` គឺជាវិធីដ៏ងាយស្រួលបំផុត និងជាស្តង់ដារបច្ចុប្បន្នក្នុងការទាញយកទិន្នន័យ (Fetch Data) ពី Server ដែលយើងនឹងអនុវត្តផ្ទាល់នៅក្នុងមេរៀនបន្ទាប់!

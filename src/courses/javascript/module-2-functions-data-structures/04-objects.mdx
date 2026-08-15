@@ -1,0 +1,98 @@
+---
+title: Objects
+description: សិក្សាពីរបៀបបង្កើត ការអាន ការកែប្រែ និងការលុបទិន្នន័យពីក្នុង Objects ព្រមទាំងការប្រើប្រាស់ Object Methods។
+objectives:
+  - យល់ពីទម្រង់ និងការប្រើប្រាស់ Objects (Key-Value pairs)
+  - ចេះធ្វើការអាន បន្ថែម កែប្រែ និងលុប Properties
+  - ស្គាល់ពីការបង្កើត Methods នៅខាងក្នុង Object
+module: module-2-functions-data-structures
+order: 4
+quiz:
+  - question: "តើរបៀបសរសេរ (Syntax) មួយណាដែលត្រឹមត្រូវសម្រាប់លុប Property `role` ពី Object ឈ្មោះ `user`?"
+    options:
+      - "user.role = null;"
+      - "delete user.role;"
+      - "remove user.role;"
+      - "user.delete(role);"
+    correctAnswer: 2
+    explanation: "Keyword `delete` ត្រូវបានប្រើប្រាស់ដើម្បីលុប Property ណាមួយចេញពី Object ទាំងស្រុង។"
+---
+
+## 📦 អ្វីទៅជា Objects?
+
+នៅក្នុងពិភពពិត វត្ថុមួយ (ឧទាហរណ៍៖ ឡាន) តែងតែមានលក្ខណៈសម្បត្តិ (ពណ៌, ម៉ាក, ទម្ងន់) និងសកម្មភាព (បញ្ឆេះ, បើក, ឈប់)។ នៅក្នុង JavaScript, **Objects** ត្រូវបានប្រើដើម្បីរៀបចំទិន្នន័យដែលមានទំនាក់ទំនងគ្នាតាមទម្រង់ `key: value` (កូនសោរ និងតម្លៃ)។
+
+```javascript
+const user = {
+  name: "John",    // Property: តម្លៃជា String
+  age: 20,         // Property: តម្លៃជា Number
+  isAdmin: false   // Property: តម្លៃជា Boolean
+};
+```
+
+---
+
+## 🛠️ ការប្រើប្រាស់ Objects (CRUD)
+
+យើងអាចធ្វើប្រតិបត្តិការ ៤ យ៉ាងលើ Object Properties៖ អាន (Read), បន្ថែម/កែប្រែ (Update), និងលុប (Delete)។
+
+### 1. ការអាន Properties (Reading)
+យើងអាចអានតម្លៃដោយប្រើ Dot Notation (`.`) ឬ Bracket Notation (`[]`)។
+```javascript
+// ប្រើ . គឺពេញនិយមបំផុត
+console.log(user.name); // "John"
+
+// ប្រើ [] នៅពេលដែល Key មានដកឃ្លា ឬត្រូវបានបញ្ជូនមកជាអថេរ
+const keyName = "age";
+console.log(user[keyName]); // 20
+```
+
+### 2. ការកែប្រែ និងការបន្ថែម Properties (Updating & Adding)
+ប្រសិនបើ Key នោះមានរួចហើយ វានឹងកែប្រែតម្លៃ។ ប្រសិនបើគ្មានទេ វានឹងបន្ថែម Key នោះថ្មី។
+```javascript
+// កែប្រែអាយុ
+user.age = 21; 
+
+// បន្ថែមអាសយដ្ឋានថ្មី
+user.address = "Phnom Penh";
+
+console.log(user); 
+// { name: "John", age: 21, isAdmin: false, address: "Phnom Penh" }
+```
+
+### 3. ការលុប Properties (Deleting)
+ប្រើ Keyword `delete` ដើម្បីលុប Property ណាមួយចេញ។
+```javascript
+delete user.isAdmin;
+console.log(user); // លែងមាន isAdmin ទៀតហើយ
+```
+
+```jsdiagram
+jsobjectcrud
+```
+
+---
+
+## ⚙️ Object Methods (សកម្មភាពរបស់ Object)
+
+Properties មិនត្រឹមតែអាចផ្ទុកទិន្នន័យធម្មតាទេ វាថែមទាំងអាចផ្ទុក **Function** ផងដែរ! នៅពេល Function ស្ថិតនៅក្នុង Object យើងហៅវាថា **Method**។
+
+```javascript
+const calculator = {
+  brand: "Casio",
+  add: function(a, b) {
+    return a + b;
+  },
+  // ការសរសេរកាត់ (ES6) សម្រាប់ Methods
+  multiply(a, b) {
+    return a * b;
+  }
+};
+
+console.log(calculator.add(10, 5)); // 15
+console.log(calculator.multiply(10, 5)); // 50
+```
+
+```jsdiagram
+jsobjectmethods
+```

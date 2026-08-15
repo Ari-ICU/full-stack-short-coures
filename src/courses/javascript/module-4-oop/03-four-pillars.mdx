@@ -1,0 +1,147 @@
+---
+title: The 4 Pillars of OOP
+description: ស្វែងយល់ពីសសរស្ដម្ភទាំង ៤ នៃ Object-Oriented Programming (Encapsulation, Inheritance, Polymorphism, Abstraction) នៅក្នុង JavaScript។
+objectives:
+  - យល់ដឹងពីការធ្វើ Encapsulation ដោយប្រើប្រាស់ Private Fields (#)
+  - យល់ពីរបៀបប្រើប្រាស់ Polymorphism តាមរយៈ Method Overriding
+  - យល់ពីគោលការណ៍ Abstraction និង Inheritance ក្នុងការសរសេរកូដជាក់ស្តែង
+module: module-4-oop
+order: 3
+quiz:
+  - question: "តើសញ្ញា (Symbol) មួយណាដែលត្រូវបានប្រើដើម្បីប្រកាស Private property ឬ private method នៅក្នុង ES6+ Class?"
+    options:
+      - "_"
+      - "$"
+      - "#"
+      - "@"
+    correctAnswer: 3
+    explanation: "សញ្ញាទ្រុងជ្រូក `#` ត្រូវបានប្រើប្រាស់នៅពីមុខឈ្មោះ property ឬ method ដើម្បីកំណត់វាជា Private (អាចប្រើបានតែនៅខាងក្នុង Class ប៉ុណ្ណោះ)។"
+---
+
+## 🏛️ សសរស្ដម្ភទាំង ៤ នៃ OOP (4 Pillars)
+
+ដើម្បីយល់ដឹង និងសរសេរកូដបែប **Object-Oriented Programming (OOP)** ប្រកបដោយប្រសិទ្ធភាព យើងត្រូវស្វែងយល់ពីសសរស្ដម្ភទាំង ៤ យ៉ាងដូចខាងក្រោម៖
+
+---
+
+## 1. Encapsulation (ការវេចខ្ចប់ និងលាក់ទិន្នន័យ)
+
+**Encapsulation** គឺជាការចងក្រងទិន្នន័យ (Properties) និងសកម្មភាព (Methods) ចូលទៅក្នុងប្រអប់តែមួយ (Class) ហើយលាក់បាំងទិន្នន័យសំខាន់ៗពីខាងក្រៅ ដើម្បីការពារការកែប្រែដោយចៃដន្យ។
+
+នៅក្នុង JavaScript ទំនើប យើងប្រើសញ្ញា **`#`** នៅពីមុខឈ្មោះ ដើម្បីបង្កើត **Private Fields**។
+
+```javascript
+class BankAccount {
+  // ប្រកាស private property (មិនអាចហៅប្រើពីខាងក្រៅ class បានទេ)
+  #balance;
+
+  constructor(owner, initialBalance) {
+    this.owner = owner;
+    this.#balance = initialBalance;
+  }
+
+  // បង្កើត public method សម្រាប់ដាក់លុយ (មានសុវត្ថិភាព)
+  deposit(amount) {
+    if (amount > 0) {
+      this.#balance += amount;
+    }
+  }
+
+  // បង្កើត public method សម្រាប់មើលទឹកប្រាក់
+  getBalance() {
+    return this.#balance;
+  }
+}
+
+const myAcc = new BankAccount("Sok", 100);
+myAcc.deposit(50);
+
+console.log(myAcc.getBalance()); // 150
+// console.log(myAcc.#balance); // ❌ Error: Private field '#balance' must be declared in an enclosing class
+```
+
+---
+
+## 2. Inheritance (ការបន្តពូជ/ការស្នងមរតក)
+
+**Inheritance** អនុញ្ញាតឱ្យ Class ថ្មី (Child Class) ស្នងយក properties និង methods ពី Class ចាស់ (Parent Class) ដោយមិនបាច់សរសេរកូដដដែលៗឡើងវិញ។ យើងប្រើប្រាស់ពាក្យគន្លឹះ `extends` និង `super()`។
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+  eat() {
+    console.log(`${this.name} is eating.`);
+  }
+}
+
+// Dog ស្នងលក្ខណៈពី Animal
+class Dog extends Animal {
+  bark() {
+    console.log("Woof! Woof!");
+  }
+}
+
+const dog = new Dog("Rex");
+dog.eat();  // ✅ Rex is eating (ស្នងពី Animal)
+dog.bark(); // Woof! Woof! (របស់ Dog ផ្ទាល់ខ្លួន)
+```
+
+---
+
+## 3. Polymorphism (ពហុរូបភាព)
+
+**Polymorphism** អនុញ្ញាតឱ្យ Class កូន អាចផ្លាស់ប្តូរ ឬសរសេរជាន់លើ (Override) វិធីសាស្ត្រ (Methods) ដែលស្នងមកពី Class មេ ដើម្បីឱ្យវាដំណើរការសមស្របទៅនឹងតម្រូវការរបស់វា។ នេះហៅថា **Method Overriding**។
+
+```javascript
+class Animal {
+  makeSound() {
+    console.log("Some generic animal sound");
+  }
+}
+
+class Dog extends Animal {
+  makeSound() { // Overriding method makeSound
+    console.log("Woof! Woof!");
+  }
+}
+
+class Cat extends Animal {
+  makeSound() { // Overriding method makeSound
+    console.log("Meow! Meow!");
+  }
+}
+
+const animals = [new Dog(), new Cat()];
+animals.forEach(animal => animal.makeSound());
+// Output:
+// Woof! Woof!
+// Meow! Meow!
+```
+
+---
+
+## 4. Abstraction (ការទាញយកតែចំណុចសំខាន់)
+
+**Abstraction** គឺជាការលាក់បាំងនូវភាពស្មុគស្មាញនៃដំណើរការកូដនៅខាងក្នុង (Internal logic/implementation) និងបង្ហាញតែចំណុចសំខាន់ៗដែលអ្នកប្រើប្រាស់ត្រូវការហៅប្រើប៉ុណ្ណោះ។
+
+ឧទាហរណ៍៖ នៅពេលអ្នកចុចបញ្ឆេះឡាន អ្នកគ្រាន់តែបង្វិលសោរ ឬចុចប៊ូតុងបញ្ឆេះ (Simple interface)។ អ្នកមិនចាំបាច់ដឹងពីរបៀបដែលម៉ាស៊ីនបាញ់ប្រេង ឬរ៉ូតទ័រវិលនៅខាងក្នុងនោះទេ។
+
+```javascript
+class RemoteControl {
+  #turnOnCircuit() {
+    console.log("Sending signal... warming up components... power output stabilized.");
+  }
+
+  // អ្វីដែលបង្ហាញទៅខាងក្រៅមានតែប៊ូតុងចុចមួយនេះប៉ុណ្ណោះ
+  pressPowerButton() {
+    this.#turnOnCircuit();
+    console.log("TV is now ON!");
+  }
+}
+
+const remote = new RemoteControl();
+remote.pressPowerButton(); // ងាយស្រួលប្រើប្រាស់
+// remote.#turnOnCircuit(); // ❌ មិនអាចហៅប្រើពីខាងក្រៅបានទេ ( abstraction ជួយលាក់វា)
+```
