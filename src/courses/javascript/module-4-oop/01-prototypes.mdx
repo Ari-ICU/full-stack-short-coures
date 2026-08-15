@@ -81,7 +81,17 @@ user2.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Dara។"
 
 ដំណើរការស្វែងរកជាបន្តបន្ទាប់ពីក្រោមឡើងលើនេះ ហៅថា **Prototype Chain**។
 
-```rdbmsdiagram
-RdbmsNormalizationDiagram
+```mermaid
+graph TD
+    user1["user1 (Instance)"] -->|__proto__| UserProto["User.prototype"]
+    user2["user2 (Instance)"] -->|__proto__| UserProto
+    UserProto -->|__proto__| ObjectProto["Object.prototype"]
+    ObjectProto -->|__proto__| Null["null"]
+
+    style user1 fill:#f9f,stroke:#333,stroke-width:2px
+    style user2 fill:#f9f,stroke:#333,stroke-width:2px
+    style UserProto fill:#bbf,stroke:#333,stroke-width:2px
+    style ObjectProto fill:#bfb,stroke:#333,stroke-width:2px
+    style Null fill:#ddd,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
 ```
 *(ចំណាំ៖ ES6 Classes គ្រាន់តែជា "ស្ករគ្រាប់ Syntax" (Syntactic Sugar) ដែលស្រោបពីលើប្រព័ន្ធ Prototype នេះប៉ុណ្ណោះ។ ពីក្រោយខ្នង វានៅតែដំណើរការតាមរបៀបដដែល។)*
