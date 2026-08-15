@@ -44,6 +44,30 @@ JavaScript គឺជាភាសា Programming ដែលធ្វើឱ្យ�
 
 ---
 
+## 💻 របៀបដំណើរការ (Run) JavaScript
+
+យើងអាចដំណើរការកូដ JavaScript បានតាមពីររបៀបធំៗ៖
+
+### ១. ដំណើរការនៅលើ Web Browser (លឿន និងងាយស្រួលបំផុត)
+រាល់ Web Browser ទាំងអស់ (ដូចជា Chrome, Edge, Safari, Firefox) សុទ្ធតែមាន JavaScript Engine ជាប់មកជាមួយស្រាប់។
+* **តាមរយៈ Web Console**: ចុច `F12` នៅលើ keyboard របស់អ្នក (ឬ Right-click នៅកន្លែងណាមួយ រួចយក **Inspect** ហើយជ្រើសរើស tab **Console**)។ បន្ទាប់មកវាយកូដ `console.log("Hello World")` រួចចុច Enter។
+* **តាមរយៈឯកសារ HTML**: បង្កើតឯកសារ HTML រួចសរសេរកូដនៅក្នុង Tag `<script>` (ដូចឧទាហរណ៍ខាងលើ) រួចចុច Double Click លើឯកសារ HTML នោះដើម្បីបើកនៅលើ Browser។
+
+### ២. ដំណើរការនៅលើ Terminal ដោយប្រើប្រាស់ Node.js
+ដើម្បីដំណើរការ JavaScript នៅក្រៅ Browser (ដូចជានៅលើ Terminal ឬ Server) យើងត្រូវការដំឡើង Node.js។
+* **ដំណើរការកូដចេញពី File**:
+  1. បង្កើតឯកសារមួយឈ្មោះថា `app.js` រួចសរសេរកូដ៖
+     ```javascript
+     console.log("Hello from Node.js!");
+     ```
+  2. បើក Terminal នៅក្នុង Folder នោះ រួចវាយបញ្ជា៖
+     ```bash
+     node app.js
+     ```
+* **ការប្រើប្រាស់ Node.js REPL (Playground)**: បើក Terminal រួចវាយពាក្យ `node` ហើយចុច Enter។ អ្នកអាចសាកល្បងសរសេរកូដ JavaScript នៅលើនោះបានភ្លាមៗ។ ដើម្បីចាកចេញ វាយពាក្យ `.exit` និងចុច Enter។
+
+---
+
 ## 📌 តើត្រូវរៀនអ្វីខ្លះបន្ត?
 
 នៅក្នុងមេរៀនបន្ទាប់ៗ យើងនឹងស្វែងយល់លម្អិតអំពី៖
