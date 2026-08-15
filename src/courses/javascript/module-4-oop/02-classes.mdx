@@ -29,6 +29,8 @@ quiz:
 
 យើងបង្កើត Class ដោយប្រើពាក្យគន្លឹះ `class`។ `constructor` គឺជា function ពិសេសដែលដើរដោយស្វ័យប្រវត្តិរាល់ពេលដែលយើងបង្កើត Object ថ្មី។
 
+ជាដំបូង យើងសរសេរកូដបង្កើត Class `User` ដែលមាន constructor សម្រាប់ផ្ទុកព័ត៌មាន name, age និងមាន method `greet()`៖
+
 ```javascript
 class User {
   constructor(name, age) {
@@ -38,13 +40,20 @@ class User {
 
   // Method
   greet() {
-    console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name}។`);
+    console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name} ហើយខ្ញុំមានអាយុ ${this.age} ឆ្នាំ។`);
   }
 }
+```
 
+បន្ទាប់មក យើងប្រើប្រាស់ពាក្យគន្លឹះ `new` ដើម្បីបង្កើត instances ថ្មីៗ និងហៅប្រើប្រាស់ method `greet()` របស់វា៖
+
+```javascript
 // បង្កើត instance ដោយប្រើ 'new'
 const user1 = new User("Sok", 25);
-user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok។"
+const user2 = new User("Dara", 30);
+
+user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok ហើយខ្ញុំមានអាយុ 25 ឆ្នាំ។"
+user2.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Dara ហើយខ្ញុំមានអាយុ 30 ឆ្នាំ។"
 ```
 
 ---
@@ -52,6 +61,8 @@ user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok។"
 ## 2. ការបន្តពូជ (Inheritance: `extends` និង `super`)
 
 យើងអាចឱ្យ Class មួយទទួលយកលក្ខណៈពី Class មួយទៀតដោយប្រើប្រាស់ `extends`។
+
+ជាដំបូង យើងបង្កើត Class `Admin` ដែលបន្តពូជពី `User` ដោយបន្ថែម property ថ្មីឈ្មោះ `role` និង method `deletePost()` ផ្ទាល់ខ្លួនរបស់វា៖
 
 ```javascript
 class Admin extends User {
@@ -64,7 +75,11 @@ class Admin extends User {
     console.log(`${this.name} (ជា Admin) បានលុបអត្ថបទមួយ។`);
   }
 }
+```
 
+បន្ទាប់មក យើងសាកល្បងបង្កើត instance `admin` និងហៅប្រើប្រាស់ methods ទាំងរបស់ `User` និង `Admin` ផ្ទាល់ខ្លួន៖
+
+```javascript
 const admin = new Admin("Dara", 30, "SuperAdmin");
 admin.greet();      // ✅ អាចប្រើប្រាស់ greet() របស់ User បាន (Inheritance)
 admin.deletePost(); // ✅ ប្រើប្រាស់ method របស់ខ្លួនឯង
@@ -75,6 +90,8 @@ admin.deletePost(); // ✅ ប្រើប្រាស់ method របស់ខ
 ## 3. Getters & Setters
 
 **Getters** (`get`) និង **Setters** (`set`) ត្រូវបានប្រើប្រាស់ដើម្បីគ្រប់គ្រងរបៀបដែលទិន្នន័យ (Properties) ត្រូវបានអាន ឬផ្លាស់ប្តូរតម្លៃ។ វាជួយការពារសុវត្ថិភាពទិន្នន័យ។
+
+ជាដំបូង យើងបង្កើត Class `Account` ដែលមាន private property `_balance` រួមជាមួយ getter និង setter សម្រាប់អាន និងកែប្រែតម្លៃប្រាក់៖
 
 ```javascript
 class Account {
@@ -97,7 +114,11 @@ class Account {
     this._balance = amount;
   }
 }
+```
 
+បន្ទាប់មក យើងសាកល្បងបង្កើត instance គណនី `myAcc` និងសាកល្បងអានតម្លៃ ឬកែប្រែតម្លៃ (ទាំងការបញ្ចូលទឹកប្រាក់វិជ្ជមាន និងអវិជ្ជមាន)៖
+
+```javascript
 const myAcc = new Account("Sok", 100);
 console.log(myAcc.balance); // "100 ដុល្លារ" (ហៅ getter)
 
@@ -113,6 +134,8 @@ myAcc.balance = -50; // "❌ ទឹកប្រាក់មិនអាចអវ
 
 **Static** properties និង methods គឺជារបស់ Class ផ្ទាល់ មិនមែនជារបស់ instance ដែលបង្កើតដោយ `new` ឡើយ។ យើងហៅវាប្រើដោយផ្ទាល់តាមរយៈឈ្មោះ Class។
 
+ជាដំបូង យើងបង្កើត Class `MathUtility` ដែលមាន static property `PI` និង static method `add()`៖
+
 ```javascript
 class MathUtility {
   static PI = 3.14159; // Static Property
@@ -121,7 +144,11 @@ class MathUtility {
     return a + b;
   }
 }
+```
 
+បន្ទាប់មក យើងសាកល្បងហៅប្រើប្រាស់ static members ទាំងនេះដោយផ្ទាល់តាមរយៈឈ្មោះ Class ដោយមិនបាច់បង្កើត new object ឡើយ៖
+
+```javascript
 // ហៅប្រើដោយផ្ទាល់ មិនបាច់បង្កើត new MathUtility() ឡើយ
 console.log(MathUtility.PI); // 3.14159
 console.log(MathUtility.add(10, 20)); // 30

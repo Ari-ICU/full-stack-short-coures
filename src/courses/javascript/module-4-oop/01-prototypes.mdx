@@ -28,13 +28,19 @@ quiz:
 
 មុនពេល JavaScript មាន `class` (ES6), យើងបង្កើត object ពុម្ពគំរូដោយប្រើប្រាស់ **Constructor Function** (សរសេរអក្សរធំនៅខាងដើមឈ្មោះ) រួមជាមួយ keyword `new`។
 
+ជាដំបូង យើងបង្កើត Constructor Function មួយឈ្មោះថា `User` ដើម្បីកំណត់រចនាសម្ព័ន្ធ Properties សម្រាប់ Object នីមួយៗ៖
+
 ```javascript
 // បង្កើត Constructor Function
 function User(name, age) {
   this.name = name;
   this.age = age;
 }
+```
 
+បន្ទាប់មក យើងប្រើប្រាស់ពាក្យគន្លឹះ `new` ដើម្បីបង្កើត objects ថ្មីៗ (ហៅថា Instances) ចេញពី Constructor Function នោះ៖
+
+```javascript
 // ប្រើ keyword 'new' ដើម្បីបង្កើត instance ថ្មី
 const user1 = new User("Sok", 20);
 const user2 = new User("Dara", 25);
@@ -48,14 +54,18 @@ console.log(user1.name); // "Sok"
 
 រាល់ពេលដែលយើងបង្កើត User ថ្មី ប្រសិនបើយើងបង្កើត method (function) នៅខាងក្នុង `User` ផ្ទាល់ វានឹងចម្លង method នោះចូលទៅក្នុងរាល់ object ថ្មីទាំងអស់ ដែលនាំឱ្យខ្ជះខ្ជាយ memory (RAM)។
 
-ដើម្បីដោះស្រាយបញ្ហានេះ យើងអាចបន្ថែម method ទៅកាន់ **`prototype`** របស់ Constructor Function វិញ។ រាល់ instances ទាំងអស់នឹងប្រើប្រាស់ method រួមគ្នាមួយនេះ។
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងអាចបន្ថែម method ទៅកាន់ **`prototype`** របស់ Constructor Function វិញ។ រាល់ instances ទាំងអស់នឹងប្រើប្រាស់ method រួមគ្នាមួយនេះ៖
 
 ```javascript
 // បន្ថែម method ទៅក្នុង prototype
 User.prototype.greet = function() {
   console.log(`សួស្តី ខ្ញុំឈ្មោះ ${this.name}។`);
 };
+```
 
+ឥឡូវនេះ យើងអាចហៅប្រើប្រាស់ method `greet()` លើ instances ទាំងអស់បានយ៉ាងងាយស្រួល៖
+
+```javascript
 user1.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Sok។"
 user2.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Dara។"
 ```
@@ -71,7 +81,7 @@ user2.greet(); // "សួស្តី ខ្ញុំឈ្មោះ Dara។"
 
 ដំណើរការស្វែងរកជាបន្តបន្ទាប់ពីក្រោមឡើងលើនេះ ហៅថា **Prototype Chain**។
 
-```jsdiagram
-jsprototypechain
+```rdbmsdiagram
+RdbmsNormalizationDiagram
 ```
 *(ចំណាំ៖ ES6 Classes គ្រាន់តែជា "ស្ករគ្រាប់ Syntax" (Syntactic Sugar) ដែលស្រោបពីលើប្រព័ន្ធ Prototype នេះប៉ុណ្ណោះ។ ពីក្រោយខ្នង វានៅតែដំណើរការតាមរបៀបដដែល។)*
