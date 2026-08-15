@@ -34,8 +34,8 @@ quiz:
 *   **ឧទាហរណ៍**: សិស្សម្នាក់អាចរៀនវគ្គសិក្សាច្រើន ហើយវគ្គសិក្សាមួយក៏មានសិស្សច្រើននាក់ (`students` $\leftrightarrow$ `courses`)។
 *   **របៀបឌីហ្សាញ**: យើងមិនអាចដាក់ FK ផ្ទាល់លើតារាងទាំងពីរបានទេ។ យើងត្រូវបង្កើតតារាងកណ្តាលមួយហៅថា **Junction Table** ឬ **Pivot Table** (ឧ. `enrollments`) ដែលផ្ទុក FK របស់តារាងទាំងពីរ។
 
-```jsdiagram
-jsdatabasemodeling
+```rdbmsdiagram
+RdbmsRelationshipsDiagram
 ```
 
 ---
@@ -61,6 +61,10 @@ CREATE TABLE orders (
 ## 🤝 SQL JOIN Operations
 
 នៅពេលយើងចង់ទាញយកទិន្នន័យចម្រុះឆ្លងតារាង យើងប្រើប្រាស់បញ្ជា **JOIN**។
+
+```rdbmsdiagram
+RdbmsJoinsDiagram
+```
 
 ### INNER JOIN
 ទាញយកតែទិន្នន័យណាដែលមានតម្លៃផ្គូផ្គងគ្នា (matching rows) នៅក្នុងតារាងទាំងសងខាងប៉ុណ្ណោះ។
