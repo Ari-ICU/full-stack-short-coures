@@ -68,7 +68,10 @@ const MODULE_TITLES: Record<string, string> = {
   "module-2-express-and-rest": "Module 2 — Express.js & RESTful APIs",
   "module-3-database-integration": "Module 3 — Database Integration",
   "module-4-security-and-advanced": "Module 4 — Security & Advanced Concepts",
-  "module-1-rdbms": "Module 1 — Relational Database (RDBMS)",
+  "module-1-rdbms-setup": "Module 1 — RDBMS Architecture & Tooling",
+  "module-2-rdbms-schema": "Module 2 — Schema Design & Database Modeling",
+  "module-3-rdbms-sql": "Module 3 — SQL Queries & CRUD Operations",
+  "module-4-rdbms-advanced": "Module 4 — Transactions & Backend Integration",
   "module-1-deployment": "Module 1 — App Deployment",
   "module-2-final-project": "Module 2 — Final Project Demo",
 };
