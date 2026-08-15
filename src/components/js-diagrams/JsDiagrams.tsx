@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { MapDiagram, FilterDiagram, ReduceDiagram } from "./JsArrayMethodsDiagrams";
 import { DomTreeDiagram, DomModifyDiagram, DomEventsDiagram } from "./JsDomDiagrams";
 import { DomCreateDiagram, DomAppendDiagram, DomRemoveReplaceDiagram } from "./JsDomUpdateDiagrams";
 import { EventListenerDiagram, EventObjectDiagram, PreventDefaultDiagram } from "./JsEventsDiagrams";
@@ -1442,9 +1441,6 @@ const JS_DIAGRAMS: Record<string, React.ComponentType> = {
   jsobjectspread:            ObjectSpreadDiagram,
   jsarraydestructuring:      ArrayDestructuringDiagram,
   jsarrayspread:             ArraySpreadDiagram,
-  jsmap:                     MapDiagram,
-  jsfilter:                  FilterDiagram,
-  jsreduce:                  ReduceDiagram,
   jsdomtree:                 DomTreeDiagram,
   jsdomselect:               DomModifyDiagram,
   jsdomevents:               DomEventsDiagram,
