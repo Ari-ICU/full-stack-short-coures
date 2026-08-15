@@ -1,22 +1,30 @@
 ---
 title: Error Handling
-description: សិក្សាពីរបៀបគ្រប់គ្រងកំហុសនៅក្នុង JavaScript ដោយប្រើប្រាស់ try, catch, finally និងរបៀបបង្កើតកំហុសដោយខ្លួនឯង (Throwing Errors) ដើម្បីអោយកម្មវិធីដើរដោយរលូនទោះមានបញ្ហាក៏ដោយ។
+description: >-
+  សិក្សាពីរបៀបគ្រប់គ្រងកំហុសនៅក្នុង JavaScript ដោយប្រើប្រាស់ try, catch, finally
+  និងរបៀបបង្កើតកំហុសដោយខ្លួនឯង (Throwing Errors)
+  ដើម្បីអោយកម្មវិធីដើរដោយរលូនទោះមានបញ្ហាក៏ដោយ។
 objectives:
   - យល់ពីសារៈសំខាន់នៃការចាប់យកកំហុស (Error Handling)
   - ចេះប្រើប្រាស់ block `try...catch` ដើម្បីការពារកម្មវិធីកុំអោយគាំង
   - ស្គាល់ពីតួនាទីរបស់ `finally`
   - ចេះប្រើប្រាស់ពាក្យគន្លឹះ `throw` ដើម្បីបង្កើត Custom Errors
 module: module-1-js
-order: 16
+order: 17
 quiz:
-  - question: តើកូដនៅក្នុង block មួយណានៃ `try...catch...finally` ដែលនឹងដំណើរការជានិច្ច ទោះបីជាមាន Error ឬគ្មាន Error ក៏ដោយ?
+  - question: >-
+      តើកូដនៅក្នុង block មួយណានៃ `try...catch...finally` ដែលនឹងដំណើរការជានិច្ច
+      ទោះបីជាមាន Error ឬគ្មាន Error ក៏ដោយ?
     options:
       - try
       - catch
       - finally
       - គ្មានចម្លើយណាត្រូវទេ
     correctAnswer: 2
-    explanation: "កូដនៅក្នុង `finally` ត្រូវបានធានាថានឹងដំណើរការជានិច្ចនៅចុងបញ្ចប់នៃប្រតិបត្តិការ ទោះបីជាកូដក្នុង `try` ជោគជ័យ ឬធ្លាក់ចូល `catch` ដោយសារមានកំហុសក៏ដោយ។"
+    explanation: >-
+      កូដនៅក្នុង `finally`
+      ត្រូវបានធានាថានឹងដំណើរការជានិច្ចនៅចុងបញ្ចប់នៃប្រតិបត្តិការ ទោះបីជាកូដក្នុង
+      `try` ជោគជ័យ ឬធ្លាក់ចូល `catch` ដោយសារមានកំហុសក៏ដោយ។
 ---
 
 ## 🛑 ហេតុអ្វីត្រូវមាន Error Handling?

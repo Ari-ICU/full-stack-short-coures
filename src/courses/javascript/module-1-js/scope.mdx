@@ -1,0 +1,84 @@
+---
+title: Scope & Hoisting
+description: ស្វែងយល់ពីគោលការណ៍ Scope (Global, Function, Block Scope) និងយន្តការ Hoisting នៅក្នុង JavaScript។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Scope ប្រភេទនីមួយៗ (Global, Function, Block Scope)
+  - យល់ដឹងពីដំណើរការ Hoisting និង Temporal Dead Zone (TDZ)
+module: module-1-js
+order: 3
+quiz:
+  - question: "តើ Variable ដែលប្រកាសដោយប្រើ keyword `var` នៅក្នុង `if` block អាចហៅប្រើប្រាស់នៅក្រៅ block នោះបានដែរឬទេ?"
+    options:
+      - "មិនបានទេ ព្រោះវាមាន Block Scope"
+      - "បាន ព្រោះ var មិនគោរព Block Scope ទេ (វាមាន Function Scope)"
+      - "បាន លុះត្រាតែយើងប្រើប្រាស់ \"use strict\""
+      - "មិនបានទេ ព្រោះវាមាន Local Scope"
+    correctAnswer: 2
+    explanation: "keyword `var` មិនមាន Block Scope ទេ ដូច្នេះរាល់ Variable ដែលប្រកាសដោយ `var` នៅក្នុង Block (ដូចជា if ឬ for) គឺអាចហៅប្រើប្រាស់នៅក្រៅ Block នោះបាន។"
+---
+
+## 🔍 Scope
+
+**Scope** គឺជាបរិបទ (Context) នៃកូដដែលកំណត់ថាតើ Variables ណាមួយអាចត្រូវបានមើលឃើញ ឬទាញយកទៅប្រើប្រាស់បាន។ JavaScript មាន Scopes ៣ សំខាន់ៗ៖
+
+### 1. Global Scope
+Variable ដែលប្រកាសនៅខាងក្រៅ Functions ឬ Blocks ទាំងអស់ គឺមាន Global Scope។ ពួកវាអាចត្រូវបានហៅប្រើនៅទីណាក៏បាន។
+
+```javascript
+const siteName = "My Website"; // Global Scope
+
+function printSite() {
+  console.log(siteName); // ✅ អាចហៅប្រើបាន
+}
+```
+
+### 2. Function Scope
+Variable ដែលប្រកាសនៅខាងក្នុង Function (មិនថាប្រើ `var`, `let`, ឬ `const` ទេ) គឺស្គាល់តែនៅខាងក្នុង Function នោះប៉ុណ្ណោះ។
+
+```javascript
+function greet() {
+  let message = "សួស្តី"; // Function Scope
+  console.log(message);
+}
+
+// console.log(message); // ❌ Error: message is not defined
+```
+
+### 3. Block Scope
+`let` និង `const` ផ្តល់នូវ Block Scope ពោលគឺវាត្រូវបានស្គាល់តែនៅក្នុងវង់ក្រចក `{}` ដូចជាក្នុង `if`, `for`, ឬ `while`។ `var` មិនមាន Block Scope ទេ។
+
+```javascript
+if (true) {
+  let blockScoped = "ខ្ញុំនៅទីនេះ";
+  var functionScoped = "ខ្ញុំអាចចេញក្រៅបាន";
+}
+
+// console.log(blockScoped); // ❌ Error
+console.log(functionScoped); // ✅ ដើរធម្មតា (នេះហើយជាមូលហេតុដែល var មានបញ្ហា!)
+```
+
+---
+
+## ⬆️ Hoisting
+
+**Hoisting** គឺជាយន្តការមួយរបស់ JavaScript ដែលទាញយកការប្រកាស (Declarations) ទាំងអស់ឡើងទៅលើគេបង្អស់នៃ Scope របស់វា មុនពេលកូដចាប់ផ្តើមដំណើរការ។
+
+```javascript
+console.log(myVar); // ចេញ undefined (មិន error ទេ!)
+var myVar = 10;
+```
+ហេតុអ្វីបានជាវាមិន Error? ដោយសារតែ Hoisting ទាញយកការប្រកាសឡើងលើ៖
+```javascript
+// កូដខាងលើត្រូវបាន JS ប្រែទៅជាបែបនេះដោយស្វ័យប្រវត្តិ៖
+var myVar;
+console.log(myVar); // ទើបតែប្រកាស តែមិនទាន់អោយតម្លៃ ទើបចេញ undefined
+myVar = 10;
+```
+
+**ចុះចំណែក `let` និង `const`?**
+ពួកវាក៏ត្រូវបាន Hoisted ដែរ ប៉ុន្តែពួកវាមិនអាចត្រូវបានហៅមកប្រើមុនពេលកូដមកដល់បន្ទាត់របស់វាឡើយ។ តំបន់រវាងការ Hoist និងការប្រកាសនេះហៅថា **Temporal Dead Zone (TDZ)**។
+
+```javascript
+// console.log(myLet); // ❌ ReferenceError: Cannot access 'myLet' before initialization
+let myLet = 20;
+```
