@@ -1,0 +1,107 @@
+---
+title: useRef Hook
+description: ស្វែងយល់ពីរបៀបប្រើប្រាស់ useRef Hook ដើម្បីចាប់យក DOM Elements ដោយផ្ទាល់ និងរក្សាទុកតម្លៃ (Mutable Value) ដោយមិនធ្វើឱ្យ Component Re-render។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង useState និង useRef
+  - ចេះប្រើប្រាស់ useRef ដើម្បីចាប់យក និងបញ្ជាលើ HTML elements (Focus input, Scroll)
+  - យល់ពីការផ្ទុកតម្លៃដែលមិនចង់ឱ្យរំខានដល់ Re-rendering cycle
+module: module-5-effects-lifecycle
+order: 3
+quiz:
+  - question: "តើការកែប្រែតម្លៃ `ref.current` នឹងធ្វើឱ្យ React component ធ្វើការ Re-render ដែរឬទេ?"
+    options:
+      - "ធ្វើឱ្យ Re-render ដូច useState ដែរ"
+      - "មិនធ្វើឱ្យ Re-render ទេ"
+      - "ធ្វើឱ្យ Re-render លុះត្រាតែវាជា object"
+      - "ធ្វើឱ្យ Re-render តែចំពោះ Child components ប៉ុណ្ណោះ"
+    correctAnswer: 2
+    explanation: "ការផ្លាស់ប្តូរតម្លៃនៅក្នុង `ref.current` មិនបង្កឱ្យមានការ Re-render component ឡើយ។ នេះជាចំណុចខុសគ្នាដ៏ធំបំផុតធៀបនឹង `useState`។"
+---
+
+## 🔍 useRef Hook
+
+**`useRef`** គឺជា Hook មួយរបស់ React ដែលត្រឡប់មកវិញនូវ object មួយមានទម្រង់ `{ current: initialValue }`។ វាត្រូវបានប្រើប្រាស់សម្រាប់គោលបំណងចម្បងពីរ៖
+1. **ចាប់យក DOM Elements ដោយផ្ទាល់** (Direct DOM Access)
+2. **រក្សាទុកតម្លៃ (Mutable Value)** ដែលមិនចង់ឱ្យ Component ធ្វើការ Re-render នៅពេលតម្លៃនោះផ្លាស់ប្តូរ។
+
+---
+
+## 1. ការចាប់យក DOM Elements (DOM Reference)
+
+ជាទូទៅ React គ្រប់គ្រង UI តាមរយៈ State និង Virtual DOM។ ប៉ុន្តែជួនកាលយើងត្រូវការបញ្ជាលើ HTML elements ដោយផ្ទាល់ ដូចជាការធ្វើឱ្យ input ទទួលបាន Focus, ការអូស scroll, ឬវាស់ទំហំ element។
+
+```jsx
+import { useRef } from 'react';
+
+function AutoFocusInput() {
+  // 1. បង្កើត ref object មួយ
+  const inputRef = useRef(null);
+
+  const handleClick = () => {
+    // 3. ប្រើ inputRef.current ដើម្បីបញ្ជាលើ DOM element
+    inputRef.current.focus();
+  };
+
+  return (
+    <div>
+      {/* 2. ភ្ជាប់ ref ទៅកាន់ HTML tag */}
+      <input ref={inputRef} type="text" placeholder="វាយបញ្ចូលអ្វីមួយ..." />
+      <button onClick={handleClick}>Focus Input Box</button>
+    </div>
+  );
+}
+```
+
+---
+
+## 2. ការរក្សាទុកតម្លៃ (Mutable Value) ដោយមិន Re-render
+
+នៅពេលយើងប្តូរតម្លៃ `useState` នោះ React នឹងគូរ Component ឡើងវិញ (Re-render)។ ចុះបើអ្នកចង់រក្សាទុកតម្លៃមួយ (ដូចជា ID របស់ Timer) ដែលការផ្លាស់ប្តូររបស់វាមិនពាក់ព័ន្ធនឹងការបង្ហាញ UI ឡើយ?
+
+ប្រសិនបើប្រើ variable ធម្មតា វានឹងត្រូវកំណត់តម្លៃលំនាំដើមឡើងវិញរាល់ពេល Component Re-render។ `useRef` ជួយរក្សាតម្លៃនោះឱ្យនៅដដែលទោះបីជា Re-render ប៉ុន្មានដងក៏ដោយ។
+
+```jsx
+import { useState, useRef, useEffect } from 'react';
+
+function Timer() {
+  const [seconds, setSeconds] = useState(0);
+  // រក្សាទុក ID របស់ interval ដើម្បីអាច clear បាននៅពេលក្រោយ
+  const timerId = useRef(null);
+
+  const startTimer = () => {
+    if (timerId.current !== null) return;
+    
+    timerId.current = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerId.current);
+    timerId.current = null; // កំណត់មក null វិញ
+  };
+
+  // សំអាត timer នៅពេល component ត្រូវលុបចោល (Unmount)
+  useEffect(() => {
+    return () => clearInterval(timerId.current);
+  }, []);
+
+  return (
+    <div>
+      <h1>⏱️ ពេលវេលា៖ {seconds} វិនាទី</h1>
+      <button onClick={startTimer}>Start</button>
+      <button onClick={stopTimer}>Stop</button>
+    </div>
+  );
+}
+```
+
+---
+
+## 💡 សង្ខេបភាពខុសគ្នា៖ useState vs useRef
+
+| លក្ខណៈសម្បត្តិ | `useState` | `useRef` |
+| :--- | :--- | :--- |
+| **តម្លៃត្រឡប់មកវិញ** | `[state, setState]` | `{ current: value }` |
+| **ធ្វើឱ្យ Re-render?** | ធ្វើឱ្យ Re-render ភ្លាមៗពេលប្តូរតម្លៃ | មិនធ្វើឱ្យ Re-render ឡើយ |
+| **ការប្រើប្រាស់ចម្បង** | សម្រាប់រក្សាទិន្នន័យបង្ហាញលើ UI | សម្រាប់ចាប់ DOM ឬផ្ទុកតម្លៃលាក់ |

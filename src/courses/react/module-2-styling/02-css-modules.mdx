@@ -1,0 +1,92 @@
+---
+title: CSS Modules
+description: សិក្សាពីរបៀបសរសេរ CSS បែប Scoped ក្នុង React ដោយប្រើប្រាស់ CSS Modules ដើម្បីការពារបញ្ហាជាន់គ្នានៃឈ្មោះ Class ផ្សេងៗ។
+objectives:
+  - យល់ដឹងពីបញ្ហាជាន់គ្នាឈ្មោះ CSS Classes (Global Namespace Pollution)
+  - ចេះបង្កើត និងនាំចូល CSS Modules (`.module.css`)
+  - យល់ដឹងពីរបៀបដែល React បម្លែងឈ្មោះ class ឱ្យទៅជា unique class name
+module: module-2-styling
+order: 2
+quiz:
+  - question: "តើ CSS Modules ជួយដោះស្រាយបញ្ហាអ្វីខ្លះក្នុងការរចនា UI React App?"
+    options:
+      - "ជួយឱ្យ CSS រត់លឿនជាងមុន"
+      - "ជួយឱ្យ component មិនបាច់សរសេរ JavaScript"
+      - "ការពារកុំឱ្យ class name ជាន់គ្នាទូទាំង App (Scope styling to specific component)"
+      - "បម្លែង CSS ទៅជា JavaScript objects ដោយស្វ័យប្រវត្ត"
+    correctAnswer: 3
+    explanation: "CSS Modules ជួយការពារកុំឱ្យឈ្មោះ class ជាន់គ្នា ដោយបម្លែងវាទៅជា unique class name នៅពេល compile ធានាថាកូដ CSS ដើរតែលើ component របស់វាប៉ុណ្ណោះ។"
+---
+
+## 🎨 CSS Modules
+
+នៅពេលយើងសរសេរ CSS ធម្មតា (`styles.css`) ហើយនាំចូល (import) ទៅក្នុង component ណាមួយ ឈ្មោះ class ទាំងនោះនឹងត្រូវបានអនុវត្តជា **Global** (ទូទាំងគេហទំព័រ)។ នេះអាចបង្កបញ្ហាប្រសិនបើអ្នកបង្កើត class ឈ្មោះដូចគ្នា នៅក្នុង components ពីរផ្សេងគ្នា (Styles នឹងជាន់គ្នា និងបង្ហាញខុស)។
+
+**CSS Modules** ដោះស្រាយបញ្ហានេះដោយ Scope ឈ្មោះ CSS class ឱ្យនៅស្គាល់តែក្នុង Component ដែលបាននាំវាចូលប៉ុណ្ណោះ។
+
+---
+
+## 1. របៀបបង្កើត និងប្រើប្រាស់ CSS Modules
+
+ដើម្បីប្រើប្រាស់ CSS Modules យើងត្រូវ៖
+1. បង្កើត file CSS ដោយប្រើកន្ទុយ **`.module.css`** (ឧ. `Button.module.css`)។
+2. នាំចូល (Import) វាមកក្នុង Component ក្នុងនាមជា JavaScript Object។
+
+### ក. បង្កើត file CSS: `Button.module.css`
+```css
+/* សរសេរ class ធម្មតា */
+.button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+}
+
+.success {
+  background-color: #10b981;
+}
+```
+
+### ខ. ប្រើប្រាស់ក្នុង Component: `Button.jsx`
+```jsx
+import styles from './Button.module.css';
+
+function Button() {
+  // styles គឺជា object ផ្ទុក class names ដូចជា { button: 'Button_button__xyz', success: 'Button_success__abc' }
+  return (
+    <button className={styles.button}>
+      ចុចទីនេះ
+    </button>
+  );
+}
+```
+
+---
+
+## 2. របៀបប្រើប្រាស់ Classes ច្រើនរួមគ្នា (Multiple Classes)
+
+ប្រសិនបើអ្នកចង់ប្រើ class ធម្មតាផង និង class success ផង អ្នកអាចប្រើ String Interpolation ឬវិធីសាស្ត្រមួយចំនួនដូចខាងក្រោម៖
+
+```jsx
+import styles from './Button.module.css';
+
+function SuccessButton() {
+  // បញ្ចូលគ្នាតាមរយៈ Template Literals
+  return (
+    <button className={`${styles.button} ${styles.success}`}>
+      ជោគជ័យ
+    </button>
+  );
+}
+```
+
+---
+
+## 🔍 តើ React ដំណើរការវាដូចម្តេចពីក្រោយខ្នង?
+
+នៅពេលដែលកម្មវិធីត្រូវបាន compile នោះ CSS Modules នឹងប្តូរឈ្មោះ class ទៅជាឈ្មោះថ្មីមួយដែលមានលក្ខណៈប្លែកគេជានិច្ច (Unique Name) ដោយភ្ជាប់ឈ្មោះ Component, ឈ្មោះ Class និងកូដកូនសោរខ្លីមួយ (Hash)។
+
+ឧទាហរណ៍៖ `.button` ត្រូវបានបម្លែងទៅជា `.Button_button__h8d2j`។
+
+ដោយសារឈ្មោះ class ថ្មីនេះមានលក្ខណៈពិសេសប្លែកពីគេជានិច្ច វានឹងលែងមានបញ្ហាកូដ CSS ជាន់គ្នាតទៅទៀតហើយ!

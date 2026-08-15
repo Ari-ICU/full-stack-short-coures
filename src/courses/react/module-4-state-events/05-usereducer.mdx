@@ -1,0 +1,100 @@
+---
+title: Advanced State Management
+description: >-
+  នៅពេលដែល Context API លែងមានប្រសិទ្ធភាពសម្រាប់គម្រោងធំៗ
+  ដល់ពេលដែលអ្នកត្រូវស្គាល់ពីបណ្ណាល័យគ្រប់គ្រង State អាជីពដូចជា Zustand ឫ Redux
+  Toolkit។
+objectives:
+  - យល់ពីចំណុចខ្សោយរបស់ Context API នៅក្នុងគម្រោងធំៗ
+  - ស្គាល់ពីបណ្ណាល័យគ្រប់គ្រង State ជំនាន់ថ្មី (Zustand)
+  - ចេះសម្រេចចិត្តជ្រើសរើសឧបករណ៍អោយត្រូវនឹងទំហំការងារ
+module: module-4-state-events
+order: 5
+quiz:
+  - question: >-
+      ហេតុអ្វីបានជាយើងមិនគួរប្រើប្រាស់ React Context ជា 'Global State'
+      សម្រាប់គ្រប់ទិន្នន័យទាំងអស់ (ដូចជាទិន្នន័យ Form ដែលវាយញឹកញាប់)?
+    options:
+      - '"ព្រោះ Context អាចផ្ទុកបានត្រឹមតែអក្សរប៉ុណ្ណោះ"'
+      - >-
+        "ព្រោះរាល់ពេលទិន្នន័យក្នុង Context ប្រែប្រួល ទោះបន្តិចបន្តួចក៏ដោយ រាល់
+        Component ទាំងអស់ដែលតភ្ជាប់ជាមួយវានឹងត្រូវ Re-render (គូរឡើងវិញ)
+        ទាំងស្រុង ដែលធ្វើអោយវេបសាយដើរយឺតខ្លាំង។"
+      - '"ព្រោះ Context មានតម្លៃថ្លៃ"'
+      - '"ព្រោះវាជាបច្ចេកវិទ្យាហួសសម័យ"'
+    correctAnswer: 2
+    explanation: >-
+      Context មិនមានសមត្ថភាព 'ជ្រើសរើស (Select)' ទិន្នន័យដាច់ដោយឡែកនោះទេ។
+      បើអ្នកមានទិន្នន័យ {name: 'A', age: 20} ហើយអ្នកប្តូរតែ name រាល់ Component
+      ដែលប្រើប្រាស់អថេរ age ក៏ត្រូវបង្ខំចិត្ត Re-render ឡើងវិញដោយឥតប្រយោជន៍ដែរ!
+      នេះជាមូលហេតុដែល Zustand/Redux ត្រូវបានបង្កើតឡើង។
+---
+
+## 🛑 ដែនកំណត់របស់ Context API
+
+Context គឺអស្ចារ្យសម្រាប់ទិន្នន័យដែលនៅស្ងៀម មិនសូវប្រែប្រួល (Static) ដូចជា Theme, Language ឫ User Authentication។ ប៉ុន្តែសម្រាប់ទិន្នន័យដែលផ្លាស់ប្តូរញឹកញាប់រៀងរាល់វិនាទី (ឧ. ការអូសផែនទី, ទិន្នន័យទំនិញក្នុងរទេះ) Context នឹងធ្វើអោយវេបសាយអ្នកគាំង!
+
+```mermaid
+flowchart TD
+    A["Global Store (កន្លែងផ្ទុកទិន្នន័យ)"] 
+    A -->|ហៅយកតែ Cart| B["Cart Component"]
+    A -->|ហៅយកតែ User| C["Profile Component"]
+    
+    style B fill:#cce5ff,stroke:#007bff,color:#000
+    style C fill:#d4edda,stroke:#28a745,color:#000
+    
+    A -. បើជា Zustand .-> D["ពេល Cart ដូរ, មានតែ Cart Component ទេដែល Re-render (អស្ចារ្យ!)"]
+    A -. បើជា Context .-> E["ពេល Cart ដូរ, Profile ក៏ Re-render ដែរ! (អាក្រក់)"]
+```
+
+---
+
+## 🐻 ស្គាល់ Zustand (បណ្ណាល័យសាមញ្ញនិងរហ័ស)
+
+បច្ចុប្បន្ន សម្រាប់គម្រោង React ភាគច្រើន សហគមន៍បានប្តូរទៅប្រើប្រាស់ **Zustand** ជាជាង Redux ដោយសារតែវាមានភាពងាយស្រួល ខ្លី និងរហ័ស។
+
+ការដំឡើង: `npm install zustand`
+
+### របៀបប្រើប្រាស់ដ៏សាមញ្ញ
+
+1. **បង្កើត Store (ឃ្លាំងទិន្នន័យ):**
+```jsx
+// ឯកសារ: store/useCartStore.js
+import { create } from 'zustand';
+
+// បង្កើត Hook មួយឈ្មោះ useCartStore
+export const useCartStore = create((set) => ({
+  items: 0,
+  // អនុគមន៍សម្រាប់ប្តូរ State អាចសរសេរក្នុងនេះបានតែម្តង!
+  addToCart: () => set((state) => ({ items: state.items + 1 })),
+  clearCart: () => set({ items: 0 }),
+}));
+```
+
+2. **ហៅយកទៅប្រើប្រាស់ក្នុង Component ណាក៏បាន (ដោយមិនបាច់មាន Provider រុំ!):**
+```jsx
+import { useCartStore } from './store/useCartStore';
+
+function Navbar() {
+  // ជ្រើសយកតែ items (ទោះបីមុខងារផ្សេងដូរ ក៏ Component នេះមិន Re-render ដែរ)
+  const items = useCartStore((state) => state.items);
+  
+  return <nav>រទេះទំនិញមាន: {items}</nav>;
+}
+
+function ProductCard() {
+  // ទាញយកអនុគមន៍
+  const addToCart = useCartStore((state) => state.addToCart);
+  
+  return <button onClick={addToCart}>ទិញឥឡូវនេះ</button>;
+}
+```
+
+---
+
+## ⚖️ ការសម្រេចចិត្ត: តើគួរប្រើមួយណា?
+
+- **Local State (`useState`):** សម្រាប់ទិន្នន័យផ្ទាល់ខ្លួនរបស់ Component នោះ (ឧ. បើក/បិទប្រអប់, អក្សរក្នុង Input)។
+- **Context API:** សម្រាប់ទិន្នន័យដែលមិនសូវប្រែប្រួល ហើយត្រូវចែករំលែកទូទាំង App (ឧ. Dark Mode, Language, User Session)។
+- **Zustand / Redux Toolkit:** សម្រាប់ទិន្នន័យដែលផ្លាស់ប្តូរញឹកញាប់ មានរចនាសម្ព័ន្ធស្មុគស្មាញ និងត្រូវប្រើប្រាស់រួមគ្នាលើទំព័រច្រើន (ឧ. រទេះទំនិញ, ទិន្នន័យហ្គេម)។
+- **React Query:** សម្រាប់គ្រប់គ្រងទិន្នន័យដែលបានមកពី API (Server State) ទាំងស្រុង!

@@ -1,0 +1,115 @@
+---
+title: Context API
+description: >-
+  ដោះស្រាយបញ្ហា 'Prop Drilling' ដោយប្រើប្រាស់ Context API
+  ដើម្បីចែកចាយទិន្នន័យទៅកាន់ទូទាំង Component Tree ដោយមិនចាំបាច់បញ្ជូនបន្តៗគ្នា។
+objectives:
+  - យល់ពីបញ្ហា Prop Drilling នៅក្នុង React
+  - 'ចេះបង្កើត Context, Provider, និងការប្រើប្រាស់ `useContext`'
+  - >-
+    ដឹងពីករណីដែលគួរ និងមិនគួរប្រើប្រាស់ Context (មិនមែនជា Global State
+    គ្រប់រឿងនោះទេ)
+module: module-6-global-state
+order: 1
+quiz:
+  - question: តើ Context API ត្រូវបានបង្កើតឡើងដើម្បីដោះស្រាយបញ្ហាអ្វីចម្បងជាងគេ?
+    options:
+      - '"ការហៅ API យឺត"'
+      - '"ការសរសេរ CSS រញ៉េរញ៉ៃ"'
+      - >-
+        "បញ្ហា Prop Drilling (ការបញ្ជូនទិន្នន័យពីឪពុក ទៅកូន ទៅចៅ ទៅចៅទួត
+        បន្តបន្ទាប់គ្នាជាច្រើនដំណាក់កាល
+        ដោយComponentកណ្តាលមិនត្រូវការទិន្នន័យនោះសោះ)"
+      - '"ការគ្រប់គ្រង Database"'
+    correctAnswer: 3
+    explanation: >-
+      Context គឺជា 'រន្ធបញ្ជូនទិន្នន័យសម្ងាត់ (Teleport)'
+      ដែលអនុញ្ញាតអោយអ្នកបញ្ជូនទិន្នន័យពីកំពូល ទៅដល់បាតក្រោមបានដោយផ្ទាល់
+      ដោយមិនចាំបាច់ឆ្លងកាត់អ្នកដែលនៅកណ្តាលរញ៉េរញ៉ៃឡើយ។
+---
+
+## 🕳️ បញ្ហា Prop Drilling
+
+ស្រមៃថាអ្នកមានទិន្នន័យ `Theme (ងងឹត ឫ ភ្លឺ)` នៅលើកំពូល `App`។ ប៉ុន្តែប៊ូតុងដែលត្រូវការប្តូរពណ៌ វាស្ថិតនៅជ្រៅមែនទែននៅខាងក្រោម។
+
+```mermaid
+flowchart TD
+    A["App (មានទិន្នន័យ Theme)"] -->|បញ្ជូនទៅ| B["Layout (អត់ត្រូវការទេ តែបង្ខំចិត្តយក)"]
+    B -->|បញ្ជូនទៅ| C["Sidebar (អត់ត្រូវការទេ តែបង្ខំចិត្តយក)"]
+    C -->|បញ្ជូនទៅ| D["ThemeButton (ទើបត្រូវការមែនទែន!)"]
+    
+    style B fill:#f8d7da,stroke:#dc3545,color:#000
+    style C fill:#f8d7da,stroke:#dc3545,color:#000
+```
+ការបញ្ជូនទិន្នន័យបន្តកន្ទុយគ្នាបែបនេះហៅថា **Prop Drilling** ដែលធ្វើអោយកូដពិបាកថែទាំ។
+
+---
+
+## 🪄 ដំណោះស្រាយជាមួយ Context API
+
+React Context អនុញ្ញាតអោយយើងបញ្ជូនទិន្នន័យកាត់កណ្តាលខ្យល់បានយ៉ាងងាយ! ការប្រើប្រាស់មាន ៣ ជំហាន៖
+
+### ជំហានទី 1: បង្កើត Context
+ដំបូង យើងត្រូវបង្កើត "បំពង់បញ្ជូនទិន្នន័យ" មួយជាមុនសិន។
+
+```jsx
+import { createContext } from 'react';
+
+// បង្កើត Context (ជាទូទៅគេទុកវានៅក្នុងឯកសារដាច់ដោយឡែក)
+export const ThemeContext = createContext("light"); 
+```
+
+### ជំហានទី 2: ប្រើប្រាស់ Provider រុំពីក្រៅ
+ដើម្បីអោយអ្នកខាងក្រោមអាចស្រូបយកទិន្នន័យបាន អ្នកត្រូវយក `Provider` ទៅរុំពីក្រៅ និងបញ្ជូនតម្លៃដែលអ្នកចង់ចែកចាយ (value)។
+
+```jsx
+import { useState } from 'react';
+import { ThemeContext } from './ThemeContext';
+import Layout from './Layout';
+
+function App() {
+  const [theme, setTheme] = useState("dark");
+
+  return (
+    // អ្វីៗទាំងអស់ដែលនៅក្នុងនេះ នឹងអាចស្រូបយក theme="dark" បាន!
+    <ThemeContext.Provider value={theme}>
+      <Layout />
+    </ThemeContext.Provider>
+  );
+}
+```
+
+### ជំហានទី 3: ទាញយកទិន្នន័យដោយ `useContext`
+ឥឡូវនេះ នៅឯប៊ូតុងដែលនៅជ្រៅខាងក្រោម មិនចាំបាច់រង់ចាំទទួល Props ពីមេទេ វាអាចលូកដៃទៅចាប់យកទិន្នន័យពីលើអាកាសបានដោយផ្ទាល់!
+
+```jsx
+import { useContext } from 'react';
+import { ThemeContext } from './ThemeContext';
+
+function ThemeButton() {
+  // ហៅទិន្នន័យតាមរយៈ useContext
+  const currentTheme = useContext(ThemeContext);
+
+  return (
+    <button className={currentTheme === "dark" ? "btn-dark" : "btn-light"}>
+      បច្ចុប្បន្នភាព: {currentTheme}
+    </button>
+  );
+}
+```
+
+---
+
+## ⚠️ Context មិនមែនជាឧបករណ៍គ្រប់គ្រង State (Global State) នោះទេ!
+
+ការយល់ច្រឡំដ៏ធំបំផុត: *"ខ្ញុំមិនចាំបាច់រៀន Redux ឫ Zustand ទេ ព្រោះខ្ញុំមាន Context ហើយ!"*
+
+តាមពិត Context គ្រាន់តែជា "បំពង់បញ្ជូន (Dependency Injection)" ប៉ុណ្ណោះ។ វាមិនមានសមត្ថភាពគ្រប់គ្រង State ដោយខ្លួនឯងទេ។ រាល់ពេលដែលតម្លៃ Context ប្រែប្រួល (ទោះបន្តិចបន្តួចក៏ដោយ) **រាល់ Component ទាំងអស់ដែលតភ្ជាប់ជាមួយវានឹង Re-render ឡើងវិញទាំងអស់!** វាអាចធ្វើអោយវេបសាយអ្នកដើរយឺតខ្លាំង។
+
+**សេចក្តីសន្និដ្ឋាន:**
+- ✅ **គួរប្រើ Context:** សម្រាប់ទិន្នន័យដែលកម្រនឹងប្រែប្រួល (ឧ. Theme, ភាសា, ទិន្នន័យ User ដែលបាន Login)។
+- ❌ **មិនគួរប្រើ Context:** សម្រាប់ទិន្នន័យដែលផ្លាស់ប្តូរញឹកញាប់ (ឧ. ទិន្នន័យវាយអត្ថបទ, ចលនាសត្វ)។ បើទិន្នន័យធំនិងស្មុគស្មាញ អ្នកគួរប្រើប្រាស់ Zustand ឫ Redux។
+
+```reactdiagram
+ContextAPI
+```
