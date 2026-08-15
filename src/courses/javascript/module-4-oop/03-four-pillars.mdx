@@ -26,9 +26,9 @@ quiz:
 
 ## 1. Encapsulation (ការវេចខ្ចប់ និងលាក់ទិន្នន័យ)
 
-**Encapsulation** គឺជាការចងក្រងទិន្នន័យ (Properties) និងសកម្មភាព (Methods) ចូលទៅក្នុងប្រអប់តែមួយ (Class) ហើយលាក់បាំងទិន្នន័យសំខាន់ៗពីខាងក្រៅ ដើម្បីការពារការកែប្រែដោយចៃដន្យ។
+**Encapsulation** គឺជាការចងក្រងទិន្នន័យ (Properties) និងសកម្មភាព (Methods) ចូលទៅក្នុងប្រអប់តែមួយ (Class) ហើយលាក់បាំងទិន្នន័យសំខាន់ៗពីខាងក្រៅ ដើម្បីការពារការកែប្រែដោយចៃដន្យ។ នៅក្នុង JavaScript ទំនើប យើងប្រើសញ្ញា **`#`** នៅពីមុខឈ្មោះ ដើម្បីបង្កើត **Private Fields**។
 
-នៅក្នុង JavaScript ទំនើប យើងប្រើសញ្ញា **`#`** នៅពីមុខឈ្មោះ ដើម្បីបង្កើត **Private Fields**។
+ជាដំបូង យើងសរសេរកូដបង្កើត Class `BankAccount` ដោយកំណត់ property `#balance` ជា Private ដើម្បីកុំឱ្យកូដខាងក្រៅអាចចូលមកកែប្រែ ឬអានតម្លៃរបស់វាដោយផ្ទាល់បាន៖
 
 ```javascript
 class BankAccount {
@@ -52,7 +52,11 @@ class BankAccount {
     return this.#balance;
   }
 }
+```
 
+បន្ទាប់មក យើងសាកល្បងបង្កើត instance ឈ្មោះ `myAcc` ដាក់ប្រាក់ និងទាញយកប្រាក់មកបង្ហាញ ដោយមិនអាចចូលទៅប៉ះពាល់ property `#balance` ផ្ទាល់ឡើយ៖
+
+```javascript
 const myAcc = new BankAccount("Sok", 100);
 myAcc.deposit(50);
 
@@ -100,6 +104,8 @@ dog.bark(); // Woof! Woof! (របស់ Dog ផ្ទាល់ខ្លួន)
 
 **Polymorphism** អនុញ្ញាតឱ្យ Class កូន អាចផ្លាស់ប្តូរ ឬសរសេរជាន់លើ (Override) វិធីសាស្ត្រ (Methods) ដែលស្នងមកពី Class មេ ដើម្បីឱ្យវាដំណើរការសមស្របទៅនឹងតម្រូវការរបស់វា។ នេះហៅថា **Method Overriding**។
 
+ជាដំបូង យើងបង្កើត Class មេ `Animal` ដែលមាន method `makeSound()` និងបង្កើត Class កូនៗគឺ `Dog` និង `Cat` ដែលស្នងលក្ខណៈពី `Animal` ប៉ុន្តែសរសេរជាន់លើ (Override) លើ method `makeSound()` ដើម្បីឱ្យវាបញ្ចេញសម្លេងទៅតាមប្រភេទសត្វរៀងៗខ្លួន៖
+
 ```javascript
 class Animal {
   makeSound() {
@@ -118,7 +124,11 @@ class Cat extends Animal {
     console.log("Meow! Meow!");
   }
 }
+```
 
+បន្ទាប់មក យើងបង្កើត Array ផ្ទុកគំរូសត្វទាំងពីរ និងសរសេរកូដរង្វិលជុំ (Loop) ហៅប្រើ method `makeSound()`។ យើងឃើញថា ទោះបីជាហៅឈ្មោះ method ដូចគ្នា តែវាបញ្ចេញសម្លេងខុសៗគ្នាទៅតាមប្រភេទជាក់ស្តែងរបស់វា៖
+
+```javascript
 const animals = [new Dog(), new Cat()];
 animals.forEach(animal => animal.makeSound());
 // Output:
@@ -132,7 +142,7 @@ animals.forEach(animal => animal.makeSound());
 
 **Abstraction** គឺជាការលាក់បាំងនូវភាពស្មុគស្មាញនៃដំណើរការកូដនៅខាងក្នុង (Internal logic/implementation) និងបង្ហាញតែចំណុចសំខាន់ៗដែលអ្នកប្រើប្រាស់ត្រូវការហៅប្រើប៉ុណ្ណោះ។
 
-ឧទាហរណ៍៖ នៅពេលអ្នកចុចបញ្ឆេះឡាន អ្នកគ្រាន់តែបង្វិលសោរ ឬចុចប៊ូតុងបញ្ឆេះ (Simple interface)។ អ្នកមិនចាំបាច់ដឹងពីរបៀបដែលម៉ាស៊ីនបាញ់ប្រេង ឬរ៉ូតទ័រវិលនៅខាងក្នុងនោះទេ។
+ជាដំបូង យើងបង្កើត Class `RemoteControl` ដែលមាន private method `#turnOnCircuit()` សម្រាប់ដោះស្រាយការដំណើរការសៀគ្វីស្មុគស្មាញនៅខាងក្នុង និងបង្កើត public method `pressPowerButton()` ជាចំណុចទំនាក់ទំនងសាមញ្ញទៅខាងក្រៅ៖
 
 ```javascript
 class RemoteControl {
@@ -146,7 +156,11 @@ class RemoteControl {
     console.log("TV is now ON!");
   }
 }
+```
 
+បន្ទាប់មក យើងបង្កើត instance ឈ្មោះ `remote` ហើយចុចដំណើរការប៊ូតុងបើកទូរទស្សន៍។ អ្នកសរសេរកូដខាងក្រៅអាចបញ្ជាទូរទស្សន៍បានយ៉ាងងាយស្រួល ដោយមិនបាច់ដឹង ឬគ្មានសិទ្ធិដំណើរការសៀគ្វី `#turnOnCircuit()` ដោយផ្ទាល់ឡើយ៖
+
+```javascript
 const remote = new RemoteControl();
 remote.pressPowerButton(); // ងាយស្រួលប្រើប្រាស់
 // remote.#turnOnCircuit(); // ❌ មិនអាចហៅប្រើពីខាងក្រៅបានទេ ( abstraction ជួយលាក់វា)
