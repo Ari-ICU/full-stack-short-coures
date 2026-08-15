@@ -1,0 +1,95 @@
+---
+title: ការរចនា Schema និង Data Types (Data Definition - DDL)
+description: ស្វែងយល់ពីប្រភេទទិន្នន័យ (Data Types) ក្នុង PostgreSQL របៀបគ្រប់គ្រងតារាង និងការប្រើប្រាស់ Constraints ដើម្បីធានាសុវត្ថិភាពទិន្នន័យ។
+objectives:
+  - ស្គាល់ពីប្រភេទទិន្នន័យសំខាន់ៗ (NUMERIC, TIMESTAMPTZ, UUID, etc.)
+  - ចេះប្រើប្រាស់បញ្ជា DDL (CREATE, ALTER, DROP, TRUNCATE TABLE)
+  - ចេះកំណត់ច្បាប់ទិន្នន័យ (PRIMARY KEY, UNIQUE, CHECK, DEFAULT)
+module: module-1-rdbms
+order: 2
+quiz:
+  - question: "តើ constraint មួយណាដែលយើងត្រូវប្រើដើម្បីធានាថាតម្លៃនៅក្នុង column `age` ត្រូវតែធំជាង ឬស្មើ ១៨ ជានិច្ច?"
+    options:
+      - "UNIQUE"
+      - "DEFAULT 18"
+      - "CHECK (age >= 18)"
+      - "NOT NULL"
+    correctAnswer: 3
+    explanation: "CHECK constraint ត្រូវបានប្រើដើម្បីកំណត់លក្ខខណ្ឌសុពលភាពទិន្នន័យ (Validation) មុនពេលអនុញ្ញាតឱ្យបញ្ចូលក្នុង database។"
+---
+
+## 💾 PostgreSQL Data Types
+
+រាល់ Column នៅក្នុងតារាង RDBMS ត្រូវតែមានការកំណត់ប្រភេទទិន្នន័យ (Data Type) ឱ្យបានច្បាស់លាស់។ ខាងក្រោមជាប្រភេទសំខាន់ៗដែលគេនិយមប្រើ៖
+
+### ១. ប្រភេទលេខ (Numbers)
+*   **INTEGER**: លេខគត់ធម្មតា (៣២ ប៊ីត) សមស្របសម្រាប់ចំនួនទូទៅ។
+*   **BIGINT**: លេខគត់ទំហំធំ (៦៤ ប៊ីត) សមស្របសម្រាប់ IDs ឬទិន្នន័យធំៗ។
+*   **NUMERIC(10,2)**: លេខមានក្បៀសច្បាស់លាស់ (ឧ. 10 ខ្ទង់សរុប, ២ ខ្ទង់ក្រោយក្បៀស)។ និយមប្រើបំផុតសម្រាប់រក្សាទុក **តម្លៃលុយកាក់**។
+*   **SERIAL**: លេខគត់ដែលកើនឡើងដោយស្វ័យប្រវត្ត (Auto-increment) ម្តង ១ៗ (ច្រើនប្រើសម្រាប់ Primary ID)។
+
+### ២. ប្រភេទអក្សរ (Text)
+*   **VARCHAR(n)**: អក្សរដែលមានការកំណត់ប្រវែងអតិបរមា (ឧ. `VARCHAR(255)`)។
+*   **TEXT**: អក្សរដែលមានប្រវែងវែង មិនកំណត់ព្រំដែន (សមស្របសម្រាប់កថាខណ្ឌ ឬអត្ថបទវែងៗ)។
+
+### ៣. ថ្ងៃខែ និងប្រភេទផ្សេងៗ
+*   **BOOLEAN**: តម្លៃពិត ឬមិនពិត (`TRUE` / `FALSE`)។
+*   **TIMESTAMPTZ**: ថ្ងៃខែ និងពេលវេលាដែលយល់ដឹងពីលំអៀងម៉ោង (Timezone-aware)។ គួរប្រើជានិច្ចសម្រាប់ប្រព័ន្ធ Web។
+*   **UUID**: ប្រភេទ ID ដែលបង្កើតឡើងដោយចៃដន្យ និងប្លែកគេទូទាំងសកលលោក (Universal Unique Identifier) ដែលល្អបំផុតសម្រាប់សុវត្ថិភាព និង scalability នៃប្រព័ន្ធ។
+
+---
+
+## 🛠️ Table Creation & Schema Management (DDL)
+
+**DDL (Data Definition Language)** គឺជាបញ្ជាសម្រាប់បង្កើត និងផ្លាស់ប្តូររចនាសម្ព័ន្ធតារាង។
+
+### CREATE TABLE (បង្កើតតារាង)
+```sql
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    price NUMERIC(10,2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### ALTER TABLE (កែប្រែតារាង)
+```sql
+-- បន្ថែម Column ថ្មី
+ALTER TABLE products ADD COLUMN description TEXT;
+
+-- លុប Column ចេញ
+ALTER TABLE products DROP COLUMN description;
+```
+
+### DROP TABLE (លុបតារាងចោល)
+```sql
+DROP TABLE products;
+```
+
+### TRUNCATE (លុបទិន្នន័យទាំងអស់ តែរក្សារចនាសម្ព័ន្ធតារាង)
+```sql
+TRUNCATE TABLE products;
+```
+
+---
+
+## 🛡️ Constraints (ច្បាប់ទិន្នន័យ)
+
+Constraints គឺជាច្បាប់ដែលយើងដាក់នៅលើ Column ដើម្បីធានាសុក្រឹតភាពទិន្នន័យ (Data Integrity)៖
+
+1.  **PRIMARY KEY**៖ កំណត់អត្តសញ្ញាណជួរដេកនីមួយៗឱ្យប្លែកពីគេជានិច្ច (មិនអាចស្ទួន និងមិនអាចទទេ)។
+2.  **NOT NULL**៖ មិនអនុញ្ញាតឱ្យទុកវាចោលទំនេរ (ទទេ) ឡើយ។
+3.  **UNIQUE**៖ មិនអនុញ្ញាតឱ្យមានតម្លៃស្ទួនគ្នាក្នុង column នោះឡើយ (ឧ. email, username)។
+4.  **DEFAULT**៖ កំណត់តម្លៃស្វ័យប្រវត្ត ប្រសិនបើមិនបានបញ្ជូនតម្លៃមក (ឧ. `created_at DEFAULT CURRENT_TIMESTAMP`)។
+5.  **CHECK**៖ បង្កើតលក្ខខណ្ឌត្រួតពិនិត្យ (ឧ. `CHECK (price > 0)` ការពារកុំឱ្យតម្លៃផលិតផលអវិជ្ជមាន)។
+
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    age INTEGER CHECK (age >= 18),
+    status VARCHAR(20) DEFAULT 'active'
+);
+```

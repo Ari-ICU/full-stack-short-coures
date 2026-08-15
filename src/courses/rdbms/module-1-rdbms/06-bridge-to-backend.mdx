@@ -1,0 +1,78 @@
+---
+title: ការត្រៀមខ្លួនសម្រាប់ Node.js & Express (Bridge to Backend)
+description: រៀនពីទម្រង់ភ្ជាប់ទៅកាន់ Database (Connection URI) របៀបរៀបចំទិន្នន័យគំរូ (Seeding) និងការអនុវត្តគម្រោងរចនា Database Schema ពេញលេញ (Capstone)។
+objectives:
+  - យល់ពីរចនាសម្ព័ន្ធរបស់ Database Connection URI សម្រាប់ភាសា backend ផ្សេងៗ
+  - យល់ពីដំណើរការ Seeding ទិន្នន័យគំរូ (Mock Data) សម្រាប់តេស្តសាកល្បង
+  - អាចរចនា Schema សម្រាប់កម្មវិធី Web ពិតប្រាកដ (E-Commerce Database Schema)
+module: module-1-rdbms
+order: 6
+quiz:
+  - question: "តើព័ត៌មានណាខ្លះដែលមិនត្រូវបានរួមបញ្ចូលនៅក្នុង Database Connection URI ធម្មតា?"
+    options:
+      - "Port (ឧ. 5432)"
+      - "Database Name"
+      - "ទំហំរបស់ Database (Database Size)"
+      - "លេខសម្ងាត់ (Password)"
+    correctAnswer: 3
+    explanation: "Connection URI ផ្ទុកតែព័ត៌មានចាំបាច់សម្រាប់ការភ្ជាប់ (Host, Port, User, Password, Database Name) ប៉ុណ្ណោះ វាមិនមានផ្ទុកព័ត៌មានទំហំ Database ឡើយ។"
+---
+
+## 🔌 Database Connection URI
+
+នៅពេលយើងសរសេរកូដ Backend (ឧ. ជាមួយ Node.js, Express, Python) យើងត្រូវផ្តល់ដំណឹងទៅកាន់កូដរបស់យើងថាតើ Database Postgres ស្ថិតនៅឯណា និងភ្ជាប់ទៅវាដោយរបៀបណា។ គេនិយមប្រើប្រាស់ទម្រង់ **Connection URI** (ឬ Connection String) ដែលមានទម្រង់ដូចខាងក្រោម៖
+
+```
+postgresql://[user]:[password]@[host]:[port]/[database_name]
+```
+
+### ឧទាហរណ៍ជាក់ស្តែង៖
+*   **Local Connection**: 
+    `postgresql://postgres:mysecretpassword@localhost:5432/ecommerce_db`
+*   **Cloud Connection (Neon / Supabase)**:
+    `postgresql://neondb_owner:npg_xY12345@ep-cool-water-a1.ap-southeast-1.aws.neon.tech/neondb?sslmode=require`
+
+---
+
+## 📇 Database Seeding (Mock Data)
+
+**Database Seeding** គឺជាដំណើរការបញ្ចូលទិន្នន័យគំរូ (Mock/Seed Data) ទៅក្នុង Database ដើម្បីឱ្យយើងមានទិន្នន័យគ្រប់គ្រាន់សម្រាប់ធ្វើការតេស្តសាកល្បងសរសេរកូដ APIs នៅមេរៀនបន្ទាប់។
+
+ជាទូទៅ គេសរសេរកូដ SQL សម្រាប់បញ្ចូលទិន្នន័យគំរូជាច្រើនជួរ៖
+
+```sql
+-- ១. សំអាតទិន្នន័យចាស់ៗចោល
+TRUNCATE TABLE users, products CASCADE;
+
+-- ២. បញ្ចូល Users គំរូ
+INSERT INTO users (username, email, status) VALUES
+  ('sok_dara', 'dara@example.com', 'active'),
+  ('cheata_ly', 'cheata@example.com', 'active'),
+  ('minea_rith', 'minea@example.com', 'suspended');
+
+-- ៣. បញ្ចូល Products គំរូ
+INSERT INTO products (title, price, category_id) VALUES
+  ('iPhone 15 Pro', 999.00, 1),
+  ('MacBook Air M3', 1199.00, 1),
+  ('T-Shirt Modern', 15.00, 2);
+```
+
+---
+
+## 🏆 គម្រោងចុងក្រោយ (Capstone Database Design)
+
+ដើម្បីបញ្ចប់ផ្នែក RDBMS នេះឱ្យបានជោគជ័យ សិស្សត្រូវរចនា និងសរសេរកូដបង្កើត **Database Schema** សម្រាប់កម្មវិធី **E-Commerce Web App** ពេញលេញមួយ។
+
+### តម្រូវការគម្រោង (Requirements)៖
+អ្នកត្រូវសរសេរកូដ SQL តែមួយ File (ឈ្មោះ `schema.sql`) ដែលបង្កើតតារាងដូចខាងក្រោម៖
+
+1.  **categories**: តារាងប្រភេទផលិតផល (`id`, `name`)
+2.  **products**: តារាងផលិតផល (`id`, `title`, `price` ជា numeric, `category_id` ជា FK ភ្ជាប់ទៅ categories)
+3.  **users**: តារាងអ្នកប្រើប្រាស់ (`id` ជា UUID, `username`, `email` ជា unique, `created_at`)
+4.  **orders**: តារាងការទិញ (`id`, `user_id` ជា FK ភ្ជាប់ទៅ users, `total` ជា numeric, `order_date`)
+5.  **order_items**: តារាងកណ្តាលបញ្ជាក់ពីផលិតផលដែលបានទិញនីមួយៗ (`id`, `order_id` ជា FK, `product_id` ជា FK, `quantity` ជា integer, `price` ជា numeric)
+
+### លក្ខខណ្ឌបន្ថែម (Constraints & Actions)៖
+*   រាល់ Column តម្លៃលុយកាក់ ត្រូវតែប្រើប្រាស់ `CHECK (price > 0)` ឬ `CHECK (total >= 0)`។
+*   ប្រើប្រាស់ `ON DELETE CASCADE` សម្រាប់ `order_items` (បើលុប order ត្រូវលុប items របស់វាចេញឱ្យអស់)។
+*   ប្រើប្រាស់ `ON DELETE RESTRICT` សម្រាប់ `products` (មិនអាចលុបផលិតផលបានឡើយ បើមាន order ណាមួយកំពុងទិញវា)។

@@ -1,0 +1,61 @@
+---
+title: ស្ថាបត្យកម្ម RDBMS និងឧបករណ៍គ្រប់គ្រង (Architecture & Tooling)
+description: ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃ Relational Database ស្គាល់ពី PostgreSQL និងការប្រើប្រាស់ GUI Tools ដូចជា pgAdmin ឬ DBeaver សម្រាប់គ្រប់គ្រងទិន្នន័យ។
+objectives:
+  - យល់ដឹងពីទស្សនទាន Relational Database (Tables, Rows, Columns, Keys)
+  - យល់ពីមូលហេតុដែល PostgreSQL ពេញនិយមសម្រាប់ Web Backends
+  - ចេះប្រើប្រាស់ pgAdmin ឬ DBeaver សម្រាប់ run SQL scripts និង Backup/Restore (.sql)
+module: module-1-rdbms
+order: 1
+quiz:
+  - question: "តើអ្វីទៅជា Primary Key នៅក្នុងតារាង Database?"
+    options:
+      - "ជា Column សម្រាប់ផ្ទុកលេខសំងាត់របស់អ្នកប្រើប្រាស់"
+      - "ជា Column ពិសេសដែលកំណត់អត្តសញ្ញាណជួរដេកនីមួយៗឱ្យខុសប្លែកពីគេជាដាច់ខាត (Unique Identifier)"
+      - "ជា Column សម្រាប់ភ្ជាប់ទំនាក់ទំនងទៅតារាងផ្សេង"
+      - "ជាប៊ូតុងសម្រាប់ Backup ទិន្នន័យ"
+    correctAnswer: 2
+    explanation: "Primary Key គឺជាតម្លៃសម្គាល់ជួរដេកនីមួយៗ (Record) ឱ្យប្លែកពីគេជានិច្ច និងមិនអាចមានតម្លៃទទេ (NULL) ឡើយ។"
+---
+
+## 🏛️ អ្វីទៅជា Relational Database?
+
+**Relational Database Management System (RDBMS)** គឺជាប្រព័ន្ធគ្រប់គ្រងមូលដ្ឋានទិន្នន័យដែលរៀបចំទិន្នន័យជាទម្រង់ **តារាង (Tables)** ដែលមានជួរដេក និងជួរឈរ ហើយតារាងទាំងនោះមានទំនាក់ទំនងគ្នាទៅវិញទៅមក (Relations)។
+
+### សមាសភាគសំខាន់ៗ៖
+*   **Table (តារាង)**៖ បណ្តុំទិន្នន័យនៃប្រធានបទណាមួយ (ឧ. តារាង Users, តារាង Products)។
+*   **Row/Record (ជួរដេក)**៖ ទិន្នន័យមួយជួរពេញរបស់ធាតុណាមួយ (ឧ. ព័ត៌មានរបស់ User ម្នាក់)។
+*   **Column/Field (ជួរឈរ)**៖ ព័ត៌មានលម្អិតជាក់លាក់ (ឧ. name, email, price) ដែលមានកំណត់ប្រភេទប្រភេទរៀងៗខ្លួន (Data Types)។
+*   **Data Consistency (សុក្រឹតភាពទិន្នន័យ)**៖ ធានាថារាល់ទិន្នន័យទាំងអស់ត្រូវតែគោរពតាមច្បាប់ និងទំនាក់ទំនងរបស់ Database ដែលបានកំណត់។
+
+---
+
+## 🐘 ស្គាល់ពី PostgreSQL
+
+**PostgreSQL** (ហៅកាត់ថា Postgres) គឺជា Relational Database បែប Open-source ដ៏រឹងមាំ និងទំនើបបំផុតមួយនៅលើលោក។
+
+### ហេតុអ្វី Postgres ជាជម្រើសលេខមួយសម្រាប់ Web Backends?
+1.  **រឹងមាំ និងមានស្ថិរភាព (Reliability)**៖ វាអនុលោមតាមគោលការណ៍ ACID ១០០% ការពារការបាត់បង់ទិន្នន័យ។
+2.  **សំបូរមុខងារ (Extensibility)**៖ គាំទ្រទាំង SQL ធម្មតា, JSON/JSONB (NoSQL style), UUIDs, និង Full-Text Search។
+3.  **គាំទ្រ Cloud សម័យថ្មី**៖ ងាយស្រួលដំណើរការលើ Cloud databases ទំនើបៗដូចជា **Supabase**, **Neon**, ឬ **Render**។
+
+---
+
+## 🛠️ ការប្រើប្រាស់ GUI Client Tools
+
+ដើម្បីគ្រប់គ្រងទិន្នន័យក្នុង Postgres Server យើងច្រើនប្រើប្រាស់កម្មវិធី GUI (Graphical User Interface) ជំនួសឱ្យការសរសេរកូដលើ command line។ ឧបករណ៍ពេញនិយមរួមមាន៖ **pgAdmin**, **DBeaver**, និង **TablePlus**។
+
+### ១. ការបង្កើត Connection
+ដើម្បីភ្ជាប់ទៅកាន់ Postgres Server យើងត្រូវការ៖
+*   **Host**: អាសយដ្ឋាន Server (ឧ. `localhost` ឬ Cloud URL)
+*   **Port**: លំនាំដើមគឺ `5432`
+*   **Username**: ឈ្មោះអ្នកប្រើប្រាស់ (លំនាំដើម `postgres`)
+*   **Password**: លេខសម្ងាត់ដែលបានកំណត់ពេលដំឡើង
+*   **Database**: ឈ្មោះ database ដែលចង់ភ្ជាប់
+
+### ២. ការដំណើរការ SQL Scripts (Query Tool)
+នៅក្នុង GUI tools នីមួយៗមានប៊ូតុង **Query Tool** ឬ **SQL Editor** ដែលអនុញ្ញាតឱ្យយើងសរសេរកូដ SQL និងចុចដំណើរការ (Execute / Run) ដើម្បីបង្កើត ឬទាញយកទិន្នន័យ។
+
+### ៣. ការ Import/Export SQL Files (Backup & Restore)
+*   **Export (Backup)**៖ ចុច Right-click លើ Database រួចយក **Backup** ដើម្បីទាញយកឯកសារកូដ `.sql` រក្សាទុក។
+*   **Import (Restore)**៖ ចុច Right-click លើ Database យក **Restore** ឬបើក file `.sql` នៅក្នុង SQL Editor ហើយចុច Run ដើម្បីបង្កើតរចនាសម្ព័ន្ធ និងបញ្ចូលទិន្នន័យឡើងវិញ។

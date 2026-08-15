@@ -1,0 +1,91 @@
+---
+title: Database Modeling, Relationships & JOINs
+description: សិក្សាពីការឌីហ្សាញទំនាក់ទំនងរវាងតារាង (1:1, 1:N, N:N) ការប្រើប្រាស់ Foreign Keys គោលការណ៍ ON DELETE និងការទាញយកទិន្នន័យឆ្លងតារាងដោយប្រើ SQL JOINs។
+objectives:
+  - យល់ដឹងពីប្រភេទទំនាក់ទំនងរវាងតារាង និងការបង្កើត Junction (Pivot) Table
+  - ចេះកំណត់ Foreign Key និង referential actions (CASCADE, SET NULL, RESTRICT)
+  - ចេះសរសេរ Query ភ្ជាប់តារាងច្រើនដោយប្រើ INNER JOIN និង LEFT JOIN
+module: module-1-rdbms
+order: 4
+quiz:
+  - question: "តើគោលការណ៍ `ON DELETE CASCADE` មានតួនាទីអ្វីខ្លះ?"
+    options:
+      - "មិនអនុញ្ញាតឱ្យលុបទិន្នន័យពីតារាងមេឡើយ"
+      - "នៅពេលទិន្នន័យក្នុងតារាងមេត្រូវបានលុប រាល់ទិន្នន័យកូនៗដែលពាក់ព័ន្ធនឹងត្រូវលុបដោយស្វ័យប្រវត្តិតាមគ្នា"
+      - "ប្តូរតម្លៃ Foreign Key របស់តារាងកូនទៅជា NULL នៅពេលលុបតារាងមេ"
+      - "បង្កើត backup តារាងកូនដោយស្វ័យប្រវត្ត"
+    correctAnswer: 2
+    explanation: "`ON DELETE CASCADE` ធានាថានៅពេលដែល Record មេត្រូវបានលុប (ឧ. លុប User) នោះ Record កូនដែលភ្ជាប់ជាមួយវា (ឧ. Orders របស់ User នោះ) នឹងត្រូវបានលុបចេញពី Database តាមគ្នាដោយស្វ័យប្រវត្តិដើម្បីកុំឱ្យសល់ទិន្នន័យកំព្រា។"
+---
+
+## 🔗 Relationships (ប្រភេទទំនាក់ទំនង)
+
+នៅក្នុង Relational Database, តារាងនីមួយៗមិនរស់នៅដាច់ដោយឡែកពីគ្នាទេ។ យើងភ្ជាប់ទំនាក់ទំនងគ្នាតាមរយៈ **Primary Key (PK)** និង **Foreign Key (FK)**។
+
+### ១. ទំនាក់ទំនង One-to-One (១:១)
+*   **ឧទាហរណ៍**: គណនីអ្នកប្រើប្រាស់ម្នាក់ មាន Profile តែមួយគត់ (`users` $\leftrightarrow$ `user_profiles`)។
+*   **របៀបឌីហ្សាញ**: ដាក់ Foreign Key នៅក្នុង `user_profiles` ហើយកំណត់វាជា `UNIQUE`។
+
+### ២. ទំនាក់ទំនង One-to-Many (១:N) - ពេញនិយមបំផុត
+*   **ឧទាហរណ៍**: ប្រភេទផលិតផលមួយ មានផលិតផលច្រើន (`categories` $\leftrightarrow$ `products`) ឬអ្នកប្រើម្នាក់អាចទិញអីវ៉ាន់ច្រើនដង (`users` $\leftrightarrow$ `orders`)។
+*   **របៀបឌីហ្សាញ**: ដាក់ Foreign Key ទៅខាងតារាងកូន (ខាងតារាង Many គឺ `products` ឬ `orders`)។
+
+### ៣. ទំនាក់ទំនង Many-to-Many (N:N)
+*   **ឧទាហរណ៍**: សិស្សម្នាក់អាចរៀនវគ្គសិក្សាច្រើន ហើយវគ្គសិក្សាមួយក៏មានសិស្សច្រើននាក់ (`students` $\leftrightarrow$ `courses`)។
+*   **របៀបឌីហ្សាញ**: យើងមិនអាចដាក់ FK ផ្ទាល់លើតារាងទាំងពីរបានទេ។ យើងត្រូវបង្កើតតារាងកណ្តាលមួយហៅថា **Junction Table** ឬ **Pivot Table** (ឧ. `enrollments`) ដែលផ្ទុក FK របស់តារាងទាំងពីរ។
+
+```jsdiagram
+jsdatabasemodeling
+```
+
+---
+
+## 🛡️ Foreign Keys & Referential Integrity
+
+Foreign Key (FK) គឺជា Column នៅក្នុងតារាងកូនដែលចង្អុលទៅកាន់ Primary Key របស់តារាងមេ។ ដើម្បីធានាសុវត្ថិភាពទិន្នន័យពេលលុប (Delete) តារាងមេ យើងត្រូវកំណត់ **Referential Actions**៖
+
+*   **ON DELETE CASCADE**: លុបមេ លុបកូនតាមដោយស្វ័យប្រវត្តិ (ឧ. លុប User នឹងលុប Orders របស់គាត់ចោលទាំងអស់)។
+*   **ON DELETE SET NULL**: លុបមេ តែរក្សាកូនទុកដោយប្តូរតម្លៃ FK ទៅជា `NULL`។
+*   **ON DELETE RESTRICT**: មិនអនុញ្ញាតអោយលុបមេឡើយ ប្រសិនបើមានកូនកំពុងប្រើប្រាស់វា (ការពារការច្រឡំលុប)។
+
+```sql
+CREATE TABLE orders (
+    id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    order_date TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
+## 🤝 SQL JOIN Operations
+
+នៅពេលយើងចង់ទាញយកទិន្នន័យចម្រុះឆ្លងតារាង យើងប្រើប្រាស់បញ្ជា **JOIN**។
+
+### INNER JOIN
+ទាញយកតែទិន្នន័យណាដែលមានតម្លៃផ្គូផ្គងគ្នា (matching rows) នៅក្នុងតារាងទាំងសងខាងប៉ុណ្ណោះ។
+```sql
+-- ទាញយកព័ត៌មានលម្អិតរបស់ផលិតផល រួមទាំងឈ្មោះប្រភេទរបស់វា
+SELECT products.title, products.price, categories.name as category_name
+FROM products
+INNER JOIN categories ON products.category_id = categories.id;
+```
+
+### LEFT JOIN (ឬ LEFT OUTER JOIN)
+ទាញយកទិន្នន័យពីតារាងខាងឆ្វេង (តារាងដើម) ទាំងអស់ ទោះបីជាគ្មានទិន្នន័យផ្គូផ្គងក្នុងតារាងខាងស្តាំក៏ដោយ (តម្លៃខាងស្តាំនឹងបង្ហាញជា `NULL`)។
+```sql
+-- បង្ហាញគ្រប់ Users ទាំងអស់ ទោះបីជាពួកគេមិនធ្លាប់ទិញអីវ៉ាន់សោះក៏ដោយ
+SELECT users.username, orders.id as order_id
+FROM users
+LEFT JOIN orders ON users.id = orders.user_id;
+```
+
+### Joining ច្រើនតារាងរួមគ្នា
+យើងអាចភ្ជាប់តារាងលើសពីពីរបានដោយសរសេរ JOIN តៗគ្នា៖
+```sql
+-- ទាញយកទិន្នន័យពី Order ភ្ជាប់ទៅកាន់ items និងព័ត៌មានផលិតផលនីមួយៗ
+SELECT orders.id as order_id, products.title, order_items.quantity
+FROM orders
+INNER JOIN order_items ON orders.id = order_items.order_id
+INNER JOIN products ON order_items.product_id = products.id;
+```

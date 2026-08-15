@@ -1,0 +1,112 @@
+---
+title: ការសរសេរ SQL Queries & CRUD (Data Manipulation - DML)
+description: រៀនសរសេរ SQL Queries ដើម្បីបន្ថែម កែប្រែ លុប និងទាញយកទិន្នន័យ ការប្រើប្រាស់ operators ចម្រុះ និងការធ្វើ Pagination សម្រាប់ Backend API។
+objectives:
+  - យល់ពីប្រតិបត្តិការ CRUD (INSERT, SELECT, UPDATE, DELETE) ជាមួយ WHERE clause
+  - ចេះធ្វើការតម្រៀប (ORDER BY) និងបែងចែកទំព័រទិន្នន័យ (LIMIT & OFFSET)
+  - យល់ពីការប្រើប្រាស់ Aggregate Functions រួមជាមួយ GROUP BY & HAVING
+module: module-1-rdbms
+order: 3
+quiz:
+  - question: "តើអ្វីទៅជាភាពខុសគ្នារវាង `LIKE` និង `ILIKE` នៅក្នុង PostgreSQL?"
+    options:
+      - "LIKE លឿនជាង ILIKE"
+      - "LIKE គឺ case-sensitive (ប្រកាន់អក្សរតូច-ធំ) ចំណែកឯ ILIKE គឺ case-insensitive (មិនប្រកាន់ឡើយ)"
+      - "ILIKE ប្រើបានតែជាមួយលេខប៉ុណ្ណោះ"
+      - "គ្មានភាពខុសគ្នាឡើយ"
+    correctAnswer: 2
+    explanation: "`ILIKE` គឺជាមុខងារប្រៀបធៀបអត្ថបទរបស់ PostgreSQL ដែលមិនគិតពីអក្សរតូច ឬធំឡើយ (Case-Insensitive) ខណៈពេលដែល `LIKE` គិតពីអក្សរតូច-ធំច្បាស់លាស់។"
+---
+
+## 📝 Basic CRUD Operations (DML)
+
+**DML (Data Manipulation Language)** ត្រូវបានប្រើសម្រាប់ការគ្រប់គ្រងទិន្នន័យជាក់ស្តែងនៅក្នុងតារាង។
+
+### ១. INSERT (ការបន្ថែមទិន្នន័យ)
+យើងអាចបញ្ចូលទិន្នន័យមួយជួរ ឬច្រើនជួរក្នុងពេលតែមួយ៖
+```sql
+-- បញ្ចូលមួយជួរ
+INSERT INTO users (username, email, age) 
+VALUES ('sok', 'sok@example.com', 20);
+
+-- បញ្ចូលច្រើនជួរក្នុងពេលតែមួយ (Multi-row Insert)
+INSERT INTO users (username, email, age) 
+VALUES 
+  ('dara', 'dara@example.com', 22),
+  ('nana', 'nana@example.com', 19);
+```
+
+### ២. SELECT (ការទាញយកទិន្នន័យ)
+```sql
+-- ទាញយកគ្រប់ columns ទាំងអស់
+SELECT * FROM users;
+
+-- ទាញយកតែ columns មួយចំនួន
+SELECT username, email FROM users;
+```
+
+### ៣. UPDATE (ការកែប្រែទិន្នន័យ)
+> ⚠️ **សំខាន់បំផុត៖** ត្រូវប្រាកដថាប្រើប្រាស់លក្ខខណ្ឌ **`WHERE`** ជានិច្ច! បើគ្មាន `WHERE` ទេ ទិន្នន័យនៅក្នុងតារាងទាំងមូលនឹងត្រូវផ្លាស់ប្តូរទាំងអស់!
+```sql
+UPDATE users 
+SET age = 21 
+WHERE username = 'sok'; -- កែប្រែតែ user ឈ្មោះ sok ប៉ុណ្ណោះ
+```
+
+### ៤. DELETE (ការលុបទិន្នន័យ)
+> ⚠️ **សំខាន់បំផុត៖** ដូចគ្នានឹង UPDATE ដែរ ត្រូវតែមានលក្ខខណ្ឌ **`WHERE`** ដើម្បីកុំឱ្យលុបទិន្នន័យចោលទាំងអស់ក្នុងតារាង!
+```sql
+DELETE FROM users 
+WHERE id = 'some-uuid-value';
+```
+
+---
+
+## 🔍 Data Filtering & Searching
+
+យើងប្រើប្រាស់ `WHERE` ដើម្បីចម្រាញ់ទិន្នន័យដែលចង់បាន៖
+
+*   **Operators**: `=`, `!=`, `<`, `>`, `AND`, `OR`, `NOT`
+*   **Pattern Matching**: ស្វែងរកតាមគំរូអក្សរ
+    *   `LIKE` (ប្រកាន់អក្សរតូច-ធំ): `WHERE name LIKE 'S%'` (ចាប់ផ្តើមដោយអក្សរ S ធំ)
+    *   `ILIKE` (មិនប្រកាន់អក្សរតូច-ធំ): `WHERE name ILIKE 's%'`
+*   **Range & Sets**:
+    *   `BETWEEN` (ចន្លោះតម្លៃ): `WHERE age BETWEEN 18 AND 25`
+    *   `IN` (ស្ថិតក្នុងបញ្ជីតម្លៃ): `WHERE status IN ('active', 'pending')`
+
+---
+
+## 📄 Sorting & Pagination (សម្រាប់ Backend API)
+
+នៅពេលបង្កើត APIs សម្រាប់បង្ហាញទិន្នន័យលើ Web Frontend យើងត្រូវការតម្រៀប និងចែកទំព័រទិន្នន័យ (Pagination)៖
+
+*   **ORDER BY**: តម្រៀបតាមលំដាប់លំដោយ `ASC` (ពីតូចទៅធំ) ឬ `DESC` (ពីធំទៅតូច)។
+*   **LIMIT**: កំណត់ចំនួនទិន្នន័យអតិបរមាដែលចង់ទាញយក (ឧ. ចំនួន items ក្នុងមួយទំព័រ)។
+*   **OFFSET**: រំលងចំនួនទិន្នន័យមួយចំនួន (ឧ. រំលង items នៃទំព័រមុនៗ)។
+
+```sql
+-- ទាញយកទិន្នន័យទំព័រទី២ (ទំព័រនីមួយៗបង្ហាញ ១០ ជួរ)
+-- ដូច្នេះយើងត្រូវរំលង ១០ ជួរដំបូង (OFFSET 10) និងយក ១០ ជួរបន្ទាប់ (LIMIT 10)
+SELECT * FROM products
+ORDER BY price DESC
+LIMIT 10 OFFSET 10;
+```
+
+---
+
+## 📊 Aggregation & Grouping
+
+គណនា និងបូកសរុបទិន្នន័យ៖
+
+*   **Aggregate Functions**: `COUNT()` (រាប់ចំនួន), `SUM()` (បូកសរុប), `AVG()` (មធ្យមភាគ), `MIN()` (តម្លៃតូចបំផុត), `MAX()` (តម្លៃធំដាច់គេ)។
+*   **GROUP BY**: ប្រមូលផ្តុំទិន្នន័យជាក្រុមៗ ដើម្បីគណនាតម្លៃ។
+*   **HAVING**: ចម្រាញ់ទិន្នន័យនៃក្រុម (ដូច `WHERE` ដែរ តែប្រើសម្រាប់ Aggregate values បន្ទាប់ពី `GROUP BY` រួច)។
+
+```sql
+-- គណនាតម្លៃផលិតផលមធ្យមភាគ ទៅតាមប្រភេទ (Category) នីមួយៗ
+-- ហើយបង្ហាញតែប្រភេទណាដែលមានតម្លៃមធ្យមភាគធំជាង 50 ដុល្លារប៉ុណ្ណោះ
+SELECT category_id, AVG(price) as avg_price, COUNT(*) as total_products
+FROM products
+GROUP BY category_id
+HAVING AVG(price) > 50.00;
+```

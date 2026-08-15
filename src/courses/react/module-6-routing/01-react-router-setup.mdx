@@ -1,0 +1,124 @@
+---
+title: React Router
+description: >-
+  រៀនពីរបៀបបង្កើតទំព័រច្រើន (Multiple Pages) និងការផ្លាស់ប្តូរទំព័រនៅលើ Single
+  Page Application របស់ React ដោយប្រើប្រាស់បណ្ណាល័យ React Router។
+objectives:
+  - ចេះរៀបចំ Routes និងការភ្ជាប់ទៅទំព័រផ្សេងៗ (Link)
+  - យល់ពី Layout Routes និងការប្រើប្រាស់ `Outlet`
+  - ចេះទាញយកទិន្នន័យពី URL (Dynamic Params & Search Params)
+module: module-6-routing
+order: 1
+quiz:
+  - question: >-
+      ហេតុអ្វីបានជាយើងត្រូវប្រើ `<Link to='/about'>` របស់ React Router
+      ជំនួសអោយការប្រើប្រាស់ `<a href='/about'>` របស់ HTML ធម្មតា?
+    options:
+      - '"ដោយសារតែ `<a>` ត្រូវបានហាមឃាត់នៅក្នុង React"'
+      - '"ដោយសារតែ `<Link>` ធ្វើអោយអក្សរមានពណ៌ស្អាតជាង"'
+      - >-
+        "ដោយសារតែ `<a href>` នឹងធ្វើការទាញយកទំព័រថ្មីពី Server និង Refresh
+        វេបសាយទាំងមូល ដែលខុសនឹងគោលការណ៍របស់ SPA។ ចំណែក `<Link>`
+        គ្រាន់តែផ្លាស់ប្តូរ URL និងប្តូរ Component ដោយគ្មានការ Refresh ឡើយ។"
+      - '"ពួកវាទាំងពីរដំណើរការដូចគ្នា"'
+    correctAnswer: 3
+    explanation: >-
+      អំណាចរបស់ SPA (Single Page Application)
+      គឺស្ថិតនៅលើល្បឿនដ៏លឿនរបស់វាដែលកើតចេញពីការមិន Refresh ទំព័រ។ ការប្រើប្រាស់
+      `<a href>` ធម្មតានឹងបំផ្លាញអំណាចនេះ! ដូច្នេះត្រូវប្រើ `<Link>`
+      ជានិច្ចសម្រាប់ការផ្លាស់ទីក្នុងវេបសាយខ្លួនឯង។
+---
+
+## 🗺️ ការរៀបចំ React Router (v6+)
+
+React ខ្លួនវាផ្ទាល់មិនមានប្រព័ន្ធគ្រប់គ្រងទំព័រ (Routing) ទេ។ ដើម្បីបង្កើតទំព័រ Home, About, Contact អ្នកត្រូវដំឡើងបណ្ណាល័យដ៏ពេញនិយមបំផុតឈ្មោះថា `react-router-dom`៖
+
+```bash
+npm install react-router-dom
+```
+
+### ការរៀបចំទម្រង់មូលដ្ឋាន (Basic Setup)
+នៅក្នុងឯកសារ `App.jsx`, យើងប្រើប្រាស់ `BrowserRouter` ដើម្បីអោបក្រសោបកូដ និង `Routes` សម្រាប់កំណត់ផ្លូវនីមួយៗ៖
+
+```jsx
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import About from './pages/About';
+
+function App() {
+  return (
+    <BrowserRouter>
+      {/* របារម៉ឺនុយនឹងបង្ហាញនៅគ្រប់ទំព័រ */}
+      <nav>
+        <Link to="/">ទំព័រដើម</Link> | <Link to="/about">អំពីយើង</Link>
+      </nav>
+
+      {/* កន្លែងកំណត់ទំព័រ */}
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        {/* ទំព័រ 404 បើរកមិនឃើញ */}
+        <Route path="*" element={<h1>404 ទំព័ររកមិនឃើញ!</h1>} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## 🏗️ Layout Routes និង `Outlet`
+
+ជាញឹកញាប់ អ្នកចង់អោយ Navbar និង Footer បង្ហាញនៅលើគ្រប់ទំព័រ ដោយមិនបាច់ Copy-Paste វាទៅដាក់គ្រប់កន្លែង។ យើងប្រើប្រាស់ **Layout Routes** ដើម្បីដោះស្រាយបញ្ហានេះ។
+
+```jsx
+import { Outlet } from 'react-router-dom';
+
+function MainLayout() {
+  return (
+    <div>
+      <Navbar />
+      <main>
+        {/* នេះជាប្រហោង! កូនៗ (ទំព័រនីមួយៗ) នឹងហូរចូលមកចន្លោះនេះ */}
+        <Outlet /> 
+      </main>
+      <Footer />
+    </div>
+  );
+}
+```
+
+នៅក្នុង `App.jsx`:
+```jsx
+<Routes>
+  <Route element={<MainLayout />}>
+    {/* កូនទាំងនេះនឹងត្រូវបញ្ជូលទៅក្នុងប្រហោង <Outlet /> */}
+    <Route path="/" element={<Home />} />
+    <Route path="/about" element={<About />} />
+  </Route>
+</Routes>
+```
+
+---
+
+## 🔍 អថេរក្នុង URL (URL Params)
+
+ឧបមាថាអ្នកមានទំព័រលក់ទំនិញ (Products) ហើយអ្នកចង់ចុចមើលទំនិញនីមួយៗអោយលម្អិត។ URL វានឹងទៅជា `/products/1` ឬ `/products/99`។ តើត្រូវចាប់យកលេខនោះដោយរបៀបណា?
+
+1. **ការរៀបចំ Route:** ប្រើសញ្ញា `:id`
+```jsx
+<Route path="/products/:id" element={<ProductDetail />} />
+```
+
+2. **ការចាប់យកតម្លៃ:** ប្រើ Hook `useParams`
+```jsx
+import { useParams } from 'react-router-dom';
+
+function ProductDetail() {
+  const { id } = useParams(); // វានឹងចាប់យកលេខ 1 ឫ 99 មក
+
+  return <h1>ពត៌មានលម្អិតរបស់ទំនិញលេខ: {id}</h1>;
+}
+```
+
+*(ក្រៅពីនេះ អ្នកក៏អាចប្រើប្រាស់ `useNavigate()` ដើម្បីបញ្ជាអោយប្តូរទំព័រដោយកូដ (ឧ. ពេល Login ជោគជ័យ អោយលោតទៅទំព័រ Home) ផងដែរ!)*

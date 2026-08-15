@@ -1,0 +1,109 @@
+---
+title: Authentication
+description: >-
+  រៀនពីទម្រង់ទូទៅនៃការចុះឈ្មោះចូលប្រើប្រាស់ (Login) ការរក្សាទុក Token
+  និងការផ្លាស់ប្តូរ State ទៅតាមស្ថានភាពអ្នកប្រើប្រាស់។
+objectives:
+  - យល់ពីលំហូរការងារនៃការ Login (Login Flow)
+  - ចេះរក្សាទុក JWT Token នៅក្នុង `localStorage`
+  - ចេះបង្កើត State សម្គាល់អ្នកប្រើប្រាស់ (Auth State)
+module: module-6-routing
+order: 2
+quiz:
+  - question: តើអ្នកគួររក្សាទុក Token សម្ងាត់ (JWT Token) ដែលទទួលបានពី API នៅទីណា?
+    options:
+      - '"នៅក្នុងអថេរធម្មតា `let token = ...`"'
+      - '"នៅក្នុង State (`useState`) តែមួយគត់"'
+      - >-
+        "នៅក្នុង `localStorage` ឫ `sessionStorage`
+        ដើម្បីកុំអោយវាបាត់បង់នៅពេលអ្នកប្រើប្រាស់ Refresh វេបសាយ"
+      - '"នៅក្នុង URL របស់វេបសាយ"'
+    correctAnswer: 3
+    explanation: >-
+      ការរក្សាទុកតែនៅក្នុង State គឺមិនគ្រប់គ្រាន់ទេ ព្រោះរាល់ពេលអ្នក Refresh
+      ទំព័រ State ទាំងអស់នឹងរលាយបាត់! អ្នកត្រូវរក្សាទុកវានៅក្នុង `localStorage`
+      ដើម្បីអោយអ្នកប្រើប្រាស់នៅតែមានឈ្មោះក្នុងគណនី (Stay Logged In)
+      នៅពេលពួកគេបើកវេបសាយនេះនៅថ្ងៃស្អែក។
+---
+
+## 🔐 លំហូរការងារនៃការ Login (Authentication Flow)
+
+ការធ្វើ Authentication មិនមែនជាការងាររបស់ Frontend សុទ្ធសាធនោះទេ។ វាគឺជាការសហការគ្នាយ៉ាងជិតស្និទ្ធរវាង React និង Backend (ឧ. Node.js, Laravel)។
+
+```mermaid
+flowchart TD
+    A["អ្នកប្រើប្រាស់បញ្ចុល Email/Password"] -->|"fetch(POST)"| B("Backend ពិនិត្យភាពត្រឹមត្រូវ")
+    B -- បរាជ័យ --> C["React បង្ហាញពាក្យ 'លេខសម្ងាត់ខុស'"]
+    B -- ជោគជ័យ --> D["Backend ផ្តល់អោយនូវ Token (កូនសោរ)"]
+    D --> E["React រក្សាទុក Token ក្នុង localStorage"]
+    E --> F["React ប្តូរ State ទៅជា 'បាន Login'"]
+    F --> G["ប្តូរទំព័រទៅកាន់ Dashboard"]
+    
+    style B fill:#f8f9fa,stroke:#ced4da,color:#000
+    style D fill:#d4edda,stroke:#28a745,color:#000
+```
+
+---
+
+## 💾 ការរក្សាទុក Token និង Auth State
+
+ដើម្បីដឹងថាអ្នកប្រើប្រាស់បាន Login រួចឬនៅ យើងត្រូវបង្កើត State មួយ (ជាទូទៅគេដាក់វានៅកម្រិតខ្ពស់ដូចជា Context ដើម្បីចែករំលែកគ្រប់ទំព័រ)។
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function AuthApp() {
+  const [user, setUser] = useState(null);
+
+  // 1. ពេលទំព័រ Load ដំបូង ឆែកមើលថាតើមាន Token ពីមុនដែរឬទេ?
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // (បើជាការងារពិត អ្នកត្រូវហៅ API ទៅឆែកថាតើ Token នេះហួសកំណត់ឫនៅសិន)
+      setUser({ name: "រដ្ឋា", role: "admin" }); 
+    }
+  }, []);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      // ឧបមាថាការហៅ API ជោគជ័យ...
+      const mockToken = "abcdef123456";
+      
+      // 2. រក្សាទុកកូនសោរចូលក្នុងឃ្លាំង Browser
+      localStorage.setItem('token', mockToken);
+      
+      // 3. ផ្លាស់ប្តូរ State
+      setUser({ name: "រដ្ឋា", role: "admin" });
+      
+      alert("ចូលគណនីបានជោគជ័យ!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleLogout = () => {
+    // 4. ការ Logout គឺគ្រាន់តែលុបកូនសោរ និង State ចោល!
+    localStorage.removeItem('token');
+    setUser(null);
+  };
+
+  return (
+    <div>
+      {user ? (
+        <>
+          <h1>សួស្តី {user.name}!</h1>
+          <button onClick={handleLogout}>ចេញពីគណនី</button>
+        </>
+      ) : (
+        <form onSubmit={handleLogin}>
+          {/* ប្រអប់វាយ Email & Password */}
+          <button type="submit">ចូលគណនី</button>
+        </form>
+      )}
+    </div>
+  );
+}
+```
+
+> **⚡ សំខាន់:** រាល់ពេលដែលអ្នកហៅ API ទៅយកទិន្នន័យឯកជន (ឧ. ពត៌មានគណនីធនាគារ) ក្រោយពេល Login រួច អ្នកត្រូវតែបញ្ជូន Token នោះទៅវិញតាមរយៈ Header `Authorization: Bearer <token>` ដើម្បីប្រាប់ Backend ថាអ្នកជានរណា!
