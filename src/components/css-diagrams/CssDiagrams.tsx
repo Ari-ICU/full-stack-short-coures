@@ -14,12 +14,6 @@ import {
   KeyframesDiagram,
   TransitionTransformDiagram,
 } from "./AnimationDiagrams";
-import {
-  ViewportDiagram,
-  MobileFirstDiagram,
-  MediaQueryDiagram,
-  ResponsiveLayoutDiagram,
-} from "./ResponsiveDiagrams";
 
 // ─── Box Model Diagram ────────────────────────────────────────────────────────
 export function BoxModelDiagram() {
@@ -2644,10 +2638,6 @@ const DIAGRAMS: Record<string, React.ComponentType> = {
   transformdemo: TransformDiagram,
   keyframesdemo: KeyframesDiagram,
   transitiontransform: TransitionTransformDiagram,
-  viewport: ViewportDiagram,
-  mobilefirst: MobileFirstDiagram,
-  mediaquery: MediaQueryDiagram,
-  responsivelayout: ResponsiveLayoutDiagram,
 };
 
 export function CssDiagram({ name }: { name: string }) {

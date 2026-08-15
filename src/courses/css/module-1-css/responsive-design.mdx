@@ -18,322 +18,165 @@ quiz:
     explanation: ការចាប់ផ្តើមពីទូរស័ព្ទ (Mobile-First) ជួយឱ្យយើងសរសេរកូដចាំបាច់មុនគេ កាត់បន្ថយភាពស្មុគស្មាញ និងបង្កើនល្បឿន (Performance)។
 ---
 
-## 📱 Responsive Web Design
+## 📱 អ្វីទៅជា Responsive Web Design?
 
-Responsive Web Design (RWD) ធ្វើអោយ Layout **ផ្លាស់ប្ដូរដោយស្វ័យប្រវត្តិ** ទៅតាម Screen Size — Mobile, Tablet, Desktop។ Click device ខាងក្រោម ដើម្បីឃើញ!
+**Responsive Web Design (RWD)** គឺជាវិធីសាស្ត្ររចនាវេបសាយដែលអាចប្រែប្រួលទំហំ រូបរាង និងរចនាសម្ព័ន្ធ (Layout) របស់វាដោយស្វ័យប្រវត្តិតម្រូវទៅតាមទំហំអេក្រង់របស់ឧបករណ៍អ្នកប្រើប្រាស់ មិនថាពួកគេប្រើប្រាស់ទូរស័ព្ទដៃ (Mobile), ថេប្លេត (Tablet) ឬកុំព្យូទ័រ (Desktop) ឡើយ។
 
-```diagram
-viewport
-```
+---
 
-```tabs
-html
-<!-- Viewport meta tag — ⭐ ត្រូវតែមាន! -->
+## 1. គ្រឹះដំបូង៖ Viewport Meta Tag (សំខាន់បំផុត!)
+
+Viewport គឺជាផ្ទៃបង្ហាញជាក់ស្តែងនៅលើអេក្រង់ឧបករណ៍។ ប្រសិនបើគ្មាន **Viewport Meta tag** ទេ browser នៅលើទូរស័ព្ទនឹងព្យាយាមបង្ហាញទំព័រវេបសាយទាំងមូលដូចនៅលើ Desktop ដែរ ដែលធ្វើឱ្យរូបភាព និងអក្សរទាំងអស់រួមតូចល្អិតខ្លាំងរហូតមើលមិនច្បាស់។
+
+ដូច្នេះ រាល់ពេលបង្កើតកូដ HTML ថ្មី អ្នកត្រូវតែដាក់កូដខាងក្រោមនេះនៅក្នុង `<head>` ជានិច្ច៖
+
+```html
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
+```
 
-<!-- Responsive container -->
-<div class="page-wrapper">
-  <nav class="navbar">
-    <div class="nav-logo">MyApp</div>
-    <button class="nav-toggle">☰</button>
-    <ul class="nav-links">
-      <li><a href="#">Home</a></li>
-      <li><a href="#">Products</a></li>
-    </ul>
-  </nav>
-  <main class="content">Main Content</main>
-</div>
+**ការពន្យល់លម្អិត៖**
+*   `width=device-width`៖ កំណត់ទទឹងរបស់ទំព័រវេបសាយឱ្យស្មើនឹងទទឹងអេក្រង់ពិតរបស់ឧបករណ៍។
+*   `initial-scale=1.0`៖ កំណត់កម្រិតពង្រីក (Zoom Level) ដំបូងឱ្យនៅកម្រិតធម្មតា (100%)។
 
 ---
 
-css
-/* ✅ Viewport meta = ត្រូវតែមានសម្រាប់ Responsive! */
+## 2. របៀបប្រើប្រាស់ Media Queries (`@media`)
 
-/* Base responsive container */
-.page-wrapper {
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 16px;
-  box-sizing: border-box;
+**Media Query** គឺជាការសរសេរលក្ខខណ្ឌនៅក្នុង CSS ដើម្បីសួរទៅកាន់ Browser ពីទំហំអេក្រង់បច្ចុប្បន្ន។ ប្រសិនបើអេក្រង់នោះត្រូវតាមលក្ខខណ្ឌដែលយើងបានកំណត់ នោះកូដ CSS នៅក្នុងប្លុក `@media` នឹងដំណើរការ។
+
+### ២.១. ស្វែងយល់ពី Syntax គ្រឹះ
+```css
+/* កូដ CSS ធម្មតានៅទីនេះ (ដើរលើគ្រប់ឧបករណ៍) */
+body {
+  background-color: white;
 }
 
-/* Mobile: hamburger visible, links hidden */
-.nav-toggle  { display: block; }
-.nav-links   { display: none; }
-
-/* Desktop: links visible, hamburger hidden */
 @media (min-width: 768px) {
-  .nav-toggle { display: none; }
-  .nav-links  { display: flex; gap: 24px; list-style: none; }
+  /* កូដ CSS នៅទីនេះដំណើរការតែលើអេក្រង់ដែលមានទទឹងចាប់ពី 768px ឡើងទៅប៉ុណ្ណោះ */
+  body {
+    background-color: lightblue;
+  }
 }
 ```
 
+### ២.២. breakpoints ពេញនិយម (Common Breakpoints)
+breakpoints គឺជាចំណុចទទឹងអេក្រង់ដែល Layout របស់វេបសាយនឹងត្រូវផ្លាស់ប្តូរ៖
+*   **`576px`**៖ សម្រាប់អេក្រង់ទូរស័ព្ទទម្រង់ផ្ដេក (Mobile Landscape)
+*   **`768px`**៖ សម្រាប់អេក្រង់ Tablet
+*   **`1024px`**៖ សម្រាប់ Laptop ឬ Desktop ខ្នាតតូច
+*   **`1200px`**៖ សម្រាប់ Desktop ធំៗ
+
 ---
 
-## 🎯 Mobile-First Approach
+## 3. វិធីសាស្ត្រ Mobile-First Approach
 
-**Mobile-First** = ចាប់ផ្ដើមសរសេរ CSS សម្រាប់ Mobile មុន — ហើយប្រើ `min-width` media queries ដើម្បីបន្ថែម styles សម្រាប់ screens ធំជាង។ Click ដើម្បីប្រៀបធៀប!
+**Mobile-First** គឺជាគោលការណ៍ដ៏ពេញនិយមបំផុតក្នុងការរចនាវេបសាយបច្ចុប្បន្ន។ យើងសរសេរកូដ CSS សម្រាប់អេក្រង់ទូរស័ព្ទ (Mobile) មុនគេជាកូដលំនាំដើម (Base Style) រួចទើបប្រើ `@media (min-width: ...)` ដើម្បីបន្ថែម ឬកែប្រែ Styles សម្រាប់អេក្រង់ធំៗ (Tablet/Desktop) តាមក្រោយ។
 
-```diagram
-mobilefirst
-```
+### ឧទាហរណ៍៖ របារម៉ឺនុយ (Navigation Bar)
+យើងចង់ឱ្យម៉ឺនុយតម្រៀបជាជួរឈរនៅលើទូរស័ព្ទ (ដើម្បីកុំឱ្យចង្អៀត) និងបង្ហាញជាជួរដេកនៅលើកុំព្យូទ័រ។
 
-```tabs
-html
+ជាដំបូង នេះជាកូដ HTML ៖
+```html
 <nav class="site-nav">
-  <div class="nav-brand">Brand</div>
+  <div class="nav-brand">Logo</div>
   <ul class="nav-menu">
     <li><a href="#">Home</a></li>
-    <li><a href="#">About</a></li>
-    <li><a href="#">Work</a></li>
-    <li><a href="#">Contact</a></li>
+    <li><a href="#">Products</a></li>
+    <li><a href="#">About Us</a></li>
   </ul>
 </nav>
+```
 
----
+បន្ទាប់មក យើងសរសេរកូដ CSS តាមគោលការណ៍ Mobile-First ៖
 
-css
-/* ✅ Mobile-First: Base = Mobile */
+```css
+/* ១. CSS សម្រាប់ទូរស័ព្ទដៃ (Mobile - កូដលំនាំដើម) */
 .site-nav {
   display: flex;
-  flex-direction: column; /* Mobile: stack vertically */
-  padding: 12px 16px;
-  background: #1f2937;
-}
-
-.nav-brand {
-  color: white;
-  font-size: 20px;
-  font-weight: 800;
-  margin-bottom: 12px;
+  flex-direction: column; /* តម្រៀបជាជួរឈរ */
+  padding: 16px;
+  background-color: #1f2937;
 }
 
 .nav-menu {
   display: flex;
-  flex-direction: column; /* Mobile: vertical menu */
-  gap: 8px;
+  flex-direction: column; /* ម៉ឺនុយរត់ចុះក្រោម */
+  gap: 12px;
   list-style: none;
-  margin: 0;
   padding: 0;
 }
+```
 
-.nav-menu a {
-  color: #9ca3af;
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  display: block;
-}
+រួចទើបយើងបន្ថែម `@media` សម្រាប់អេក្រង់ Tablet និង Desktop ចាប់ពីទទឹង 768px ឡើងទៅ៖
 
-/* Tablet: horizontal nav */
+```css
+/* ២. CSS បន្ថែមសម្រាប់ Tablet/Desktop (Screen >= 768px) */
 @media (min-width: 768px) {
   .site-nav {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: row; /* ប្តូរមកជាជួរដេក */
     justify-content: space-between;
+    align-items: center;
   }
-  .nav-brand   { margin-bottom: 0; }
-  .nav-menu    { flex-direction: row; gap: 4px; }
-}
-```
 
----
-
-## 🛠️ Media Queries — `@media`
-
-`@media` ដំណើរការ CSS ផ្សេងគ្នា ទៅតាម screen size។ ទាញ slider ដើម្បីឃើញ breakpoint ផ្លាស់ប្ដូរ live!
-
-```diagram
-mediaquery
-```
-
-```tabs
-html
-<section class="features">
-  <div class="feature-card">
-    <span class="feature-icon">⚡</span>
-    <h3 class="feature-title">Fast</h3>
-    <p class="feature-desc">Lightning fast performance</p>
-  </div>
-  <div class="feature-card">
-    <span class="feature-icon">🔒</span>
-    <h3 class="feature-title">Secure</h3>
-    <p class="feature-desc">Enterprise grade security</p>
-  </div>
-  <div class="feature-card">
-    <span class="feature-icon">🎨</span>
-    <h3 class="feature-title">Beautiful</h3>
-    <p class="feature-desc">Stunning modern design</p>
-  </div>
-</section>
-
----
-
-css
-/* Mobile-First base */
-.features {
-  display: grid;
-  grid-template-columns: 1fr; /* Mobile: 1 column */
-  gap: 16px;
-  padding: 24px 16px;
-}
-
-.feature-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.feature-icon  { font-size: 2.5rem; display: block; margin-bottom: 12px; }
-.feature-title { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #111827; }
-.feature-desc  { margin: 0; font-size: 14px; color: #6b7280; }
-
-/* Tablet: 2 columns */
-@media (min-width: 768px) {
-  .features {
-    grid-template-columns: repeat(2, 1fr);
+  .nav-menu {
+    flex-direction: row; /* ម៉ឺនុយរត់ទទឹងផ្ដេក */
     gap: 20px;
-    padding: 40px 24px;
-  }
-}
-
-/* Desktop: 3 columns */
-@media (min-width: 1024px) {
-  .features {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    padding: 48px 32px;
   }
 }
 ```
 
 ---
 
-## 📐 Responsive Page Layout
+## 4. ឧទាហរណ៍ជាក់ស្តែង៖ Grid ប្រែប្រួលតាមអេក្រង់ (Responsive Grid)
 
-Layout ពេញ page ដែល sidebar លេចឡើងពេល tablet+, columns ផ្លាស់ប្ដូរពេល desktop។ Click device ដើម្បីឃើញ layout progression!
+នេះជាករណីសិក្សាទូទៅបំផុត៖ យើងមាន Cards ចំនួន ៣។ យើងចង់ឱ្យ៖
+*   បង្ហាញ **១ ខ្ទង់ (1 column)** នៅលើ Mobile
+*   បង្ហាញ **២ ខ្ទង់ (2 columns)** នៅលើ Tablet (ទទឹងចាប់ពី 768px)
+*   បង្ហាញ **៣ ខ្ទង់ (3 columns)** នៅលើ Desktop (ទទឹងចាប់ពី 1024px)
 
-```diagram
-responsivelayout
-```
-
-```tabs
-html
-<div class="app-layout">
-  <header class="app-header">
-    <div class="header-inner">
-      <div class="header-logo">MyApp</div>
-      <nav class="header-nav">
-        <a href="#">Dashboard</a>
-        <a href="#">Reports</a>
-        <a href="#">Settings</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="app-body">
-    <aside class="app-sidebar">
-      <ul class="sidebar-menu">
-        <li><a href="#">Overview</a></li>
-        <li><a href="#">Analytics</a></li>
-        <li><a href="#">Users</a></li>
-      </ul>
-    </aside>
-
-    <main class="app-main">
-      <div class="card-grid">
-        <article class="stat-card">Users<strong>4,821</strong></article>
-        <article class="stat-card">Revenue<strong>$12,400</strong></article>
-        <article class="stat-card">Orders<strong>284</strong></article>
-        <article class="stat-card">Growth<strong>+18%</strong></article>
-      </div>
-    </main>
-  </div>
-
-  <footer class="app-footer">Footer</footer>
+ជាដំបូង កូដ HTML ៖
+```html
+<div class="card-grid">
+  <div class="card">Card 1</div>
+  <div class="card">Card 2</div>
+  <div class="card">Card 3</div>
 </div>
+```
 
----
+បន្ទាប់មក កូដ CSS ៖
 
-css
-/* Mobile-First base */
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.app-header { background: #1e293b; padding: 12px 16px; }
-.header-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1280px;
-  margin: 0 auto;
-}
-.header-logo { color: white; font-weight: 800; font-size: 18px; }
-.header-nav  { display: flex; gap: 16px; }
-.header-nav a { color: #94a3b8; text-decoration: none; font-size: 14px; }
-
-/* Mobile: sidebar hidden */
-.app-sidebar { display: none; }
-
-.app-main    { flex: 1; padding: 16px; }
-
+```css
+/* Mobile-First Base (លំនាំដើមដើរលើ Mobile) */
 .card-grid {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile: 1 column */
-  gap: 12px;
+  grid-template-columns: 1fr; /* ១ ជួរឈរ */
+  gap: 16px;
+  padding: 16px;
 }
 
-.stat-card {
-  background: white;
+.card {
+  background-color: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.app-footer {
-  background: #f1f5f9;
-  padding: 16px;
+  padding: 24px;
+  border-radius: 8px;
   text-align: center;
-  font-size: 13px;
-  color: #64748b;
 }
 
-/* Tablet: sidebar visible, 2-col cards */
+/* សម្រាប់ Tablet (ចាប់ពី 768px ឡើងទៅ) */
 @media (min-width: 768px) {
-  .app-body {
-    display: flex;
-    flex: 1;
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr); /* ២ ជួរឈរ */
   }
-  .app-sidebar {
-    display: block;
-    width: 200px;
-    background: #f8fafc;
-    border-right: 1px solid #e2e8f0;
-    padding: 16px;
-    flex-shrink: 0;
-  }
-  .sidebar-menu { list-style: none; margin: 0; padding: 0; }
-  .sidebar-menu li { margin-bottom: 4px; }
-  .sidebar-menu a { display: block; padding: 8px 12px; border-radius: 6px; color: #475569; text-decoration: none; font-size: 14px; }
-
-  .card-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* Desktop: wider sidebar, 4-col cards */
+/* សម្រាប់ Desktop (ចាប់ពី 1024px ឡើងទៅ) */
 @media (min-width: 1024px) {
-  .app-sidebar { width: 240px; padding: 20px; }
-  .card-grid   { grid-template-columns: repeat(4, 1fr); }
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr); /* ៣ ជួរឈរ */
+  }
 }
 ```
+
+ការអនុវត្តវិធីសាស្ត្រនេះជួយឱ្យកូដរបស់អ្នកមានសណ្តាប់ធ្នាប់ ដើរលឿននៅលើទូរស័ព្ទដៃ និងងាយស្រួលដោះស្រាយបញ្ហាកូដ (Debug) ទៅថ្ងៃក្រោយ!
