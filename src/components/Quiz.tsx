@@ -68,6 +68,19 @@ function QuizItem({ question, index }: { question: QuizQuestion; index: number }
             }
           }
 
+          const formatOption = (opt: any): string => {
+            if (typeof opt === "string") {
+              return opt.replace(/^"|"$/g, '');
+            }
+            if (opt && typeof opt === "object") {
+              const keys = Object.keys(opt);
+              if (keys.length > 0) {
+                return `${keys[0]}: ${opt[keys[0]]}`.replace(/^"|"$/g, '');
+              }
+            }
+            return String(opt).replace(/^"|"$/g, '');
+          };
+
           return (
             <button
               key={idx}
@@ -75,7 +88,7 @@ function QuizItem({ question, index }: { question: QuizQuestion; index: number }
               disabled={isAnswered}
               className={`w-full text-left px-5 py-4 rounded-xl border transition-all duration-200 flex items-center justify-between gap-4 ${buttonStateClass} ${!isAnswered ? "cursor-pointer" : "cursor-default"}`}
             >
-              <span className="leading-relaxed">{option.replace(/^"|"$/g, '')}</span>
+              <span className="leading-relaxed">{formatOption(option)}</span>
               {icon && <span className="flex-shrink-0">{icon}</span>}
             </button>
           );
