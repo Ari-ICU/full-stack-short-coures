@@ -66,6 +66,8 @@ console.log(myAcc.getBalance()); // 150
 
 **Inheritance** អនុញ្ញាតឱ្យ Class ថ្មី (Child Class) ស្នងយក properties និង methods ពី Class ចាស់ (Parent Class) ដោយមិនបាច់សរសេរកូដដដែលៗឡើងវិញ។ យើងប្រើប្រាស់ពាក្យគន្លឹះ `extends` និង `super()`។
 
+ជាដំបូង យើងបង្កើត Class មេ (Parent Class) មួយឈ្មោះថា `Animal` ដែលមាន constructor សម្រាប់ផ្ទុកឈ្មោះសត្វ និងមាន method `eat()` សម្រាប់បង្ហាញសកម្មភាពស៊ីចំណី៖
+
 ```javascript
 class Animal {
   constructor(name) {
@@ -75,7 +77,11 @@ class Animal {
     console.log(`${this.name} is eating.`);
   }
 }
+```
 
+បន្ទាប់មក យើងបង្កើត Class កូន (Child Class) មួយឈ្មោះថា `Dog` ដែលស្នងលក្ខណៈ (Inherited) ពី Class `Animal` ដោយប្រើប្រាស់ពាក្យគន្លឹះ `extends`។ នៅក្នុង Class `Dog` នេះ យើងគ្រាន់តែសរសេរ method បន្ថែមឈ្មោះ `bark()` ប៉ុណ្ណោះ។ នៅពេលយើងបង្កើត instance `dog` វានឹងទទួលបានទាំង method `eat()` របស់ `Animal` និង `bark()` របស់ `Dog`៖
+
+```javascript
 // Dog ស្នងលក្ខណៈពី Animal
 class Dog extends Animal {
   bark() {
