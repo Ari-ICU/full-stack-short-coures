@@ -98,6 +98,28 @@ html
   <button type="submit">ចូលប្រើប្រាស់</button>
 </form>
 ---
+css
+#login-form {
+  display: flex;
+  gap: 8px;
+}
+
+#login-form input {
+  padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  outline: none;
+}
+
+#login-form button {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+---
 js
 const form = document.querySelector("#login-form");
 const usernameInput = document.querySelector("#username");

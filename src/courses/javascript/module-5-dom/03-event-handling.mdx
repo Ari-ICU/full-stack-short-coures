@@ -85,14 +85,42 @@ btn.addEventListener("click", () => {
 jseventlistener
 ```
 
+### 💡 ស្វែងយល់ពី Callback Function នៅក្នុង Events
+
+**Callback Function** គឺជា Function ដែលយើងបញ្ជូនទៅជា Parameter/Argument របស់ Function មួយផ្សេងទៀត (ក្នុងករណីនេះគឺ `addEventListener`) ដើម្បីទុកអោយវាដំណើរការនៅពេលក្រោយ (នៅពេល Event ជាក់លាក់មួយកើតឡើង)។
+
+យើងអាចសរសេរ Callback Function បាន ២ របៀប៖
+
+**របៀបទី១៖ ប្រើប្រាស់ Arrow Function ផ្ទាល់ (Anonymous Callback)**
+ពេញនិយមខ្លាំងព្រោះសរសេរខ្លី និងនៅជិតគ្នា៖
+```javascript
+button.addEventListener("click", () => {
+  console.log("ប៊ូតុងត្រូវបានចុច!");
+});
+```
+
+**របៀបទី២៖ បង្កើត Function ដាច់ដោយឡែក (Named Callback)**
+ស័ក្តិសមសម្រាប់កូដដែលមានលក្ខណៈស្មុគស្មាញ ឬចង់យកទៅប្រើឡើងវិញនៅកន្លែងផ្សេង៖
+```javascript
+// ១. បង្កើត function
+function handleClick() {
+  console.log("ប៊ូតុងត្រូវបានចុច!");
+}
+
+// ២. បញ្ជូនឈ្មោះ function ទៅកាន់ listener (ចំណាំ៖ មិនត្រូវដាក់សញ្ញាវង់ក្រចក `()` ឡើយ)
+button.addEventListener("click", handleClick); 
+```
+> ⚠️ **ប្រុងប្រយ័ត្ន៖** ពេលបញ្ជូន named function ទៅអោយ `addEventListener` ត្រូវសរសេរតែឈ្មោះ function ប៉ុណ្ណោះ (ឧ. `handleClick`)។ ប្រសិនបើអ្នកសរសេរ `handleClick()` វានឹងដំណើរការ function នោះភ្លាមៗនៅពេល Browser អានកូដដល់បន្ទាត់នោះ ជាជាងរង់ចាំទាល់តែមានការចុច click។
+
 ---
 
 ## 2. ប្រភេទ Events ពេញនិយម
 
 ### Events សម្រាប់ Mouse (កណ្តុរ)
-*   **`click`**: ពេលចុចលើ Element ណាមួយ។
-*   **`dblclick`**: ពេលចុចពីរដងផ្ទួនៗគ្នា (Double click)។
-*   **`mouseenter` / `mouseleave`**: ពេលដាក់កណ្តុរពីលើ និងដកកណ្តុរចេញ។
+*   **`click`**: កើតឡើងនៅពេលដែលអ្នកប្រើប្រាស់ចុច (Click) mouse ឆ្វេងលើ Element ណាមួយ។ (ពេញនិយមបំផុតសម្រាប់ Button, Links, etc.)។
+*   **`dblclick`**: កើតឡើងនៅពេលចុចពីរដងលឿនៗផ្ទួនគ្នា (Double click) លើ Element តែមួយ។ (ឧទាហរណ៍៖ ចុចពីរដងដើម្បី Zoom រូបភាព ឬ Edit comment)។
+*   **`mouseenter`**: កើតឡើងនៅពេលដែលចង្អុលកណ្តុរ (Mouse cursor) ត្រូវបានរំកិលចូលទៅក្នុងតំបន់របស់ Element។ (ល្អសម្រាប់បង្កើត Hover effect ដូចជា បង្ហាញ Tooltip ឬ Sub-menu)។
+*   **`mouseleave`**: កើតឡើងនៅពេលដែលចង្អុលកណ្តុរ ត្រូវបានដកចេញពីតំបន់របស់ Element នោះវិញ។ (ឧ. លាក់ Tooltip មកវិញ)។
 
 ### Events សម្រាប់ Keyboard (ក្តារចុច)
 *   **`keydown`**: ពេលដែលអ្នកចុចប៊ូតុងណាមួយចុះក្រោមភ្លាមៗ។
@@ -130,8 +158,11 @@ css
 ---
 
 js
+const keyOutput = document.querySelector("#key-output");
+
 // ស្តាប់ការវាយអក្សរពេញមួយគេហទំព័រ
 document.addEventListener("keydown", (e) => {
+  keyOutput.textContent = "អ្នកចុចប៉ះអក្សរ: " + e.key;
   console.log("អ្នកចុចប៉ះអក្សរ: " + e.key);
 });
 ```
@@ -187,9 +218,117 @@ searchInput.addEventListener("input", (e) => {
 
 ## 📦 3. ការប្រើប្រាស់ Event Object (`e`)
 
-នៅពេលមាន Event មួយកើតឡើង JavaScript តែងតែបញ្ជូន **Event Object (ច្រើនតាងដោយ `e` ឬ `event`)** ដោយស្វ័យប្រវត្តិទៅអោយ Function របស់អ្នក។ Object នេះមានផ្ទុកព័ត៌មានលម្អិតទាំងអស់អំពី Event នោះ (ឧ. ចុចចំទីតាំងណា? ចុចប៊ូតុងអ្វី? ចេញពី Element មួយណា?)។
+នៅពេលមាន Event មួយកើតឡើង JavaScript តែងតែបង្កើត និងបញ្ជូន **Event Object** (ជាទូទៅតាងដោយអក្សរ `e` ឬ `event`) ដោយស្វ័យប្រវត្តទៅអោយ Callback Function របស់អ្នក។ 
 
-ការប្រើប្រាស់ពេញនិយមបំផុតគឺ `e.target` ដែលចង្អុលទៅកាន់ Element ដើមដែលបានបង្កើត Event នោះ (ឧទាហរណ៍ជាក់ស្តែងគឺការអាន `e.target.value` ខាងលើ)។
+គិតងាយៗ៖ **Event Object គឺជាកញ្ចប់ព័ត៌មានលម្អិត** អំពីអ្វីគ្រប់យ៉ាងដែលទើបតែបានកើតឡើង (ចុចចំកន្លែងណា? ចុចប៉ះអក្សរអ្វី? Element មួយណាជាអ្នកបង្ក? កូអរដោនេកណ្តុរនៅត្រង់ណា?)។
+
+### 🔑 ស្វែងយល់ពី Properties សំខាន់ៗរបស់ `e`៖
+
+1. **`e.target`**: សំខាន់ជាងគេបង្អស់! វាចង្អុលទៅកាន់ **Element ដើមចមដែលបង្ក Event នោះឡើង**។ 
+   * ប្រសិនបើវាជា `<input>`, យើងអាចប្រើ `e.target.value` ដើម្បីយកតម្លៃអត្ថបទដែលគេវាយបញ្ចូល។
+   * ប្រសិនបើវាជា `<button>`, `e.target` គឺជា Element Button នោះផ្ទាល់។
+2. **`e.type`**: ប្រាប់ពីប្រភេទនៃ Event នោះជា String (ឧ. `"click"`, `"input"`, `"submit"`)។
+3. **`e.clientX` / `e.clientY`**: សម្រាប់ Mouse Events វាផ្តល់នូវទីតាំងកូអរដោនេ X (ទទឹង) និង Y (បណ្តោយ) របស់ចង្អុលកណ្តុរនៅលើអេក្រង់ (គិតជា Pixel)។
+4. **`e.key`**: សម្រាប់ Keyboard Events វាប្រាប់ពីឈ្មោះគ្រាប់ចុចដែលអ្នកប្រើប្រាស់បានចុច (ឧ. `"Enter"`, `"a"`, `"ArrowUp"`)។
+
+---
+
+### 🎮 ពិសោធន៍ជាក់ស្តែង៖ បង្ហាញព័ត៌មានរបស់ Event Object (`e`)
+
+```tabs
+html
+<div class="interactive-box">
+  <button id="event-btn">Click here</button>
+  <input type="text" id="event-input" placeholder="Type here" />
+  
+  <div class="monitor-panel">
+    <p>Event Type: <span id="val-type">-</span></p>
+    <p>Event Target (Tag): <span id="val-target">-</span></p>
+    <p>Mouse Position: <span id="val-coords">-</span></p>
+    <p>Input Value: <span id="val-input">-</span></p>
+  </div>
+</div>
+
+---
+
+css
+.interactive-box {
+  padding: 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+#event-btn {
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+#event-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  max-width: 300px;
+}
+.monitor-panel {
+  margin-top: 12px;
+  padding: 12px;
+  background: #0f172a;
+  color: #38bdf8;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+}
+.monitor-panel p {
+  margin: 4px 0;
+  color: #94a3b8;
+}
+.monitor-panel span {
+  color: #38bdf8;
+  font-weight: bold;
+}
+
+---
+
+js
+const btn = document.querySelector("#event-btn");
+const input = document.querySelector("#event-input");
+
+const valType = document.querySelector("#val-type");
+const valTarget = document.querySelector("#val-target");
+const valCoords = document.querySelector("#val-coords");
+const valInput = document.querySelector("#val-input");
+
+// មុខងារធ្វើបច្ចុប្បន្នភាពព័ត៌មាន Event
+function updateEventDetails(e) {
+  valType.textContent = e.type;                  // ប្រាប់ពីប្រភេទ Event (click, input, etc.)
+  valTarget.textContent = e.target.tagName;      // ប្រាប់ពី Element ណាដែលបង្ក Event
+  
+  // បើជា Mouse Event យើងអាចយកកូអរដោនេ X និង Y បាន
+  if (e.clientX !== undefined) {
+    valCoords.textContent = `X: ${e.clientX}, Y: ${e.clientY}`;
+  } else {
+    valCoords.textContent = "N/A (Not a Mouse Event)";
+  }
+}
+
+btn.addEventListener("click", (e) => {
+  updateEventDetails(e);
+  valInput.textContent = "N/A";
+});
+
+input.addEventListener("input", (e) => {
+  updateEventDetails(e);
+  valInput.textContent = e.target.value;        // e.target.value យកតម្លៃអត្ថបទពី input
+});
+```
 
 ```jsdiagram
 jseventobject
@@ -209,6 +348,7 @@ html
   <input type="text" id="username" placeholder="បញ្ចូលឈ្មោះ" />
   <button type="submit">ចូលគណនី</button>
 </form>
+<p id="welcome-message"></p>
 
 ---
 
@@ -243,11 +383,19 @@ css
   cursor: pointer;
 }
 
+#welcome-message {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
 ---
 
 js
 const form = document.querySelector("#login-form");
 const usernameInput = document.querySelector("#username");
+const welcomeMessage = document.querySelector("#welcome-message");
 
 form.addEventListener("submit", (e) => {
   // បញ្ឈប់ការ Refresh ទំព័រ (Page Reload)
@@ -255,6 +403,7 @@ form.addEventListener("submit", (e) => {
 
   // យកទិន្នន័យមកធ្វើការដោយខ្លួនឯង...
   const username = usernameInput.value;
+  welcomeMessage.textContent = `ស្វាគមន៍, ${username}!`;
   console.log(`ស្វាគមន៍, ${username}!`);
 });
 ```

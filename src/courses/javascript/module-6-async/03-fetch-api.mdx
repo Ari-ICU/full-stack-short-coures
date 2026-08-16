@@ -96,7 +96,37 @@ html
 
 ---
 
-javascript
+css
+#load-btn {
+  padding: 10px 20px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#load-btn:hover {
+  background: #4338ca;
+}
+
+#user-list {
+  margin-top: 16px;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+#user-list li {
+  padding: 6px 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+---
+
+js
 const btn = document.querySelector("#load-btn");
 const userList = document.querySelector("#user-list");
 

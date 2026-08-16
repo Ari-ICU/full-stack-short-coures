@@ -84,12 +84,18 @@ newButton.textContent = "Click Me";
 newButton.className = "btn btn-success";
 
 // ✅ Now add to DOM (still invisible until here)
-document.querySelector("#main-article").appendChild(newParagraph);
+const articleElement = document.querySelector("#main-article");
+articleElement.appendChild(newParagraph);
+articleElement.appendChild(newButton);
 ```
 
 ```jsdiagram
 jsdomcreate
 ```
+
+> 💡 **ចំណាំ៖ ភាពខុសគ្នារវាង `classList` និង `className`**
+> * **`classList`**: ប្រើសម្រាប់បន្ថែម ដកចេញ ឬប្តូរ (Toggle) Class មួយៗដោយសុវត្ថិភាព (រក្សាទុក Class ចាស់ៗដែលមានស្រាប់) តាមរយៈ Method ដូចជា `.add()`, `.remove()`, `.toggle()`។
+> * **`className`**: ប្រើសម្រាប់កំណត់តម្លៃ Class ទាំងអស់ជាអត្ថបទ (String)។ ប្រុងប្រយ័ត្ន៖ វានឹងលុប និងជំនួសរាល់ Class ទាំងអស់ដែលមានស្រាប់នៅលើ Element នោះដោយគ្មានការព្រមានឡើយ!
 
 ---
 
@@ -124,6 +130,10 @@ css
 
 js
 const article = document.querySelector("#main-article");
+
+// បង្កើត Paragraph ថ្មី
+const newParagraph = document.createElement("p");
+newParagraph.textContent = "This is a new appended paragraph.";
 
 // បន្ថែម newParagraph ទៅចុងបញ្ចប់នៃ #main-article
 article.appendChild(newParagraph);
