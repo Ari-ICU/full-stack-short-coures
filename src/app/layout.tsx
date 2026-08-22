@@ -30,6 +30,42 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="km" className={`${outfit.variable} ${khmerFont.variable}`} suppressHydrationWarning>
+      <head>
+        {process.env.NODE_ENV === "development" && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                try {
+                  const origSetAttr = Element.prototype.setAttribute;
+                  Element.prototype.setAttribute = function(name, val) {
+                    if (name === 'bis_skin_checked') return;
+                    return origSetAttr.apply(this, arguments);
+                  };
+                  const observer = new MutationObserver((mutations) => {
+                    for (const m of mutations) {
+                      if (m.attributeName === 'bis_skin_checked' && m.target && m.target.removeAttribute) {
+                        m.target.removeAttribute('bis_skin_checked');
+                      }
+                    }
+                  });
+                  observer.observe(document.documentElement, {
+                    attributes: true,
+                    subtree: true,
+                    attributeFilter: ['bis_skin_checked']
+                  });
+                  const origError = console.error;
+                  console.error = function(...args) {
+                    if (args.some(arg => typeof arg === 'string' && arg.includes('bis_skin_checked'))) {
+                      return;
+                    }
+                    return origError.apply(console, args);
+                  };
+                } catch (e) {}
+              `,
+            }}
+          />
+        )}
+      </head>
       <body suppressHydrationWarning className="flex flex-col min-h-screen antialiased">
         {/* Global Header */}
         <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
