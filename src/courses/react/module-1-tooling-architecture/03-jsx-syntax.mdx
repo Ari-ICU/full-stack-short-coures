@@ -1,0 +1,93 @@
+---
+title: JSX Syntax Rules, Expressions & Fragments
+description: សិក្សាពី JSX Syntax, ច្បាប់សំខាន់ៗ, ការបញ្ចូល JavaScript Expressions, និងការប្រើប្រាស់ Fragments។
+objectives:
+  - យល់ពីទម្រង់ JSX និងដំណើរការ Transpilation ទៅជា JavaScript
+  - ចេះអនុវត្ត 3 Core Rules របស់ JSX (`Single Root`, `Close Tags`, `camelCase`)
+  - ចេះបង្កប់ JavaScript Expressions និងការប្រើប្រាស់ `<></>` (Fragments)
+module: module-1-tooling-architecture
+order: 3
+quiz:
+  - question: "តើហេតុអ្វីបានជាយើងមិនអាច return Elements ពីរទន្ទឹមគ្នាដោយគ្មាន Single Root Element ឬ Fragment ក្នុង JSX?"
+    options:
+      - "ព្រោះ JavaScript Functions អាច return បានតែតម្លៃ (Value/Object) តែមួយគត់ក្នុងពេលតែមួយ"
+      - "ព្រោះ Browser មិនស្គាល់ HTML Tags ច្រើន"
+      - "ព្រោះ Vite មិនអនុញ្ញាតអោយបង្កើតប៊ូតុងច្រើន"
+      - "ព្រោះ React ដំណើរការបានតែនៅលើទំព័រតែមួយ"
+    correctAnswer: 1
+    explanation: "JSX ត្រូវបាន compile ទៅជា `React.createElement()` calls។ ដោយសារ Function ក្នុង JS អាច return បានតែមួយ Value ប៉ុណ្ណោះ ដូច្នេះ JSX ត្រូវតែមាន Tag មេតែមួយគត់ ឬ Fragment `<></>` រុំព័ទ្ធជុំវិញ។"
+---
+
+## 🎭 1. អ្វីទៅជា JSX?
+
+**JSX (JavaScript XML)** គឺជា Syntax Extension ដែលអនុញ្ញាតឱ្យយើងសរសេរ HTML-like syntax នៅក្នុងឯកសារ JavaScript។
+
+```mermaid
+flowchart LR
+    subgraph Step1["1. Developer Writes JSX"]
+        A["<code>&lt;button className='btn'&gt;Click&lt;/button&gt;</code>"]
+    end
+
+    subgraph Step2["2. Vite / Babel Compilation"]
+        B["<code>React.createElement(<br>'button',<br>{ className: 'btn' },<br>'Click'<br>)</code>"]
+    end
+
+    subgraph Step3["3. Virtual DOM Object"]
+        C["<code>{ type: 'button', props: { className: 'btn', children: 'Click' } }</code>"]
+    end
+
+    subgraph Step4["4. Real DOM Output"]
+        D["<code>&lt;button class='btn'&gt;Click&lt;/button&gt;</code>"]
+    end
+
+    A -->|Transpile| B
+    B -->|Execute JS| C
+    C -->|Render| D
+
+    style Step1 fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Step2 fill:#fffaf0,stroke:#dd6b20,color:#000
+    style Step3 fill:#faf5ff,stroke:#805ad5,color:#000
+    style Step4 fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 📏 2. វិធានគ្រឹះទាំង ៣ របស់ JSX (The 3 Core Rules)
+
+1. **Single Root Element:** ត្រូវតែមាន Element មេតែមួយគត់ ឬប្រើ **Fragment** `<></>`៖
+```jsx
+// ✅ ត្រឹមត្រូវ (ប្រើ Fragment)
+return (
+  <>
+    <h1>សួស្តី</h1>
+    <p>ស្វាគមន៍មកកាន់ React</p>
+  </>
+);
+```
+
+2. **Close All Tags:** រាល់ Tags ទាំងអស់ត្រូវតែបិទជានិច្ច (រួមទាំង Self-closing tags ដូចជា `<img />`, `<input />`, `<br />`)។
+
+3. **camelCase Attributes:** ឈ្មោះ HTML Attributes ត្រូវប្តូរជា camelCase៖
+   - `class` $\rightarrow$ **`className`**
+   - `onclick` $\rightarrow$ **`onClick`**
+   - `for` $\rightarrow$ **`htmlFor`**
+
+---
+
+## 🧮 3. ការប្រើប្រាស់ JavaScript Expressions ក្នុង `{ }`
+
+យើងអាចបញ្ចូល JavaScript Variables, Calculations, ឬ Function Calls ចូលក្នុង JSX ដោយប្រើប្រាស់សញ្ញា **`{ }`** (Curly Braces)៖
+
+```jsx
+export default function UserGreeting() {
+  const userName = "រដ្ឋា";
+  const unreadCount = 5;
+
+  return (
+    <div className="card">
+      <h2>សួស្តី, {userName.toUpperCase()}! 👋</h2>
+      <p>សារមិនទាន់អាន: {unreadCount * 2} សារ</p>
+    </div>
+  );
+}
+```

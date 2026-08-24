@@ -1,0 +1,84 @@
+---
+title: CSS Modules for Scoped Component Styling
+description: សិក្សាពីរបៀបសរសេរ Scoped CSS ដោយប្រើ CSS Modules (`.module.css`) ដើម្បីការពារបញ្ហាជាន់គ្នានៃ Global Class Names។
+objectives:
+  - យល់ពី Global Namespace Pollution ក្នុង CSS ធម្មតា
+  - ចេះបង្កើត និងនាំចូល `.module.css` ក្នុង React Components
+  - យល់ពីរបៀបដែល Build Tool ធ្វើការ Hash Class Names
+module: module-5-styling-ui
+order: 1
+quiz:
+  - question: "តើ CSS Modules ការពារកុំឱ្យ Class Name ជាន់គ្នាដោយរបៀបណា?"
+    options:
+      - "ដោយលុប Class Name ចាស់ចោល"
+      - "ដោយបម្លែង Class Name ទៅជា Unique Hashed String (ឧ. `.Button_btn__a1b2c`) នៅពេល Build"
+      - "ដោយបិទមិនឱ្យប្រើ CSS ក្នុង JavaScript"
+      - "ដោយប្រើប្រាស់តែ Inline Styles"
+    correctAnswer: 2
+    explanation: "CSS Modules ដំណើរការជាមួយ Build Tool ដើម្បី Hash ឈ្មោះ class ឱ្យទៅជា Unique Name ធានាថាកូដ styling មានប្រសិទ្ធភាពតែលើ Component របស់វាប៉ុណ្ណោះ។"
+---
+
+## 🎨 1. Global CSS Issue vs CSS Modules Solution
+
+```mermaid
+flowchart TD
+    subgraph GlobalCSSProblem["Global CSS Issue: Class Name Collision"]
+        direction LR
+        G1["Header.jsx (.btn)"] --> GC["Global Scope CSS (.btn { bg: red })"]
+        G2["Card.jsx (.btn)"] --> GC
+        GC -->|Styles Clash 💥| GResult["UI អាចបែកពណ៌ ឬទម្រង់ដោយអចេតនា"]
+    end
+
+    subgraph CSSModulesSolution["CSS Modules: Automatic Hash Scoping"]
+        direction LR
+        M1["Header.module.css (.btn)"] --> Compile["Build / Hash Compiler"]
+        M2["Card.module.css (.btn)"] --> Compile
+        Compile --> M1Out["<code>.Header_btn__a1b2c</code>"]
+        Compile --> M2Out["<code>.Card_btn__x9y8z</code>"]
+        M1Out --> MResult["Scoped 100% គ្មានការជាន់គ្នា 🎉"]
+        M2Out --> MResult
+    end
+
+    style GlobalCSSProblem fill:#fff5f5,stroke:#e53e3e,color:#000
+    style CSSModulesSolution fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. ការអនុវត្តក្នុងកូដជាក់ស្តែង
+
+### ក. បង្កើតឯកសារ `Button.module.css`៖
+```css
+.primaryBtn {
+  background-color: #2563eb;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.primaryBtn:hover {
+  background-color: #1d4ed8;
+}
+
+.dangerBtn {
+  background-color: #dc2626;
+}
+```
+
+### ខ. នាំចូលទៅប្រើក្នុង `Button.jsx`៖
+```jsx
+import styles from './Button.module.css';
+
+export function ActionButton({ label, isDanger = false }) {
+  // styles គឺជា JS Object ដែលផ្ទុក Hashed Class Names
+  return (
+    <button className={`${styles.primaryBtn} ${isDanger ? styles.dangerBtn : ''}`}>
+      {label}
+    </button>
+  );
+}
+```

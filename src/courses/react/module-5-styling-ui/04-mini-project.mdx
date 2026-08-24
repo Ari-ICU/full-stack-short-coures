@@ -1,0 +1,193 @@
+---
+title: "Hands-on Mini Project: Admin Dashboard Layout"
+description: អនុវត្តបង្កើត Responsive Admin Dashboard Layout ជាមួយ Tailwind CSS, Responsive Sidebar, Metric Cards, និង Recent Activities Table។
+objectives:
+  - បង្កើត Responsive Layout (Sidebar + Top Navbar + Main Content Grid)
+  - អនុវត្ត Tailwind Grid, Flexbox, Gradients & Transitions
+  - បង្កើត Metric Statistics Cards ជាមួយ Badges & Icons
+module: module-5-styling-ui
+order: 4
+quiz:
+  - question: "តើ Tailwind class មួយណាដែលធ្វើឱ្យ Sidebar លាក់នៅលើ Mobile (`hidden`) ប៉ុន្តែបង្ហាញនៅលើ Desktop (`block`)?"
+    options:
+      - "`hidden md:block`"
+      - "`show-desktop`"
+      - "`flex-desktop-only`"
+      - "`visible:large`"
+    correctAnswer: 1
+    explanation: "Tailwind ប្រើ Mobile-First Breakpoints។ `hidden md:block` មានន័យថាលាក់នៅលើ Screen តូចៗ (mobile) និងបង្ហាញជា Block ចាប់ពី `md` breakpoint (768px+) ឡើងទៅ។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងបង្កើត **Modern Admin Dashboard Layout** ដែលមាន៖
+1. Responsive Sidebar Navigation
+2. Top Navbar ជាមួយ Search & Profile
+3. 4x Key Metrics Analytics Cards
+4. Recent Orders Data Table
+
+---
+
+## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+
+```jsx
+import { useState } from 'react';
+import { LayoutDashboard, Users, ShoppingBag, DollarSign, TrendingUp, Bell, Search, Menu, X } from 'lucide-react';
+
+const STATS = [
+  { title: 'ចំណូលសរុប', value: '$45,231.89', change: '+20.1%', isPositive: true, icon: DollarSign },
+  { title: 'ការបញ្ជាទិញថ្មី', value: '+2,350', change: '+180.1%', isPositive: true, icon: ShoppingBag },
+  { title: 'អតិថិជនសកម្ម', value: '+12,234', change: '+19%', isPositive: true, icon: Users },
+  { title: 'អត្រាបម្លែង', value: '4.75%', change: '-2.4%', isPositive: false, icon: TrendingUp },
+];
+
+const RECENT_ORDERS = [
+  { id: 'ORD-001', customer: 'សុខ វិបុល', product: 'MacBook Pro M3', amount: '$1,999.00', status: 'បានដឹកជញ្ជូន' },
+  { id: 'ORD-002', customer: 'ចាន់ ស្រីមុំ', product: 'iPad Pro 11"', amount: '$799.00', status: 'កំពុងដំណើរការ' },
+  { id: 'ORD-003', customer: 'កែវ ពិសិដ្ឋ', product: 'AirPods Pro 2', amount: '$249.00', status: 'បានដឹកជញ្ជូន' },
+  { id: 'ORD-004', customer: 'ហ៊ាង សុភា', product: 'Apple Watch Ultra', amount: '$799.00', status: 'រង់ចាំទូទាត់' },
+];
+
+export default function AdminDashboard() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex">
+      
+      {/* 1. SIDEBAR */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-950 border-r border-slate-800 p-5 flex flex-col justify-between transition-transform duration-300 md:static md:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div>
+          <div className="flex items-center justify-between mb-8 px-2">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center font-black">
+                ⚛️
+              </div>
+              <span className="font-bold text-lg tracking-wide">ReactAdmin</span>
+            </div>
+            <button onClick={() => setSidebarOpen(false)} className="md:hidden text-slate-400">
+              <X size={20} />
+            </button>
+          </div>
+
+          <nav className="space-y-1">
+            <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-blue-600/10 text-blue-400 font-semibold">
+              <LayoutDashboard size={18} />
+              <span>Dashboard</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition font-medium">
+              <ShoppingBag size={18} />
+              <span>Orders</span>
+            </a>
+            <a href="#" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition font-medium">
+              <Users size={18} />
+              <span>Customers</span>
+            </a>
+          </nav>
+        </div>
+
+        <div className="p-4 bg-slate-900/60 rounded-2xl border border-slate-800/80">
+          <p className="text-xs text-slate-400">ចូលប្រើជា៖</p>
+          <p className="font-bold text-sm text-slate-200">admin@company.com</p>
+        </div>
+      </aside>
+
+      {/* 2. MAIN CONTENT AREA */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        {/* Top Navbar */}
+        <header className="h-16 border-b border-slate-800 bg-slate-950/50 px-6 flex items-center justify-between backdrop-blur">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(true)} className="md:hidden text-slate-400">
+              <Menu size={20} />
+            </button>
+            <div className="relative hidden sm:block">
+              <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
+              <input
+                type="text"
+                placeholder="ស្វែងរកទិន្នន័យ..."
+                className="bg-slate-900 border border-slate-800 text-sm rounded-xl pl-9 pr-4 py-2 text-slate-200 focus:outline-none focus:border-blue-500 w-64"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white">
+              <Bell size={18} />
+            </button>
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center font-bold text-xs">
+              AD
+            </div>
+          </div>
+        </header>
+
+        {/* Dashboard Body */}
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-white">ផ្ទាំងគ្រប់គ្រងទូទៅ (Dashboard)</h1>
+            <p className="text-slate-400 text-sm mt-1">ទិដ្ឋភាពទូទៅនៃប្រតិបត្តិការ និងការលក់</p>
+          </div>
+
+          {/* Metric Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {STATS.map((stat, i) => {
+              const IconComponent = stat.icon;
+              return (
+                <div key={i} className="p-5 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs font-semibold text-slate-400">{stat.title}</span>
+                    <div className="p-2 rounded-lg bg-slate-900 text-blue-400">
+                      <IconComponent size={16} />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <div className="text-2xl font-black text-white">{stat.value}</div>
+                    <span className={`text-xs font-bold ${stat.isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {stat.change} ធៀបនឹងខែមុន
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Recent Orders Table */}
+          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6">
+            <h3 className="font-bold text-lg mb-4 text-white">ការបញ្ជាទិញចុងក្រោយ</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-800 text-slate-400 text-xs uppercase">
+                    <th className="pb-3">កូដកុម្ម៉ង់</th>
+                    <th className="pb-3">អតិថិជន</th>
+                    <th className="pb-3">ទំនិញ</th>
+                    <th className="pb-3">តម្លៃ</th>
+                    <th className="pb-3">ស្ថានភាព</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {RECENT_ORDERS.map((ord) => (
+                    <tr key={ord.id} className="hover:bg-slate-900/40">
+                      <td className="py-3.5 font-mono text-blue-400">{ord.id}</td>
+                      <td className="py-3.5 font-medium">{ord.customer}</td>
+                      <td className="py-3.5 text-slate-400">{ord.product}</td>
+                      <td className="py-3.5 font-bold">{ord.amount}</td>
+                      <td className="py-3.5">
+                        <span className="bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full text-xs font-bold border border-emerald-500/20">
+                          {ord.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+
+      </div>
+    </div>
+  );
+}
+```

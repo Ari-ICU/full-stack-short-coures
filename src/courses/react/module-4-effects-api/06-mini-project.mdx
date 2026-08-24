@@ -1,0 +1,137 @@
+---
+title: "Hands-on Mini Project: Live Weather & City Finder"
+description: អនុវត្តបង្កើត Live Weather Finder App ដែលទាញយកទិន្នន័យពី Live Public API អមជាមួយ Loading State, Error Handling, និង Input Debouncing។
+objectives:
+  - អនុវត្ត Data Fetching ជាមួយ Live Public API (Open-Meteo Weather API)
+  - អនុវត្ត `useEffect` Synchronization ជាមួយ Dependency Array `[city]`
+  - បង្កើត Loading Skeletons និង Error Alerts
+module: module-4-effects-api
+order: 6
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងគួរដាក់ Dependency `[selectedCity]` ក្នុង `useEffect` នៃ Weather App?"
+    options:
+      - "ដើម្បីឱ្យ `useEffect` ដំណើរការ Fetch ទិន្នន័យអាកាសធាតុថ្មីឡើងវិញដោយស្វ័យប្រវត្តិតែនៅពេល User ផ្លាស់ប្តូរទីក្រុង"
+      - "ដើម្បីឱ្យ JavaScript ឈប់ដំណើរការ"
+      - "ដើម្បីការពារកុំឱ្យ Browser បិទ"
+      - "ដើម្បី Compile ទៅជា TypeScript"
+    correctAnswer: 1
+    explanation: "ការដាក់ `[selectedCity]` ក្នុង dependency array ធានាថា API នឹងត្រូវបាន call សារជាថ្មីរាល់ពេលដែល state `selectedCity` ផ្លាស់ប្តូរតម្លៃ។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងបង្កើតកម្មវិធី **Live Weather Finder** ដែលទាញយកព័ត៌មានអាកាសធាតុជាក់ស្តែង (សីតុណ្ហភាព, ល្បឿនខ្យល់, កូដអាកាសធាតុ) ពី Open-Meteo API ដោយផ្ទាល់។
+
+---
+
+## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+
+```jsx
+import { useState, useEffect } from 'react';
+
+const CITIES = [
+  { name: 'ភ្នំពេញ (Phnom Penh)', lat: 11.5564, lon: 104.9282 },
+  { name: 'សៀមរាប (Siem Reap)', lat: 13.3671, lon: 103.8448 },
+  { name: 'បាត់ដំបង (Battambang)', lat: 13.0957, lon: 103.2022 },
+  { name: 'ព្រះសីហនុ (Sihanoukville)', lat: 10.6275, lon: 103.5221 },
+];
+
+export default function WeatherFinder() {
+  const [selectedCity, setSelectedCity] = useState(CITIES[0]);
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isCurrent = true;
+    setLoading(true);
+    setError(null);
+
+    const fetchWeather = async () => {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.lat}&longitude=${selectedCity.lon}&current_weather=true`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('មិនអាចទាញយកទិន្នន័យអាកាសធាតុបានឡើយ!');
+        const data = await res.json();
+        
+        if (isCurrent) {
+          setWeather(data.current_weather);
+        }
+      } catch (err) {
+        if (isCurrent) setError(err.message);
+      } finally {
+        if (isCurrent) setLoading(false);
+      }
+    };
+
+    fetchWeather();
+
+    return () => {
+      isCurrent = false; // Cleanup
+    };
+  }, [selectedCity]); // Re-fetch ពេលប្តូរទីក្រុង
+
+  return (
+    <div className="min-h-screen bg-sky-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full border border-sky-100">
+        
+        <div className="text-center mb-6">
+          <h1 className="text-2xl font-black text-slate-800">🌤️ Live Weather Finder</h1>
+          <p className="text-slate-500 text-sm mt-1">ពិនិត្យអាកាសធាតុតាមពេលវេលាជាក់ស្តែង</p>
+        </div>
+
+        {/* City Selector Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 justify-center">
+          {CITIES.map((city) => (
+            <button
+              key={city.name}
+              onClick={() => setSelectedCity(city)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                selectedCity.name === city.name
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              {city.name.split(' ')[0]}
+            </button>
+          ))}
+        </div>
+
+        {/* Error Alert */}
+        {error && (
+          <div className="p-4 bg-red-50 text-red-700 rounded-2xl text-sm font-semibold mb-4 text-center">
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Weather Card Display */}
+        {loading ? (
+          <div className="p-8 border border-slate-100 rounded-2xl bg-slate-50 animate-pulse text-center space-y-4">
+            <div className="h-8 bg-slate-200 rounded w-1/3 mx-auto"></div>
+            <div className="h-12 bg-slate-200 rounded w-1/2 mx-auto"></div>
+            <div className="h-4 bg-slate-200 rounded w-3/4 mx-auto"></div>
+          </div>
+        ) : weather ? (
+          <div className="p-6 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl text-center shadow-lg">
+            <h2 className="text-lg font-semibold text-blue-100">{selectedCity.name}</h2>
+            <div className="text-5xl font-black my-4">
+              {weather.temperature}°C
+            </div>
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/20 text-sm">
+              <div>
+                <p className="text-blue-200 text-xs">ល្បឿនខ្យល់</p>
+                <p className="font-bold">{weather.windspeed} km/h</p>
+              </div>
+              <div>
+                <p className="text-blue-200 text-xs">ទិសខ្យល់</p>
+                <p className="font-bold">{weather.winddirection}°</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+      </div>
+    </div>
+  );
+}
+```

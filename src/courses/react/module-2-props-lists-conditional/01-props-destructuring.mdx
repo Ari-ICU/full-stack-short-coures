@@ -1,0 +1,75 @@
+---
+title: Passing & Destructuring Props
+description: សិក្សាពីការបញ្ជូនទិន្នន័យពី Parent ទៅ Child Component តាមរយៈ Props, Object Destructuring, និង Default Props។
+objectives:
+  - យល់ដឹងពីគោលការណ៍ Unidirectional Data Flow (One-Way Data Flow)
+  - ចេះបញ្ជូន និងទាញយក Props តាមរយៈ Destructuring
+  - យល់ពី Props Immutability (មិនអាច mutate ដោយផ្ទាល់)
+module: module-2-props-lists-conditional
+order: 1
+quiz:
+  - question: "តើ Child Component អាចកែប្រែតម្លៃ `props.name = 'ថ្មី'` ដោយផ្ទាល់បានដែរឬទេ?"
+    options:
+      - "បាន ព្រោះវាជា object ធម្មតា"
+      - "មិនអាចទេ ព្រោះ Props នៅក្នុង React គឺ Read-Only (Immutable)"
+      - "បាន លុះត្រាតែមានការ refresh ទំព័រ"
+      - "បាន តែចំពោះលេខប៉ុណ្ណោះ"
+    correctAnswer: 2
+    explanation: "Props គឺជា Read-Only (Immutable)។ Child component មិនអាច mutate props ដោយផ្ទាល់បានទេ។ ប្រសិនបើចង់ផ្លាស់ប្តូរទិន្នន័យ Parent ត្រូវតែ pass callback function ឬ state setter ចុះមក។"
+---
+
+## 🎁 1. Unidirectional Data Flow ជាមួយ Props
+
+នៅក្នុង React ទិន្នន័យធ្វើដំណើរតែមួយទិសដៅប៉ុណ្ណោះ (**One-Way Data Flow**) គឺពី **Parent Component ធ្លាក់ចុះទៅកាន់ Child Components** តាមរយៈ **Props** (Properties)។
+
+```mermaid
+flowchart TD
+    subgraph Parent["Parent Component (&lt;App /&gt;)"]
+        StateData["State: userList = [...]"]
+    end
+
+    subgraph Children["Child Components (Reusable & Isolated)"]
+        direction LR
+        Child1["&lt;UserProfile /&gt;<br>props: { name: 'រដ្ឋា', age: 25 }"]
+        Child2["&lt;UserProfile /&gt;<br>props: { name: 'សីហា', age: 30 }"]
+    end
+
+    Parent -->|1. Pass Data Down (Props ⬇️)| Child1
+    Parent -->|1. Pass Data Down (Props ⬇️)| Child2
+    Child1 -.->|2. Notify Parent Up (Callback Function ⬆️)| Parent
+    Child2 -.->|2. Notify Parent Up (Callback Function ⬆️)| Parent
+
+    style Parent fill:#ebf8ff,stroke:#3182ce,stroke-width:2px,color:#000
+    style Children fill:#f0fff4,stroke:#38a169,stroke-width:2px,color:#000
+    style Child1 fill:#ffffff,stroke:#38a169,color:#000
+    style Child2 fill:#ffffff,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. ការប្រើប្រាស់ Object Destructuring & Default Props
+
+ជំនួសឱ្យការសរសេរ `props.name`, `props.role`, យើងប្រើ **Object Destructuring** ផ្ទាល់នៅក្នុង function parameters៖
+
+```jsx
+// 1. Child Component ជាមួយ Destructuring & Default Value
+export function UserBadge({ name, role = "Member", isVerified = false }) {
+  return (
+    <div className="flex items-center gap-2 p-2 border rounded-lg">
+      <span className="font-bold text-gray-800">{name}</span>
+      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{role}</span>
+      {isVerified && <span className="text-blue-500 text-sm">✓ Verified</span>}
+    </div>
+  );
+}
+
+// 2. Parent Component បញ្ជូន Props
+export default function App() {
+  return (
+    <div className="space-y-3 p-6">
+      <UserBadge name="រដ្ឋា" role="Admin" isVerified={true} />
+      <UserBadge name="សុខា" /> {/* ប្រើប្រាស់ default role="Member" */}
+    </div>
+  );
+}
+```

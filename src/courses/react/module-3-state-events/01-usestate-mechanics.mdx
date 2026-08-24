@@ -1,0 +1,74 @@
+---
+title: The useState Hook Mechanics & Re-rendering Cycles
+description: សិក្សាពីយន្តការនៃ Hook `useState`, ដំណើរការ Re-rendering Cycle របស់ React, និង Functional Updates។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Local Variables និង React State
+  - ស្គាល់ពី Re-render Lifecycle នៅពេលហៅ Setter Function
+  - ចេះប្រើប្រាស់ Functional Updates `setCount(prev => prev + 1)`
+module: module-3-state-events
+order: 1
+quiz:
+  - question: "ប្រសិនបើអ្នកហៅ `setCount(count + 1)` បីដងជាប់គ្នាក្នុង Handler តែមួយ តើ State នឹងកើនឡើងប៉ុន្មាន?"
+    options:
+      - "កើនឡើង 3"
+      - "កើនឡើងតែ 1 ប៉ុណ្ណោះ ព្រោះ `count` ក្នុង render snapshot នោះនៅជាតម្លៃចាស់ដដែល (Batching)"
+      - "បណ្តាលឱ្យមាន Infinite Loop"
+      - "មិនកើនឡើងសោះ"
+    correctAnswer: 2
+    explanation: "React ធ្វើ State Batching។ ដើម្បីឱ្យកើនឡើង 3 អ្នកត្រូវប្រើ Functional Updates: `setCount(prev => prev + 1)` បីដងជាប់គ្នា។"
+---
+
+## 🚦 1. យន្តការនៃ `useState`
+
+React មិនតាមដានការប្រែប្រួលរបស់ regular variable `let x = 0` ឡើយ។ ដើម្បីឱ្យ UI ធ្វើការ **Re-render** យើងត្រូវប្រើប្រាស់ **State** តាមរយៈ Hook `useState`៖
+
+```mermaid
+flowchart TD
+    subgraph RenderCycle["React State & Re-render Cycle"]
+        direction TB
+        S1["1. Initial Render (Display UI with state value)"] --> S2["2. User Action (e.g. clicks button)"]
+        S2 --> S3["3. Call Setter Function (e.g. setCount(count + 1))"]
+        S3 --> S4["4. React schedules Re-render with new state"]
+        S4 --> S5["5. Virtual DOM Diffing computes updates"]
+        S5 --> S6["6. Real DOM Patched & Fresh UI Painted 🚀"]
+        S6 -.-> S2
+    end
+
+    style RenderCycle fill:#f8f9fa,stroke:#ced4da,color:#000
+    style S1 fill:#ebf8ff,stroke:#3182ce,color:#000
+    style S3 fill:#fffaf0,stroke:#dd6b20,color:#000
+    style S6 fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. Functional Updates
+
+នៅពេលការគណនា State ថ្មីត្រូវពឹងផ្អែកលើតម្លៃ State ចាស់ យើងគួរប្រើប្រាស់ **Functional Update Pattern** ជានិច្ច៖
+
+```jsx
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  const incrementThreeTimes = () => {
+    // ✅ ប្រើ functional updates ដើម្បីធានាតម្លៃថ្មីបំផុតជានិច្ច
+    setCount((prev) => prev + 1);
+    setCount((prev) => prev + 1);
+    setCount((prev) => prev + 1);
+  };
+
+  return (
+    <div className="p-6 border rounded-2xl text-center max-w-xs">
+      <h2 className="text-3xl font-black mb-4">{count}</h2>
+      <button 
+        onClick={incrementThreeTimes}
+        className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700"
+      >
+        +3 ក្នុងម្តងចុច
+      </button>
+    </div>
+  );
+}
+```

@@ -1,0 +1,175 @@
+---
+title: "Hands-on Mini Project: Multi-Page Store with Product Details & Auth Gates"
+description: អនុវត្តបង្កើត Multi-Page E-Commerce Application ដែលមាន Dynamic Routes (`/products/:id`), Shared Navbar Layout, និង Protected Checkout Route។
+objectives:
+  - អនុវត្ត Multi-page Navigation ជាមួយ React Router
+  - អនុវត្ត Dynamic Route Matching (`useParams`)
+  - អនុវត្ត Protected Route Gate និង State Redirection
+module: module-6-routing
+order: 6
+quiz:
+  - question: "នៅពេល User មិនទាន់ Login ព្យាយាមចូល `/checkout`, តើ Protected Route គួរធ្វើដូចម្តេច?"
+    options:
+      - "Redirect ទៅ `/login` រួចបញ្ជូន User ត្រឡប់មក `/checkout` វិញបន្ទាប់ពី Login ជោគជ័យ"
+      - "បិទ Browser របស់ User"
+      - "លុបប្រព័ន្ធទិន្នន័យចោល"
+      - "បង្ហាញផ្ទាំងស គ្មានអក្សរ"
+    correctAnswer: 1
+    explanation: "ការរក្សាទុក URL ដើម (`state: { from: location }`) អនុញ្ញាតឱ្យយើងបញ្ជូន User ត្រឡប់មកកាន់ទំព័រ checkout វិញបន្ទាប់ពីគាត់ Login រួចរាល់។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងបង្កើត **Multi-Page Store App** ដែលរួមមាន៖
+1. Shared Layout ជាមួយ Header & Navigation Links
+2. Products Catalog (`/`)
+3. Product Details Dynamic View (`/products/:id`)
+4. Login Page (`/login`)
+5. Protected Checkout Gate (`/checkout`)
+
+---
+
+## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+
+```jsx
+import { useState } from 'react';
+import { BrowserRouter, Routes, Route, Link, NavLink, Outlet, useParams, useNavigate, Navigate } from 'react-router-dom';
+
+const PRODUCTS = [
+  { id: '101', name: 'Premium Leather Backpack', price: 120, desc: 'កាបូបស្បែកពិត គុណភាពខ្ពស់ ធន់នឹងទឹក' },
+  { id: '102', name: 'Wireless Ergonomic Mouse', price: 65, desc: 'កណ្ដុរឥតខ្សែ ការពារការចុកដៃពេលធ្វើការយូរ' },
+  { id: '103', name: 'Mechanical Keyboard (Khmer Layout)', price: 95, desc: 'ក្តារចុចមេកានិច Switch ស្ងាត់ ស្រួលវាយអក្សរខ្មែរ' },
+];
+
+// 1. Layout
+function AppLayout({ user, onLogout }) {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <header className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
+        <Link to="/" className="text-xl font-black tracking-wide text-blue-400">🛍️ QuickStore</Link>
+        <nav className="flex items-center gap-4 text-sm font-semibold">
+          <NavLink to="/" className={({ isActive }) => isActive ? 'text-blue-400' : 'text-slate-300'}>ទំព័រដើម</NavLink>
+          <NavLink to="/checkout" className={({ isActive }) => isActive ? 'text-blue-400' : 'text-slate-300'}>Checkout</NavLink>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-xs bg-slate-800 px-3 py-1 rounded-full">{user.name}</span>
+              <button onClick={onLogout} className="text-red-400 hover:underline">ចាកចេញ</button>
+            </div>
+          ) : (
+            <Link to="/login" className="bg-blue-600 px-3 py-1 rounded-lg text-white">ចូលគណនី</Link>
+          )}
+        </nav>
+      </header>
+
+      <main className="flex-1 p-6 max-w-4xl mx-auto w-full">
+        <Outlet />
+      </main>
+    </div>
+  );
+}
+
+// 2. Product Catalog
+function Catalog() {
+  return (
+    <div>
+      <h1 className="text-2xl font-black text-slate-800 mb-6">ទំនិញពេញនិយម</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {PRODUCTS.map((p) => (
+          <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+            <div>
+              <h3 className="font-bold text-slate-900">{p.name}</h3>
+              <p className="text-slate-500 text-xs mt-1 line-clamp-2">{p.desc}</p>
+            </div>
+            <div className="mt-4 flex justify-between items-center">
+              <span className="font-black text-slate-800">${p.price}</span>
+              <Link to={`/products/${p.id}`} className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100">
+                មើលលម្អិត →
+              </Link>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// 3. Dynamic Product Detail
+function ProductDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const product = PRODUCTS.find((p) => p.id === id);
+
+  if (!product) return <p>រកមិនឃើញទំនិញឡើយ!</p>;
+
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-lg mx-auto">
+      <button onClick={() => navigate(-1)} className="text-xs font-bold text-slate-400 mb-4 hover:text-slate-600">
+        ← ត្រឡប់ក្រោយ
+      </button>
+      <h2 className="text-2xl font-black text-slate-800 mb-2">{product.name}</h2>
+      <p className="text-slate-600 text-sm mb-6">{product.desc}</p>
+      <div className="flex justify-between items-center border-t pt-4">
+        <span className="text-3xl font-black text-blue-600">${product.price}</span>
+        <button onClick={() => navigate('/checkout')} className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700">
+          ទិញទំនិញនេះ
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 4. Login Page
+function LoginPage({ onLogin, user }) {
+  const navigate = useNavigate();
+  if (user) return <Navigate to="/" replace />;
+
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-sm mx-auto text-center">
+      <h2 className="text-2xl font-black text-slate-800 mb-4">ចូលគណនី</h2>
+      <p className="text-slate-500 text-sm mb-6">ចុចប៊ូតុងខាងក្រោមដើម្បីក្លែងធ្វើការ Login</p>
+      <button 
+        onClick={() => { onLogin({ name: 'រដ្ឋា ធឿន', email: 'ratha@demo.com' }); navigate('/'); }}
+        className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition"
+      >
+        Sign in as Ratha
+      </button>
+    </div>
+  );
+}
+
+// 5. Protected Checkout Gate
+function CheckoutPage() {
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 max-w-md mx-auto text-center">
+      <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-xl">
+        ✓
+      </div>
+      <h2 className="text-2xl font-black text-slate-800">ទំព័រទូទាត់ប្រាក់ (Checkout)</h2>
+      <p className="text-slate-500 text-sm mt-2 mb-6">អ្នកបានឆ្លងកាត់ Protected Route ដោយជោគជ័យ!</p>
+      <button className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl">
+        បញ្ជាក់ការទូទាត់ឥឡូវនេះ
+      </button>
+    </div>
+  );
+}
+
+export default function App() {
+  const [user, setUser] = useState(null);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<AppLayout user={user} onLogout={() => setUser(null)} />}>
+          <Route path="/" element={<Catalog />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
+          <Route path="/login" element={<LoginPage onLogin={setUser} user={user} />} />
+          <Route 
+            path="/checkout" 
+            element={user ? <CheckoutPage /> : <Navigate to="/login" replace />} 
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```

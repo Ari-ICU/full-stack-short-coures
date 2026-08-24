@@ -1,0 +1,93 @@
+---
+title: Synthetic Event Handling (onClick, onChange, onSubmit)
+description: សិក្សាពីប្រព័ន្ធ React SyntheticEvent, ការចាប់យកព្រឹត្តិការណ៍ផ្សេងៗ (onClick, onChange, onSubmit), និងការប្រើប្រាស់ Function References។
+objectives:
+  - យល់ពី React SyntheticEvent Object និង Cross-Browser Event Normalization
+  - ចេះភ្ជាប់ Event Handlers (`onClick`, `onChange`, `onSubmit`)
+  - ចេះការពារបញ្ហា Immediate Invocation និងការប្រើប្រាស់ `e.preventDefault()`
+module: module-3-state-events
+order: 2
+quiz:
+  - question: "តើហេតុអ្វីបានជាយើងមិនគួរដាក់រង្វង់ក្រចក `()` ពេលភ្ជាប់ Event Handler (ឧ. `<button onClick={handleClick()}>`)?"
+    options:
+      - "ព្រោះវាធ្វើអោយ Handler execute ភ្លាមៗកំឡុងពេល Render មិនមែនរង់ចាំដល់ពេល User ចុចឡើយ"
+      - "ព្រោះ JSX មិនស្គាល់សញ្ញារង្វង់ក្រចក"
+      - "ព្រោះវានឹងលុបប៊ូតុងចេញពីអេក្រង់"
+      - "ព្រោះវាជា syntax error ក្នុង JavaScript"
+    correctAnswer: 1
+    explanation: "ការដាក់ `handleClick()` គឺមានន័យថា Function នោះត្រូវបាន Invoke ភ្លាមៗពេល Component render។ វិធីត្រឹមត្រូវគឺបញ្ជូនតែ Function Reference ដូចជា `onClick={handleClick}` ឬ `onClick={() => handleClick(id)}`។"
+---
+
+## 🖱️ 1. React SyntheticEvent Engine
+
+React មិនភ្ជាប់ Event Listener ទៅលើ DOM Node នីមួយៗដោយផ្ទាល់ទេ ប៉ុន្តែវាប្រើប្រាស់ **Top-Level Event Delegation** និង wrap Native Event ទៅជា **`SyntheticEvent`** ដើម្បីធានាភាពស៊ីសង្វាក់គ្នានៅលើគ្រប់ Browser ទាំងអស់។
+
+```mermaid
+flowchart LR
+    subgraph Browser["1. Browser DOM"]
+        A["User Click / Typing Action"] --> B["Native DOM Event"]
+    end
+
+    subgraph ReactCore["2. React Event Delegation Engine"]
+        B --> C["Wraps in SyntheticEvent Object (Cross-browser compatible)"]
+    end
+
+    subgraph AppCode["3. Your Handler Execution"]
+        C --> D["Runs Your Handler<br><code>const handleClick = (e) => { ... }</code>"]
+        D --> E["Update State / Trigger API ⚡"]
+    end
+
+    style Browser fill:#fff5f5,stroke:#e53e3e,color:#000
+    style ReactCore fill:#fffaf0,stroke:#dd6b20,color:#000
+    style AppCode fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. Event Handlers សំខាន់ៗទាំង ៣
+
+```jsx
+export default function EventDemo() {
+  const handleClick = (e) => {
+    console.log("Button clicked!", e.target);
+  };
+
+  const handleInputChange = (e) => {
+    console.log("Typing:", e.target.value);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault(); // 🛑 ការពារ Browser កុំឱ្យ Refresh ទំព័រ
+    alert("Form submitted successfully!");
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-sm">
+      <div>
+        <label className="block text-sm font-semibold mb-1">ស្វែងរក:</label>
+        <input 
+          type="text" 
+          onChange={handleInputChange} 
+          className="w-full px-3 py-2 border rounded-lg"
+          placeholder="វាយអក្សរទីនេះ..."
+        />
+      </div>
+
+      <button 
+        type="button" 
+        onClick={handleClick} 
+        className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300"
+      >
+        Click Me
+      </button>
+
+      <button 
+        type="submit" 
+        className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 block w-full"
+      >
+        Submit Form
+      </button>
+    </form>
+  );
+}
+```

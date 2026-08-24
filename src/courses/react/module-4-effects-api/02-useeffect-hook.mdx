@@ -1,0 +1,82 @@
+---
+title: The useEffect Hook (Mounting, Dependencies & Cleanup)
+description: សិក្សាពីការប្រើប្រាស់ `useEffect` Hook សម្រាប់ Synchronization, Dependency Arrays, និង Cleanup Functions។
+objectives:
+  - ចេះប្រើ `useEffect` សម្រាប់ Mounting Phase
+  - យល់ច្បាស់ពី Dependency Array (`[]`, `[dep]`, គ្មាន dep)
+  - ចេះសរសេរ Cleanup Function ដើម្បីការពារ Memory Leaks
+module: module-4-effects-api
+order: 2
+quiz:
+  - question: "តើអ្វីនឹងកើតឡើងប្រសិនបើអ្នកមិនដាក់ Dependency Array ក្នុង `useEffect` (ឧ. useEffect(() => {...}))?"
+    options:
+      - "Effect នោះនឹងដំណើរការតែម្តងគត់"
+      - "Effect នោះនឹង execute រាល់ពេលដែល Component ធ្វើការ Render និង Re-render ឡើងវិញទាំងអស់"
+      - "វានឹងបណ្តាលឱ្យ Error ភ្លាមៗ"
+      - "វាមិនដែលដំណើរការឡើយ"
+    correctAnswer: 2
+    explanation: "ប្រសិនបើគ្មាន Dependency Array ទេ Effect នឹង execute គ្រប់ Render ទាំងអស់។ ប្រសិនបើដាក់ `[]` (Empty Array) វា execute តែម្តងគត់ពេល Mount។ ប្រសិនបើដាក់ `[id]` វា execute ពេល `id` ប្រែប្រួល។"
+---
+
+## 🪢 1. Lifecycle Timeline ជាមួយ `useEffect`
+
+```mermaid
+flowchart TD
+    subgraph Lifecycle["useEffect Execution Timeline & Cleanup"]
+        direction TB
+        M1["1. Component Mounts & Paints UI on Screen 🖼️"] --> M2["2. useEffect Callback Executes (e.g. Subscribe / Fetch)"]
+        M2 --> M3{"3. Prop / State Dependency Change?"}
+        
+        M3 -->|Yes| M4["4. Run Cleanup Function of Previous Effect 🧹"]
+        M4 --> M5["5. Re-run useEffect with New Values"]
+        M5 --> M3
+
+        M3 -->|Component Unmounts| M6["6. Run Final Cleanup (Clear Timers, Subscriptions) 🛑"]
+    end
+
+    style Lifecycle fill:#f8f9fa,stroke:#ced4da,color:#000
+    style M1 fill:#ebf8ff,stroke:#3182ce,color:#000
+    style M2 fill:#fffaf0,stroke:#dd6b20,color:#000
+    style M4 fill:#fff5f5,stroke:#e53e3e,color:#000
+    style M6 fill:#fed7d7,stroke:#e53e3e,color:#000
+```
+
+---
+
+## 🛠️ 2. Dependency Array Rules & Cleanup Code
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export default function TimerApp() {
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(true);
+
+  useEffect(() => {
+    if (!isRunning) return;
+
+    // 1. Setup Side Effect (Timer)
+    const intervalId = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+
+    // 2. Return Cleanup Function (ដំណើរការពេល unmount ឬ ពេល isRunning ប្រែប្រួល)
+    return () => {
+      clearInterval(intervalId);
+      console.log("Timer cleared! 🧹");
+    };
+  }, [isRunning]); // Dependency: Re-run តែពេល isRunning ដូរ
+
+  return (
+    <div className="p-6 border rounded-2xl max-w-xs text-center">
+      <h2 className="text-4xl font-black mb-4">{seconds}s</h2>
+      <button 
+        onClick={() => setIsRunning(!isRunning)}
+        className={`px-4 py-2 text-white font-bold rounded-xl ${isRunning ? 'bg-amber-600' : 'bg-green-600'}`}
+      >
+        {isRunning ? 'ផ្អាក (Pause)' : 'បន្ត (Resume)'}
+      </button>
+    </div>
+  );
+}
+```

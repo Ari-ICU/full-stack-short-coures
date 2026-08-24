@@ -1,0 +1,81 @@
+---
+title: Component Composition using Children Prop
+description: សិក្សាពីបច្ចេកទេស Component Composition ដោយប្រើប្រាស់ `children` prop ដើម្បីបង្កើត Reusable Container & Wrapper Layouts។
+objectives:
+  - យល់ពីតួនាទីពិសេសរបស់ `children` prop ក្នុង React
+  - ចេះបង្កើត Layout Wrappers (Card, Modal, Section Container)
+  - ស្គាល់ពីភាពខុសគ្នារវាង Inheritance និង Composition ក្នុង React
+module: module-2-props-lists-conditional
+order: 2
+quiz:
+  - question: "តើ `children` prop ទទួលបានតម្លៃពីប្រភពណា?"
+    options:
+      - "ពី API Server"
+      - "ពីមាតិកា (JSX nodes/text) ដែលស្ថិតនៅចន្លោះ Opening & Closing Tags របស់ Component នោះ"
+      - "ពី URL Parameters"
+      - "ពីឯកសារ CSS"
+    correctAnswer: 2
+    explanation: "នៅពេលអ្នកសរសេរ `<Card><h1>Hello</h1></Card>`, React នឹងបញ្ជូន `<h1>Hello</h1>` ជា `children` prop ទៅកាន់ Card component ដោយស្វ័យប្រវត្តិ។"
+---
+
+## 📦 1. អ្វីទៅជា `children` Prop?
+
+នៅក្នុង React យើងមិនប្រើប្រាស់ Class Inheritance ទេ ប៉ុន្តែយើងប្រើ **Component Composition** (ផ្គុំ Component មួយចូលក្នុង Component មួយទៀត)។
+
+`children` គឺជា prop ពិសេសមួយដែលតំណាងឱ្យអ្វីៗទាំងអស់ដែលអ្នកសរសេរនៅចន្លោះ `<Wrapper>...</Wrapper>`។
+
+```mermaid
+flowchart LR
+    subgraph Usage["Parent Usage in JSX"]
+        A["<code>&lt;Card title='ព័ត៌មាន'&gt;<br>&nbsp;&nbsp;&lt;p&gt;ខ្លឹមសារនៅខាងក្នុង&lt;/p&gt;<br>&lt;/Card&gt;</code>"]
+    end
+
+    subgraph CardComponent["Card Component Definition"]
+        B["<code>function Card({ title, children }) {<br>&nbsp;&nbsp;return (<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;{title}&lt;/h3&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&gt;{children}&lt;/div&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/div&gt;<br>&nbsp;&nbsp;);<br>}</code>"]
+    end
+
+    A -->|Passes &lt;p&gt; automatically into| B
+
+    style Usage fill:#ebf8ff,stroke:#3182ce,color:#000
+    style CardComponent fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. ឧទាហរណ៍ជាក់ស្តែង: Reusable Modal & Card Wrapper
+
+```jsx
+// 1. Container Wrapper
+export function ModalWrapper({ isOpen, onClose, title, children }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl">
+        <div className="flex justify-between items-center border-b pb-3 mb-4">
+          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+        </div>
+
+        {/* ទីតាំងដែល children នឹងបង្ហាញ */}
+        <div className="modal-content">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 2. ប្រើប្រាស់ Modal ជាមួយ Content ខុសៗគ្នា
+export default function App() {
+  return (
+    <ModalWrapper isOpen={true} onClose={() => {}} title="ការបញ្ជាក់ការបញ្ជាទិញ">
+      <p className="text-gray-600 mb-4">តើអ្នកពិតជាចង់ទិញផលិតផលនេះមែនទេ?</p>
+      <div className="flex justify-end gap-3">
+        <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg">បោះបង់</button>
+        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg">យល់ព្រម</button>
+      </div>
+    </ModalWrapper>
+  );
+}
+```

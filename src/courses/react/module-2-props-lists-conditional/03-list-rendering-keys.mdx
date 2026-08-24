@@ -1,0 +1,70 @@
+---
+title: Rendering Dynamic Lists with .map() & Unique Key Props
+description: សិក្សាពីរបៀប Render ទិន្នន័យ Arrays ដោយប្រើ JavaScript `Array.prototype.map()` និងសារៈសំខាន់នៃ `key` prop។
+objectives:
+  - ចេះបម្លែង JavaScript Array ទៅជា JSX Elements ដោយប្រើ `.map()`
+  - យល់ពីតួនាទីរបស់ `key` prop ក្នុង React Diffing Algorithm
+  - ដឹងពីផលប៉ះពាល់ និងគ្រោះថ្នាក់នៃការប្រើប្រាស់ Array Index ជា `key`
+module: module-2-props-lists-conditional
+order: 3
+quiz:
+  - question: "តើអ្វីជាគ្រោះថ្នាក់នៃការប្រើប្រាស់ Array Index ជា key (ឧ. key={index})?"
+    options:
+      - "វានឹងធ្វើអោយកុំព្យូទ័រគាំងភ្លាមៗ"
+      - "នៅពេល list ត្រូវបាន sort, filter, ឬ delete items, index នឹងផ្លាស់ប្តូរទីតាំង បណ្តាលឱ្យ React update ខុស Component State ឬ Input Focus"
+      - "វាមិនដំណើរការជាមួយលេខ"
+      - "React មិនអនុញ្ញាតអោយប្រើ index ដាច់ខាត"
+    correctAnswer: 2
+    explanation: "Array Index គឺមិនស្ថិតស្ថេរ (Unstable)។ នៅពេលលុប item នៅកណ្តាល ចំនួន index នឹងរុញច្រានគ្នា ដែលធ្វើឱ្យ React Diffing Algorithm ច្រឡំ state របស់ component នីមួយៗ។ ដូច្នេះត្រូវប្រើប្រាស់ Stable Unique ID (ឧ. item.id) ជានិច្ច។"
+---
+
+## 📋 1. ការប្រើប្រាស់ `Array.prototype.map()`
+
+នៅក្នុង React យើងមិនប្រើ `for` ឬ `while` loops ក្នុង JSX ទេ ប៉ុន្តែយើងប្រើ **`.map()`** ដើម្បី transform items ក្នុង array ឱ្យទៅជា JSX Elements៖
+
+```jsx
+const courses = [
+  { id: 'c1', title: 'React 19 Mastery', price: 49 },
+  { id: 'c2', title: 'Node.js Backend Architecture', price: 59 },
+  { id: 'c3', title: 'Full-Stack Next.js Project', price: 69 },
+];
+
+export function CourseList() {
+  return (
+    <ul className="divide-y border rounded-xl overflow-hidden">
+      {courses.map((course) => (
+        <li key={course.id} className="p-4 flex justify-between items-center hover:bg-gray-50">
+          <span className="font-semibold text-gray-800">{course.title}</span>
+          <span className="font-black text-blue-600">${course.price}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+---
+
+## 🔑 2. សារៈសំខាន់នៃ `key` Prop ក្នុង Diffing Algorithm
+
+```mermaid
+flowchart TD
+    subgraph WithUniqueKey["With Stable Unique Key (e.g. key={item.id})"]
+        direction TB
+        K1["Items: [ID:1, ID:2, ID:3]"] -->|Delete ID:2| K2["Items: [ID:1, ID:3]"]
+        K2 --> K3["React identifies ID:2 removed -> Remove ONLY DOM node #2 ⚡"]
+    end
+
+    subgraph WithoutKeyOrIndex["With Array Index (e.g. key={index}) ⚠️"]
+        direction TB
+        I1["Items: [index:0 (A), index:1 (B), index:2 (C)]"] -->|Delete Item B| I2["Items: [index:0 (A), index:1 (C)]"]
+        I2 --> I3["Index:1 now points to C -> State / input bugs & re-renders! 💥"]
+    end
+
+    style WithUniqueKey fill:#f0fff4,stroke:#38a169,color:#000
+    style WithoutKeyOrIndex fill:#fff5f5,stroke:#e53e3e,color:#000
+```
+
+### លក្ខខណ្ឌនៃ Key ដ៏ល្អ៖
+1. **Unique:** មិនស្ទួនគ្នាក្នុងចំណោម Sibling elements
+2. **Stable:** មិនផ្លាស់ប្តូរតាមពេលដែល list ត្រូវ sort ឬ filter (កុំប្រើ `Math.random()`)

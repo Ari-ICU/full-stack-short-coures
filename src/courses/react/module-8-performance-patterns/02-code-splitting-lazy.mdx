@@ -1,0 +1,84 @@
+---
+title: "Code Splitting & Lazy Loading with React.lazy & Suspense"
+description: "សិក្សាពីការបំបែក JavaScript Bundle ខ្នាតធំទៅជា Chunks តូចៗ (Code Splitting) ដោយប្រើ React.lazy() និង Suspense។"
+objectives:
+  - "យល់ពីផលប៉ះពាល់នៃ Huge JavaScript Bundle ទៅលើ Initial Page Load Speed"
+  - "ចេះប្រើ React.lazy() សម្រាប់ On-Demand Route & Component Loading"
+  - "ចេះកំណត់ Fallback UI ជាមួយ Suspense fallback"
+module: module-8-performance-patterns
+order: 2
+quiz:
+  - question: "តើអ្វីជាតួនាទីរបស់ `<Suspense fallback={...}>` ពេលប្រើជាមួយ `React.lazy()`?"
+    options:
+      - "វាបិទដំណើរការ Browser"
+      - "វាបង្ហាញ Fallback UI (ដូចជា Loading Spinner ឬ Skeleton) ខណៈពេលដែល Browser កំពុងទាញយក chunk JS file ពី Network"
+      - "វាលុប Bundle file ចោល"
+      - "វា run លើ Database"
+    correctAnswer: 2
+    explanation: "`<Suspense>` ផ្តល់នូវ Fallback UI ដើម្បីបង្ហាញជូន User កំឡុងពេល asynchronous chunk របស់ lazy component កំពុង download ពី Internet។"
+---
+
+## ✂️ 1. Monolithic Bundle vs Code Splitting
+
+```mermaid
+flowchart TD
+    subgraph Monolithic["❌ Without Code Splitting: Huge 5MB Initial Bundle"]
+        direction TB
+        B1["User visits Homepage ('/')"] --> B2["Browser downloads entire 5MB bundle<br>(Home + Admin + Checkout + Analytics) ⏳"]
+        B2 --> B3["Slow Initial Page Load &amp; Higher Bounce Rate!"]
+    end
+
+    subgraph Splitting["✅ With Route-Based Code Splitting &amp; Suspense"]
+        direction TB
+        S1["User visits Homepage ('/')"] --> S2["Browser downloads ONLY 200KB chunk ⚡"]
+        S2 --> S3["User clicks '/admin'"]
+        S3 --> S4["&lt;Suspense fallback={&lt;Spinner /&gt;}&gt;"]
+        S4 --> S5["Lazy loads 150KB admin chunk on-demand 🚀"]
+    end
+
+    style Monolithic fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Splitting fill:#f0fff4,stroke:#38a169,color:#000
+    style S2 fill:#c6f6d5,stroke:#38a169,color:#000
+    style S5 fill:#c6f6d5,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង
+
+```jsx
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+
+// 1. Dynamic Imports ជាមួយ React.lazy
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center p-12 text-blue-600 font-bold">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+      កំពុងទាញយកទិន្នន័យទំព័រ...
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <nav className="p-4 bg-slate-900 text-white flex gap-4">
+        <Link to="/">ទំព័រដើម</Link>
+        <Link to="/analytics">Analytics (Lazy)</Link>
+      </nav>
+
+      {/* 2. រុំ Routes ដោយ Suspense */}
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/analytics" element={<AnalyticsDashboard />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
+}
+```

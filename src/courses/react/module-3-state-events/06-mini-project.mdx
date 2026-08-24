@@ -1,0 +1,171 @@
+---
+title: "Hands-on Mini Project: Interactive Task Tracker (CRUD App)"
+description: អនុវត្តបង្កើត Interactive Task Tracker ដែលមានមុខងារ CRUD ពេញលេញ (Create, Read, Update/Toggle, Delete) ជាមួយ React State & Events។
+objectives:
+  - អនុវត្ត State Operations ទាំងអស់ (Add, Toggle Complete, Delete)
+  - អនុវត្ត Controlled Form Handling & Input Clearing
+  - បង្កើត Real-time Summary Statistics (Completed vs Total Tasks)
+module: module-3-state-events
+order: 6
+quiz:
+  - question: "តើកូដមួយណាដែលជាវិធីត្រឹមត្រូវក្នុងការ Delete Todo item តាម id ក្នុង React State?"
+    options:
+      - "`setTodos(todos.splice(index, 1))`"
+      - "`setTodos(todos.filter((todo) => todo.id !== idToDelete))`"
+      - "`delete todos[idToDelete]`"
+      - "`setTodos(todos.pop())`"
+    correctAnswer: 2
+    explanation: "`filter()` បង្កើត array ថ្មីមួយដែលមិនរាប់បញ្ចូល item ដែលត្រូវលុប ដោយគោរពតាមគោលការណ៍ Immutability 100%។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងបង្កើតកម្មវិធី **Interactive Task Tracker** ដែលមានសមត្ថភាព៖
+1. បញ្ចូលភារកិច្ចថ្មី (Create)
+2. បង្ហាញបញ្ជីភារកិច្ច (Read)
+3. ធីកបញ្ចប់ភារកិច្ច (Toggle / Update)
+4. លុបភារកិច្ចចោល (Delete)
+5. បង្ហាញស្ថិតិ Task Counters
+
+---
+
+## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+
+```jsx
+import { useState } from 'react';
+
+export default function TaskTracker() {
+  const [tasks, setTasks] = useState([
+    { id: 1, text: 'រៀបចំគម្រោង React + Vite', completed: true },
+    { id: 2, text: 'អនុវត្ត State & Event Handling', completed: false },
+    { id: 3, text: 'សាងសង់ Mini Project CRUD App', completed: false },
+  ]);
+
+  const [inputTask, setInputTask] = useState('');
+  const [filter, setFilter] = useState('all'); // 'all' | 'active' | 'completed'
+
+  // 1. CREATE: បន្ថែម Task ថ្មី
+  const handleAddTask = (e) => {
+    e.preventDefault();
+    if (!inputTask.trim()) return;
+
+    const newTask = {
+      id: Date.now(),
+      text: inputTask.trim(),
+      completed: false,
+    };
+
+    setTasks([newTask, ...tasks]);
+    setInputTask(''); // Clear input box
+  };
+
+  // 2. UPDATE: Toggle ស្ថានភាព
+  const handleToggleTask = (id) => {
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
+
+  // 3. DELETE: លុប Task
+  const handleDeleteTask = (id) => {
+    setTasks(tasks.filter((task) => task.id !== id));
+  };
+
+  // 4. FILTERING:
+  const filteredTasks = tasks.filter((t) => {
+    if (filter === 'active') return !t.completed;
+    if (filter === 'completed') return t.completed;
+    return true;
+  });
+
+  const completedCount = tasks.filter((t) => t.completed).length;
+
+  return (
+    <div className="min-h-screen bg-slate-50 py-12 px-4">
+      <div className="max-w-lg mx-auto bg-white rounded-3xl shadow-xl p-8 border border-slate-100">
+        
+        {/* Header & Stats */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-black text-slate-800">📋 Task Tracker</h1>
+            <p className="text-slate-500 text-sm">គ្រប់គ្រងការងារប្រចាំថ្ងៃ</p>
+          </div>
+          <div className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-bold">
+            {completedCount} / {tasks.length} រួចរាល់
+          </div>
+        </div>
+
+        {/* Input Form */}
+        <form onSubmit={handleAddTask} className="flex gap-2 mb-6">
+          <input
+            type="text"
+            value={inputTask}
+            onChange={(e) => setInputTask(e.target.value)}
+            placeholder="តើអ្នកចង់ធ្វើអ្វីបន្ទាប់?"
+            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          />
+          <button
+            type="submit"
+            className="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md"
+          >
+            បន្ថែម
+          </button>
+        </form>
+
+        {/* Filter Tabs */}
+        <div className="flex gap-2 mb-4 border-b border-slate-100 pb-3">
+          {['all', 'active', 'completed'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setFilter(tab)}
+              className={`px-3 py-1 rounded-lg text-xs font-bold uppercase transition ${
+                filter === tab ? 'bg-slate-800 text-white' : 'text-slate-500 hover:bg-slate-100'
+              }`}
+            >
+              {tab === 'all' ? 'ទាំងអស់' : tab === 'active' ? 'កំពុងធ្វើ' : 'បានបញ្ចប់'}
+            </button>
+          ))}
+        </div>
+
+        {/* Task List */}
+        <ul className="space-y-2">
+          {filteredTasks.length === 0 ? (
+            <p className="text-center text-slate-400 py-8 text-sm">គ្មានទិន្នន័យភារកិច្ចឡើយ</p>
+          ) : (
+            filteredTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-xl transition group"
+              >
+                <div 
+                  onClick={() => handleToggleTask(task.id)}
+                  className="flex items-center gap-3 cursor-pointer flex-1"
+                >
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() => {}}
+                    className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                  />
+                  <span className={`text-sm ${task.completed ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}`}>
+                    {task.text}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="text-slate-400 hover:text-red-500 p-1 opacity-0 group-hover:opacity-100 transition text-sm"
+                >
+                  ✕
+                </button>
+              </li>
+            ))
+          )}
+        </ul>
+
+      </div>
+    </div>
+  );
+}
+```

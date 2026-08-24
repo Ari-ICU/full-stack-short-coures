@@ -1,0 +1,88 @@
+---
+title: useContext & createContext Setup
+description: សិក្សាពីជំហានទាំង ៣ ក្នុងការបង្កើត Global State ដោយប្រើប្រាស់ `createContext`, `<Context.Provider>`, និង `useContext()` Hook។
+objectives:
+  - "ចេះបង្កើត Context ដោយប្រើ createContext()"
+  - "ចេះ wrap Component Tree ជាមួយ Context Provider"
+  - "ចេះទាញយកទិន្នន័យដោយផ្ទាល់តាមរយៈ useContext() Hook"
+module: module-7-global-state
+order: 2
+quiz:
+  - question: "តើអ្វីនឹងកើតឡើងចំពោះ Components ដែលហៅ `useContext(ThemeContext)` នៅពេល `value` ក្នុង Provider ប្រែប្រួល?"
+    options:
+      - "វានឹងមិនធ្វើអ្វីទាំងអស់"
+      - "គ្រប់ Consumer Components ទាំងនោះនឹង Re-render ដោយស្វ័យប្រវត្តិតាមតម្លៃ State ថ្មី"
+      - "Browser នឹង Refresh ទំព័រ"
+      - "Context នឹងត្រូវបានលុប"
+    correctAnswer: 2
+    explanation: "នៅពេល `value` របស់ Provider ផ្លាស់ប្តូរ គ្រប់ Components ទាំងអស់ដែល subscribe តាមរយៈ `useContext()` នឹងត្រូវ Re-render ដើម្បី sync ទិន្នន័យថ្មីភ្លាមៗ។"
+---
+
+## ⚙️ 1. ជំហានទាំង ៣ នៃ Context API
+
+```mermaid
+flowchart TD
+    subgraph Step1["1. បង្កើត Context"]
+        A["<code>const ThemeContext = createContext('light');</code>"]
+    end
+
+    subgraph Step2["2. ផ្តល់ទិន្នន័យ (Provider)"]
+        B["<code>&lt;ThemeContext.Provider value={theme}&gt;<br>&nbsp;&nbsp;&lt;App /&gt;<br>&lt;/ThemeContext.Provider&gt;</code>"]
+    end
+
+    subgraph Step3["3. ប្រើប្រាស់ទិន្នន័យ (Consumer)"]
+        C["<code>const theme = useContext(ThemeContext);</code>"]
+    end
+
+    Step1 --> Step2 --> Step3
+
+    style Step1 fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Step2 fill:#fffaf0,stroke:#dd6b20,color:#000
+    style Step3 fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដគំរូអនុវត្តជាក់ស្តែង: Theme Switcher
+
+```jsx
+import { createContext, useContext, useState } from 'react';
+
+// 1. បង្កើត Context
+const ThemeContext = createContext();
+
+// 2. Child Component ហៅប្រើដោយផ្ទាល់
+function ThemeButton() {
+  const { isDark, toggleTheme } = useContext(ThemeContext);
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={`px-4 py-2 rounded-xl font-bold transition ${
+        isDark ? 'bg-amber-400 text-slate-900' : 'bg-slate-900 text-white'
+      }`}
+    >
+      {isDark ? '☀️ របៀបពន្លឺ (Light)' : '🌙 របៀបងងឹត (Dark)'}
+    </button>
+  );
+}
+
+// 3. Root App ផ្តល់ Provider
+export default function App() {
+  const [isDark, setIsDark] = useState(false);
+  const toggleTheme = () => setIsDark(!isDark);
+
+  return (
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
+      <div className={`min-h-screen flex items-center justify-center p-8 transition-colors ${
+        isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
+      }`}>
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-black">React Context API Theme Demo</h1>
+          <ThemeButton />
+        </div>
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+```

@@ -1,0 +1,77 @@
+---
+title: URL Parameters (useParams) & Programmatic Navigation (useNavigate)
+description: សិក្សាពី Dynamic Routing ជាមួយ `useParams` (`/products/:id`) និងការបញ្ជា Navigation តាមរយៈកូដ JavaScript ជាមួយ `useNavigate`។
+objectives:
+  - ចេះបង្កើត Dynamic Route Parameters ដូចជា `/products/:productId`
+  - ចេះទាញយក Parameters តាមរយៈ `useParams()` Hook
+  - ចេះប្រើ `useNavigate()` សម្រាប់ Redirects និង Form Submission Navigation
+module: module-6-routing
+order: 4
+quiz:
+  - question: "ប្រសិនបើ Route ត្រូវបានកំណត់ជា `<Route path='/users/:userId' element={<UserProfile />} />` តើត្រូវទាញយក `userId` ដោយរបៀបណា?"
+    options:
+      - "`const { userId } = useParams();`"
+      - "`const userId = window.userId;`"
+      - "`const userId = props.url;`"
+      - "`const userId = useRoute();`"
+    correctAnswer: 1
+    explanation: "`useParams()` Hook របស់ React Router នឹង return object មួយដែលផ្ទុក key-value pairs នៃ dynamic segment ក្នុង URL (ឧ. `{ userId: '123' }`)។"
+---
+
+## 🚏 1. Dynamic Routing Architecture
+
+```mermaid
+flowchart LR
+    A["User clicks '/products/42'"] --> Router["React Router Pattern Matching"]
+    Router --> Match["Matches <code>/products/:productId</code>"]
+    Match --> Component["&lt;ProductDetail /&gt;"]
+    Component --> Hook["<code>const { productId } = useParams(); // '42'</code>"]
+    Hook --> Fetch["<code>fetch('/api/products/42')</code> 🚀"]
+
+    style A fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Router fill:#fffaf0,stroke:#dd6b20,color:#000
+    style Component fill:#f0fff4,stroke:#38a169,color:#000
+    style Fetch fill:#faf5ff,stroke:#805ad5,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដគំរូ: `useParams` & `useNavigate`
+
+```jsx
+import { useParams, useNavigate } from 'react-router-dom';
+
+export default function ProductDetail() {
+  const { productId } = useParams();
+  const navigate = useNavigate();
+
+  const handleBuyNow = () => {
+    // ធ្វើការទូទាត់ប្រាក់...
+    alert("ការទិញបានជោគជ័យ!");
+    
+    // បញ្ជា Redirect ទៅកាន់ទំព័រជោគជ័យ
+    navigate('/checkout/success', { replace: true });
+  };
+
+  return (
+    <div className="p-6 max-w-md mx-auto border rounded-2xl bg-white shadow-sm">
+      <button 
+        onClick={() => navigate(-1)} // ត្រឡប់ក្រោយ (Go Back)
+        className="text-sm text-blue-600 font-bold mb-4"
+      >
+        ← ត្រឡប់ក្រោយ
+      </button>
+
+      <h2 className="text-2xl font-bold">ព័ត៌មានលម្អិតផលិតផល #{productId}</h2>
+      <p className="text-gray-600 my-4">នេះជាទំព័របង្ហាញព័ត៌មានជាក់លាក់តាម ID...</p>
+
+      <button 
+        onClick={handleBuyNow}
+        className="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700"
+      >
+        ទិញឥឡូវនេះ
+      </button>
+    </div>
+  );
+}
+```

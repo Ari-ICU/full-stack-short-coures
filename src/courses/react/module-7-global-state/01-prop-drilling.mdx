@@ -1,0 +1,46 @@
+---
+title: The Problem of Prop Drilling in Large Component Trees
+description: សិក្សាពីបញ្ហា Prop Drilling ក្នុង React កម្មវិធីខ្នាតធំ និងដំណោះស្រាយឆ្លាតវៃជាមួយ Context API។
+objectives:
+  - យល់ពីនិយមន័យនៃ Prop Drilling
+  - ដឹងពីផលវិបាកលើ Code Maintainability និង Refactoring
+  - ត្រៀមខ្លួនប្រើប្រាស់ `createContext` និង `useContext`
+module: module-7-global-state
+order: 1
+quiz:
+  - question: "តើអ្វីទៅជា Prop Drilling?"
+    options:
+      - "ជាការដំឡើង extension ក្នុង VS Code"
+      - "ជាដំណើរការនៃការបញ្ជូន Props កាត់តាម Intermediate Components ជាច្រើនជាន់ដែលមិនត្រូវការទិន្នន័យនោះសោះ គ្រាន់តែដើម្បីបញ្ជូនទៅឱ្យ Deep Child Component"
+      - "ជាការលុប Props ចោលទាំងអស់"
+      - "ជាកំហុសនៃការសរសេរ CSS"
+    correctAnswer: 2
+    explanation: "Prop Drilling កើតឡើងនៅពេលដែល Intermediate Components (ដូចជា Layout, Sidebar) ត្រូវតែទទួល និង pass props បន្តចុះក្រោម បើទោះបីជាពួកវាមិនប្រើប្រាស់ទិន្នន័យនោះក៏ដោយ។"
+---
+
+## 😫 1. បញ្ហា Prop Drilling
+
+នៅពេល Component Tree កាន់តែជ្រៅ ការបញ្ជូន State ចុះក្រោមតាមរយៈ Props ច្រើនជាន់ ធ្វើឱ្យកូដពិបាក Maintain និងងាយ Error ពេល Refactor៖
+
+```mermaid
+flowchart TD
+    subgraph Problem["❌ Prop Drilling: Cluttered Intermediate Components"]
+        direction TB
+        App["&lt;App /&gt; (Holds user state)"] -->|Passes user prop| Layout["&lt;Layout /&gt; (Doesn't use user)"]
+        Layout -->|Passes user prop| Side["&lt;Sidebar /&gt; (Doesn't use user)"]
+        Side -->|Passes user prop| Nav["&lt;NavMenu /&gt; (Doesn't use user)"]
+        Nav -->|Finally uses user!| Avatar["&lt;UserAvatar /&gt; 🎯"]
+    end
+
+    subgraph Solution["✅ React Context API: Direct Teleportation"]
+        direction TB
+        Provider["&lt;UserContext.Provider value={user}&gt;"]
+        Target["&lt;UserAvatar /&gt;<br><code>const user = useContext(UserContext)</code> 🚀"]
+        Provider -.->|Direct Wireless Access (No Middlemen)| Target
+    end
+
+    style Problem fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Solution fill:#f0fff4,stroke:#38a169,color:#000
+    style Avatar fill:#fed7d7,stroke:#e53e3e,color:#000
+    style Target fill:#c6f6d5,stroke:#38a169,color:#000
+```

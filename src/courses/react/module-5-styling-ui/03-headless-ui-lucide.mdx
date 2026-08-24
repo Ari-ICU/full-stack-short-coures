@@ -1,0 +1,78 @@
+---
+title: Headless UI & Modern Component Libraries (shadcn/ui & Lucide)
+description: សិក្សាពីការប្រើប្រាស់ Modern UI Ecosystem ដូចជា Lucide React Icons, Headless UI Primitives (Radix UI), និង shadcn/ui។
+objectives:
+  - ចេះបញ្ចូល SVG Icons ដោយប្រើ `lucide-react`
+  - យល់ពីភាពខុសគ្នារវាង Black-box Component Libraries និង shadcn/ui
+  - យល់ពីសារៈសំខាន់នៃ Accessibility (A11y) ជាមួយ Headless UI
+module: module-5-styling-ui
+order: 3
+quiz:
+  - question: "តើ shadcn/ui មានលក្ខណៈខុសប្លែកពី Traditional Component Libraries (ដូចជា MUI) ដូចម្តេច?"
+    options:
+      - "វាទាញយកកូដ Components មកដាក់ក្នុង `src/components/ui/` ដោយផ្ទាល់ ផ្តល់ Full Ownership និងងាយស្រួលកែប្រែ"
+      - "វាជា CSS Framework ដាច់ដោយឡែក"
+      - "វាដំណើរការតែជាមួយ PHP"
+      - "វាមិនអាចប្រើជាមួយ Tailwind បានទេ"
+    correctAnswer: 1
+    explanation: "shadcn/ui មិនមែនជា npm dependency ធ្ងន់ក្នុង node_modules ទេ គឺវា Copy-paste component source code មកកាន់ project របស់អ្នកផ្ទាល់ ដែលអនុញ្ញាតឱ្យអ្នក customize styling និង logic បាន ១០០%។"
+---
+
+## 🧩 1. Modern Component Architecture ជាមួយ shadcn/ui
+
+```mermaid
+flowchart TD
+    subgraph Traditional["Traditional UI Libraries (Black Box)"]
+        direction TB
+        T1["Install <code>node_modules/material-ui</code>"] --> T2["Hard to customize styles & logic"]
+        T2 --> T3["Heavy bundle size with unused components"]
+    end
+
+    subgraph Modern["Modern shadcn/ui Architecture (Full Ownership)"]
+        direction TB
+        M1["Radix UI (Accessible Headless Primitives)"] --> M2["Tailwind CSS (Utility Styling)"]
+        M2 --> M3["CLI Copies Code Direct to <code>src/components/ui/</code>"]
+        M3 --> M4["100% Editable Source Code in your Project 🚀"]
+    end
+
+    style Traditional fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Modern fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🎨 2. ការប្រើប្រាស់ Lucide React Icons
+
+```bash
+npm install lucide-react
+```
+
+```jsx
+import { LayoutDashboard, Users, ShoppingCart, Settings, Bell } from 'lucide-react';
+
+export function SidebarNav() {
+  return (
+    <nav className="w-64 bg-slate-900 text-slate-300 min-h-screen p-4 space-y-2">
+      <div className="flex items-center gap-3 px-3 py-4 text-white font-bold border-b border-slate-800">
+        <LayoutDashboard className="text-blue-500" />
+        <span>Admin Panel</span>
+      </div>
+
+      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-medium">
+        <Users size={18} />
+        <span>អតិថិជន</span>
+      </a>
+
+      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+        <ShoppingCart size={18} />
+        <span>ការបញ្ជាទិញ</span>
+      </a>
+
+      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
+        <Settings size={18} />
+        <span>ការកំណត់</span>
+      </a>
+    </nav>
+  );
+}
+```

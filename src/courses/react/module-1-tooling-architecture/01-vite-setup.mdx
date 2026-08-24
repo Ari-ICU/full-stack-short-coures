@@ -1,0 +1,162 @@
+---
+title: Setting up React with Vite & Project Structure
+description: រៀនពីរបៀបបង្កើតគម្រោង React ដោយប្រើប្រាស់ Vite, ការដំឡើង Tailwind CSS, និងការស្វែងយល់ពីរចនាសម្ព័ន្ធ Project ទាំងមូល។
+objectives:
+  - ចេះបង្កើត និងដំណើរការ React Project ជាមួយ Vite
+  - ចេះដំឡើង និង Configure Tailwind CSS ក្នុង Vite
+  - យល់ដឹងពីរចនាសម្ព័ន្ធ Folder និងឯកសារសំខាន់ៗក្នុង React
+  - ស្គាល់ពីតួនាទីរបស់ NPM Scripts (`dev`, `build`, `preview`)
+module: module-1-tooling-architecture
+order: 1
+quiz:
+  - question: "ហេតុអ្វីបានជាគេនិយមប្រើប្រាស់ Vite ជំនួសឱ្យ Create React App (CRA) ក្នុងគម្រោងទំនើប?"
+    options:
+      - "ព្រោះ CRA មិនគាំទ្រ JavaScript"
+      - "ព្រោះ Vite ប្រើប្រាស់ Native ES Modules (ESM) និង esbuild ដែលផ្តល់ល្បឿន Server Start និង Hot Module Replacement (HMR) លឿនជាង CRA រាប់សិបដង"
+      - "ព្រោះ Vite មិនបាច់ប្រើ Node.js"
+      - "ព្រោះ Vite បង្កើតបានតែ static HTML"
+    correctAnswer: 2
+    explanation: "Vite គឺជា Modern Build Tool ដែលប្រើប្រាស់ Browser Native ES Modules និង esbuild (សរសេរដោយ Go) ធ្វើឱ្យការ start dev server និង update code (HMR) មានល្បឿនលឿនភ្លាមៗ។"
+---
+
+## ⚡ 1. ការបង្កើតគម្រោង React ជាមួយ Vite
+
+**Vite** គឺជា Build Tool ជំនាន់ថ្មីដែលផ្តល់ល្បឿនលឿនបំផុតសម្រាប់ Frontend Development។
+
+### ជំហានបង្កើតតាម Terminal៖
+
+```bash
+# 1. បង្កើតគម្រោងថ្មី (ជ្រើសរើស React រួចយក JavaScript)
+npm create vite@latest my-react-app
+
+# 2. ចូលទៅកាន់ Folder គម្រោង
+cd my-react-app
+
+# 3. ដំឡើង Dependencies
+npm install
+```
+
+---
+
+## 🎨 2. ការដំឡើង Tailwind CSS ក្នុង Vite (Tailwind Setup)
+
+ដើម្បីសរសេរ Styling បានលឿន និងស្អាត យើងដំឡើង **Tailwind CSS** បន្ថែមចូលក្នុងគម្រោង Vite របស់យើង៖
+
+### ជំហានទី ១: ដំឡើង Tailwind Packages
+```bash
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+*ពាក្យបញ្ជានេះនឹងបង្កើតឯកសារ `tailwind.config.js` និង `postcss.config.js` ឱ្យយើងដោយស្វ័យប្រវត្តិ។*
+
+### ជំហានទី ២: កំណត់ Template Paths ក្នុង `tailwind.config.js`
+បើកឯកសារ `tailwind.config.js` រួចបន្ថែម paths ក្នុង `content`៖
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+### ជំហានទី ៣: បន្ថែម Tailwind Directives ក្នុង `src/index.css`
+លុបកូដចាស់ៗក្នុង `src/index.css` ចោលទាំងអស់ ហើយដាក់ ៣ បន្ទាត់នេះចូល៖
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+### ជំហានទី ៤: ដំណើរការ Server និងតេស្តមើលលទ្ធផល
+```bash
+npm run dev
+```
+
+សាកល្បងសរសេរក្នុង `src/App.jsx`៖
+```jsx
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
+      <div className="bg-white p-8 rounded-3xl shadow-xl text-center max-w-sm">
+        <h1 className="text-2xl font-black text-slate-800">⚛️ React + Vite + Tailwind</h1>
+        <p className="text-slate-500 text-sm mt-2">ការដំឡើងទទួលបានជោគជ័យ ១០០%! 🎉</p>
+        <button className="mt-4 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-md">
+          Get Started
+        </button>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 📁 រចនាសម្ព័ន្ធ Folder & Files (Project Architecture)
+
+```mermaid
+flowchart TD
+    subgraph Browser["1. Entry Point in Browser"]
+        A["index.html<br><code>&lt;div id='root'&gt;&lt;/div&gt;</code>"]
+    end
+
+    subgraph ReactMount["2. React JavaScript Mounting"]
+        B["src/main.jsx<br><code>ReactDOM.createRoot(root).render(&lt;App /&gt;)</code>"]
+    end
+
+    subgraph ComponentHierarchy["3. Component Tree Hierarchy"]
+        C["src/App.jsx (Root Component)"]
+        D["src/components/Navbar.jsx"]
+        E["src/components/Hero.jsx"]
+        F["src/components/Footer.jsx"]
+        
+        C --> D
+        C --> E
+        C --> F
+    end
+
+    A -->|Link Script Tag| B
+    B -->|Mount into #root| C
+
+    style Browser fill:#fff5f5,stroke:#e53e3e,color:#000
+    style ReactMount fill:#fffaf0,stroke:#dd6b20,color:#000
+    style ComponentHierarchy fill:#ebf8ff,stroke:#3182ce,color:#000
+```
+
+1. **`index.html`:** ឯកសារ HTML តែមួយគត់នៃ Single Page Application (SPA) ដែលផ្ទុក `<div id="root"></div>`។
+2. **`src/main.jsx`:** Entry point របស់ React ដែលចាប់យក DOM element `#root` និង inject `<App />` ចូលតាមរយៈ `ReactDOM.createRoot()`។
+3. **`src/App.jsx`:** Root Component ស្នូលដែលផ្គុំ Components ដទៃទៀត។
+4. **`package.json`:** គ្រប់គ្រង Dependencies (ដូចជា `react`, `react-dom`) និង Scripts សម្រាប់ Run/Build។
+
+---
+
+## 📦 NPM Scripts Lifecycle
+
+```mermaid
+flowchart LR
+    subgraph DevMode["Development Mode (npm run dev)"]
+        direction TB
+        Dev1["Vite Dev Server (Localhost:5173)"]
+        Dev2["Instant ES Modules + Hot Module Replacement (HMR)"]
+        Dev1 --> Dev2
+    end
+
+    subgraph ProdMode["Production Build (npm run build)"]
+        direction TB
+        Prod1["Rollup Compiler & Minifier"]
+        Prod2["Output: /dist folder (Static HTML + CSS + Chunks)"]
+        Prod1 --> Prod2
+    end
+
+    style DevMode fill:#f0fff4,stroke:#38a169,color:#000
+    style ProdMode fill:#faf5ff,stroke:#805ad5,color:#000
+```
+
+- **`npm run dev`:** បើក Local Server អមជាមួយ **Hot Module Replacement (HMR)** (កែកូដឃើញភ្លាមៗ)។
+- **`npm run build`:** Compile កូដទាំងអស់ទៅជា minified static files ក្នុង folder `dist/` សម្រាប់ deploy ទៅ Production។
+- **`npm run preview`:** តេស្តដំណើរការ Production build នៅលើ local machine មុន deploy។

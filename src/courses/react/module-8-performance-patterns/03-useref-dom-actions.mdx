@@ -1,0 +1,98 @@
+---
+title: DOM Manipulation & Imperative Actions using useRef
+description: សិក្សាពីការប្រើប្រាស់ `useRef` Hook សម្រាប់ផ្ទុក Mutable Values ដោយមិន Re-render និងការគ្រប់គ្រង Real DOM Elements (Focus, Scroll, Video Playback)។
+objectives:
+  - "យល់ពីភាពខុសគ្នារវាង useState (Trigger Re-render) និង useRef (No Re-render)"
+  - "ចេះភ្ជាប់ ref prop ទៅលើ Real DOM Elements"
+  - "ចេះបញ្ជា Imperative Actions ដូចជា Input Auto-focus, Scrolling, និង Storing Timers"
+module: module-8-performance-patterns
+order: 3
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នាចម្បងរវាង `useState` និង `useRef`?"
+    options:
+      - "ការកែប្រែ `useState` នឹង Trigger Re-render លើ UI រីឯការកែប្រែ `useRef.current` នឹងមិន Trigger Re-render ឡើយ"
+      - "`useRef` សម្រាប់តែ CSS"
+      - "`useState` ដំណើរការតែក្នុង Node.js"
+      - "ពួកវាគ្មានអ្វីខុសគ្នាទេ"
+    correctAnswer: 1
+    explanation: "`useRef` គឺជា JavaScript Object ធម្មតាមួយ `{ current: initialValue }` ដែលតម្លៃរបស់វាត្រូវបាន persist រវាងគ្រប់ renders ដោយការផ្លាស់ប្តូរតម្លៃ `ref.current = newValue` នឹងមិនបង្កឱ្យ Component ត្រូវ Re-render ឡើយ។"
+---
+
+## 🔍 1. `useState` vs `useRef` Architecture
+
+```mermaid
+flowchart TD
+    subgraph useStateModel["useState (Reactive / UI State)"]
+        direction TB
+        S1["setCount(count + 1)"] --> S2["Triggers Re-render Cycle 🔄"]
+        S2 --> S3["UI Repainted on Screen"]
+    end
+
+    subgraph useRefModel["useRef (Silent Container / DOM Node)"]
+        direction TB
+        R1["timerRef.current = 123"] --> R2["Mutates in Memory Instantly ⚡"]
+        R2 --> R3["NO Re-render Triggered (Silent)"]
+    end
+
+    style useStateModel fill:#ebf8ff,stroke:#3182ce,color:#000
+    style useRefModel fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង: Focus Input & Video Control
+
+```jsx
+import { useRef } from 'react';
+
+export default function RefDemo() {
+  const inputRef = useRef(null);
+  const videoRef = useRef(null);
+
+  const handleFocus = () => {
+    // បញ្ជា DOM ផ្ទាល់ឱ្យ Focus នៅលើ Input
+    inputRef.current.focus();
+  };
+
+  const handlePlayVideo = () => {
+    videoRef.current.play();
+  };
+
+  const handlePauseVideo = () => {
+    videoRef.current.pause();
+  };
+
+  return (
+    <div className="p-8 max-w-md mx-auto space-y-6">
+      {/* 1. DOM Focus */}
+      <div className="p-5 border rounded-2xl bg-white shadow-sm space-y-3">
+        <h3 className="font-bold">Input Focus Control</h3>
+        <input 
+          ref={inputRef}
+          type="text" 
+          placeholder="ចុចប៊ូតុងដើម្បី Focus ខ្ញុំ..." 
+          className="w-full border px-3 py-2 rounded-lg"
+        />
+        <button onClick={handleFocus} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm">
+          Focus Input 🎯
+        </button>
+      </div>
+
+      {/* 2. Video Player Imperative Play/Pause */}
+      <div className="p-5 border rounded-2xl bg-white shadow-sm space-y-3">
+        <h3 className="font-bold">Video Player Control</h3>
+        <video 
+          ref={videoRef}
+          width="100%" 
+          className="rounded-lg"
+          src="https://www.w3schools.com/html/mov_bbb.mp4" 
+        />
+        <div className="flex gap-2">
+          <button onClick={handlePlayVideo} className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm">Play</button>
+          <button onClick={handlePauseVideo} className="px-4 py-2 bg-rose-600 text-white rounded-lg font-bold text-sm">Pause</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```

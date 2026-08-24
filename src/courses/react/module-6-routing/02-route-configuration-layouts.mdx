@@ -1,0 +1,100 @@
+---
+title: Route Configuration, Layouts & the <Outlet/> Component
+description: សិក្សាពី Nested Routing, Shared Layouts (Navbar + Sidebar + Footer), និងតួនាទីរបស់ `<Outlet />` Component។
+objectives:
+  - យល់ពី Nested Routes ក្នុង React Router v6+
+  - បង្កើត Shared Layouts ដោយមិនបាច់ Re-render Navbar/Footer
+  - ចេះប្រើ `<Outlet />` ជា Placeholder សម្រាប់ Child Routes
+module: module-6-routing
+order: 2
+quiz:
+  - question: "តើអ្វីទៅជាតួនាទីរបស់ `<Outlet />` នៅក្នុង Layout Component?"
+    options:
+      - "ជាប៊ូតុងសម្រាប់ Logout"
+      - "ជា Placeholder/Slot ដែល React Router នឹង inject Child Route Component ដែលត្រូវនឹង URL បច្ចុប្បន្នចូលមកបង្ហាញ"
+      - "ជា Database connection"
+      - "ជា Server route"
+    correctAnswer: 2
+    explanation: "`<Outlet />` ដើរតួជាកន្លែងដែល Child Routes (ដូចជា Profile, Settings) នឹងត្រូវ render នៅខាងក្នុង Shared Layout (Navbar + Sidebar)។"
+---
+
+## 🏛️ 1. Layout Routes Architecture
+
+```mermaid
+flowchart TD
+    subgraph SharedLayout["Shared MainLayout (&lt;MainLayout /&gt;)"]
+        direction TB
+        Nav["&lt;Navbar /&gt; (Persistent Across Routes)"]
+        OutletNode["&lt;Outlet /&gt; (Dynamic View Slot)"]
+        Foot["&lt;Footer /&gt; (Persistent Across Routes)"]
+        Nav --> OutletNode --> Foot
+    end
+
+    subgraph ChildViews["Child Views (Swapped Inside &lt;Outlet /&gt;)"]
+        direction LR
+        HomeView["&lt;HomePage /&gt; (URL: '/')"]
+        ProdView["&lt;ProductsPage /&gt; (URL: '/products')"]
+    end
+
+    OutletNode -. Injects .-> HomeView
+    OutletNode -. Injects .-> ProdView
+
+    style SharedLayout fill:#ebf8ff,stroke:#3182ce,color:#000
+    style OutletNode fill:#fffaf0,stroke:#dd6b20,stroke-width:2px,color:#000
+    style ChildViews fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង
+
+### ក. បង្កើត `MainLayout.jsx`
+```jsx
+import { Outlet, Link } from 'react-router-dom';
+
+export default function MainLayout() {
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Persistent Navbar */}
+      <header className="bg-slate-900 text-white p-4 flex justify-between items-center">
+        <span className="font-black text-xl">MyStore</span>
+        <nav className="space-x-4">
+          <Link to="/" className="hover:text-blue-400">ទំព័រដើម</Link>
+          <Link to="/products" className="hover:text-blue-400">ផលិតផល</Link>
+        </nav>
+      </header>
+
+      {/* Dynamic Content Slot */}
+      <main className="flex-1 p-6 bg-slate-50">
+        <Outlet />
+      </main>
+
+      {/* Persistent Footer */}
+      <footer className="bg-slate-200 text-slate-600 p-4 text-center text-sm">
+        © 2026 MyStore. All Rights Reserved.
+      </footer>
+    </div>
+  );
+}
+```
+
+### ខ. កំណត់ Nested Routes ក្នុង `App.jsx`
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import HomePage from './pages/HomePage';
+import ProductsPage from './pages/ProductsPage';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="products" element={<ProductsPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```

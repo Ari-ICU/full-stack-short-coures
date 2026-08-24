@@ -1,0 +1,53 @@
+---
+title: Understanding the Component Lifecycle
+description: ស្វែងយល់ពីដំណាក់កាលទាំង ៣ នៃ React Component Lifecycle (Mounting, Updating, Unmounting)។
+objectives:
+  - យល់ពីដំណាក់កាលទាំង ៣ នៃ Component Lifecycle
+  - ស្គាល់ពី Side Effects និងមូលហេតុដែលមិនអាចដាក់ក្នុង Render Phase
+  - ត្រៀមខ្លួនប្រើប្រាស់ `useEffect` Hook សម្រាប់គ្រប់គ្រង Lifecycle Events
+module: module-4-effects-api
+order: 1
+quiz:
+  - question: "តើដំណាក់កាល 'Unmounting' ក្នុង Component Lifecycle កើតឡើងនៅពេលណា?"
+    options:
+      - "នៅពេល Component ត្រូវបាន Render លើកដំបូង"
+      - "នៅពេល Component ត្រូវបានដកចេញពី DOM អេក្រង់ (ឧទាហរណ៍ ពេល User ចាកចេញពីទំព័រនោះ)"
+      - "នៅពេល State ផ្លាស់ប្តូរ"
+      - "នៅពេលដំឡើង npm packages"
+    correctAnswer: 2
+    explanation: "Unmounting គឺជាដំណាក់កាលដែល Component ត្រូវបាន Remove ចេញពី Browser DOM។ នេះជាពេលដែលយើងត្រូវ Clean up memory (ដូចជា stop timers, cancel active network requests)។"
+---
+
+## 🔄 1. ដំណាក់កាលទាំង ៣ នៃ Lifecycle
+
+Component នីមួយៗក្នុង React ឆ្លងកាត់វដ្តជីវិត (Lifecycle) ចំនួន ៣ ដំណាក់កាល៖
+
+```mermaid
+flowchart LR
+    subgraph Mount["1. Mounting (កើតឡើង)"]
+        M1["Component Render ដំបូង"] --> M2["បញ្ចូលទៅក្នុង DOM"]
+    end
+
+    subgraph Update["2. Updating (ប្រែប្រួល)"]
+        U1["Props / State ដូរ"] --> U2["Re-render & Patch DOM"]
+    end
+
+    subgraph Unmount["3. Unmounting (រលត់ទៅវិញ)"]
+        D1["ដកចេញពី DOM"] --> D2["Cleanup Memory & Timers"]
+    end
+
+    Mount --> Update --> Unmount
+
+    style Mount fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Update fill:#fffaf0,stroke:#dd6b20,color:#000
+    style Unmount fill:#fff5f5,stroke:#e53e3e,color:#000
+```
+
+---
+
+## ⚡ 2. ហេតុអ្វីត្រូវស្គាល់ Lifecycle?
+
+នៅក្នុងការសរសេរកូដជាក់ស្តែង យើងតែងតែត្រូវការ៖
+- **នៅពេល Mount:** ទាញយកទិន្នន័យពី Backend API, បង្កើត WebSocket Connection, ចាប់ផ្តើម Timer
+- **នៅពេល Update:** Update ទិន្នន័យថ្មីនៅពេល User ប្តូរ ID ឬ Filter
+- **នៅពេល Unmount:** Clear Timers (`clearInterval`), បិទ WebSocket ដើម្បីកុំឱ្យ Leak Memory!

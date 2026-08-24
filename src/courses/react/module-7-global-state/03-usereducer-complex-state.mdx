@@ -1,0 +1,101 @@
+---
+title: Complex State Logic with useReducer
+description: សិក្សាពី The Reducer Pattern, Hook `useReducer`, `dispatch(action)`, និងការគ្រប់គ្រង Complex State ក្នុង React។
+objectives:
+  - យល់ពី Reducer Function (`(state, action) => newState`)
+  - ស្គាល់ពី Action Objects (`{ type, payload }`)
+  - ចេះជំនួស `useState` ច្រើនជាន់ដោយប្រើ `useReducer` តែមួយ
+module: module-7-global-state
+order: 3
+quiz:
+  - question: "តើអ្វីទៅជា Pure Reducer Function?"
+    options:
+      - "ជា Function ដែលធ្វើ API call ដោយផ្ទាល់"
+      - "ជា Pure JavaScript Function ដែលទទួលយក State បច្ចុប្បន្ន និង Action រួច return ចេញនូវ New State ដោយមិន mutate state ចាស់ និងគ្មាន side-effects"
+      - "ជា Function សម្រាប់ render JSX"
+      - "ជា Database query"
+    correctAnswer: 2
+    explanation: "Reducer គឺជា Pure Function ដែលត្រូវតែ Predictable: Given the same state and action, it must always return the exact same new state object without mutating existing state."
+---
+
+## ⚙️ 1. The Reducer Pattern Loop
+
+```mermaid
+flowchart TD
+    subgraph ReducerLoop["The Reducer Pattern Architecture"]
+        direction TB
+        UI["1. User Action in UI (e.g. clicks 'Add to Cart')"] --> Dispatch["2. <code>dispatch({ type: 'ADD_ITEM', payload: product })</code>"]
+        Dispatch --> Reducer["3. Pure Reducer Function: <code>(state, action) =&gt; newState</code>"]
+        Reducer --> NewState["4. Compute New State (Immutable Copy)"]
+        NewState --> Store["5. Central Store Updates"]
+        Store --> ReRender["6. Subscribed UI Components Re-render 🚀"]
+    end
+
+    style ReducerLoop fill:#f8f9fa,stroke:#ced4da,color:#000
+    style UI fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Dispatch fill:#fffaf0,stroke:#dd6b20,color:#000
+    style Reducer fill:#faf5ff,stroke:#805ad5,color:#000
+    style ReRender fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង: Shopping Cart Reducer
+
+```jsx
+import { useReducer } from 'react';
+
+const initialState = { items: [], totalAmount: 0 };
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const updatedItems = [...state.items, action.payload];
+      return {
+        items: updatedItems,
+        totalAmount: state.totalAmount + action.payload.price,
+      };
+    }
+    case 'REMOVE_ITEM': {
+      const updatedItems = state.items.filter((i) => i.id !== action.payload.id);
+      return {
+        items: updatedItems,
+        totalAmount: state.totalAmount - action.payload.price,
+      };
+    }
+    case 'CLEAR_CART':
+      return initialState;
+    default:
+      return state;
+  }
+}
+
+export default function CartApp() {
+  const [cart, dispatch] = useReducer(cartReducer, initialState);
+
+  return (
+    <div className="p-6 max-w-md mx-auto border rounded-2xl">
+      <h2 className="text-xl font-bold mb-4">កន្ត្រកទំនិញ (${cart.totalAmount})</h2>
+      <button
+        onClick={() => dispatch({ type: 'ADD_ITEM', payload: { id: Date.now(), name: 'Mouse', price: 25 } })}
+        className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg"
+      >
+        + បន្ថែមទំនិញ ($25)
+      </button>
+      <ul className="mt-4 divide-y">
+        {cart.items.map((item) => (
+          <li key={item.id} className="py-2 flex justify-between">
+            <span>{item.name} (${item.price})</span>
+            <button 
+              onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item })}
+              className="text-red-500 text-xs font-bold"
+            >
+              លុប
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```

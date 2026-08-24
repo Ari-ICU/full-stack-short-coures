@@ -1,0 +1,128 @@
+---
+title: "Hands-on Mini Project: Profile & Product Card Library"
+description: អនុវត្តបង្កើត Profile & Product Card Component Library ដោយអនុវត្តតាមរចនាសម្ព័ន្ធ Modular Files និង Clean Code។
+objectives:
+  - បង្កើត Reusable Card Components ដែលបំបែកឯកសារច្បាស់លាស់
+  - អនុវត្ត Component Nesting និង JSX Syntax Rules
+  - បង្កើត Component Library Layout សម្រាប់បង្ហាញ UI
+module: module-1-tooling-architecture
+order: 5
+quiz:
+  - question: "តើគោលការណ៍ Single Responsibility Principle (SRP) ជួយអ្វីខ្លះដល់ Component Library?"
+    options:
+      - "ធ្វើអោយកូដ JSX កាន់តែវែង"
+      - "ធានាថា Component នីមួយៗទទួលខុសត្រូវតែមួយមុខងារច្បាស់លាស់ ងាយស្រួល Reuse និង Test"
+      - "លុបចោលតម្រូវការប្រើ CSS"
+      - "ធ្វើអោយ App ដើរលើ Server"
+    correctAnswer: 2
+    explanation: "SRP ជួយឱ្យ Component នីមួយៗ (ដូចជា Avatar, Card, Button) ងាយស្រួលយកទៅផ្គុំ និងប្រើប្រាស់ឡើងវិញគ្រប់កន្លែងដោយមិនមានកូដជាន់គ្នា។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងសាងសង់ **Card Component Library** ដែលមានរចនាសម្ព័ន្ធឯកសារដាច់ដោយឡែកពីគ្នា សម្រាប់បង្ហាញទាំង **User Profile Card** និង **E-Commerce Product Card**។
+
+```text
+src/
+├── components/
+│   ├── cards/
+│   │   ├── ProfileCard.jsx
+│   │   └── ProductCard.jsx
+│   └── ui/
+│       ├── Avatar.jsx
+│       └── PriceTag.jsx
+└── App.jsx
+```
+
+---
+
+## 🛠️ ការសរសេរកូដអនុវត្តជាក់ស្តែង
+
+### 1. បង្កើត UI Primitives (`src/components/ui/Avatar.jsx`)
+```jsx
+export function Avatar({ src, alt }) {
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      className="w-20 h-20 rounded-full border-2 border-blue-500 object-cover shadow-sm" 
+    />
+  );
+}
+```
+
+### 2. បង្កើត ProfileCard (`src/components/cards/ProfileCard.jsx`)
+```jsx
+import { Avatar } from '../ui/Avatar';
+
+export default function ProfileCard({ name, role, bio, avatarUrl }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-md p-6 max-w-sm text-center border border-gray-100">
+      <div className="flex justify-center mb-4">
+        <Avatar src={avatarUrl} alt={name} />
+      </div>
+      <h3 className="text-xl font-bold text-gray-800">{name}</h3>
+      <p className="text-sm font-semibold text-blue-600 mb-2">{role}</p>
+      <p className="text-gray-600 text-sm">{bio}</p>
+      <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+        Connect Profile
+      </button>
+    </div>
+  );
+}
+```
+
+### 3. បង្កើត ProductCard (`src/components/cards/ProductCard.jsx`)
+```jsx
+export default function ProductCard({ title, price, category, imageUrl }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden max-w-sm border border-gray-100">
+      <img src={imageUrl} alt={title} className="w-full h-48 object-cover" />
+      <div className="p-5">
+        <span className="text-xs uppercase font-bold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-full">
+          {category}
+        </span>
+        <h4 className="text-lg font-bold text-gray-800 mt-2">{title}</h4>
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-2xl font-black text-gray-900">${price}</span>
+          <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+### 4. ផ្គុំចូលក្នុង `src/App.jsx`
+```jsx
+import ProfileCard from './components/cards/ProfileCard';
+import ProductCard from './components/cards/ProductCard';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-gray-50 p-10">
+      <h1 className="text-3xl font-black text-center text-gray-900 mb-10">
+        🎨 Component Library Showcase
+      </h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <ProfileCard 
+          name="រដ្ឋា ធឿន"
+          role="Full Stack Developer"
+          bio="ជំនាញក្នុងការសរសេរ React, Node.js និង Cloud Architecture។"
+          avatarUrl="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300"
+        />
+
+        <ProductCard 
+          title="Mechanical Keyboard (RGB)"
+          price={89.99}
+          category="Electronics"
+          imageUrl="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500"
+        />
+      </div>
+    </div>
+  );
+}
+```

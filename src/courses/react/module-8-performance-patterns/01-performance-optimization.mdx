@@ -1,0 +1,102 @@
+---
+title: Performance Optimization with React.memo, useCallback & useMemo
+description: សិក្សាពីបច្ចេកទេសបង្កើនល្បឿន Render ក្នុង React ដោយប្រើ `React.memo` (Memoization), `useMemo`, និង `useCallback`។
+objectives:
+  - យល់ពីដំណើរការ Re-render Waterfall និងពេលណាដែលត្រូវ Optimize
+  - ចេះប្រើ `React.memo` ដើម្បី Skip Child Re-renders
+  - ចេះប្រើ `useMemo` (Cache expensive calculations) និង `useCallback` (Cache function references)
+module: module-8-performance-patterns
+order: 1
+quiz:
+  - question: "តើ `useMemo` និង `useCallback` មានភាពខុសគ្នាដូចម្តេច?"
+    options:
+      - "`useMemo` ធ្វើការ Cache តម្លៃលទ្ធផលនៃការគណនា (Computed Value) រីឯ `useCallback` ធ្វើការ Cache តួ Function Reference ផ្ទាល់"
+      - "`useMemo` សម្រាប់ CSS រីឯ `useCallback` សម្រាប់ HTML"
+      - "`useCallback` ដំណើរការតែលើ Server"
+      - "ពួកវាទាំងពីរដូចគ្នា ១០០%"
+    correctAnswer: 1
+    explanation: "`useMemo(() => computeValue(a, b), [a, b])` ផ្តល់នូវ return value ចំណែក `useCallback((e) => handleClick(e), [])` ផ្តល់នូវ memoized function reference សម្រាប់ការពារ child re-render។"
+---
+
+## 🏎️ 1. Memoization Architecture ជាមួយ `React.memo`
+
+```mermaid
+flowchart TD
+    subgraph StandardRender["Standard React Re-render (Without Optimization)"]
+        direction TB
+        P1["Parent Component State Updates"] --> C1["Child Component Re-renders unconditionally ⚠️"]
+    end
+
+    subgraph MemoizedRender["Optimized with React.memo()"]
+        direction TB
+        P2["Parent Component State Updates"] --> Check{"Props Shallow Equality Check<br><code>prevProps === nextProps?</code>"}
+        Check -->|Props Changed (False)| C2["Child Re-renders 🔄"]
+        Check -->|Props Identical (True)| Skip["Skip Child Re-render ⚡ (Keeps Cached DOM)"]
+    end
+
+    style StandardRender fill:#fff5f5,stroke:#e53e3e,color:#000
+    style MemoizedRender fill:#f0fff4,stroke:#38a169,color:#000
+    style Skip fill:#c6f6d5,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង: `useMemo` & `useCallback`
+
+```jsx
+import { useState, useMemo, useCallback, memo } from 'react';
+
+// 1. Child Component Memoized
+const ExpensiveChart = memo(function ExpensiveChart({ data, onExport }) {
+  console.log("ExpensiveChart rendered! 🎨");
+  return (
+    <div className="p-4 border rounded-xl bg-white shadow-sm mt-4">
+      <p className="font-bold">Chart Points: {data.length}</p>
+      <button onClick={onExport} className="text-xs bg-slate-900 text-white px-3 py-1 rounded mt-2">
+        Export Data
+      </button>
+    </div>
+  );
+});
+
+export default function PerformanceApp() {
+  const [count, setCount] = useState(0);
+  const [filterQuery, setFilterQuery] = useState('');
+
+  // 2. useMemo: Cache Expensive Calculation
+  const filteredData = useMemo(() => {
+    console.log("Computing heavy data filter... ⏳");
+    const rawData = Array.from({ length: 5000 }, (_, i) => `Item #${i + 1}`);
+    return rawData.filter((item) => item.includes(filterQuery));
+  }, [filterQuery]); // Re-calculate តែពេល filterQuery ដូរ
+
+  // 3. useCallback: Cache Function Reference
+  const handleExport = useCallback(() => {
+    alert("Exported successfully!");
+  }, []); // Stable reference មិនប្តូរតាម count state ឡើយ
+
+  return (
+    <div className="p-8 max-w-md mx-auto">
+      <div className="flex gap-4 items-center mb-6">
+        <button 
+          onClick={() => setCount((c) => c + 1)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold"
+        >
+          Count: {count}
+        </button>
+        <span className="text-xs text-gray-500">(ការចុច Count មិនបង្កឱ្យ Chart re-render ឡើយ)</span>
+      </div>
+
+      <input
+        type="text"
+        value={filterQuery}
+        onChange={(e) => setFilterQuery(e.target.value)}
+        placeholder="ស្វែងរក Item..."
+        className="w-full border px-4 py-2 rounded-xl"
+      />
+
+      <ExpensiveChart data={filteredData} onExport={handleExport} />
+    </div>
+  );
+}
+```

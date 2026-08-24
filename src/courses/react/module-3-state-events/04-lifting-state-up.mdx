@@ -1,0 +1,88 @@
+---
+title: Lifting State Up for Parent-Child Communication
+description: សិក្សាពីបច្ចេកទេស Lifting State Up ដើម្បីចែករំលែកទិន្នន័យរវាង Sibling Components តាមរយៈ Parent Component។
+objectives:
+  - យល់ពីដែនកំណត់នៃការទុក State ដាច់ដោយឡែកក្នុង Sibling Components
+  - ចេះអនុវត្ត Lifting State Up ទៅកាន់ Parent រួម
+  - ចេះបញ្ជូន Callback Functions ពី Parent ចុះទៅ Child
+module: module-3-state-events
+order: 4
+quiz:
+  - question: "នៅពេល Sibling Components ពីរ (ឧ. SearchBar និង SearchResults) ត្រូវការចែករំលែកទិន្នន័យតែមួយ តើអ្នកគួរទុក State នៅកន្លែងណា?"
+    options:
+      - "ទុកនៅក្នុង SearchBar component តែមួយគត់"
+      - "លើក State នោះឡើងទៅកាន់ Parent Component រួមដែលនៅជិតបំផុត (Lift State Up)"
+      - "សរសេរកូដចូលទៅក្នុង Window Global Object"
+      - "បង្កើតឯកសារ HTML ថ្មីមួយទៀត"
+    correctAnswer: 2
+    explanation: "នៅក្នុង React ទិន្នន័យមិនអាចបញ្ជូនពីបងប្អូន (Sibling) ទៅបងប្អូនដោយផ្ទាល់បានទេ។ យើងត្រូវលើក State ទៅ Parent រួម ហើយ pass State ចុះទៅ Child A និង pass Setter/Callback ចុះទៅ Child B។"
+---
+
+## ⬆️ 1. អ្វីទៅជា Lifting State Up?
+
+នៅពេល Component ពីរ ឬច្រើនត្រូវការ State តែមួយ ដំណោះស្រាយរបស់ React គឺ **"លើក State នោះឡើងទៅកាន់ Parent រួមដែលនៅជិតបំផុត (Closest Common Ancestor)"**។
+
+```mermaid
+flowchart TD
+    subgraph Parent["Parent Component (&lt;FilterableList /&gt;)"]
+        State["Holds State: <code>searchTerm</code> &amp; <code>setSearchTerm</code>"]
+    end
+
+    subgraph Children["Sibling Components"]
+        ChildA["&lt;SearchBar /&gt;<br>(ទទួល <code>setSearchTerm</code>)"]
+        ChildB["&lt;ProductList /&gt;<br>(ទទួល <code>searchTerm</code>)"]
+    end
+
+    Parent -->|Passes Setter Callback| ChildA
+    Parent -->|Passes Filtered State| ChildB
+    ChildA -.->|User types ⬆️ triggers update| Parent
+
+    style Parent fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Children fill:#f8f9fa,stroke:#ced4da,color:#000
+    style ChildA fill:#fffaf0,stroke:#dd6b20,color:#000
+    style ChildB fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដគំរូអនុវត្តជាក់ស្តែង
+
+```jsx
+import { useState } from 'react';
+
+// Child A: Input Box
+function SearchInput({ value, onChangeText }) {
+  return (
+    <input 
+      type="text" 
+      value={value} 
+      onChange={(e) => onChangeText(e.target.value)} 
+      placeholder="ស្វែងរកឈ្មោះ..."
+      className="border px-4 py-2 rounded-lg w-full mb-4"
+    />
+  );
+}
+
+// Child B: Display Count
+function ResultSummary({ count }) {
+  return <p className="font-bold text-gray-700">រកឃើញចំនួន៖ {count} នាក់</p>;
+}
+
+// Parent: រក្សាទុក State រួម
+export default function SearchApp() {
+  const [query, setQuery] = useState('');
+  const allNames = ['រដ្ឋា', 'សីហា', 'ពិសិដ្ឋ', 'សុខា', 'វណ្ណា'];
+  
+  const filtered = allNames.filter((n) => n.includes(query));
+
+  return (
+    <div className="p-6 max-w-md mx-auto border rounded-2xl shadow-sm">
+      <SearchInput value={query} onChangeText={setQuery} />
+      <ResultSummary count={filtered.length} />
+      <ul className="mt-3 list-disc pl-5">
+        {filtered.map((name, i) => <li key={i}>{name}</li>)}
+      </ul>
+    </div>
+  );
+}
+```

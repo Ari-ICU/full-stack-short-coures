@@ -1,0 +1,159 @@
+---
+title: "Hands-on Mini Project: Persistent Shopping Cart & Auth Global State"
+description: អនុវត្តបង្កើត Global State System ពេញលេញជាមួយ React Context API & `useReducer` សម្រាប់ Shopping Cart Counter និង User Session Auth State។
+objectives:
+  - បង្កើត `CartContext` គ្រប់គ្រង Global Items, Add, Remove, Total Count
+  - បង្កើត `AuthContext` គ្រប់គ្រង Login / Logout Session
+  - ភ្ជាប់ Global Cart Badge ទៅលើ Navbar នៅគ្រប់ទំព័រ
+module: module-7-global-state
+order: 5
+quiz:
+  - question: "តើការបង្កើត CartContext ជួយអ្វីខ្លះដល់ Navbar និង Product Card នៅទំព័រផ្សេងគ្នា?"
+    options:
+      - "អនុញ្ញាតឱ្យ Navbar អាចបង្ហាញចំនួន Total Cart Items ភ្លាមៗនៅពេល User ចុច Add to Cart ក្នុង Product Card ដោយមិនបាច់ pass props ចុះឡើង"
+      - "ដើម្បីលុបបំបាត់តម្រូវការប្រើ React"
+      - "ដើម្បីឱ្យ CSS ដើរលើទូរស័ព្ទ"
+      - "ដើម្បីលុប HTML"
+    correctAnswer: 1
+    explanation: "Global State ជួយឱ្យ Navbar និង Product Card ដែលស្ថិតនៅមែកធាងខុសគ្នា អាច communicate និង share ទិន្នន័យ Shopping Cart ជាមួយគ្នាបានយ៉ាងរលូន។"
+---
+
+## 🎯 គោលដៅ Mini Project
+
+យើងនឹងបង្កើត **Global State Architecture** ដែលចែករំលែកទិន្នន័យ **Shopping Cart** និង **User Authentication** ទៅកាន់គ្រប់ Components ទាំងអស់ក្នុងកម្មវិធី។
+
+---
+
+## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+
+```jsx
+import { createContext, useContext, useReducer, useState } from 'react';
+
+// ==========================================
+// 1. GLOBAL CART CONTEXT & REDUCER
+// ==========================================
+const CartContext = createContext();
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TO_CART': {
+      const existing = state.find((item) => item.id === action.payload.id);
+      if (existing) {
+        return state.map((item) =>
+          item.id === action.payload.id ? { ...item, qty: item.qty + 1 } : item
+        );
+      }
+      return [...state, { ...action.payload, qty: 1 }];
+    }
+    case 'REMOVE_FROM_CART':
+      return state.filter((item) => item.id !== action.payload);
+    case 'CLEAR_CART':
+      return [];
+    default:
+      return state;
+  }
+}
+
+export function CartProvider({ children }) {
+  const [cart, dispatch] = useReducer(cartReducer, []);
+
+  const addToCart = (product) => dispatch({ type: 'ADD_TO_CART', payload: product });
+  const removeFromCart = (id) => dispatch({ type: 'REMOVE_FROM_CART', payload: id });
+  const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, totalCount, totalPrice }}>
+      {children}
+    </CartContext.Provider>
+  );
+}
+
+export const useCart = () => useContext(CartContext);
+
+// ==========================================
+// 2. UI COMPONENTS USING GLOBAL STATE
+// ==========================================
+const PRODUCTS = [
+  { id: '1', name: 'MacBook Air M2', price: 999 },
+  { id: '2', name: 'Magic Trackpad', price: 129 },
+  { id: '3', name: 'Studio Display', price: 1599 },
+];
+
+function Navbar() {
+  const { totalCount } = useCart();
+  return (
+    <header className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center rounded-2xl mb-8">
+      <span className="font-black text-xl text-blue-400">⚡ AppleHub</span>
+      <div className="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold">
+        <span>🛒 កន្ត្រក:</span>
+        <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">{totalCount}</span>
+      </div>
+    </header>
+  );
+}
+
+function ProductGrid() {
+  const { addToCart } = useCart();
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      {PRODUCTS.map((prod) => (
+        <div key={prod.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-slate-800">{prod.name}</h3>
+            <p className="text-2xl font-black text-blue-600 mt-2">${prod.price}</p>
+          </div>
+          <button
+            onClick={() => addToCart(prod)}
+            className="mt-4 w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm"
+          >
+            + Add to Cart
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CartSummary() {
+  const { cart, removeFromCart, totalPrice } = useCart();
+  return (
+    <div className="mt-8 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+      <h3 className="text-lg font-bold text-slate-800 mb-4">សេចក្តីសង្ខេបកន្ត្រកទំនិញ (Cart Summary)</h3>
+      {cart.length === 0 ? (
+        <p className="text-slate-400 text-sm">គ្មានទំនិញក្នុងកន្ត្រកឡើយ</p>
+      ) : (
+        <div className="space-y-3">
+          {cart.map((item) => (
+            <div key={item.id} className="flex justify-between items-center py-2 border-b border-slate-50 text-sm">
+              <span className="font-medium text-slate-700">{item.name} x {item.qty}</span>
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-slate-900">${item.price * item.qty}</span>
+                <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:underline text-xs">
+                  លុប
+                </button>
+              </div>
+            </div>
+          ))}
+          <div className="flex justify-between items-center pt-3 text-lg font-black text-slate-900">
+            <span>តម្លៃសរុប៖</span>
+            <span className="text-blue-600">${totalPrice.toFixed(2)}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <CartProvider>
+      <div className="min-h-screen bg-slate-50 p-8 max-w-4xl mx-auto">
+        <Navbar />
+        <ProductGrid />
+        <CartSummary />
+      </div>
+    </CartProvider>
+  );
+}
+```

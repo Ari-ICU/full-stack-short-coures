@@ -1,0 +1,71 @@
+---
+title: Integrating Tailwind CSS in a React Project
+description: សិក្សាពីរបៀបដំឡើង និងប្រើប្រាស់ Tailwind CSS (Utility-First Framework) នៅក្នុងគម្រោង React + Vite។
+objectives:
+  - យល់ពីអត្ថប្រយោជន៍របស់ Utility-First CSS Architecture
+  - ចេះ Setup Tailwind CSS ក្នុង Vite (`tailwind.config.js`, `postcss.config.js`)
+  - ចេះប្រើ Utility Classes សម្រាប់ Flexbox, Grid, Responsive Design & Hover States
+module: module-5-styling-ui
+order: 2
+quiz:
+  - question: "តើអ្វីទៅជាអត្ថប្រយោជន៍ចម្បងនៃការប្រើប្រាស់ Tailwind CSS ក្នុង React?"
+    options:
+      - "វាផ្តល់ Utility Classes ខ្លីៗសម្រាប់សរសេរផ្ទាល់លើ JSX ដោយមិនបាច់ប្តូរឯកសារចុះឡើង និងមិនបាច់គិតឈ្មោះ Class"
+      - "វាជំនួស JavaScript ទាំងស្រុង"
+      - "វាទាញយក Data ពី Server ដោយស្វ័យប្រវត្តិ"
+      - "វាធ្វើឱ្យ Browser មិនបាច់ compile CSS"
+    correctAnswer: 1
+    explanation: "Tailwind CSS ប្រើប្រាស់ Utility-First Classes (ដូចជា `flex`, `p-4`, `bg-blue-500`) ធ្វើឱ្យយើងសរសេរ UI បានលឿនក្នុង JSX ផ្ទាល់ និងមាន Bundle Size តូចបំផុតតាមរយៈ Purge/JIT engine។"
+---
+
+## 🎨 1. Traditional CSS vs Tailwind CSS Workflow
+
+```mermaid
+flowchart TD
+    subgraph TraditionalCSS["Traditional CSS Workflow (Context Switching)"]
+        direction LR
+        T1["Button.jsx<br><code>&lt;button class='btn-primary'&gt;</code>"] <-->|Switch Files 🔄| T2["Button.css<br><code>.btn-primary { bg: blue; ... }</code>"]
+    end
+
+    subgraph TailwindWorkflow["Tailwind Utility-First Workflow (Fast & Co-located)"]
+        direction LR
+        TW1["Button.jsx<br><code>&lt;button className='bg-blue-500 px-4 rounded text-white'&gt;</code>"]
+        TW2["Tailwind Scanner / JIT Compiler"]
+        TW3["Generated Minimal CSS Bundle"]
+        TW1 --> TW2 --> TW3
+    end
+
+    style TraditionalCSS fill:#fff5f5,stroke:#e53e3e,color:#000
+    style TailwindWorkflow fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## ⚙️ 2. ការដំឡើង Tailwind CSS ក្នុង Vite
+
+```bash
+# 1. ដំឡើង Tailwind Packages
+npm install -D tailwindcss postcss autoprefixer
+
+# 2. បង្កើត config files
+npx tailwindcss init -p
+```
+
+### កែប្រែ `tailwind.config.js`៖
+```javascript
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+### បន្ថែម Directives ទៅក្នុង `src/index.css`៖
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```

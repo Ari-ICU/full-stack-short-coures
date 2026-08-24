@@ -1,0 +1,71 @@
+---
+title: Navigation with <Link> & <NavLink>
+description: សិក្សាពីភាពខុសគ្នារវាង HTML `<a>` Tag និង React `<Link>` / `<NavLink>` អមដោយ Active Link Styling។
+objectives:
+  - យល់ពីមូលហេតុដែលមិនត្រូវប្រើ `<a href="...">` ក្នុង SPA
+  - ចេះប្រើ `<Link to="...">` សម្រាប់ Client-Side Navigation
+  - ចេះប្រើ `<NavLink>` សម្រាប់ highlight Active Navigation Links
+module: module-6-routing
+order: 3
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នាសំខាន់រវាង `<Link>` និង `<NavLink>` ក្នុង React Router?"
+    options:
+      - "`<NavLink>` ផ្តល់ `isActive` boolean parameter ក្នុង `className` ឬ `style` សម្រាប់ងាយស្រួល highlight link ដែលកំពុងបើក"
+      - "`<Link>` ដំណើរការតែជាមួយរូបភាព"
+      - "`<NavLink>` បង្កើត full page refresh"
+      - "ពួកវាគ្មានអ្វីខុសគ្នាឡើយ"
+    correctAnswer: 1
+    explanation: "`<NavLink>` ដឹងថា URL បច្ចុប្បន្នត្រូវគ្នានឹង `to` prop ឬអត់ ហើយផ្តល់ `{ isActive }` សម្រាប់យើងកំណត់ active styles (ឧ. ពណ៌ខៀវ ឬ underline)។"
+---
+
+## 🔗 1. ហេតុអ្វីត្រូវប្រើ `<Link>` ជំនួស `<a href>`?
+
+- **`<a href="/about">`:** បង្ខំឱ្យ Browser ធ្វើ **Full Page Reload 🔄** (បាត់បង់ State ក្នុង Memory និងដើរយឺត)។
+- **`<Link to="/about">`:** ផ្លាស់ប្តូរ URL ក្នុង Browser Address Bar និង update React Components ភ្លាមៗ **ដោយគ្មានការ Reload ⚡**។
+
+---
+
+## 🛠️ 2. កូដគំរូ: Active Link Styling ជាមួយ `<NavLink>`
+
+```jsx
+import { NavLink } from 'react-router-dom';
+
+export function NavigationBar() {
+  return (
+    <nav className="flex gap-4 p-4 bg-slate-900 text-slate-300">
+      <NavLink
+        to="/"
+        className={({ isActive }) =>
+          `px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+            isActive ? 'bg-blue-600 text-white' : 'hover:text-white'
+          }`
+        }
+      >
+        ទំព័រដើម
+      </NavLink>
+
+      <NavLink
+        to="/products"
+        className={({ isActive }) =>
+          `px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+            isActive ? 'bg-blue-600 text-white' : 'hover:text-white'
+          }`
+        }
+      >
+        ផលិតផល
+      </NavLink>
+
+      <NavLink
+        to="/contact"
+        className={({ isActive }) =>
+          `px-3 py-1.5 rounded-lg text-sm font-semibold transition ${
+            isActive ? 'bg-blue-600 text-white' : 'hover:text-white'
+          }`
+        }
+      >
+        ទំនាក់ទំនង
+      </NavLink>
+    </nav>
+  );
+}
+```

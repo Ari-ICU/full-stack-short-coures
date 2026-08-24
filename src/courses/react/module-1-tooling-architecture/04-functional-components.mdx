@@ -1,0 +1,108 @@
+---
+title: Functional Components, Nesting & Modular Imports/Exports
+description: សិក្សាពីរបៀបបង្កើត Functional Components, ការរៀបចំ Component Nesting Hierarchy, និងការប្រើប្រាស់ ES6 Modular Imports/Exports។
+objectives:
+  - ចេះបង្កើត Functional Components ជាមួយ PascalCase
+  - យល់ដឹងពី Component Nesting និង Single Responsibility Principle (SRP)
+  - ចេះប្រើ Default Export និង Named Export ក្នុង React
+module: module-1-tooling-architecture
+order: 4
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នារវាង Default Export និង Named Export ក្នុង React?"
+    options:
+      - "Default Export ប្រើសម្រាប់តែ HTML tags"
+      - "ឯកសារមួយអាចមាន Default Export តែមួយគត់ (នាំចូលដោយឈ្មោះអ្វីក៏បាន) រីឯ Named Export អាចមានច្រើន និងត្រូវនាំចូលក្នុងសញ្ញា { }"
+      - "Named Export ដំណើរការតែជាមួយ CSS"
+      - "ពួកវាទាំងពីរគ្មានអ្វីខុសគ្នាឡើយ"
+    correctAnswer: 2
+    explanation: "`export default Component` អនុញ្ញាតឱ្យនាំចូលដោយ `import MyComponent from './Component'` (ឈ្មោះតាមចិត្ត) ចំណែក `export { A, B }` ត្រូវតែនាំចូលតាមឈ្មោះពិតប្រាកដ `{ A, B }`។"
+---
+
+## 🧩 1. អ្វីទៅជា Functional Component?
+
+នៅក្នុង React, **Component** គឺជា JavaScript Function ដែលទទួល Data និង return ចេញជា JSX សម្រាប់គូរ UI នៅលើ Browser។ ឈ្មោះ Component ត្រូវតែចាប់ផ្តើមដោយ **PascalCase** (អក្សរធំនៅខាងមុខ) ជានិច្ច។
+
+```jsx
+// 1. បង្កើត Button Component
+export function PrimaryButton() {
+  return <button className="btn-primary">ចុចទីនេះ</button>;
+}
+```
+
+---
+
+## 🌳 2. Component Hierarchy & Nesting
+
+យើងអាចយក Components តូចៗមកផ្គុំគ្នា (Nesting) បង្កើតជារចនាសម្ព័ន្ធទំព័រពេញលេញមួយ៖
+
+```mermaid
+flowchart TD
+    subgraph RootLevel["Root Level"]
+        App["&lt;App /&gt; (Root Container)"]
+    end
+
+    subgraph LayoutLevel["Layout Level"]
+        Nav["&lt;Navbar /&gt;"]
+        Main["&lt;MainContent /&gt;"]
+        Foot["&lt;Footer /&gt;"]
+    end
+
+    subgraph FeatureLevel["Feature & UI Level"]
+        Side["&lt;Sidebar /&gt;"]
+        Feed["&lt;FeedList /&gt;"]
+        Card1["&lt;PostCard /&gt;"]
+        Card2["&lt;PostCard /&gt;"]
+        Btn["&lt;Button /&gt;"]
+    end
+
+    App --> Nav
+    App --> Main
+    App --> Foot
+
+    Main --> Side
+    Main --> Feed
+    Feed --> Card1
+    Feed --> Card2
+    Card1 --> Btn
+    Card2 --> Btn
+
+    style RootLevel fill:#ebf8ff,stroke:#3182ce,color:#000
+    style LayoutLevel fill:#fffaf0,stroke:#dd6b20,color:#000
+    style FeatureLevel fill:#f0fff4,stroke:#38a169,color:#000
+    style App fill:#3182ce,stroke:#fff,color:#fff
+    style Btn fill:#38a169,stroke:#fff,color:#fff
+```
+
+---
+
+## 📦 3. Modular Imports & Exports
+
+ដើម្បីឱ្យកូដស្អាត យើងបំបែក Component នីមួយៗដាក់ក្នុងឯកសារដាច់ដោយឡែកពីគ្នា ក្នុង folder `src/components/`៖
+
+```javascript
+// ឯកសារ: src/components/Header.jsx
+export default function Header() {
+  return <header><h1>គេហទំព័ររបស់ខ្ញុំ</h1></header>;
+}
+
+// ឯកសារ: src/components/Badge.jsx (Named Export)
+export function Badge({ label }) {
+  return <span className="badge">{label}</span>;
+}
+```
+
+នាំចូលមកប្រើក្នុង `App.jsx`៖
+```jsx
+// ឯកសារ: src/App.jsx
+import Header from './components/Header';       // Default Import
+import { Badge } from './components/Badge';     // Named Import
+
+export default function App() {
+  return (
+    <div>
+      <Header />
+      <Badge label="New Feature" />
+    </div>
+  );
+}
+```

@@ -1,0 +1,77 @@
+---
+title: The Virtual DOM, Reconciliation & SPA Workflow
+description: យល់ដឹងពីបេះដូងរបស់ React ដូចជា Single Page Application (SPA), Virtual DOM និង Diffing Reconciliation Algorithm។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Traditional MPA និង Modern React SPA
+  - យល់ដឹងពីដំណើរការ Virtual DOM និង Diffing Algorithm
+  - ស្គាល់ពីអត្ថប្រយោជន៍នៃ Reconciliation លើ Performance
+module: module-1-tooling-architecture
+order: 2
+quiz:
+  - question: "តើអ្វីទៅជា Reconciliation នៅក្នុង React?"
+    options:
+      - "ជាការដំឡើង Node.js លើកុំព្យូទ័រ"
+      - "ជា Algorithm ដែលប្រៀបធៀប Virtual DOM ចាស់ និងថ្មី (Diffing) រួច Update តែចំណុចណាដែលប្រែប្រួលលើ Real DOM"
+      - "ជាការលុប Browser Cache ចោលទាំងអស់"
+      - "ជាការ Compile CSS ទៅជា JavaScript"
+    correctAnswer: 2
+    explanation: "Reconciliation គឺជាដំណើរការដែល React ប្រៀបធៀប Virtual DOM Trees ទាំងពីរ (Diffing) ដើម្បីរកចំណុចដែលប្រែប្រួល និង patch តែ Element នោះទៅកាន់ Browser DOM ដោយមិនចាំបាច់ render ទំព័រឡើងវិញទាំងមូល។"
+---
+
+## ⚛️ 1. Single Page Application (SPA) Workflow
+
+នៅក្នុង **Single Page Application (SPA)** Browser ទាញយកឯកសារ HTML តែមួយដងគត់ (`index.html`)។ រាល់ការ navigate ទៅកាន់ page ផ្សេងៗ គឺ React ប្រើប្រាស់ JavaScript ដើម្បី update DOM ដោយគ្មានការ Full Page Reload ឡើយ។
+
+```mermaid
+flowchart TD
+    subgraph MPA["Traditional Multi-Page App (MPA)"]
+        direction TB
+        A1["User ចុច Link / Navigation"] --> A2["Browser ផ្ញើ Request ទៅ Server"]
+        A2 --> A3["Server បង្កើត HTML ថ្មីទាំងស្រុង"]
+        A3 --> A4["Browser ផ្ទុកទំព័រថ្មី (Full Page Reload 🔄)"]
+    end
+
+    subgraph SPA["Modern React Single-Page App (SPA)"]
+        direction TB
+        B1["User ចុច Link / Button"] --> B2["React Client-Side Router ចាប់យក Event"]
+        B2 --> B3["React គណនា DOM Diffing ក្នុង Memory"]
+        B3 --> B4["កែប្រែតែ Element ដែលផ្លាស់ប្តូរ (Fast Patch ⚡ គ្មាន Reload)"]
+    end
+
+    style MPA fill:#fff5f5,stroke:#e53e3e,stroke-width:2px,color:#000
+    style SPA fill:#f0fff4,stroke:#38a169,stroke-width:2px,color:#000
+    style A4 fill:#fed7d7,stroke:#e53e3e,color:#000
+    style B4 fill:#c6f6d5,stroke:#38a169,color:#000
+```
+
+---
+
+## 🎨 2. Virtual DOM & Reconciliation
+
+ការបញ្ជាឱ្យ Browser កែប្រែ Real HTML DOM ផ្ទាល់គឺស៊ីកម្លាំង CPU និងយឺត។ React ដោះស្រាយបញ្ហានេះដោយបង្កើត **Virtual DOM** (ស្រមោលនៃ DOM នៅក្នុង JavaScript Memory)។
+
+```mermaid
+flowchart TD
+    S1["1. State Change / User Action<br><code>setState(newValue)</code>"]
+    S2["2. Virtual DOM in Memory<br>(React calculates new lightweight Virtual Tree)"]
+    S3["3. Diffing Algorithm<br>(Compares Previous Virtual DOM vs New Virtual DOM)"]
+    S4["4. Reconciliation (Fast Patch)<br>(Updates ONLY changed elements on Real DOM)"]
+    S5["5. Updated UI Screen ⚡<br>(No Full Page Reload)"]
+
+    S1 -->|Trigger| S2
+    S2 -->|Compare| S3
+    S3 -->|Targeted Patch| S4
+    S4 -->|Repaint| S5
+
+    style S1 fill:#ebf8ff,stroke:#3182ce,stroke-width:2px,color:#000
+    style S2 fill:#fffaf0,stroke:#dd6b20,stroke-width:2px,color:#000
+    style S3 fill:#faf5ff,stroke:#805ad5,stroke-width:2px,color:#000
+    style S4 fill:#f0fff4,stroke:#38a169,stroke-width:2px,color:#000
+    style S5 fill:#c6f6d5,stroke:#38a169,stroke-width:2px,color:#000
+```
+
+### ដំណើរការ ៤ ជំហាន៖
+1. **Render Trigger:** State ឬ Props ផ្លាស់ប្តូរតម្លៃ។
+2. **Generate New Tree:** React បង្កើត Virtual DOM Tree ថ្មីមួយក្នុង Memory។
+3. **Diffing Algorithm:** React ប្រៀបធៀប Virtual DOM ថ្មី ជាមួយ Virtual DOM ចាស់។
+4. **Reconciliation:** React ធ្វើការ patch តែ DOM nodes ដែលផ្លាស់ប្តូរទៅកាន់ Real DOM នៅលើអេក្រង់។

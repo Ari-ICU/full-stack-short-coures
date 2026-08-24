@@ -1,0 +1,71 @@
+---
+title: State Immutability (Updating Primitives, Arrays & Objects)
+description: សិក្សាពីគោលការណ៍ Immutability ក្នុង React, របៀប Update Objects ជាមួយ Spread Operator, និង Array Operations (add, filter, map)។
+objectives:
+  - យល់ពីមូលហេតុដែល React ទាមទារ Immutability
+  - ចេះ Update Nested Objects ដោយប្រើ Spread Operator `...`
+  - ចេះ Update Arrays ដោយប្រើ `.concat()`, `.filter()`, និង `.map()` (ជៀសវាង `push`/`splice`)
+module: module-3-state-events
+order: 3
+quiz:
+  - question: "ហេតុអ្វីបានជាការសរសេរ `todos.push(newItem)` រួចហៅ `setTodos(todos)` មិនធ្វើឱ្យ React Re-render?"
+    options:
+      - "ព្រោះ `push()` ធ្វើការ Mutate array ចាស់ផ្ទាល់ ធ្វើឱ្យ Object Reference នៅដដែល React គិតថាគ្មានការប្រែប្រួល"
+      - "ព្រោះ Array មិនអាចផ្ទុក Object បាន"
+      - "ព្រោះ push មិនមែនជា JavaScript method"
+      - "ព្រោះ React មិនគាំទ្រ Todo list"
+    correctAnswer: 1
+    explanation: "React ប្រើ Shallow Equality Check (`prev === next`)។ នៅពេលអ្នក mutate array ជាមួយ `push()`, reference របស់ array មិនបានផ្លាស់ប្តូរទេ ដូច្នេះ React នឹង skip ការ re-render។ ត្រូវបង្កើត array ថ្មីជានិច្ច ដូចជា `setTodos([...todos, newItem])`។"
+---
+
+## 🛡️ 1. ហេតុអ្វីត្រូវតែ Immutable?
+
+នៅក្នុង JavaScript, Objects និង Arrays ត្រូវបានរក្សាទុកតាមរយៈ **Memory Reference**។ 
+
+ប្រសិនបើអ្នក mutate properties របស់វាក្នុង memory ចាស់ (`user.name = "ថ្មី"`) នោះ `oldState === newState` នឹងនៅតែស្មើ `true` ជានិច្ច ដែលធ្វើឱ្យ React **មិនដឹងថាទិន្នន័យបានផ្លាស់ប្តូរឡើយ**។
+
+---
+
+## 🛠️ 2. វិធីសាស្ត្រ Update Objects & Arrays ត្រឹមត្រូវ
+
+### ក. Updating Objects:
+```javascript
+const [user, setUser] = useState({ name: 'រដ្ឋា', age: 25, role: 'Developer' });
+
+// ❌ ខុស (Direct Mutation)
+user.age = 26;
+setUser(user);
+
+// ✅ ត្រូវ (Spread Operator បង្កើត Object ថ្មី)
+setUser({
+  ...user,
+  age: 26,
+});
+```
+
+### ខ. Updating Arrays (Add, Remove, Edit):
+```javascript
+const [items, setItems] = useState([
+  { id: 1, text: 'រៀន JSX', done: false },
+  { id: 2, text: 'រៀន State', done: false },
+]);
+
+// 1. បន្ថែម Item ថ្មី (Add)
+const addItem = (newItem) => {
+  setItems([...items, newItem]);
+};
+
+// 2. លុប Item (Delete ដោយប្រើ filter)
+const deleteItem = (idToDelete) => {
+  setItems(items.filter((item) => item.id !== idToDelete));
+};
+
+// 3. កែប្រែ Item (Toggle/Edit ដោយប្រើ map)
+const toggleItem = (idToToggle) => {
+  setItems(
+    items.map((item) => 
+      item.id === idToToggle ? { ...item, done: !item.done } : item
+    )
+  );
+};
+```

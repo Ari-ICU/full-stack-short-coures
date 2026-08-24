@@ -1,0 +1,73 @@
+---
+title: Conditional Rendering Patterns (&&, Ternary, Early Returns)
+description: សិក្សាពីបច្ចេកទេសគ្រប់គ្រងការបង្ហាញ UI តាមលក្ខខណ្ឌ (Early Returns, Ternary Operators, Logical AND) ក្នុង React។
+objectives:
+  - ចេះប្រើ Early Return Pattern សម្រាប់ State ធំៗ
+  - ចេះប្រើ Ternary Operator `? :` សម្រាប់ Either/Or UI Logic
+  - ចេះប្រើ Logical AND `&&` និងដឹងពីកំហុស Falsy Number `0 && ...`
+module: module-2-props-lists-conditional
+order: 4
+quiz:
+  - question: "តើអ្វីនឹងបង្ហាញលើ Browser ប្រសិនបើអ្នកសរសេរ `{count && <span>Items</span>}` នៅពេល `count = 0`?"
+    options:
+      - "វាមិនបង្ហាញអ្វីទាំងអស់ (Empty UI)"
+      - "វាបង្ហាញលេខ `0` នៅលើអេក្រង់"
+      - "វាបណ្តាលឱ្យមាន Syntax Error"
+      - "វាបង្ហាញពាក្យថា Items"
+    correctAnswer: 2
+    explanation: "នៅក្នុង JavaScript `0 && ...` នឹង evaluate ចេញជាលេខ 0។ React នឹង render លេខ 0 នោះទៅលើ UI។ ដើម្បីការពារ សូមសរសេរ `{count > 0 && <span>Items</span>}` ឬ `{Boolean(count) && ...}`។"
+---
+
+## 🚦 1. យុទ្ធសាស្ត្រ Conditional Rendering ទាំង ៣
+
+```mermaid
+flowchart TD
+    subgraph Decision["Conditional Rendering Strategies"]
+        direction TB
+        Cond{"Check State / Prop Condition"}
+        
+        Cond -->|1. Big Page/State Switch| BranchA["if / else (Early Return)<br><code>if (!isAuth) return &lt;Login /&gt;;</code>"]
+        Cond -->|2. Either / Or Inline UI| BranchB["Ternary Operator (? :)<br><code>{isDark ? &lt;Moon /&gt; : &lt;Sun /&gt;}</code>"]
+        Cond -->|3. Render Only If True| BranchC["Logical AND (&amp;&amp;)<br><code>{hasError &amp;&amp; &lt;Alert /&gt;}</code>"]
+    end
+
+    style Decision fill:#f8f9fa,stroke:#ced4da,color:#000
+    style BranchA fill:#ebf8ff,stroke:#3182ce,color:#000
+    style BranchB fill:#fffaf0,stroke:#dd6b20,color:#000
+    style BranchC fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដគំរូជាក់ស្តែង
+
+```jsx
+export default function OrderStatus({ order }) {
+  // 1. Early Return សម្រាប់ State មិនទាន់ពេញលេញ
+  if (!order) {
+    return <p className="text-gray-500">កំពុងស្វែងរកទិន្នន័យ...</p>;
+  }
+
+  return (
+    <div className="p-6 border rounded-xl shadow-sm">
+      <h2>ការបញ្ជាទិញលេខ: #{order.id}</h2>
+
+      {/* 2. Ternary Operator (បង្ហាញទម្រង់ ២ ផ្ទុយគ្នា) */}
+      <div className="my-3">
+        ស្ថានភាព: {order.isPaid ? (
+          <span className="text-green-600 font-bold bg-green-50 px-2 py-1 rounded">បានទូទាត់ប្រាក់រួច</span>
+        ) : (
+          <span className="text-amber-600 font-bold bg-amber-50 px-2 py-1 rounded">រង់ចាំការទូទាត់</span>
+        )}
+      </div>
+
+      {/* 3. Logical AND (បង្ហាញតែពេលលក្ខខណ្ឌពិត) */}
+      {order.notes && (
+        <p className="text-sm bg-gray-50 p-3 rounded text-gray-700">
+          ចំណាំបន្ថែម: {order.notes}
+        </p>
+      )}
+    </div>
+  );
+}
+```

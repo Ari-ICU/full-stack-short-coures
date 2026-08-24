@@ -1,0 +1,91 @@
+---
+title: Protected/Private Route Wrappers & 404 Pages
+description: សិក្សាពីការបង្កើត Route Guards (Protected Routes) សម្រាប់ការពារទំព័រដែលត្រូវការ Login និងការបង្កើត Custom 404 Not Found Page។
+objectives:
+  - "បង្កើត Protected Route Wrapper ជាមួយ <Navigate />"
+  - "យល់ពីការរក្សាទុក Redirect History (state: from location)"
+  - "បង្កើត Custom 404 Not Found Catch-All Route"
+module: module-6-routing
+order: 5
+quiz:
+  - question: "តើអ្វីជាតួនាទីរបស់ `<Navigate to='/login' replace />` ក្នុង Protected Route?"
+    options:
+      - "វាបិទ browser ភ្លាមៗ"
+      - "វាធ្វើការ Redirect user ទៅកាន់ទំព័រ Login ដោយស្វ័យប្រវត្តិ ប្រសិនបើ user មិនទាន់បាន Login ចូល"
+      - "វាទាញយក password របស់ user"
+      - "វាមិនមានតួនាទីអ្វីទេ"
+    correctAnswer: 2
+    explanation: "`<Navigate />` គឺជា Component របស់ React Router សម្រាប់ redirect user ទៅ URL ថ្មីភ្លាមៗក្នុងអំឡុងពេល render។"
+---
+
+## 🛡️ 1. Protected Route Guard Architecture
+
+```mermaid
+flowchart TD
+    subgraph RouteGuard["Protected Route Guard Decision Tree"]
+        direction TB
+        Req["User tries to access '/admin' or '/checkout'"] --> Guard["&lt;ProtectedRoute&gt; Wrapper"]
+        Guard --> CheckAuth{"1. Is User Authenticated? (isAuth === true)"}
+        
+        CheckAuth -->|No ❌| Redirect["Redirect to '/login'<br><code>&lt;Navigate to='/login' replace /&gt;</code>"]
+        CheckAuth -->|Yes 🟢| CheckRole{"2. Role Authorization Check?"}
+        
+        CheckRole -->|Not Authorized ❌| Denied["Redirect to '/unauthorized' (403)"]
+        CheckRole -->|Authorized 🟢| Grant["Render Child Route (Render &lt;Outlet /&gt;) 🚀"]
+    end
+
+    style RouteGuard fill:#f8f9fa,stroke:#ced4da,color:#000
+    style Req fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Redirect fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Denied fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Grant fill:#f0fff4,stroke:#38a169,color:#000
+```
+
+---
+
+## 🛠️ 2. កូដគំរូអនុវត្តជាក់ស្តែង
+
+### ក. បង្កើត `ProtectedRoute.jsx`
+```jsx
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+
+export function ProtectedRoute({ isAuthenticated }) {
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    // Redirect ទៅ login page និងរក្សាទុកទំព័រដែលចង់ទៅក្នុង state
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />;
+}
+```
+
+### ខ. កំណត់ Route ក្នុង `App.jsx`
+```jsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+export default function App() {
+  const isAuth = true; // ឧទាហរណ៍ពី Auth State
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes Wrapper */}
+        <Route element={<ProtectedRoute isAuthenticated={isAuth} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+
+        {/* 404 Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
