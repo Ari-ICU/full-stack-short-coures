@@ -1,59 +1,98 @@
 ---
 title: CommonJS vs ES Modules
 description: ស្វែងយល់ពីរបៀបចែករំលែកកូដ (Module System) នៅក្នុង Node.js រវាង CommonJS និង ES Modules។
+objectives:
+  - "ប្រៀបធៀបភាពខុសគ្នារវាង CommonJS (CJS) និង ES Modules (ESM)"
+  - "ចេះប្រើ import/export និង export default ក្នុង Node.js"
+  - "ស្គាល់វិធី configure 'type': 'module' ក្នុង package.json"
+  - "យល់ពី import.meta.url និងការដោះស្រាយ __dirname ក្នុង ESM"
 module: module-1-nodejs-fundamentals
 order: 3
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នាជាមូលដ្ឋានរវាង CommonJS និង ES Modules (ESM)?"
+    options:
+      - "CommonJS ប្រើបានតែលើ React ចំណែក ESM ប្រើបានតែលើ Vue"
+      - "CommonJS ដំណើរការ synchronous/dynamic (ពេល runtime) រីឯ ESM ដំណើរការ static analysis (ពេល parse) និងជា official standard របស់ JavaScript"
+      - "ESM មិនគាំទ្រ async/await ឡើយ"
+      - "CommonJS មិនអាច export function បានទេ"
+    correctAnswer: 2
+    explanation: "ES Modules (ESM) គឺជាស្តង់ដារផ្លូវការរបស់ JavaScript (ECMAScript) ដែលអនុញ្ញាតឱ្យ static analysis, tree-shaking, និង asynchronous module loading មានប្រសិទ្ធភាពខ្ពស់។"
 ---
 
-## 🧩 អ្វីទៅជា Module?
+## 🧩 អ្វីទៅជា Module System?
 
-នៅក្នុងការសរសេរកូដជាក់ស្តែង យើងមិនអាចសរសេរកូដទាំងអស់រាប់ពាន់ជួរនៅក្នុងឯកសារតែមួយបានទេ។ យើងត្រូវបំបែកវាជាឯកសារតូចៗ ហើយឯកសារតូចៗទាំងនោះហៅថា **Modules**។
+នៅក្នុងការសរសេរកម្មវិធីខ្នាតធំ យើងមិនអាចសរសេរកូដទាំងអស់ក្នុង file តែមួយបានទេ។ យើងបំបែកកូដជាឯកសារតូចៗដែលមានមុខងារដាច់ដោយឡែកពីគ្នា (**Separation of Concerns**)។
 
-នៅក្នុងប្រវត្តិសាស្ត្ររបស់ JavaScript មានវិធី ២ សំខាន់ក្នុងការធ្វើបែបនេះ៖ **CommonJS** និង **ES Modules (ESM)**។
+នៅក្នុង Node.js មាន Module Systems សំខាន់ពីរ៖
+1. **CommonJS (CJS):** ប្រព័ន្ធដើមរបស់ Node.js (តាំងពីឆ្នាំ ២០០៩) ប្រើ `require()` និង `module.exports`។
+2. **ES Modules (ESM):** ស្តង់ដារផ្លូវការរបស់ JavaScript (ចាប់តាំងពី ES6/2015) ប្រើ `import` និង `export`។
 
-### 1. CommonJS (CJS)
-នេះគឺជាស្តង់ដារចាស់ដែល Node.js បង្កើតឡើងតាំងពីដំបូង។ វាប្រើប្រាស់ `require` និង `module.exports`។
+---
 
-**ការបង្កើត Module (math.js):**
-```javascript
-const add = (a, b) => a + b;
-const subtract = (a, b) => a - b;
-
-module.exports = { add, subtract };
-```
-
-**ការទាញយកមកប្រើ (app.js):**
-```javascript
-const math = require('./math');
-console.log(math.add(5, 5)); // 10
-```
-
-### 2. ES Modules (ESM)
-នេះគឺជាស្តង់ដារថ្មីរបស់ JavaScript ផ្លូវការ (ដូចអ្វីដែលយើងសរសេរក្នុង React)។ វាប្រើប្រាស់ `import` និង `export`។ 
-
-> [!IMPORTANT]  
-> ដើម្បីប្រើប្រាស់ ES Modules នៅក្នុង Node.js អ្នកត្រូវកំណត់ `"type": "module"` នៅក្នុងឯកសារ `package.json` ជាមុនសិន។
-
-**ការបង្កើត Module (math.js):**
-```javascript
-export const add = (a, b) => a + b;
-export const subtract = (a, b) => a - b;
-```
-
-**ការទាញយកមកប្រើ (app.js):**
-```javascript
-// ត្រូវតែដាក់កន្ទុយ .js ពីក្រោយ
-import { add, subtract } from './math.js'; 
-console.log(add(5, 5)); // 10
-```
-
-### តើគួរប្រើមួយណា?
+## ⚖️ ការប្រៀបធៀប CJS vs ESM
 
 ```mermaid
 graph TD
-    A[តើគម្រោងរបស់អ្នកថ្មី ឬចាស់?]
-    A -->|គម្រោងថ្មី (ទំនើប)| ESM[ប្រើប្រាស់ ES Modules <br/>import/export]
-    A -->|គម្រោងចាស់ (Legacy)| CJS[ប្រើប្រាស់ CommonJS <br/>require/module.exports]
+    subgraph "CommonJS (Legacy)"
+        CJS1["require('./math')"] --> CJS2["Synchronous Loading (Runtime)"]
+        CJS2 --> CJS3["module.exports = { ... }"]
+    end
+    
+    subgraph "ES Modules (Modern Standard)"
+        ESM1["import { add } from './math.js'"] --> ESM2["Static Analysis & Tree-shaking"]
+        ESM2 --> ESM3["export const add = ..."]
+    end
 ```
 
-នៅក្នុង Course មួយនេះ សម្រាប់ការសរសេរ Backend ទំនើប យើងនឹងផ្តោតលើ **ES Modules** ព្រោះវាជាអនាគតរបស់ JavaScript។
+| លក្ខណៈសម្បត្តិ | CommonJS (CJS) | ES Modules (ESM) |
+|---|---|---|
+| **Syntax** | `const pkg = require('./file')` | `import pkg from './file.js'` |
+| **Export** | `module.exports = { ... }` | `export { ... }` ឬ `export default ...` |
+| **Loading** | Synchronous (រារាំងពេល load) | Asynchronous & Static parsing |
+| **Tree Shaking** | ពិបាក Optimize | ងាយស្រួល Optimize និងកាត់ Dead Code |
+| **File Extension** | `.cjs` ឬ `.js` (default) | `.mjs` ឬ `.js` (បើកំណត់ `"type": "module"`) |
+| **Globals** | មាន `__dirname` និង `__filename` | ប្រើ `import.meta.url` និង `fileURLToPath` |
+
+---
+
+## 💻 ឧទាហរណ៍ជាក់ស្តែងនៃ Modern ESM
+
+### 1. ការបង្កើត Module (`src/utils/math.js`)
+```javascript
+// Named Exports
+export const add = (a, b) => a + b;
+export const multiply = (a, b) => a * b;
+
+// Default Export
+const logger = (msg) => console.log(`[MATH LOG]: ${msg}`);
+export default logger;
+```
+
+### 2. ការទាញយកមកប្រើ (`src/app.js`)
+```javascript
+import logger, { add, multiply } from './utils/math.js';
+
+logger("Calculating values...");
+console.log("Sum:", add(10, 20));
+console.log("Product:", multiply(4, 5));
+```
+
+---
+
+## 💡 ការដោះស្រាយ `__dirname` ក្នុង ES Modules
+
+នៅក្នុង ES Modules, អញ្ញត្តិ `__dirname` និង `__filename` មិនមានវត្តមានដោយស្វ័យប្រវត្តិដូច CommonJS ឡើយ។ ខាងក្រោមនេះជារបៀបបង្កើតពួកវាឡើងវិញ៖
+
+```javascript
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log("Current Directory:", __dirname);
+console.log("Current File     :", __filename);
+```
+
+> [!TIP]
+> សម្រាប់គម្រោង Backend ទំនើបៗ យើងតែងតែកំណត់ `"type": "module"` ក្នុង `package.json` ឬប្រើ **TypeScript** ដែល compile ESM ដោយផ្ទាល់។

@@ -1,29 +1,65 @@
 ---
-title: Authentication vs Authorization
-description: យល់ដឹងពីភាពខុសគ្នារវាងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (Authentication) និងការកំណត់សិទ្ធិ (Authorization)។
+title: Authentication vs Authorization & Security Principles
+description: យល់ច្បាស់ពីភាពខុសគ្នារវាងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (Authentication) និងការអនុញ្ញាតសិទ្ធិ (Authorization), Session-based vs Token-based។
+objectives:
+  - យល់ច្បាស់ពីភាពខុសគ្នារវាង Authentication (401) និង Authorization (403)
+  - ប្រៀបធៀប State-full Session-based Authentication vs Stateless Token-based Authentication
+  - ស្គាល់ហានិភ័យសុវត្ថិភាពទូទៅ (CSRF, XSS, Session Hijacking)
+  - យល់ពី Flow នៃការ Login និងការរក្សាទុក Security Context ក្នុង Backend
 module: module-5-authentication
 order: 1
+quiz:
+  - question: "ប្រសិនបើ User មិនទាន់ Login សោះ ហើយព្យាយាមបើកមើល Dashboard តើ Backend គួរឆ្លើយតប HTTP Status Code មួយណា?"
+    options:
+      - "400 Bad Request"
+      - "401 Unauthorized (ខ្វះ ឬខុស Credentials សម្រាប់ Auth)"
+      - "403 Forbidden (បាន Auth ស្គាល់ខ្លួនហើយ តែគ្មានសិទ្ធិ Role)"
+      - "500 Internal Server Error"
+    correctAnswer: 2
+    explanation: "401 Unauthorized បញ្ជាក់ថា User មិនទាន់បាន Authenticate (មិនទាន់បញ្ជាក់ថាខ្លួនជាអ្នកណា)។ ចំណែក 403 Forbidden គឺ User ស្គាល់អត្តសញ្ញាណហើយ តែគ្មានសិទ្ធិចូលមើល Resource នោះ។"
 ---
 
-## 🔑 Authentication (AuthN) ទល់នឹង Authorization (AuthZ)
-
-នៅក្នុងការបង្កើតប្រព័ន្ធសុវត្ថិភាពសម្រាប់ Backend ពាក្យពីរនេះតែងតែត្រូវបានគេប្រើប្រាស់ញឹកញាប់ ប៉ុន្តែវាមានអត្ថន័យខុសគ្នាស្រឡះ។
-
-### 1. Authentication (ការបញ្ជាក់អត្តសញ្ញាណ)
-**សំនួរ:** តើអ្នកជានរណា? (Who are you?)
-នេះគឺជាដំណើរការផ្ទៀងផ្ទាត់ថា អ្នកពិតជាមនុស្សដែលអ្នកបានអះអាងមែន។
-*ឧទាហរណ៍:* ការបញ្ចូល Email និង Password ត្រឹមត្រូវដើម្បី Login ចូលប្រព័ន្ធ។
-
-### 2. Authorization (ការផ្តល់សិទ្ធិ)
-**សំនួរ:** តើអ្នកមានសិទ្ធិធ្វើអ្វីខ្លះ? (What are you allowed to do?)
-នេះគឺជាដំណើរការកំណត់ថា តើអ្នកត្រូវបានអនុញ្ញាតអោយមើល ឬកែប្រែទិន្នន័យជាក់លាក់ណាមួយដែរឬទេ។
-*ឧទាហរណ៍:* ថ្វីត្បិតតែអ្នកបាន Login (Authentication) ក៏ពិតមែន ប៉ុន្តែអ្នកគ្មានសិទ្ធិលុបទិន្នន័យអ្នកដទៃចេញពីប្រព័ន្ធនោះទេ លុះត្រាតែអ្នកជា Admin (Authorization)។
+## 🔐 ភាពខុសគ្នារវាង AuthN និង AuthZ
 
 ```mermaid
 graph TD
-    A["អ្នកប្រើប្រាស់ (Client)"] -->|"បញ្ចូល Email/Password"| B{"Authentication <br/>(តើត្រឹមត្រូវទេ?)"}
-    B -->|"ខុស"| C["បដិសេធ (401 Unauthorized)"]
-    B -->|"ត្រូវ"| D{"Authorization <br/>(តើមានសិទ្ធិទេ?)"}
-    D -->|"គ្មានសិទ្ធិ"| E["បដិសេធ (403 Forbidden)"]
-    D -->|"មានសិទ្ធិ"| F["អនុញ្ញាតអោយចូលមើលទិន្នន័យ (200 OK)"]
+    REQ["User Request"] --> A1["1. Authentication (AuthN)<br/>'តើអ្នកជានរណា?' (Who are you?)"]
+    A1 -->|"Credentials Valid (Email + Password)"| A2["2. Authorization (AuthZ)<br/>'តើអ្នកមានសិទ្ធិធ្វើអ្វីខ្លះ?' (What can you do?)"]
+    A1 -.->|"Invalid / Missing Token"| E401["401 Unauthorized"]
+    A2 -->|"Admin Role Verified"| OK["Access Granted (200 OK)"]
+    A2 -.->|"Customer Role Only"| E403["403 Forbidden"]
 ```
+
+| លក្ខណៈ | Authentication (AuthN) | Authorization (AuthZ) |
+|---|---|---|
+| **និយមន័យ** | ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណអ្នកប្រើប្រាស់ | ការត្រួតពិនិត្យសិទ្ធិ ឬតួនាទីក្នុងការប្រើប្រាស់ Resource |
+| **សំណួរចម្បង** | "តើអ្នកជានរណា?" | "តើអ្នកអាចធ្វើអ្វីបានខ្លះ?" |
+| **មធ្យោបាយ** | Passwords, OTP, Biometrics, OAuth (Google/GitHub) | Roles, Permissions, Policies, ACLs |
+| **HTTP Status Code** | `401 Unauthorized` | `403 Forbidden` |
+
+---
+
+## ⚖️ Session-Based vs Token-Based Authentication
+
+```mermaid
+graph TD
+    subgraph "Session-based Auth (Stateful)"
+        C1["Client"] -->|"Login"| S1["Server"]
+        S1 -->|"Store in Redis / Memory"| DB_S[("Session Store")]
+        S1 -->|"Set-Cookie: session_id=xyz"| C1
+        C1 -->|"Cookie sent automatically"| S1
+    end
+    
+    subgraph "Token-based Auth / JWT (Stateless)"
+        C2["Client"] -->|"Login"| S2["Server"]
+        S2 -->|"Sign JWT Token (No DB store needed)"| C2
+        C2 -->|"Authorization: Bearer <jwt>"| S2
+    end
+```
+
+| លក្ខណៈសម្បត្តិ | Session-Based (Cookies) | Token-Based (JWT) |
+|---|---|---|
+| **Server State** | Stateful (ត្រូវការ RAM ឬ Redis ផ្ទុក Session) | Stateless (Server មិនបាច់ចាំ State ទេ) |
+| **Scalability** | ពិបាក Scale ពេលមាន Servers ច្រើន (ត្រូវការ Sticky Sessions/Redis) | ងាយស្រួល Scale លើ Microservices & Serverless |
+| **Mobile & Cross-domain** | ពិបាក Configure Cookie លើ Mobile Apps | ស្រួលប្រើជាមួយ REST API, Mobile Apps, SPAs |
+| **Revocation** | ស្រួលលុបចោលភ្លាមៗ (Delete Session ពី Redis) | ត្រូវការ Refresh Token Rotation ឬ Blacklist |

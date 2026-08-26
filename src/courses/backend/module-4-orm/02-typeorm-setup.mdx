@@ -1,71 +1,106 @@
 ---
-title: TypeORM Setup
-description: ការរៀបចំដំឡើង និងតភ្ជាប់ TypeORM នៅក្នុងគម្រោង Express។
+title: TypeORM Setup & DataSource Configuration
+description: ការដំឡើង TypeORM ជាមួយ TypeScript, ការកំណត់ DataSource, tsconfig.json decorators, និងការភ្ជាប់ទៅកាន់ PostgreSQL។
+objectives:
+  - "ចេះដំឡើង TypeORM, reflect-metadata, pg, និង TypeScript dependencies"
+  - "Configure tsconfig.json សម្រាប់ experimentalDecorators & emitDecoratorMetadata"
+  - "បង្កើត AppDataSource instance ជាមួយ PostgreSQL connection configuration"
+  - "យល់ពីគ្រោះថ្នាក់នៃ synchronize: true ក្នុង Production"
 module: module-4-orm
 order: 2
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវកំណត់ `synchronize: false` នៅក្នុង Production DataSource Configuration?"
+    options:
+      - "ព្រោះ synchronize មិនគាំទ្រជាមួយ PostgreSQL ទេ"
+      - "ព្រោះបើទុក synchronize: true, TypeORM អាចនឹង DROP/ALTER Tables ដោយស្វ័យប្រវត្តិដែលបណ្តាលឱ្យបាត់បង់ទិន្នន័យពិតរបស់អ្នកប្រើប្រាស់ (Data Loss)"
+      - "ព្រោះវាធ្វើឱ្យ Server ចុះឈ្មោះមិនបាន"
+      - "ព្រោះ Node.js មិនដំណើរការជាមួយ boolean"
+    correctAnswer: 2
+    explanation: "`synchronize: true` នឹង Sync Schema តាម Entities ដោយស្វ័យប្រវត្តិពេល Startup ដែលអាច Drop columns ឬ tables នៅ Production។ ក្នុង Production ត្រូវប្រើ Migrations ជានិច្ច!"
 ---
 
-## 🛠️ ការរៀបចំ TypeORM
+## 🛠️ ការដំឡើង TypeORM ក្នុង TypeScript Project
 
-នៅក្នុង Course នេះយើងនឹងប្រើប្រាស់ **TypeORM** (ទោះបីជា Prisma ក៏កំពុងពេញនិយម វាសំខាន់ណាស់ក្នុងការចេះ TypeORM ព្រោះគម្រោងធំៗប្រើ NestJS សុទ្ធតែតម្រូវអោយចេះវា)។
-
-### ១. ការដំឡើង Library ចាំបាច់
-
+### ជំហានទី ១: ដំឡើង Dependencies
 ```bash
-npm install typeorm pg reflect-metadata
+npm install typeorm reflect-metadata pg dotenv
+npm install -D typescript @types/node tsx
 ```
 
-> [!NOTE]  
-> ហេតុអ្វីត្រូវការ `reflect-metadata`? ព្រោះ TypeORM ប្រើប្រាស់មុខងាររបស់ TypeScript/Babel ដែលហៅថា "Decorators" (សញ្ញា `@`) ដើម្បីកំណត់ទម្រង់ទិន្នន័យ។
+### ជំហានទី ២: កំណត់ `tsconfig.json`
+TypeORM ប្រើប្រាស់ **TypeScript Decorators** (`@Entity()`, `@Column()`) ដូច្នេះយើងត្រូវបើក Flags ទាំងនេះ៖
 
-### ២. ការកំណត់ DataSource
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*"]
+}
+```
 
-**DataSource** គឺជាកន្លែងកំណត់ព័ត៌មាន Database របស់យើង។ 
-
-```tabs
-javascript
-// config/database.js
-import { DataSource } from 'typeorm';
-  import 'reflect-metadata'; // ចាំបាច់ត្រូវតែ Import
-  import { User } from '../entities/User.js';
-
-  export const AppDataSource = new DataSource({
-      type: "postgres",
-      host: process.env.DB_HOST || "localhost",
-      port: 5432,
-      username: process.env.DB_USER || "postgres",
-      password: process.env.DB_PASSWORD || "secret123",
-      database: process.env.DB_NAME || "ecommerce",
-      
-      // បញ្ចូល Entities ទាំងអស់នៅទីនេះ
-      entities: [User], 
-      
-      // synchronise: true នឹងបង្កើតតារាងអោយដោយស្វ័យប្រវត្តិ (កុំប្រើវានៅពេល Production!)
-      synchronize: process.env.NODE_ENV !== 'production',
-      
-      logging: false, // ប្តូរទៅ true បើចង់ឃើញ SQL ដើរនៅពីក្រោយ
-  });
-
-  export const connectDB = async () => {
-      try {
-          await AppDataSource.initialize();
-          console.log("✅ ភ្ជាប់ TypeORM ទៅកាន់ PostgreSQL ជោគជ័យ!");
-      } catch (error) {
-          console.error("❌ បរាជ័យក្នុងការភ្ជាប់ TypeORM:", error);
-      }
-  };
 ---
-javascript
-// app.js
-import express from 'express';
-  import { connectDB } from './config/database.js';
 
-  const app = express();
+## 🔌 ការបង្កើត DataSource (`src/config/data-source.ts`)
 
-  // ហៅការតភ្ជាប់ Database ពេលបើក Server ភ្លាម
-  connectDB().then(() => {
-      app.listen(3000, () => {
-          console.log("Server is running...");
-      });
+`DataSource` គឺជាចំណុចកណ្តាលសម្រាប់គ្រប់គ្រង Connection Pool និង Entities ទាំងអស់ក្នុង TypeORM៖
+
+```typescript
+import "reflect-metadata";
+import { DataSource } from "typeorm";
+import "dotenv/config";
+
+export const AppDataSource = new DataSource({
+  type: "postgres",
+  url: process.env.DATABASE_URL,
+  synchronize: process.env.NODE_ENV === "development", // ⚠️ ប្រើតែពេល Dev ប៉ុណ្ណោះ!
+  logging: process.env.NODE_ENV === "development",
+  entities: ["src/entities/**/*.ts"],
+  migrations: ["src/migrations/**/*.ts"],
+  subscribers: [],
+});
+
+export const initializeDatabase = async () => {
+  try {
+    await AppDataSource.initialize();
+    console.log("🚀 TypeORM DataSource has been initialized successfully!");
+  } catch (error) {
+    console.error("❌ Error during TypeORM DataSource initialization:", error);
+    process.exit(1);
+  }
+};
+```
+
+---
+
+## 🚀 ការចាប់ផ្តើមក្នុង Server (`src/server.ts`)
+
+```typescript
+import "reflect-metadata";
+import express from "express";
+import { initializeDatabase } from "./config/data-source";
+
+const app = express();
+app.use(express.json());
+
+const startServer = async () => {
+  // 1. Initialize Database ជាមុនសិន
+  await initializeDatabase();
+
+  // 2. Start HTTP Server
+  const PORT = process.env.PORT || 4000;
+  app.listen(PORT, () => {
+    console.log(`⚡ Server running on http://localhost:${PORT}`);
   });
+};
+
+startServer();
 ```

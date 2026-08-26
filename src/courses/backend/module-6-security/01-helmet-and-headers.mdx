@@ -1,42 +1,82 @@
 ---
-title: Security Headers (Helmet)
-description: ការការពារកម្មវិធីពីការវាយប្រហារតាមរយៈ HTTP Headers ដោយប្រើប្រាស់ Helmet។
+title: HTTP Security Headers with Helmet.js
+description: ការពារកម្មវិធី Express.js ពីការវាយប្រហារតាមរយៈការកំណត់ HTTP Security Headers ដោយប្រើ Helmet.js។
+objectives:
+  - "យល់ពីតួនាទីរបស់ HTTP Security Headers ក្នុងការទប់ស្កាត់ Web Vulnerabilities"
+  - "ស្គាល់ Headers សំខាន់ៗ (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)"
+  - "ចេះ Configure helmet package ក្នុង Express app"
+  - "ស្គាល់វិធីលាក់ header X-Powered-By: Express"
 module: module-6-security
 order: 1
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវលាក់ Header `X-Powered-By: Express` ពី HTTP Response?"
+    options:
+      - "ដើម្បីសន្សំទំហំ Bandwidth ២ bytes"
+      - "ដើម្បីការពារមិនឱ្យ Hacker ដឹងពីបច្ចេកវិទ្យា និង Framework Version ដែល Server កំពុងប្រើ (Security through Obscurity / Information Disclosure)"
+      - "ព្រោះ Google Chrome មិនគាំទ្រ Header នេះ"
+      - "ដើម្បីបង្កើន SEO Ranking"
+    correctAnswer: 2
+    explanation: "ការបង្ហាញ X-Powered-By ផ្តល់ព័ត៌មានដល់ Hacker ថា Server ប្រើ Express ដែលធ្វើឱ្យពួកគេងាយស្រួលស្វែងរក Exploit/CVEs ដែលត្រូវនឹង Version នោះ។"
 ---
 
-## 🪖 ហេតុអ្វីបានជាត្រូវបិទបាំង Headers?
+## 🛡️ អ្វីទៅជា Helmet.js?
 
-តាមលំនាំដើម (Default) Express.js តែងតែផ្ញើ HTTP Header មួយដែលមានឈ្មោះថា `X-Powered-By: Express` ត្រលប់ទៅកាន់ Client វិញ។ 
-ទោះបីជាវាមើលទៅមិនមានអ្វីធំដុំ ប៉ុន្តែវាគឺជាការប្រាប់ Hacker ថា "ខ្ញុំប្រើ Express" ដូច្នេះពួកគេអាចស្វែងរកចន្លោះប្រហោង (Vulnerabilities) របស់ Express យកមកវាយប្រហារយើងបាន។
+**Helmet.js** គឺជា Middleware ដ៏សំខាន់សម្រាប់ Express ដែលជួយកំណត់ **HTTP Security Headers** សំខាន់ៗចំនួន ១៥+ ដោយស្វ័យប្រវត្តិ ដើម្បីការពារកម្មវិធីពីការវាយប្រហារទូទៅដូចជា Clickjacking, XSS, MIME-sniffing ជាដើម។
 
-### ការដោះស្រាយជាមួយ Helmet
+```mermaid
+graph LR
+    CLIENT["Browser Client"] --> SVR["Express Application"]
+    SVR -->|"Response with Helmet Headers"| CLIENT
+    
+    subgraph "Headers Injected by Helmet"
+        H1["Content-Security-Policy (CSP)"]
+        H2["Strict-Transport-Security (HSTS)"]
+        H3["X-Frame-Options (DENY/SAMEORIGIN)"]
+        H4["X-Content-Type-Options (nosniff)"]
+        H5["Hide X-Powered-By"]
+    end
+```
 
-**Helmet** គឺជាកញ្ចប់ Middleware ដ៏តូចមួយដែលជួយលាក់បាំង Headers បែបនេះ និងបន្ថែមនូវ Headers សុវត្ថិភាពជាច្រើនទៀតដោយស្វ័យប្រវត្តិ។ 
+---
 
-*វាមិនមែនជាថ្នាំទិព្វដែលអាចការពារកម្មវិធីរបស់អ្នក ១០០% ទេ ប៉ុន្តែវាជារបាំងការពារទី១ ដ៏មានប្រសិទ្ធភាពដែលគ្រប់គម្រោង Backend គួរតែមាន។*
+## 📦 ការដំឡើង និង Configure Helmet
 
 ```bash
 npm install helmet
 ```
 
-```tabs
-javascript
-// app.js
+```javascript
 import express from 'express';
 import helmet from 'helmet';
 
 const app = express();
 
-// គ្រាន់តែដាក់វាជា Middleware នៅខាងលើគេ នោះវានឹងធ្វើការដោយស្វ័យប្រវត្តិ
+// 1. បើកប្រើ Default Protection ទាំងអស់
 app.use(helmet());
 
-app.get('/', (req, res) => {
-    res.json({ message: "Hello Secure World!" });
-});
-
-app.listen(3000);
+// 2. ឬ Custom CSP សម្រាប់ APIs
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "https://trusted-cdn.com"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "https://images.unsplash.com"],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 ```
 
-> [!TIP]
-> អ្នកក៏អាចបិទ `X-Powered-By` ដោយមិនចាំបាច់ប្រើ Helmet ក៏បាន តាមរយៈកូដ `app.disable('x-powered-by');`
+---
+
+## 📋 តារាង Headers សំខាន់ៗដែល Helmet គ្រប់គ្រង
+
+| HTTP Header | ការពារពីអ្វី | មុខងារ |
+|---|---|---|
+| `Content-Security-Policy` | XSS & Data Injection | កំណត់ប្រភព Domain ដែលអនុញ្ញាតឱ្យ Load Scripts/Styles/Images |
+| `X-Frame-Options` | Clickjacking | បិទមិនឱ្យគេហទំព័រផ្សេងយក API/App របស់យើងទៅបង្កប់ក្នុង `<iframe>` |
+| `Strict-Transport-Security` | Man-in-the-Middle | បង្ខំឱ្យ Browser ប្រើតែ **HTTPS** ជានិច្ច |
+| `X-Content-Type-Options` | MIME-sniffing | បង្ខំឱ្យ Browser គោរព `Content-Type` ពិតប្រាកដ |

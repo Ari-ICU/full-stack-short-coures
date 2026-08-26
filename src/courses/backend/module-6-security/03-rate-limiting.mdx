@@ -1,47 +1,84 @@
 ---
-title: Rate Limiting
-description: ការពារកុំអោយមានការហៅ API ច្រើនហួសហេតុក្នុងពេលតែមួយ (Brute Force / Application DDoS)។
+title: Rate Limiting & Brute-Force Protection
+description: ការពារ APIs ពីការវាយប្រហារ Denial of Service (DoS), Brute-force Login, និង Scraping តាមរយៈ express-rate-limit និង Redis Store។
+objectives:
+  - យល់ពីហានិភ័យនៃ Brute-Force Password Guessing និង DoS Attacks
+  - ចេះបង្កើត Global API Rate Limiter ជាមួយ `express-rate-limit`
+  - ចេះបង្កើត Strict Rate Limiter សម្រាប់ Auth Endpoints (`/login`, `/register`, `/forgot-password`)
+  - យល់ពីការប្រើប្រាស់ Redis Store សម្រាប់ Distributed Rate Limiting
 module: module-6-security
 order: 3
+quiz:
+  - question: "នៅពេលដែល Client ផ្ញើ Request លើសចំនួនកំណត់នៃ Rate Limiter តើ Server គួរឆ្លើយតប Status Code អ្វី?"
+    options:
+      - "400 Bad Request"
+      - "429 Too Many Requests"
+      - "500 Internal Server Error"
+      - "404 Not Found"
+    correctAnswer: 2
+    explanation: "429 Too Many Requests គឺជាស្តង់ដារ HTTP Status Code ដែលបញ្ជាក់ថា User បានផ្ញើសំណើលើសកម្រិតកំណត់ (Rate Limit Exceeded) ក្នុងចន្លោះពេលជាក់លាក់មួយ។"
 ---
 
-## 🚦 ហេតុអ្វីយើងត្រូវការ Rate Limiter?
+## 🛑 ហេតុអ្វីត្រូវមាន Rate Limiting?
 
-ប្រសិនបើអ្នកមិនមានការកម្រិតចំនួន Request ទេ Hacker អាចសរសេរកម្មវិធី (Bot) ដើម្បីហៅទៅកាន់ API របស់អ្នក ១ ម៉ឺនដងក្នុងមួយវិនាទី (Application-level DDoS Attack) ដែលធ្វើអោយ Server របស់អ្នកគាំង។
+ប្រសិនបើគ្មាន Rate Limiting ទេ៖
+1. **Brute-Force Attacks:** Hacker អាចសាកល្បង Login Password រាប់ពាន់ដងក្នុង ១ វិនាទី។
+2. **API Abuse & Scraping:** Bots អាចទាញយកទិន្នន័យផលិតផលទាំងអស់ពី Server ធ្វើឱ្យ Database ធ្លាក់ល្បឿន។
+3. **DoS (Denial of Service):** ការផ្ញើ Requests ច្រើនហួសប្រមាណធ្វើឱ្យ Server គាំង។
 
-មួយវិញទៀត ពួកគេអាចប្រើការហៅជាច្រើនដងដើម្បីទាយលេខសម្ងាត់របស់អ្នកប្រើប្រាស់ (Brute Force Attack) នៅត្រង់ចំនុច Login។
+```mermaid
+graph LR
+    REQ["Incoming Requests"] --> RL["express-rate-limit Checkpoint"]
+    RL -->|"Under 100 req / 15 min"| API["Express Controller (200 OK)"]
+    RL -->|"Exceeded 100 req"| BLK["HTTP 429 Too Many Requests + Retry-After Header"]
+```
 
-### ការដោះស្រាយជាមួយ `express-rate-limit`
+---
+
+## 💻 ការអនុវត្តជាក់ស្តែងជាមួយ `express-rate-limit`
 
 ```bash
 npm install express-rate-limit
 ```
 
-```tabs
-javascript
-// app.js
-import express from 'express';
-import rateLimit from 'express-rate-limit';
+### 1. Global API Rate Limiter (`src/middlewares/rateLimiter.ts`)
+```typescript
+import rateLimit from "express-rate-limit";
+
+// 1. General Limiter សម្រាប់ endpoints ធម្មតា
+export const generalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 នាទី
+  max: 100, // អនុញ្ញាតអតិបរមា 100 requests ក្នុង 1 IP
+  standardHeaders: true, // បញ្ជូន `RateLimit-*` headers ត្រលប់ទៅ client
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "អ្នកបានផ្ញើសំណើច្រើនដងពេកហើយ សូមរង់ចាំ ១៥ នាទីសិនមុននឹងព្យាយាមម្តងទៀត! (429 Too Many Requests)",
+  },
+});
+
+// 2. Strict Auth Limiter សម្រាប់ Login / Register
+export const authRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 ម៉ោង
+  max: 5, // អនុញ្ញាតឱ្យ login ខុសត្រឹមតែ 5 ដងប៉ុណ្ណោះក្នុង 1 ម៉ោង
+  message: {
+    success: false,
+    message: "ការប៉ុនប៉ង Login បរាជ័យច្រើនដងពេក គណនីរបស់អ្នកត្រូវបានផ្អាកជាបណ្តោះអាសន្ន ១ ម៉ោងដើម្បីសុវត្ថិភាព!",
+  },
+});
+```
+
+### 2. ការប្រើប្រាស់ក្នុង Application
+```typescript
+import express from "express";
+import { generalApiLimiter, authRateLimiter } from "./middlewares/rateLimiter";
+import authRoutes from "./routes/auth.routes";
 
 const app = express();
 
-// 1. Global Rate Limiter: កំណត់លើគ្រប់ API ទាំងអស់
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // ១៥ នាទី
-    max: 100, // អនុញ្ញាតត្រឹម 100 requests ក្នុង ១៥ នាទី សម្រាប់ IP នីមួយៗ
-    message: { error: "អ្នកបានស្នើសុំច្រើនដងពេកហើយ សូមរង់ចាំ ១៥ នាទីសិន!" }
-});
-app.use(globalLimiter);
+// អនុវត្តលើគ្រប់ /api/ routes ទាំងអស់
+app.use("/api", generalApiLimiter);
 
-// 2. Strict Rate Limiter: សម្រាប់តែ Route សំខាន់ៗ (ដូចជា Login / Register)
-const loginLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // ១ ម៉ោង
-    max: 5, // អនុញ្ញាតអោយវាយលេខសម្ងាត់ខុសតែ ៥ ដងប៉ុណ្ណោះ សម្រាប់ IP នីមួយៗ
-    message: { error: "អ្នកបានព្យាយាម Login ច្រើនដងពេកហើយ សូមរង់ចាំ ១ ម៉ោង!" }
-});
-
-// ដាក់ប្រើប្រាស់ជាក់លាក់លើ Route
-app.post('/api/login', loginLimiter, (req, res) => {
-    // ... logic ផ្ទៀងផ្ទាត់ ...
-});
+// អនុវត្ត Strict Limit លើតែ Auth routes
+app.use("/api/v1/auth", authRateLimiter, authRoutes);
 ```

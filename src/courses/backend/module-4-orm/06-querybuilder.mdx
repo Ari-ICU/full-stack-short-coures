@@ -1,49 +1,126 @@
 ---
-title: QueryBuilder & Pagination
-description: របៀបប្រើប្រាស់ QueryBuilder សម្រាប់ការទាញទិន្នន័យស្មុគស្មាញ និងការធ្វើ Pagination។
+title: Advanced Queries with TypeORM QueryBuilder
+description: ការសរសេរ Complex SQL Queries, Subqueries, Dynamic Filtering, Aggregations, និង Pagination តាមរយៈ TypeORM QueryBuilder។
+objectives:
+  - យល់ពីពេលណាដែលត្រូវប្រើ QueryBuilder ជំនួសឱ្យ Standard Repository methods
+  - ចេះសរសេរ JOINs (leftJoinAndSelect, innerJoinAndSelect)
+  - អនុវត្ត Dynamic Search & Multi-field Filtering ដោយសុវត្ថិភាព
+  - ចេះសរសេរ Aggregation Queries (COUNT, SUM, AVG, GROUP BY)
 module: module-4-orm
 order: 6
+quiz:
+  - question: "តើ `leftJoinAndSelect` ខុសពី `leftJoin` ធម្មតាក្នុង TypeORM QueryBuilder យ៉ាងដូចម្តេច?"
+    options:
+      - "`leftJoin` ប្រើបានតែជាមួយ MySQL"
+      - "`leftJoinAndSelect` មិនត្រឹមតែ JOIN Table ប៉ុណ្ណោះទេ តែវានឹង Select columns នៃ relation នោះមក Map ចូល Entity property ដោយស្វ័យប្រវត្តិ"
+      - "`leftJoinAndSelect` ដំណើរការយឺតជាង ១០ ដងជានិច្ច"
+      - "គ្មានអ្វីខុសគ្នាឡើយ"
+    correctAnswer: 2
+    explanation: "`leftJoinAndSelect` ទាំង JOIN table និងទាញយក Columns នៃតារាងដែល JOIN នោះមក hydrate ចូល property នៃ object entity ដែលធ្វើឱ្យកូដស្រួលប្រើប្រាស់។"
 ---
 
-## 🔍 អ្វីទៅជា QueryBuilder?
+## 🏗️ ហេតុអ្វីត្រូវប្រើ QueryBuilder?
 
-ពេលខ្លះ Function ស្តង់ដាររបស់ Repository (ដូចជា `find()`, `findOne()`) មិនអាចឆ្លើយតបទៅនឹងលក្ខខណ្ឌស្មុគស្មាញបានទេ។ 
-នៅពេលនោះ យើងត្រូវប្រើប្រាស់ **QueryBuilder** ដែលអនុញ្ញាតអោយយើងសរសេរកូដស្រដៀងទៅនឹង SQL តែវាមានសុវត្ថិភាពខ្ពស់ជាង។
+ខណៈពេលដែល `repository.find()` ងាយស្រួលសម្រាប់ CRUD សាមញ្ញ នៅពេលដែលអ្នកត្រូវការ៖
+- ការ Search ពាក្យគន្លឹះលើ Columns ច្រើន (Complex WHERE conditions)
+- ការគណនា Aggregations (SUM, AVG, GROUP BY, HAVING)
+- Subqueries ឬ Pagination ស្មុគស្មាញ
 
-```tabs
-javascript
-// repositories/postRepository.js
-import { AppDataSource } from '../config/database.js';
-  import { Post } from '../entities/Post.js';
+**QueryBuilder** ផ្តល់អំណាចពេញលេញដូច Raw SQL តែមាន **Type Safety និង Parameterized Safety** ស្រាប់!
 
-  const postRepo = AppDataSource.getRepository(Post);
+```mermaid
+graph TD
+    QB["createQueryBuilder('user')"] --> J1[".leftJoinAndSelect('user.orders', 'order')"]
+    J1 --> W1[".where('user.isActive = :active', { active: true })"]
+    W1 --> W2[".andWhere('order.totalAmount > :minAmount', { minAmount: 100 })"]
+    W2 --> P1[".orderBy('order.createdAt', 'DESC')"]
+    P1 --> EX[".getMany() / .getRawMany()"]
+```
 
-  export const searchActivePosts = async (keyword) => {
-      return await postRepo.createQueryBuilder("post")
-          .leftJoinAndSelect("post.user", "user") // ទាញយក User មកជាមួយ (JOIN)
-          .where("post.isActive = :active", { active: true })
-          .andWhere("post.title ILIKE :keyword", { keyword: `%${keyword}%` })
-          .orderBy("post.createdAt", "DESC")
-          .getMany(); // ទាញយកជា Array
-  };
 ---
-javascript
-// pagination
-export const getPostsWithPagination = async (page = 1, limit = 10) => {
-      const skip = (page - 1) * limit;
 
-      // getManyAndCount នឹងបញ្ជូនមកវិញនូវ [ទិន្នន័យ, ចំនួនសរុប]
-      const [data, total] = await postRepo.createQueryBuilder("post")
-          .orderBy("post.createdAt", "DESC")
-          .skip(skip)   // រំលងទិន្នន័យចាស់ៗ
-          .take(limit)  // ទាញយកត្រឹមចំនួន limit
-          .getManyAndCount();
+## 💻 ឧទាហរណ៍ជាក់ស្តែង៖ Dynamic Filter & Search Service
 
-      return {
-          data,
-          total,
-          currentPage: page,
-          totalPages: Math.ceil(total / limit)
-      };
+```typescript
+import { AppDataSource } from "../config/data-source";
+import { Product } from "../entities/Product.entity";
+
+interface ProductFilterParams {
+  search?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  limit?: number;
+}
+
+export async function searchProducts(filters: ProductFilterParams) {
+  const {
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    page = 1,
+    limit = 10,
+  } = filters;
+
+  const query = AppDataSource.getRepository(Product)
+    .createQueryBuilder("product")
+    .leftJoinAndSelect("product.category", "category");
+
+  // 1. Dynamic Search (Title or Description)
+  if (search) {
+    query.andWhere(
+      "(product.title ILIKE :search OR product.description ILIKE :search)",
+      { search: `%${search}%` }
+    );
+  }
+
+  // 2. Category Filter
+  if (category) {
+    query.andWhere("category.slug = :category", { category });
+  }
+
+  // 3. Price Range Filter
+  if (minPrice !== undefined) {
+    query.andWhere("product.price >= :minPrice", { minPrice });
+  }
+  if (maxPrice !== undefined) {
+    query.andWhere("product.price <= :maxPrice", { maxPrice });
+  }
+
+  // 4. Pagination & Ordering
+  query
+    .orderBy("product.createdAt", "DESC")
+    .skip((page - 1) * limit)
+    .take(limit);
+
+  const [items, total] = await query.getManyAndCount();
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
   };
+}
+```
+
+---
+
+## 📈 Aggregation Queries ជាមួយ `getRawMany()`
+
+```typescript
+// គណនាផលបូកនៃការលក់តាម Category
+const salesReport = await AppDataSource.getRepository(Product)
+  .createQueryBuilder("product")
+  .leftJoin("product.category", "category")
+  .select("category.name", "categoryName")
+  .addSelect("COUNT(product.id)", "totalProducts")
+  .addSelect("AVG(product.price)", "averagePrice")
+  .groupBy("category.name")
+  .getRawMany();
 ```

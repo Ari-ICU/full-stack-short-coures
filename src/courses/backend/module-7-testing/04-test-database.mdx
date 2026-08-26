@@ -1,43 +1,90 @@
 ---
-title: Test Database Strategy
-description: របៀបរៀបចំ Database សម្រាប់ទុកធ្វើតេស្តដាច់ដោយឡែក ដើម្បីកុំអោយប៉ះពាល់ទិន្នន័យពិត។
-module: module-8-testing
+title: Test Database Strategy & Mocking External APIs
+description: យុទ្ធសាស្ត្ររៀបចំ Isolated Test Database, Test Containers, Fixtures/Seeders, និង Mocking Third-Party HTTP APIs ជាមួយ MSW។
+objectives:
+  - យល់ពីគ្រោះថ្នាក់នៃការប្រើ Production/Dev Database សម្រាប់ Testing
+  - ចេះរៀបចំ Dedicated Test Database តាមរយៈ Docker / Testcontainers
+  - បង្កើត Factory Data & Fixtures សម្រាប់បង្កើត Mock Entities យ៉ាងរហ័ស
+  - ចេះ Mock External 3rd-party HTTP Requests ដោយប្រើ MSW (Mock Service Worker)
+module: module-7-testing
 order: 4
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងមិនគួរហៅ API ពិតប្រាកដរបស់ Stripe ឬ Twilio នៅពេលរត់ Automated Integration Tests?"
+    options:
+      - "ព្រោះវាស៊ីលុយពិត, អាចផ្ញើសារ SMS រំខាន, ដំណើរការយឺតលើបណ្តាញ Internet, និងអាចបរាជ័យប្រសិនបើ Third-party ដាច់សេវា"
+      - "ព្រោះ Stripe មិនគាំទ្រ Node.js"
+      - "ព្រោះ Jest មិនអាចភ្ជាប់ Internet បានទេ"
+      - "ព្រោះគ្មានអ្នកណាធ្វើការពេលយប់"
+    correctAnswer: 1
+    explanation: "ការហៅ Third-party APIs ពិតប្រាកដពេលរត់ Tests ធ្វើឱ្យចំណាយលុយលើ API calls, ប្រឈម Rate Limits, និងធ្វើឱ្យ Test យឺតខ្លាំង។ យើងគួរតែ Mock HTTP Responses (ឧ. MSW ឬ Nock) ជានិច្ច!"
 ---
 
-## 🗄️ ហេតុអ្វីត្រូវមាន Test Database?
+## 🗄️ យុទ្ធសាស្ត្រ Test Database Isolation
 
-ប្រសិនបើអ្នកធ្វើការតេស្តដោយប្រើ Database ធម្មតា នោះរាល់ពេលអ្នករត់កូដតេស្ត (ឧទាហរណ៍តេស្តលុប User) វានឹងទៅលុប User នៅក្នុង Database ពិតប្រាកដរបស់អ្នក ដែលជារឿងគ្រោះថ្នាក់បំផុត។
+ដើម្បីធានាសុវត្ថិភាពទិន្នន័យ ការតេស្តត្រូវតែធ្វើឡើងនៅលើ **Isolated Database (ឧ. `ecommerce_test`)**៖
 
-ជានិច្ចកាល អ្នកត្រូវបង្កើត Database មួយទៀតសម្រាប់តែធ្វើតេស្តប៉ុណ្ណោះ ឧទាហរណ៍ `ecommerce_test`។ វានឹងត្រូវលុបចោល និងបង្កើតតារាងថ្មីរាល់ពេលតេស្តម្តងៗ។
-
-### ការកំណត់នៅក្នុងបរិយាកាស (Environment Setup)
-
-អ្នកត្រូវបង្កើតឯកសារ `.env.test` មួយដាច់ដោយឡែក៖
-
-```tabs
-text
-// .env.test
-DB_NAME=ecommerce_test
-PORT=4000
----
-javascript
-// config/database.js
-export const AppDataSource = new DataSource({
-    // ...
-    // បើជាពេល test ប្រើប្រាស់ឈ្មោះ database ផ្សេង
-    database: process.env.NODE_ENV === 'test' ? 'ecommerce_test' : process.env.DB_NAME,
-    
-    // dropSchema: true នឹងលុបតារាងចោលទាំងអស់ ហើយបង្កើតថ្មីរាល់ពេលភ្ជាប់ (ស័ក្តិសមបំផុតសម្រាប់តេស្ត)
-    dropSchema: process.env.NODE_ENV === 'test',
-    synchronize: process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
-});
+```mermaid
+graph TD
+    DEV_ENV["Local Development (.env)"] --> DEV_DB[("ecommerce_dev DB")]
+    TEST_ENV["Test Environment (.env.test)"] --> TEST_DB[("ecommerce_test DB (Drop/Sync per run)")]
+    PROD_ENV["Production Server (Secrets Manager)"] --> PROD_DB[("ecommerce_prod High-Availability Cluster")]
 ```
 
-### ដំណើរការនៃការរត់តេស្ត (CI/CD Flow)
-នៅពេលអ្នករៀបចំប្រព័ន្ធស្វ័យប្រវត្តិ (GitHub Actions) វាធ្វើការតាមលំដាប់នេះ៖
-1. Checkout កូដរបស់អ្នក។
-2. បើកកុំព្យូទ័រ Server ថ្មី និងតម្លើង PostgreSQL (ទទេរស្អាត)។
-3. រត់ Command `npm test` (ដែលកំណត់ `NODE_ENV=test`)។
-4. កូដតេស្តរត់ ធ្វើអោយ TypeORM បង្កើតតារាងថ្មីក្នុង Database នោះ រួចបញ្ចូលទិន្នន័យសាកល្បង រួចធ្វើតេស្ត។
-5. បើជោគជ័យ វានឹង Deploy ទៅ Production។ បើបរាជ័យ វានឹងរារាំងការ Deploy ភ្លាមៗ។
+---
+
+## 🏭 ការបង្កើត Test Data Factories & Fixtures
+
+ជំនួសឱ្យការសរសេរ `INSERT` ទិន្នន័យដោយដៃនៅគ្រប់ Test Case យើងបង្កើត **Factory Helpers**៖
+
+```typescript
+// tests/factories/user.factory.ts
+import { AppDataSource } from "../../src/config/data-source";
+import { User, UserRole } from "../../src/entities/User.entity";
+import { hashPassword } from "../../src/utils/password";
+
+export async function createTestUser(overrides: Partial<User> = {}): Promise<User> {
+  const userRepo = AppDataSource.getRepository(User);
+  const randomSuffix = Math.floor(Math.random() * 100000);
+
+  const passwordHash = await hashPassword(overrides.passwordHash || "password123");
+
+  const user = userRepo.create({
+    fullName: overrides.fullName || `Test User ${randomSuffix}`,
+    email: overrides.email || `test_${randomSuffix}@example.com`,
+    passwordHash,
+    role: overrides.role || UserRole.CUSTOMER,
+    isActive: overrides.isActive ?? true,
+    ...overrides,
+  });
+
+  return userRepo.save(user);
+}
+```
+
+---
+
+## 🌐 Mocking Third-Party HTTP APIs ជាមួយ MSW / Nock
+
+នៅពេលសរសេរ Test សម្រាប់ Payments យើង Mock HTTP Response ដើម្បីកុំឱ្យកាត់លុយពិត៖
+
+```typescript
+import { describe, it, expect, vi } from "vitest";
+import { PaymentService } from "../../src/services/payment.service";
+
+describe("PaymentService.chargeCard()", () => {
+  it("គួរតែដំណើរការ Payment បានជោគជ័យតាម Mock Stripe Response", async () => {
+    // Mock Stripe SDK method
+    const mockStripeCharge = vi.fn().mockResolvedValue({
+      id: "ch_mock_12345",
+      status: "succeeded",
+      amount: 5000, // $50.00
+    });
+
+    const paymentService = new PaymentService(mockStripeCharge);
+    const result = await paymentService.processOrderPayment("order_999", 50);
+
+    expect(result.status).toBe("succeeded");
+    expect(mockStripeCharge).toHaveBeenCalledTimes(1);
+  });
+});
+```

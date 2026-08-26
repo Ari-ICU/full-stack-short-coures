@@ -1,59 +1,109 @@
 ---
-title: Express Fundamentals
-description: ស្វែងយល់ពី Express.js និងរបៀបប្រើប្រាស់វាដើម្បីបង្កើត Web Server បានយ៉ាងងាយស្រួល។
+title: Express.js Fundamentals & Server Setup
+description: ស្វែងយល់ពី Express.js និងរបៀបប្រើប្រាស់វាដើម្បីបង្កើត Web Server និង API បានយ៉ាងងាយស្រួល និងមានប្រសិទ្ធភាពខ្ពស់។
+objectives:
+  - យល់ដឹងពីស្ថាបត្យកម្ម Minimalist & Unopinionated របស់ Express.js
+  - ចេះដំឡើង និងបង្កើត Express Application ដំបូងជាមួយ modern ES Modules / TypeScript
+  - ស្គាល់រចនាសម្ព័ន្ធ Request & Response Objects ក្នុង Express
+  - ចេះ configure Development workflow ដោយប្រើ nodemon ឬ tsx watch
 module: module-2-expressjs
 order: 1
+quiz:
+  - question: "តើ Express.js ត្រូវបានចាត់ទុកជាប្រភេទ Framework បែបណា?"
+    options:
+      - "ជា Full-Stack Opinionated Framework ដូចជា Ruby on Rails ឬ Django"
+      - "ជា Minimalist, Unopinionated Web Framework សម្រាប់ Node.js ដែលផ្តល់ភាពបត់បែនខ្ពស់ក្នុងការជ្រើសរើស Architecture"
+      - "ជា CSS Framework សម្រាប់រៀបចំ Layout"
+      - "ជា Database Management System"
+    correctAnswer: 2
+    explanation: "Express.js គឺជា Minimalist & Unopinionated Framework ដែលមិនបង្ខំ Folder Structure ឬ ORM ជាក់លាក់ណាមួយឡើយ ដោយផ្តល់សេរីភាពពេញលេញដល់ Developer ក្នុងការរចនា Architecture។"
 ---
 
 ## 🚂 អ្វីទៅជា Express.js?
 
-**Express.js** គឺជា Framework ដ៏ពេញនិយមបំផុតសម្រាប់បង្កើត Web Server និង APIs នៅក្នុង Node.js។ វាជួយសម្រួលដល់ភាពស្មុគស្មាញនៃការប្រើប្រាស់ Core `http` module ដោយផ្តល់នូវមុខងារចាំបាច់ជាច្រើនដូចជា Routing និង Middleware។
+**Express.js** គឺជា Web Framework ដ៏ល្បីល្បាញ និងពេញនិយមបំផុតសម្រាប់ Node.js។ វាត្រូវបានបង្កើតឡើងលើ Core `http` module ដោយផ្តល់នូវ Abstraction ដ៏ងាយស្រួល ក្នុងការបង្កើត **RESTful APIs, Single-Page Applications Backend, និង Microservices**។
 
-### ហេតុអ្វីបានជាយើងប្រើ Express?
-1. **ងាយស្រួលសរសេរ (Simplicity):** កូដខ្លី និងងាយយល់ជាងការប្រើ `http` ផ្ទាល់។
-2. **Routing:** អាចបែងចែកផ្លូវ (URLs) និង Methods (GET, POST, PUT, DELETE) បានយ៉ាងងាយ។
-3. **Middleware:** អាចត្រួតពិនិត្យ Request មុនពេលបញ្ជូនទៅកាន់កន្លែងផ្សេង (ដូចជាឆែកមើល Token)។
-
-### រចនាសម្ព័ន្ធគម្រោង Express ដំបូង
-
-ខាងក្រោមនេះជារបៀបបង្កើត Server ដំបូងដោយប្រើ Express ជាមួយ ES Modules។
-
-```tabs
-javascript
-// app.js
-import express from 'express';
-
-  // បង្កើត Application របស់ Express
-  const app = express();
-
-  // Route សាមញ្ញមួយ
-  app.get('/', (req, res) => {
-      res.json({ message: "សួស្តីពី Express.js! 🚀" });
-  });
-
-  // ចាប់ផ្តើម Server
-  const PORT = 3000;
-  app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-  });
----
-json
-{
-    "name": "my-express-app",
-    "version": "1.0.0",
-    "type": "module",
-    "scripts": {
-      "start": "node app.js",
-      "dev": "nodemon app.js"
-    },
-    "dependencies": {
-      "express": "^4.19.2"
-    },
-    "devDependencies": {
-      "nodemon": "^3.1.0"
-    }
-  }
+```mermaid
+graph TD
+    REQ["Incoming HTTP Request"] --> EXP["Express Application Pipeline"]
+    EXP --> MW1["Global Middleware<br/>(CORS, Helmet, Body Parser)"]
+    MW1 --> RTR["Express Router<br/>(Routing by URL & Method)"]
+    RTR --> CTRL["Controller Handler<br/>(Business Logic & DB Query)"]
+    CTRL --> RES["res.json(data) / 200 OK"]
 ```
 
+---
+
+## 🛠️ ការដំឡើង និងបង្កើត Express Application
+
+### ជំហានទី ១: បង្កើតគម្រោង និងដំឡើង Packages
+```bash
+mkdir express-api && cd express-api
+npm init -y
+npm install express dotenv
+npm install -D nodemon @types/express @types/node
+```
+
+### ជំហានទី ២: កំណត់ `package.json`
+```json
+{
+  "name": "express-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
+```
+
+### ជំហានទី ៣: សរសេរកូដ Server (`src/app.js`)
+```javascript
+import express from 'express';
+import 'dotenv/config';
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Built-in Middleware សម្រាប់បកប្រែ JSON Body
+app.use(express.json());
+
+// Basic Routes
+app.get('/', (req, res) => {
+  res.json({
+    name: "Express.js REST API",
+    status: "active",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/v1/health', (req, res) => {
+  res.status(200).json({
+    uptime: process.uptime(),
+    message: "Server is healthy! 🚀"
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`⚡ Server running on http://localhost:${PORT}`);
+});
+```
+
+---
+
+## 🔍 ការយល់ដឹងពី `req` និង `res` Objects
+
+| Object | មុខងារចម្បង | ឧទាហរណ៍ Properties & Methods |
+|---|---|---|
+| **`req` (Request)** | ផ្ទុកព័ត៌មានដែលផ្ញើមកពី Client | `req.body`, `req.params`, `req.query`, `req.headers`, `req.ip` |
+| **`res` (Response)** | គ្រប់គ្រងការឆ្លើយតបទៅ Client វិញ | `res.status(200)`, `res.json({...})`, `res.send()`, `res.redirect()` |
+
 > [!TIP]
-> យើងប្រើប្រាស់ **nodemon** នៅក្នុង `devDependencies` ដើម្បីអោយ Server ធ្វើការ Restart ដោយស្វ័យប្រវត្តិរាល់ពេលដែលយើង Save កូដថ្មី ដោយមិនបាច់បិទបើក Terminal ខ្លួនឯង។
+> ត្រូវចាំថា នៅក្នុង Express រាល់ Route Handler ត្រូវតែបញ្ចប់ដោយការហៅ method នៃ response ដូចជា `res.json(...)` ឬ `res.send(...)` ឬហៅ `next()` បើពុំនោះទេ Client នឹងជាប់រង់ចាំ (Hanging / Timeout)។

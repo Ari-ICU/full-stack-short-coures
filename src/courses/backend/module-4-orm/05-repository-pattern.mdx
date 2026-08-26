@@ -1,71 +1,100 @@
 ---
-title: Repository Pattern
-description: របៀបរៀបចំកូដអោយមានរបៀបរៀបរយដោយបំបែក Controller ចេញពីការទាក់ទង Database។
+title: The Repository Pattern & Data Access Layer
+description: ស្វែងយល់ពី Repository Pattern, TypeORM Standard Repositories, Custom Extended Repositories, និង Service Layer Integration។
+objectives:
+  - យល់ពីអត្ថប្រយោជន៍នៃ Repository Pattern ក្នុង Software Architecture
+  - ចេះប្រើ Generic Repository Methods (find, findOne, create, save, update, delete)
+  - បង្កើត Custom Extended Repositories សម្រាប់ Complex Queries
+  - ស្គាល់ភាពខុសគ្នារវាង `delete()` និង `softDelete()`
 module: module-4-orm
 order: 5
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នារវាង `repository.create(dto)` និង `repository.save(entity)` ក្នុង TypeORM?"
+    options:
+      - "`create()` បង្កើត Entity instance ក្នុង Memory តែមិនទាន់កត់ត្រាចូល Database ទេ រីឯ `save()` ទើបជាអ្នក INSERT/UPDATE ចូល Database ពិតប្រាកដ"
+      - "`create()` ប្រើសម្រាប់លុប Record"
+      - "`save()` មិនដំណើរការលើ PostgreSQL"
+      - "ទាំងពីរដូចគ្នា ១០០%"
+    correctAnswer: 1
+    explanation: "`repository.create()` គ្រាន់តែ Instantiate JavaScript object ទៅជា Class Entity Instance ក្នុង Memory ប៉ុណ្ណោះ។ អ្នកត្រូវតែហៅ `await repository.save(entity)` ដើម្បីបញ្ជូន SQL INSERT ទៅកាន់ Database។"
 ---
 
-## 🏛️ ការរចនារចនាសម្ព័ន្ធកូដ (Architecture)
+## 🏛️ អ្វីទៅជា Repository Pattern?
 
-ប្រសិនបើយើងសរសេរកូដទាក់ទង Database ផ្ទាល់នៅក្នុង Express Controller កូដរបស់យើងនឹងមានភាពរញ៉េរញ៉ៃ។
-យើងនឹងអនុវត្តតាមទម្រង់ដ៏ពេញនិយមគឺ **Controller → Service → Repository**។
+**Repository Pattern** ដើរតួជាស្រទាប់កណ្តាល (Abstraction Layer) រវាង **Domain/Business Logic (Services)** និង **Data Mapping Layer (Database)**។
 
 ```mermaid
 graph LR
-    REQ["Request"] --> ROUTE["Router"]
-    ROUTE --> CTRL["Controller <br/>ទទួល Request"]
-    CTRL --> SERV["Service <br/>គិតលេខ, Business Logic"]
-    SERV --> REPO["Repository <br/>សរសេរ/អាន Database"]
+    CTRL["Controller"] --> SRV["Service Layer<br/>(Business Logic & Validation)"]
+    SRV --> REPO["Repository<br/>(Data Access & Query Logic)"]
     REPO --> DB[("Database")]
 ```
 
-```tabs
-javascript
-// repositories/userRepository.js
-import { AppDataSource } from '../config/database.js';
-  import { User } from '../entities/User.js';
-
-  // ទាញយក Repository ផ្ទាល់ពី TypeORM
-  const userRepository = AppDataSource.getRepository(User);
-
-  // បង្កើត Function សាមញ្ញៗ
-  export const findUserByEmail = async (email) => {
-      return await userRepository.findOneBy({ email });
-  };
-
-  export const createUser = async (userData) => {
-      const user = userRepository.create(userData);
-      return await userRepository.save(user);
-  };
 ---
-javascript
-// services/userService.js
-import { findUserByEmail, createUser } from '../repositories/userRepository.js';
-  // Service ជាកន្លែងឆែកលក្ខខណ្ឌ (Business Logic)
-  
-  export const registerUser = async (email, password) => {
-      const existingUser = await findUserByEmail(email);
-      if (existingUser) {
-          throw new Error("អុីមែលនេះមានរួចហើយ!");
-      }
-      
-      // TODO: យើងនឹងរៀន Hashing លេខសម្ងាត់នៅ Module ក្រោយ!
-      return await createUser({ email, password });
-  };
+
+## 🛠️ Methods សំខាន់ៗរបស់ TypeORM Repository
+
+```typescript
+import { AppDataSource } from "../config/data-source";
+import { User, UserRole } from "../entities/User.entity";
+import { Like, MoreThan, In } from "typeorm";
+
+const userRepo = AppDataSource.getRepository(User);
+
+// 1. CREATE & SAVE
+const newUser = userRepo.create({
+  fullName: "Keo Sophea",
+  email: "sophea@example.com",
+  role: UserRole.CUSTOMER,
+});
+await userRepo.save(newUser); // SQL: INSERT INTO users...
+
+// 2. FIND WITH FILTERS & PAGINATION
+const [users, totalCount] = await userRepo.findAndCount({
+  where: {
+    isActive: true,
+    role: In([UserRole.ADMIN, UserRole.MANAGER]),
+  },
+  order: { createdAt: "DESC" },
+  take: 10, // LIMIT 10
+  skip: 0,  // OFFSET 0
+  select: ["id", "fullName", "email", "role", "createdAt"],
+});
+
+// 3. FIND ONE OR FAIL
+const user = await userRepo.findOneByOrFail({ id: "uuid-here" });
+
+// 4. UPDATE
+await userRepo.update({ id: "uuid-here" }, { isActive: false });
+
+// 5. SOFT DELETE & RESTORE
+await userRepo.softDelete({ id: "uuid-here" }); // កំណត់ deletedAt = NOW()
+await userRepo.restore({ id: "uuid-here" });    // កំណត់ deletedAt = NULL
+```
+
 ---
-javascript
-// controllers/authController.js
-import { registerUser } from '../services/userService.js';
-  // Controller មានតួនាទីត្រឹមតែទទួល req, res ប៉ុណ្ណោះ
-  
-  export const register = async (req, res, next) => {
-      try {
-          const { email, password } = req.body;
-          const user = await registerUser(email, password);
-          
-          res.status(201).json({ success: true, data: user });
-      } catch (error) {
-          next(error); // បញ្ជូនទៅ Global Error Handler
-      }
-  };
+
+## 💡 ការបង្កើត Custom Extended Repository
+
+អ្នកអាចពង្រីកសមត្ថភាព Repository ដោយបន្ថែម Methods ផ្ទាល់ខ្លួន៖
+
+```typescript
+// src/repositories/user.repository.ts
+import { AppDataSource } from "../config/data-source";
+import { User } from "../entities/User.entity";
+
+export const UserRepository = AppDataSource.getRepository(User).extend({
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.createQueryBuilder("user")
+      .addSelect("user.passwordHash")
+      .where("user.email = :email", { email: email.toLowerCase() })
+      .getOne();
+  },
+
+  async countActiveAdmins(): Promise<number> {
+    return this.count({
+      where: { role: "admin", isActive: true },
+    });
+  },
+});
 ```

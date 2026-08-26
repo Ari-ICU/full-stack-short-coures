@@ -1,53 +1,88 @@
 ---
-title: JSON Web Tokens (JWT)
-description: យល់ដឹងពីអ្វីទៅជា JWT និងរបៀបប្រើប្រាស់វាដើម្បីធ្វើ Authentication បែប Stateless។
+title: JSON Web Tokens (JWT) Architecture & Signing
+description: ស្វែងយល់ពីរចនាសម្ព័ន្ធ JWT (Header, Payload, Signature), ការបង្កើត Token, ការ Verify, និងការការពារសុវត្ថិភាព។
+objectives:
+  - យល់ពីរចនាសម្ព័ន្ធ 3 ផ្នែកនៃ JWT (Header.Payload.Signature)
+  - ស្គាល់ភាពខុសគ្នារវាង Symmetric Signing (HS256) និង Asymmetric Signing (RS256/EdDSA)
+  - ចេះប្រើ Library `jsonwebtoken` ដើម្បី sign និង verify tokens
+  - យល់ពីច្បាប់សុវត្ថិភាព JWT (Never put secrets in Payload, Token Expiry)
 module: module-5-authentication
 order: 3
+quiz:
+  - question: "តើព័ត៌មាននៅក្នុង JWT Payload (ផ្នែកកណ្តាល) មានសុវត្ថិភាពកម្រិតណា?"
+    options:
+      - "វាត្រូវបាន Encrypt យ៉ាងសម្ងាត់ គ្មាននរណាអាចអានបានទេ"
+      - "វាគ្រាន់តែត្រូវបាន Base64Url Encoded ប៉ុណ្ណោះ នរណាក៏អាច Decode អានបានដែរ ដូច្នេះដាច់ខាតកុំដាក់ Password ឬ Sensitive Data ក្នុង Payload"
+      - "អាចអានបានតែជាមួយ Database Password ប៉ុណ្ណោះ"
+      - "វារលុបបាត់ភ្លាមៗក្រោយ ១ វិនាទី"
+    correctAnswer: 2
+    explanation: "JWT គឺជា Signed Token មិនមែន Encrypted Token ឡើយ។ Payload គ្រាន់តែជា Base64-encoded string ដូច្នេះអ្នកណាក៏អាច decode មើលទិន្នន័យបានដែរ។ Signature គ្រាន់តែបញ្ជាក់ថាទិន្នន័យមិនត្រូវបានកែប្រែបន្លំប៉ុណ្ណោះ។"
 ---
 
-## 🎟️ អ្វីទៅជា JWT?
+## 🪙 អ្វីទៅជា JSON Web Token (JWT)?
 
-**JWT (JSON Web Token)** គឺជាស្តង់ដារមួយសម្រាប់តំណាងអោយព័ត៌មានរវាងភាគីពីរ (Client និង Server) ប្រកបដោយសុវត្ថិភាព។ វាជាទូទៅត្រូវបានគេប្រើជំនួសអោយការប្រើ Session នៅក្នុងការបង្កើត API ទំនើប។
+**JWT (JSON Web Token)** គឺជាស្តង់ដារបើកចំហរ (RFC 7519) សម្រាប់ការបញ្ជូនព័ត៌មានរវាងភាគីពីរដោយសុវត្ថិភាព និងបង្រួមតូច (Compact & Self-contained)។
 
-### លក្ខណៈពិសេសរបស់ JWT (Stateless)
-ចំនុចខ្លាំងរបស់ JWT គឺ Server មិនចាំបាច់រក្សាទុកព័ត៌មាន (State) ថាអ្នកណាបាន Login នោះទេ។ 
-- ពេល Login ត្រូវ Server បង្កើត JWT (ដែលមានផ្ទុក User ID) រួចចុះហត្ថលេខា (Sign) ដោយប្រើ Secret Key ហើយបញ្ជូនទៅ Client។
-- រាល់ពេល Client ត្រូវការទាញទិន្នន័យ ពួកគេគ្រាន់តែផ្ញើ JWT នោះមកកាន់ Server វិញ។
-- Server គ្រាន់តែឆែកមើលហត្ថលេខា (Signature) បើត្រឹមត្រូវ គឺដឹងថាជានរណាភ្លាម ដោយមិនបាច់ទៅសួរ Database គ្រប់ពេលឡើយ។
+```mermaid
+graph TD
+    JWT["JSON Web Token: xxxxx.yyyyy.zzzzz"]
+    
+    H["1. Header (Algorithm & Token Type)<br/>{'alg': 'HS256', 'typ': 'JWT'}"]
+    P["2. Payload (Claims & User Data)<br/>{'sub': 'user_123', 'role': 'admin', 'exp': 1714000000}"]
+    S["3. Signature (HMACSHA256(H + '.' + P, SecretKey))"]
+    
+    JWT --> H
+    JWT --> P
+    JWT --> S
+```
 
-### រចនាសម្ព័ន្ធរបស់ JWT
-JWT មានបីផ្នែក ចែកដាច់ពីគ្នាដោយសញ្ញាចុច (`.`): `Header.Payload.Signature`
+---
 
-1. **Header:** ប្រាប់ពីប្រភេទ Token និងការបំប្លែងកូដ (ឧ. HS256)។
-2. **Payload:** ផ្ទុកទិន្នន័យពិតប្រាកដ (ឧ. `userId`, `role`, ម៉ោងផុតកំណត់)។
-3. **Signature:** គឺជាលេខសម្ងាត់សម្រាប់បញ្ជាក់ថា ទិន្នន័យ (Payload) មិនត្រូវបានគេកែប្រែក្លែងបន្លំ។
-
-> [!WARNING]
-> **Payload របស់ JWT មិនត្រូវបានលាក់ (Encrypt) ទេ!** អ្នកណាក៏អាចអានវាបានដែរ គ្រាន់តែគេមិនអាចកែប្រែវាបាន (ព្រោះអត់មាន Secret Key សម្រាប់ Sign ឡើងវិញ)។ ដូច្នេះ កុំដាក់ព័ត៌មានសម្ងាត់ដូចជា លេខសម្ងាត់ ឬ លេខកាតធនាគារ ចូលក្នុង JWT អោយសោះ។ ដាក់ត្រឹម `userId` បានហើយ។
-
-### ការបង្កើត និងបញ្ជាក់ JWT
+## ⚙️ ការប្រើប្រាស់ `jsonwebtoken` ក្នុង TypeScript
 
 ```bash
 npm install jsonwebtoken
+npm install -D @types/jsonwebtoken
 ```
 
-```tabs
-javascript
-// utils/jwtHelper.js
-import jwt from 'jsonwebtoken';
+### 1. Token Helper Service (`src/utils/jwt.ts`)
+```typescript
+import jwt, { SignOptions } from 'jsonwebtoken';
 
-// 1. បង្កើត Token (ពេល Login ត្រូវ)
-export const generateToken = (userId) => {
-    // ត្រូវមានព័ត៌មានសម្ងាត់ (Secret) នៅក្នុងឯកសារ .env
-    const secret = process.env.JWT_SECRET; 
-    
-    // បង្កើត Token ដែលមានសុពលភាពត្រឹម ១ ថ្ងៃ
-    return jwt.sign({ id: userId }, secret, { expiresIn: '1d' });
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_dev_key';
+const JWT_EXPIRES_IN = '15m'; // Access Token អាយុខ្លី
+
+export interface UserTokenPayload {
+  userId: string;
+  email: string;
+  role: string;
+}
+
+export const signToken = (payload: UserTokenPayload, options?: SignOptions): string => {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
+    algorithm: 'HS256',
+    ...options,
+  });
 };
 
-// 2. ផ្ទៀងផ្ទាត់ Token (Middleware)
-export const verifyToken = (token) => {
-    const secret = process.env.JWT_SECRET;
-    return jwt.verify(token, secret); // បើហួសម៉ោង ឫក្លែងបន្លំ វានឹងលោត Error
+export const verifyToken = (token: string): UserTokenPayload => {
+  try {
+    return jwt.verify(token, JWT_SECRET) as UserTokenPayload;
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      throw new Error('Token ផុតកំណត់សុពលភាពហើយ (Token Expired)');
+    }
+    throw new Error('Token មិនត្រឹមត្រូវឡើយ (Invalid Token)');
+  }
 };
 ```
+
+---
+
+## 🛡️ ច្បាប់សុវត្ថិភាពសំខាន់ៗពេលប្រើ JWT
+
+> [!WARNING]
+> 1. **ហាមដាច់ខាត:** កុំដាក់ Passwords, Credit Card numbers, ឬ Private Secrets ទៅក្នុង JWT Payload។
+> 2. **កំណត់ Expiration ជានិច្ច:** ត្រូវកំណត់អាយុកាល Token ខ្លី (ឧ. 15 នាទីទៅ 1 ម៉ោង) សម្រាប់ Access Token។
+> 3. **ការពារ Secret Key:** ប្រើ Secret Key ដែលមានប្រវែងយ៉ាងតិច 256 bits (32+ bytes random characters)។

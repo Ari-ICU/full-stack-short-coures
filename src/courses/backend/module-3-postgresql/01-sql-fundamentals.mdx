@@ -1,48 +1,97 @@
 ---
-title: SQL Fundamentals
-description: ស្វែងយល់ពីមូលដ្ឋានគ្រឹះនៃ SQL (Structured Query Language) ដើម្បីទំនាក់ទំនងជាមួយ Database។
+title: Relational Database & SQL Fundamentals
+description: មូលដ្ឋានគ្រឹះនៃ Relational Databases, តារាងទិន្នន័យ (Tables), Data Types, និងពាក្យបញ្ជា SQL DDL & DML។
+objectives:
+  - យល់ពីគំរូទិន្នន័យតារាង (Rows, Columns, Primary Keys, Foreign Keys)
+  - ស្គាល់ភាពខុសគ្នារវាង DDL (CREATE, ALTER, DROP) និង DML (SELECT, INSERT, UPDATE, DELETE)
+  - ចេះសរសេរ SQL Queries សំខាន់ៗជាមួយ WHERE, ORDER BY, LIMIT, OFFSET
+  - យល់ពី Data Types សំខាន់ៗក្នុង PostgreSQL (UUID, VARCHAR, TIMESTAMP, JSONB)
 module: module-3-postgresql
 order: 1
+quiz:
+  - question: "តើ Primary Key នៅក្នុង Table មួយមានតួនាទីជាអ្វី?"
+    options:
+      - "ជា Password សម្រាប់ Login ចូល Database"
+      - "ជា Column ដែលកំណត់អត្តសញ្ញាណប្លែកពីគេដាច់ខាត (Unique & NOT NULL) សម្រាប់ Row នីមួយៗ"
+      - "ជា Folder ដែលផ្ទុក backup data"
+      - "ជាឈ្មោះរបស់ Table"
+    correctAnswer: 2
+    explanation: "Primary Key គឺជា Unique Identifier (មិនស្ទួន និងមិនអាចជា NULL) សម្រាប់កំណត់អត្តសញ្ញាណ Row នីមួយៗនៅក្នុង Table មួយយ៉ាងច្បាស់លាស់។"
 ---
 
-## 💾 អ្វីទៅជា SQL?
+## 🗄️ អ្វីទៅជា Relational Database (RDBMS)?
 
-**SQL (Structured Query Language)** គឺជាភាសាស្តង់ដារដែលប្រើសម្រាប់ទំនាក់ទំនង (អាន បញ្ចូល កែប្រែ លុប) ជាមួយ Relational Database ដូចជា PostgreSQL, MySQL, ឬ SQL Server ជាដើម។
+**RDBMS (Relational Database Management System)** រៀបចំផ្ទុកទិន្នន័យជាទម្រង់ **Tables (តារាង)** ដែលមាន **Columns (ជួរឈរ/Attributes)** និង **Rows (ជួរដេក/Records)** ព្រមទាំងមានទំនាក់ទំនង (Relationships) រវាងតារាងនីមួយៗ។
 
-### ប្រភេទនៃពាក្យបញ្ជា SQL
-
-SQL ត្រូវបានបែងចែកជាផ្នែកធំៗ ប៉ុន្តែអ្វីដែលយើងប្រើប្រាស់ញឹកញាប់បំផុតគឺ **DML (Data Manipulation Language)** និង **DDL (Data Definition Language)**។
-
-```tabs
-sql
--- ddl
--- បង្កើតតារាងថ្មីឈ្មោះ users
-  CREATE TABLE users (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      email VARCHAR(150) UNIQUE NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
-
-  -- បន្ថែមជួរឈរ (Column) ថ្មី
-  ALTER TABLE users ADD COLUMN age INT;
----
-sql
--- dml
--- 1. ការបញ្ចូលទិន្នន័យ (Create)
-  INSERT INTO users (name, email) 
-  VALUES ('សុខ', 'sok@example.com'), ('សៅ', 'sao@example.com');
-
-  -- 2. ការអានទិន្នន័យ (Read)
-  SELECT id, name FROM users WHERE id = 1;
-  SELECT * FROM users ORDER BY created_at DESC LIMIT 10;
-
-  -- 3. ការកែប្រែទិន្នន័យ (Update)
-  UPDATE users SET name = 'សុខា' WHERE id = 1;
-
-  -- 4. ការលុបទិន្នន័យ (Delete)
-  DELETE FROM users WHERE id = 2;
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    USERS {
+        uuid id PK
+        string email UK
+        string full_name
+        timestamp created_at
+    }
+    ORDERS {
+        uuid id PK
+        uuid user_id FK
+        decimal total_amount
+        string status
+    }
 ```
 
-> [!WARNING]
-> ពេលអ្នកសរសេរពាក្យបញ្ជា `UPDATE` ឬ `DELETE` **ត្រូវតែ** ដាក់លក្ខខណ្ឌ `WHERE` ជានិច្ច! បើអ្នកភ្លេច វាអាចនឹងកែប្រែ ឬលុបទិន្នន័យក្នុងតារាងរបស់អ្នកទាំងអស់។
+---
+
+## 📜 ភាសា SQL: DDL vs DML
+
+### 1. DDL (Data Definition Language) - កំណត់រចនាសម្ព័ន្ធ Table
+```sql
+-- បង្កើត Table
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    age INT CHECK (age >= 18),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+### 2. DML (Data Manipulation Language) - គ្រប់គ្រងទិន្នន័យ
+
+```sql
+-- 1. INSERT (បង្កើត Record ថ្មី)
+INSERT INTO users (username, email, age) 
+VALUES ('sok_dara', 'sok@example.com', 24)
+RETURNING id, username, created_at;
+
+-- 2. SELECT (ទាញយកទិន្នន័យជាមួយលក្ខខណ្ឌ)
+SELECT id, username, email 
+FROM users 
+WHERE is_active = TRUE AND age > 20
+ORDER BY created_at DESC 
+LIMIT 10 OFFSET 0;
+
+-- 3. UPDATE (កែប្រែទិន្នន័យ)
+UPDATE users 
+SET age = 25, is_active = TRUE 
+WHERE username = 'sok_dara'
+RETURNING *;
+
+-- 4. DELETE (លុបទិន្នន័យ)
+DELETE FROM users 
+WHERE id = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+```
+
+---
+
+## 🎯 Data Types សំខាន់ៗក្នុង PostgreSQL
+
+| Data Type | ការពិពណ៌នា | ឧទាហរណ៍ |
+|---|---|---|
+| `UUID` | Universally Unique Identifier (128-bit) | `a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11` |
+| `VARCHAR(n)` | ខ្សែអក្សរមានកំណត់ប្រវែងអតិបរមា | `VARCHAR(255)` សម្រាប់ Emails, Titles |
+| `TEXT` | អត្ថបទវែងគ្មានកំណត់ប្រវែង | សម្រាប់ Blog Contents, Descriptions |
+| `NUMERIC(p, s)` | លេខទសភាគសុក្រឹត (គ្មានបញ្ហា Floating-point) | `NUMERIC(10, 2)` សម្រាប់តម្លៃលុយ |
+| `TIMESTAMPTZ` | កាលបរិច្ឆេទ និងពេលវេលាគិតបញ្ចូល Timezone | `2026-08-25 08:50:00+07` |
+| `JSONB` | Binary JSON អាច Index និង Query Key-Value បាន | `{"tags": ["tech", "node"], "verified": true}` |

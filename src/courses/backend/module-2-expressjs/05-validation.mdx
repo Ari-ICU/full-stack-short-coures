@@ -1,68 +1,120 @@
 ---
-title: Input Validation
-description: របៀបប្រើប្រាស់ Joi ឬ Zod ដើម្បីត្រួតពិនិត្យទិន្នន័យដែល Client ផ្ញើមកមុននឹងបញ្ចូលទៅក្នុង Database។
+title: Request Validation & Schema Verification (Zod)
+description: ការពារប្រព័ន្ធ Backend ពីទិន្នន័យមិនប្រក្រតីតាមរយៈ Schema Validation ជាមួយ Zod នៅក្នុង Express Middleware។
+objectives:
+  - យល់ពីសារៈសំខាន់នៃ Data Sanitization & Validation នៅច្រកចូល API
+  - ចេះបង្កើត Schema សម្រាប់ `req.body`, `req.query`, និង `req.params` ជាមួយ Zod
+  - បង្កើត Reusable Validation Middleware
+  - ផ្តល់ Error Messages ច្បាស់លាស់ (400 / 422) ទៅកាន់ Client
 module: module-2-expressjs
 order: 5
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងមិនគួរទុកចិត្ត (Never Trust) ទិន្នន័យដែលផ្ញើមកពី Client?"
+    options:
+      - "ព្រោះ Client Browser អាចជា Hacker ដែលកែបន្លំទិន្នន័យ (SQL Injection, Malicious payloads, Missing fields)"
+      - "ព្រោះ HTTP Protocol មិនអាចផ្ញើលេខ String បាន"
+      - "ព្រោះ Zod មិនអាចដំណើរការនៅលើ Frontend"
+      - "ព្រោះ Express មិនគាំទ្រ JSON"
+    correctAnswer: 1
+    explanation: "ច្បាប់លេខមួយនៃ Backend Security គឺ Never Trust Client Input។ យើងត្រូវតែ Validate ទិន្នន័យទាំង Body, Query, និង Headers ទាំងអស់មុននឹងបញ្ជូនទៅកាន់ Service ឬ Database។"
 ---
 
-## 🛡️ សារៈសំខាន់នៃ Validation
+## 🛡️ ហេតុអ្វីត្រូវមាន Request Validation?
 
-"Never Trust Client Input" (កុំទុកចិត្តទិន្នន័យដែលអ្នកប្រើប្រាស់បញ្ជូនមកអោយសោះ)។ 
-បើអ្នកប្រើប្រាស់បញ្ជូន `email` ដែលមិនមានទម្រង់ជាអុីមែល ឬក៏មិនបានបញ្ជូន `password` មក យើងមិនត្រូវអោយកូដរបស់យើងដើរទៅដល់ដំណាក់កាល Database ឡើយ។
+ប្រសិនបើគ្មាន Validation ទេ កម្មវិធី Server របស់អ្នកអាចជួបប្រទះបញ្ហាជាច្រើនដូចជា៖
+- Runtime Crashes ដោយសារតែ Types មិនត្រូវ (`undefined is not a function`)
+- ទិន្នន័យមិនពេញលេញ ឬខូចរចនាសម្ព័ន្ធធ្លាក់ចូល Database
+- ហានិភ័យ Security Attacks (Injection, Data Tampering)
 
-យើងនឹងប្រើប្រាស់ Library **Zod** ដែលកំពុងពេញនិយមខ្លាំងសម្រាប់ការធ្វើ Validation។
+```mermaid
+graph LR
+    REQ["Client Request"] --> VAL["Zod Validation Middleware"]
+    VAL -->|"Valid Data (Parsed & Clean)"| CTRL["Controller"]
+    VAL -->|"Invalid Data (Schema Mismatch)"| ERR["422 / 400 Bad Request + Formatted Errors"]
+```
 
-### ការដំឡើង Zod
+---
+
+## 📦 ការដំឡើង និងប្រើប្រាស់ Zod
+
 ```bash
 npm install zod
 ```
 
-### ឧទាហរណ៍ជាក់ស្តែង
+### 1. បង្កើត Generic Validate Middleware (`src/middlewares/validate.js`)
+```javascript
+import { ZodError } from 'zod';
 
-```tabs
-javascript
-// validators/userValidator.js
-import { z } from 'zod';
+export const validate = (schema) => async (req, res, next) => {
+  try {
+    // Validate ទាំង body, query, និង params
+    const parsed = await schema.parseAsync({
+      body: req.body,
+      query: req.query,
+      params: req.params,
+    });
 
-  // 1. បង្កើត Schema សម្រាប់ពិនិត្យទិន្នន័យ
-  export const registerSchema = z.object({
-      name: z.string().min(2, "ឈ្មោះត្រូវមានយ៉ាងហោចណាស់ ២ តួអក្សរ"),
-      email: z.string().email("ទម្រង់អុីមែលមិនត្រឹមត្រូវទេ"),
-      password: z.string().min(6, "លេខសម្ងាត់ត្រូវមានយ៉ាងហោចណាស់ ៦ ខ្ទង់"),
-      age: z.number().int().min(18, "អ្នកត្រូវតែមានអាយុ ១៨ ឆ្នាំឡើងទៅ").optional()
-  });
+    // ជំនួសទិន្នន័យចាស់ដោយ sanitized data
+    req.body = parsed.body || req.body;
+    req.query = parsed.query || req.query;
+    req.params = parsed.params || req.params;
 
-  // 2. បង្កើត Middleware សម្រាប់យក Schema ទៅឆែក
-  export const validateRequest = (schema) => {
-      return (req, res, next) => {
-          try {
-              // ពិនិត្យមើល req.body
-              schema.parse(req.body);
-              next(); // បើត្រូវ អោយទៅមុខទៀត
-          } catch (error) {
-              // បើខុស បញ្ជូន Error ត្រលប់ទៅវិញ ជាមួយ Status 400
-              return res.status(400).json({
-                  message: "ទិន្នន័យមិនត្រឹមត្រូវ",
-                  errors: error.errors.map(e => e.message)
-              });
-          }
-      };
-  };
----
-javascript
-// routes/authRoutes.js
-import express from 'express';
-  import { validateRequest, registerSchema } from '../validators/userValidator.js';
+    next();
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const formattedErrors = error.errors.map((err) => ({
+        field: err.path.join('.'),
+        message: err.message,
+      }));
 
-  const router = express.Router();
+      return res.status(422).json({
+        success: false,
+        message: "ទិន្នន័យផ្ញើមកមិនត្រឹមត្រូវតាមទម្រង់ឡើយ (Validation Failed)",
+        errors: formattedErrors,
+      });
+    }
 
-  // ប្រើប្រាស់ Validation Middleware មុននឹងដល់ (req, res)
-  router.post('/register', validateRequest(registerSchema), (req, res) => {
-      // មកដល់ទីនេះ មានន័យថាទិន្នន័យ req.body គឺត្រឹមត្រូវ ១០០% ហើយ
-      const { name, email, password, age } = req.body;
-      
-      res.status(201).json({ message: "ចុះឈ្មោះបានជោគជ័យ" });
-  });
-
-  export default router;
+    next(error);
+  }
+};
 ```
+
+---
+
+## 📝 ការកំណត់ Zod Schemas និងការប្រើប្រាស់ក្នុង Routes
+
+```javascript
+import express from 'express';
+import { z } from 'zod';
+import { validate } from './middlewares/validate.js';
+
+const app = express();
+app.use(express.json());
+
+// 1. កំណត់ Schema
+const createProductSchema = z.object({
+  body: z.object({
+    name: z.string({ required_error: "ឈ្មោះទំនិញគឺចាំបាច់" })
+           .min(3, "ឈ្មោះត្រូវមានយ៉ាងតិច 3 តួអក្សរ")
+           .max(100, "ឈ្មោះមិនអាចលើសពី 100 តួអក្សរ"),
+    price: z.number({ required_error: "តម្លៃទំនិញគឺចាំបាច់" })
+            .positive("តម្លៃត្រូវតែជាចំនួនវិជ្ជមាន (> 0)"),
+    category: z.enum(['electronics', 'clothing', 'books', 'food'], {
+      errorMap: () => ({ message: "ប្រភេទមិនត្រឹមត្រូវឡើយ" })
+    }),
+    email: z.string().email("ទម្រង់ Email មិនត្រឹមត្រូវ").optional(),
+  })
+});
+
+// 2. ប្រើប្រាស់ក្នុង Route
+app.post('/api/v1/products', validate(createProductSchema), (req, res) => {
+  res.status(201).json({
+    success: true,
+    message: "បង្កើតទំនិញជោគជ័យ!",
+    data: req.body
+  });
+});
+```
+
+> [!TIP]
+> ប្រើប្រាស់ **Zod** ផ្តល់នូវអត្ថប្រយោជន៍ ២ ក្នុងពេលតែមួយ៖ **Runtime Validation** សម្រាប់ Express និង **Static Type Inference (`z.infer<typeof schema>`)** សម្រាប់ TypeScript!

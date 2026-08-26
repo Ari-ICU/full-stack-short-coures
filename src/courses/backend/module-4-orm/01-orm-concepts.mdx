@@ -1,49 +1,82 @@
 ---
-title: ORM Concepts
-description: អ្វីទៅជា ORM ហើយហេតុអ្វីបានជាវាធ្វើអោយការសរសេរកូដ Backend កាន់តែងាយស្រួលនិងមានសុវត្ថិភាពជាងមុន។
+title: Object-Relational Mapping (ORM) Concepts
+description: អ្វីទៅជា ORM, គុណសម្បត្តិ និងគុណវិបត្តិ, និងការប្រៀបធៀបរវាង Raw SQL vs Query Builder vs ORMs (TypeORM / Prisma)。
+objectives:
+  - យល់ពីនិយមន័យ Object-Relational Mapping (ORM)
+  - ស្គាល់ភាពខុសគ្នារវាង Data Mapper Pattern (TypeORM) និង Active Record Pattern
+  - ប្រៀបធៀប Raw SQL, Knex (Query Builder), TypeORM, និង Prisma
+  - យល់ពីគុណសម្បត្តិ (Type safety, Productivity) និង Trade-offs (Performance, N+1 Query Problem)
 module: module-4-orm
 order: 1
+quiz:
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃការប្រើប្រាស់ ORM ក្នុង TypeScript Project?"
+    options:
+      - "ORM ធ្វើឱ្យ Server មិនបាច់ភ្ជាប់ Internet"
+      - "ផ្តល់នូវ Type Safety ពេញលេញ, Auto-completion ក្នុង IDE, និងការបំប្លែងទិន្នន័យពី Relational Tables ទៅជា TypeScript Objects ដោយស្វ័យប្រវត្តិ"
+      - "ORM ដំណើរការលឿនជាង Raw C++ Code ជានិច្ច"
+      - "ORM លុបបំបាត់តម្រូវការយល់ដឹងពី Database"
+    correctAnswer: 2
+    explanation: "ORM ផ្តល់នូវ Type-safe abstraction លើ Database Tables ដែលជួយកាត់បន្ថយ Bug ពីការវាយឈ្មោះ Column ខុស ព្រមទាំងបង្កើនល្បឿនអភិវឌ្ឍន៍ (Developer Productivity) យ៉ាងខ្លាំង។"
 ---
 
 ## 🎩 អ្វីទៅជា ORM?
 
-**ORM (Object-Relational Mapping)** គឺជាបច្ចេកទេស ឬ Library មួយដែលបំប្លែងទិន្នន័យពីទម្រង់តារាង (Rows/Columns ក្នុង Database) មកជាទម្រង់ Object (របស់ JavaScript) វិញ ដើម្បីអោយយើងងាយស្រួលសរសេរកូដ។
-
-### បញ្ហារបស់ Raw SQL
-ពេលយើងប្រើ Raw SQL យើងត្រូវសរសេរកូដ SQL ជាទម្រង់អក្សរ (String) ដែលនាំអោយមានបញ្ហាធំពីរ៖
-1. បើយើងវាយអក្សរខុស (Typo) កូដយើងនឹង Error តែពេលរត់ប៉ុណ្ណោះ។
-2. យើងមិនមាន Type Hinting (ការចង្អុលបង្ហាញកូដដោយស្វ័យប្រវត្តិពី VS Code) ទេ។
-
-### ដំណោះស្រាយពី ORM
+**ORM (Object-Relational Mapping)** គឺជាបច្ចេកវិទ្យាដែលធ្វើស្ពានតភ្ជាប់រវាង **Object-Oriented / Typed Code (TypeScript/JavaScript Classes)** និង **Relational Database (Tables, Columns, Foreign Keys)**។
 
 ```mermaid
-graph TD
-    JS["JavaScript Object <br/> { name: 'Sok', age: 20 }"] --> ORM["ORM Engine <br/> (TypeORM, Prisma)"]
-    ORM -->|"បង្កើត SQL ដោយស្វ័យប្រវត្តិ <br/> INSERT INTO users..."| DB[("Database")]
+graph LR
+    subgraph "Application Layer (TypeScript)"
+        OBJ["User Entity Instance<br/>user.name = 'Dara'<br/>user.orders = [...]"]
+    end
+    
+    subgraph "ORM Translation Engine (TypeORM)"
+        MAPPER["Data Mapper / Metadata Engine<br/>• Generates Safe SQL<br/>• Maps Rows to Class Instances"]
+    end
+    
+    subgraph "Database Layer (PostgreSQL)"
+        DB[("users & orders tables<br/>(Rows & Foreign Keys)")]
+    end
+    
+    OBJ <--> MAPPER
+    MAPPER <--> DB
 ```
 
-**ឧទាហរណ៍ប្រៀបធៀប៖**
-
-```tabs
-javascript
-// raw
-// មិនមាន Type Hinting, ប្រឈមនឹងការសរសេរខុស
-  const result = await pool.query(
-      'SELECT * FROM users WHERE age > $1 AND status = $2', 
-      [18, 'active']
-  );
-  const users = result.rows;
 ---
-javascript
-// orm
-// VS Code នឹងលោតអោយរើសដោយស្វ័យប្រវត្តិ!
-  const users = await User.find({
-      where: {
-          age: MoreThan(18),
-          status: 'active'
-      }
-  });
+
+## 📊 ការប្រៀបធៀប Data Access Patterns
+
+| វិធីសាស្ត្រ | ឧទាហរណ៍ Tools | គុណសម្បត្តិ | គុណវិបត្តិ |
+|---|---|---|---|
+| **Raw SQL** | `pg`, `mysql2` | ដំណើរការលឿនបំផុត (Zero Overhead), គ្រប់គ្រង SQL 100% | គ្មាន Type-Safety, ងាយនឹង typo, ពិបាក Re-factor |
+| **Query Builder** | `Knex.js`, `Kysely` | បង្កើត Query dynamic តាម Javascript, ស្អាត | នៅតែត្រូវសរសេរ Schema និង Types ដាច់ដោយឡែក |
+| **Full ORM** | `TypeORM`, `Prisma`, `Drizzle` | Type-Safe 100%, Auto-migration, Relationships ងាយស្រួល | មាន Performance Overhead បន្តិចបន្តួច, អាចជួប N+1 Problem បើមិនប្រយ័ត្ន |
+
+---
+
+## 🏛️ Active Record vs Data Mapper Patterns
+
+TypeORM គាំទ្រ Pattern ធំៗទាំងពីរ៖
+
+### 1. Active Record Pattern
+Entity ផ្ទុកទាំងទិន្នន័យ និង Logic នៃ Database Operations ផ្ទាល់ខ្លួន៖
+```typescript
+// Active Record: ហៅ method លើ Class ផ្ទាល់
+const user = await User.findOneBy({ email: "sok@example.com" });
+user.isActive = false;
+await user.save();
 ```
 
-> [!WARNING]  
-> "បើដូរពី Postgres ទៅ MySQL មិនបាច់សរសេរកូដឡើងវិញទេ" - ពាក្យនេះ **មិនត្រឹមត្រូវ ១០០% ទេ**។ ទោះបីជា ORM ជួយសម្រួលការប្តូរ Database មែន ប៉ុន្តែបើអ្នកប្រើប្រាស់មុខងារពិសេសៗរបស់ Database (ដូចជា JSONB របស់ Postgres) ពេលប្តូរទៅ MySQL វានៅតែមានបញ្ហាដដែល។
+### 2. Data Mapper Pattern (Recommended for Large Architecture)
+ញែកដាច់រវាង Data Model (Entity) និង Database Access (Repository)៖
+```typescript
+// Data Mapper: ប្រើ Repository ដាច់ដោយឡែក
+const userRepository = AppDataSource.getRepository(User);
+const user = await userRepository.findOneBy({ email: "sok@example.com" });
+if (user) {
+  user.isActive = false;
+  await userRepository.save(user);
+}
+```
+
+> [!TIP]
+> ក្នុងវគ្គសិក្សានេះ យើងនឹងប្រើប្រាស់ **Data Mapper Pattern** ព្រោះវាជាស្ថាបត្យកម្មកម្រិត Enterprise ដែលជួយឱ្យ Codebase ងាយស្រួលធ្វើ Unit Test និង Maintain!

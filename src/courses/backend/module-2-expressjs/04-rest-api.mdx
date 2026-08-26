@@ -1,68 +1,139 @@
 ---
-title: REST API Principles
-description: ស្វែងយល់ពីគោលការណ៍របស់ REST និងរបៀបរចនា API អោយបានត្រឹមត្រូវ។
+title: Building RESTful CRUD APIs
+description: រៀនពីគោលការណ៍រចនា REST API កម្រិតស្តង់ដារ និងការអនុវត្តពេញលេញនូវប្រតិបត្តិការ CRUD (Create, Read, Update, Delete)។
+objectives:
+  - យល់ពីគោលការណ៍ 6 នៃ REST Architecture (Stateless, Resource-based, etc.)
+  - ចេះរចនា Endpoints ស្តង់ដារ (Nouns, Plural, Idempotency)
+  - អនុវត្ត CRUD API ពេញលេញជាមួយ Express (In-memory / Mock DB)
+  - កំណត់ទម្រង់ JSON Response ស្តង់ដារ (JSend format)
 module: module-2-expressjs
 order: 4
+quiz:
+  - question: "តើ endpoint មួយណាដែលអនុវត្តតាមស្តង់ដារ RESTful API ល្អបំផុតសម្រាប់កែប្រែព័ត៌មានរបស់ Product ដែលមាន ID = 5?"
+    options:
+      - "POST /api/v1/updateProduct?id=5"
+      - "GET /api/v1/product/edit/5"
+      - "PATCH /api/v1/products/5"
+      - "DELETE /api/v1/products/5/update"
+    correctAnswer: 3
+    explanation: "REST API ប្រើ Nouns ពហុវចនៈ (/products) ជាមួយ Resource ID (/5) និង HTTP Method (PATCH សម្រាប់កែមួយចំណែក ឬ PUT សម្រាប់ជំនួសទាំងស្រុង) ដោយមិនប្រើកិរិយាសព្ទក្នុង URL ឡើយ។"
 ---
 
-## 🏛️ អ្វីទៅជា REST API?
+## 🏛️ គោលការណ៍គ្រឹះនៃ RESTful API Design
 
-**REST (Representational State Transfer)** គឺជាស្តង់ដារ ឬច្បាប់ក្នុងការរចនា (Design) API ដើម្បីអោយកម្មវិធីផ្សេងៗអាចនិយាយគ្នាបានងាយស្រួល។ API ដែលអនុវត្តតាមច្បាប់របស់ REST ត្រូវបានហៅថា **RESTful API**។
+**REST (Representational State Transfer)** គឺជាស្តង់ដារស្ថាបត្យកម្មសម្រាប់ការរចនា Web API៖
 
-### គោលការណ៍នៃការរចនា REST API ដែលល្អ
+1. **Resource-Oriented (ផ្អែកលើ Resource):** ប្រើប្រាស់ Nouns ពហុវចនៈ (Plural) ដូចជា `/api/v1/products` មិនប្រើកិរិយាសព្ទ `/api/v1/getProducts` ឡើយ។
+2. **Stateless (គ្មានការចងចាំ State):** រាល់ Request ត្រូវតែផ្ទុកព័ត៌មានគ្រប់គ្រាន់ដោយខ្លួនឯង។
+3. **Standard HTTP Methods:**
+   - `GET /products` -> ទាញយកបញ្ជី Products ទាំងអស់
+   - `GET /products/:id` -> ទាញយក Product តែមួយតាម ID
+   - `POST /products` -> បង្កើត Product ថ្មី
+   - `PUT /products/:id` -> កែប្រែជំនួស Product ទាំងមូល
+   - `PATCH /products/:id` -> កែប្រែតែ Fields មួយចំនួន (ឧ. ប្តូរតែតម្លៃ price)
+   - `DELETE /products/:id` -> លុប Product ចោល
 
-1. **ប្រើប្រាស់ Nouns (នាម) មិនមែន Verbs (កិរិយាសព្ទ) ទេ:**
-   - ❌ ខុស: `/getAllUsers`, `/createUser`, `/deleteUser/1`
-   - ✅ ត្រូវ: `/users` 
+---
 
-2. **ប្រើប្រាស់ HTTP Methods អោយបានត្រឹមត្រូវ:**
-   - `GET`: ទាញយកទិន្នន័យ (គ្មានការប៉ះពាល់ដល់ទិន្នន័យចាស់)
-   - `POST`: បង្កើតទិន្នន័យថ្មី
-   - `PUT`: កែប្រែទិន្នន័យ (ជំនួសទាំងស្រុង)
-   - `PATCH`: កែប្រែទិន្នន័យ (ជំនួសតែចំណុចខ្លះ)
-   - `DELETE`: លុបទិន្នន័យ
+## 📐 ទម្រង់ Standard API Response (JSend Pattern)
 
-3. **ប្រើប្រាស់ Status Codes អោយបានត្រឹមត្រូវ:**
-   - `200 OK` សម្រាប់ការទាញយកជោគជ័យ
-   - `201 Created` សម្រាប់ការបង្កើតជោគជ័យ
-   - `400 Bad Request` សម្រាប់ការបញ្ចូលទិន្នន័យខុសទម្រង់
-   - `404 Not Found` សម្រាប់ទិន្នន័យដែលរកមិនឃើញ
+ការកំណត់ទម្រង់ Response ឱ្យមានរចនាសម្ព័ន្ធដូចគ្នាជួយឱ្យក្រុម Frontend ស្រួលសរសេរ Fetch Logic៖
 
-### ឧទាហរណ៍នៃ RESTful API ពេញលេញ
+```json
+// Success Response
+{
+  "success": true,
+  "data": { "id": 1, "name": "MacBook Pro M3", "price": 1999 },
+  "message": "Product retrieved successfully"
+}
 
-```tabs
-javascript
-// routes/posts.js
+// Error Response
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Product with ID 999 does not exist"
+  }
+}
+```
+
+---
+
+## 💻 ការអនុវត្ត Full CRUD REST API ជាមួយ Express
+
+```javascript
 import express from 'express';
-  const router = express.Router();
 
-  // 1. ទាញយកអត្ថបទទាំងអស់ (GET /posts)
-  router.get('/', (req, res) => {
-      res.status(200).json({ data: [] });
-  });
+const app = express();
+app.use(express.json());
 
-  // 2. ទាញយកអត្ថបទតែមួយតាម ID (GET /posts/:id)
-  router.get('/:id', (req, res) => {
-      res.status(200).json({ data: { id: req.params.id, title: "Hello REST" } });
-  });
+// Mock In-memory Database
+let products = [
+  { id: 1, name: "Mechanical Keyboard", price: 89, inStock: true },
+  { id: 2, name: "Wireless Mouse", price: 49, inStock: false }
+];
 
-  // 3. បង្កើតអត្ថបទថ្មី (POST /posts)
-  router.post('/', (req, res) => {
-      const { title, body } = req.body;
-      // ... កូដរក្សាទុកក្នុង Database ...
-      res.status(201).json({ message: "បង្កើតបានជោគជ័យ", data: { id: 1, title } });
-  });
+// 1. READ ALL (ជាមួយ Query Filtering)
+app.get('/api/v1/products', (req, res) => {
+  const { inStock } = req.query;
+  let result = [...products];
+  if (inStock !== undefined) {
+    result = result.filter(p => p.inStock === (inStock === 'true'));
+  }
+  res.status(200).json({ success: true, count: result.length, data: result });
+});
 
-  // 4. កែប្រែអត្ថបទ (PUT /posts/:id)
-  router.put('/:id', (req, res) => {
-      const { title, body } = req.body;
-      res.status(200).json({ message: "កែប្រែបានជោគជ័យ" });
-  });
+// 2. READ ONE BY ID
+app.get('/api/v1/products/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const product = products.find(p => p.id === id);
 
-  // 5. លុបអត្ថបទ (DELETE /posts/:id)
-  router.delete('/:id', (req, res) => {
-      res.status(200).json({ message: "លុបបានជោគជ័យ" });
-  });
+  if (!product) {
+    return res.status(404).json({ success: false, message: "រកមិនឃើញ Product ឡើយ" });
+  }
 
-  export default router;
+  res.status(200).json({ success: true, data: product });
+});
+
+// 3. CREATE PRODUCT
+app.post('/api/v1/products', (req, res) => {
+  const { name, price, inStock = true } = req.body;
+
+  if (!name || price === undefined) {
+    return res.status(400).json({ success: false, message: "Name និង Price គឺចាំបាច់" });
+  }
+
+  const newProduct = { id: Date.now(), name, price: Number(price), inStock: Boolean(inStock) };
+  products.push(newProduct);
+
+  res.status(201).json({ success: true, data: newProduct });
+});
+
+// 4. UPDATE (PATCH)
+app.patch('/api/v1/products/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const index = products.findIndex(p => p.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: "រកមិនឃើញ Product ឡើយ" });
+  }
+
+  products[index] = { ...products[index], ...req.body };
+  res.status(200).json({ success: true, data: products[index] });
+});
+
+// 5. DELETE
+app.delete('/api/v1/products/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const index = products.findIndex(p => p.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: "រកមិនឃើញ Product ឡើយ" });
+  }
+
+  products.splice(index, 1);
+  res.status(200).json({ success: true, message: `Product ${id} ត្រូវបានលុបជោគជ័យ` });
+});
+
+app.listen(3000, () => console.log("REST API running on port 3000"));
 ```

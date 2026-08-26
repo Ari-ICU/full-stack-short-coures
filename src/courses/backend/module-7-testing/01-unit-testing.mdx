@@ -1,58 +1,123 @@
 ---
-title: Unit Testing (Jest)
-description: របៀបសរសេរតេស្តសាកល្បងទៅលើ Functions តូចៗនៃកម្មវិធីដោយស្វ័យប្រវត្តិ។
-module: module-8-testing
+title: Unit Testing with Vitest & Jest
+description: របៀបសរសេរ Unit Tests សាកល្បងទៅលើ Functions, Services, Utilities ដោយស្វ័យប្រវត្តិតាមរយៈ Vitest / Jest និង Test Mocks។
+objectives:
+  - យល់ពីទស្សនវិជ្ជានៃ Testing Pyramid (Unit vs Integration vs E2E)
+  - ចេះដំឡើង និង Configure Vitest / Jest សម្រាប់ TypeScript Codebase
+  - ចេះសរសេរ Test Suites (describe, it/test, expect assertions)
+  - ស្គាល់វិធី Mock Functions និង Dependencies តាមរយៈ `vi.fn()` / `jest.fn()`
+module: module-7-testing
 order: 1
+quiz:
+  - question: "តើ Unit Testing ផ្តោតសំខាន់លើការតេស្តអ្វីខ្លះ?"
+    options:
+      - "តេស្ត Server ទាំងមូលជាមួយ Production Database"
+      - "តេស្តផ្នែកតូចបំផុត និងឯករាជ្យនៃកូដ (Unit/Function/Utility) ដោយមិនពឹងផ្អែកលើ Network ឬ Database ខាងក្រៅ (Isolated with Mocks)"
+      - "តេស្តតែ CSS Styling នៅលើ Browser"
+      - "តេស្តល្បឿនអ៊ីនធឺណិត"
+    correctAnswer: 2
+    explanation: "Unit Test ផ្តោតលើការតេស្ត Functions ឬ Methods ដាច់ដោយឡែកពីគេក្នុងល្បឿនលឿន (Millisecond) ដោយ Mock នូវ Dependencies ខាងក្រៅដូចជា Database ឬ Network Requests។"
 ---
 
-## 🧪 អ្វីទៅជា Unit Testing?
+## 🔺 Testing Pyramid
 
-**Unit Testing** គឺជាការសរសេរកូដ ដើម្បីយកទៅតេស្តកូដរបស់អ្នក។ វាមិនមែនជាការតេស្តទាំងមូលនោះទេ ប៉ុន្តែជាការតេស្តផ្នែកតូចៗ (Units) ដូចជា Function នីមួយៗ ដើម្បីប្រាកដថាវាធ្វើការបានត្រឹមត្រូវ។
-
-Library ដែលពេញនិយមបំផុតសម្រាប់តេស្តកូដ JavaScript គឺ **Jest**។
-
-### ការដំឡើង Jest
-
-```bash
-npm install --save-dev jest
+```mermaid
+graph TD
+    E2E["End-to-End Tests (E2E)<br/>(យឺត, ថ្លៃ, តិចតួច - Cypress/Playwright)"]
+    INT["Integration Tests<br/>(មធ្យម, តេស្ត APIs & Database - Supertest)"]
+    UNIT["Unit Tests<br/>(លឿនបំផុត, ច្រើនបំផុត, ឯករាជ្យ - Vitest/Jest)"]
+    
+    E2E --- INT
+    INT --- UNIT
 ```
 
-> ត្រូវបន្ថែម `"test": "jest"` ទៅក្នុង `package.json` ត្រង់ `scripts`។
+---
 
-### ឧទាហរណ៍នៃការសរសេរកូដ Test
+## ⚡ ការដំឡើង Vitest ក្នុង TypeScript
 
-<Tabs>
-  <TabItem value="utils/math.js" label="utils/math.js" default>
-  ```javascript
-  // នេះគឺជា Function ដែលយើងចង់តេស្ត
-  export const add = (a, b) => {
-      if (typeof a !== 'number' || typeof b !== 'number') {
-          throw new Error("ត្រូវតែជាលេខ");
-      }
-      return a + b;
-  };
-  ```
-  </TabItem>
-  <TabItem value="utils/math.test.js" label="utils/math.test.js">
-  ឯកសារតេស្ត តែងតែមានកន្ទុយ `.test.js` ឬ `.spec.js` ដើម្បីអោយ Jest អាចរកឃើញ។
+```bash
+npm install -D vitest @types/node
+```
 
-  ```javascript
-  import { add } from './math.js';
+### `package.json`:
+```json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}
+```
 
-  // describe ប្រើសម្រាប់ដាក់ឈ្មោះក្រុមអោយ Tests
-  describe('Math Helper Functions', () => {
-      
-      // it (ឫ test) គឺជាការធ្វើតេស្តមួយករណី
-      it('គួរតែបូកលេខ ២ ចូលគ្នាបានត្រឹមត្រូវ', () => {
-          const result = add(2, 3);
-          expect(result).toBe(5); // រំពឹងថាវាស្មើ ៥
-      });
+---
 
-      it('គួរតែបោះ Error ប្រសិនបើមានអថេរជាអក្សរ', () => {
-          expect(() => add(2, "3")).toThrow("ត្រូវតែជាលេខ");
-      });
+## 💻 ការអនុវត្ត Unit Tests ជាក់ស្តែង
 
+### 1. Function ដែលត្រូវតេស្ត (`src/utils/calculator.ts`)
+```typescript
+export function calculateOrderTotal(
+  items: Array<{ price: number; quantity: number }>,
+  discountPercentage: number = 0
+): number {
+  if (discountPercentage < 0 || discountPercentage > 100) {
+    throw new Error("ភាគរយបញ្ចុះតម្លៃត្រូវតែនៅចន្លោះពី 0 ដល់ 100");
+  }
+
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discount = (subtotal * discountPercentage) / 100;
+  return Math.round((subtotal - discount) * 100) / 100;
+}
+```
+
+### 2. Unit Test Suite (`tests/unit/calculator.test.ts`)
+```typescript
+import { describe, it, expect } from "vitest";
+import { calculateOrderTotal } from "../../src/utils/calculator";
+
+describe("calculateOrderTotal()", () => {
+  it("គួរតែគណនាតម្លៃសរុបនៃទំនិញបានត្រឹមត្រូវពេលគ្មានបញ្ចុះតម្លៃ", () => {
+    const items = [
+      { price: 10, quantity: 2 }, // 20
+      { price: 15, quantity: 3 }, // 45
+    ];
+    const total = calculateOrderTotal(items, 0);
+    expect(total).toBe(65);
   });
-  ```
-  </TabItem>
-</Tabs>
+
+  it("គួរតែគណនាបញ្ចុះតម្លៃ 10% បានត្រឹមត្រូវ", () => {
+    const items = [{ price: 100, quantity: 1 }];
+    const total = calculateOrderTotal(items, 10);
+    expect(total).toBe(90);
+  });
+
+  it("គួរតែបោះ Error ប្រសិនបើ discountPercentage អវិជ្ជមាន (< 0)", () => {
+    const items = [{ price: 50, quantity: 1 }];
+    expect(() => calculateOrderTotal(items, -5)).toThrow(
+      "ភាគរយបញ្ចុះតម្លៃត្រូវតែនៅចន្លោះពី 0 ដល់ 100"
+    );
+  });
+});
+```
+
+---
+
+## 🎭 Mocking Dependencies ជាមួយ `vi.fn()`
+
+```typescript
+import { describe, it, expect, vi } from "vitest";
+
+describe("UserService.sendWelcomeEmail", () => {
+  it("គួរតែហៅ EmailService.send យ៉ាងពិតប្រាកដ", async () => {
+    // បង្កើត Mock function
+    const mockSendEmail = vi.fn().mockResolvedValue(true);
+
+    // សាកល្បងហៅ
+    await mockSendEmail("sok@example.com", "Welcome to Full Stack!");
+
+    // ផ្ទៀងផ្ទាត់ថា Mock ត្រូវបានហៅ ១ ដងជាមួយ Email ត្រឹមត្រូវ
+    expect(mockSendEmail).toHaveBeenCalledTimes(1);
+    expect(mockSendEmail).toHaveBeenCalledWith("sok@example.com", expect.any(String));
+  });
+});
+```

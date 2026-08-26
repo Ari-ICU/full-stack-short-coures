@@ -1,76 +1,135 @@
 ---
-title: Error Handling
-description: ការគ្រប់គ្រងកំហុស (Error) នៅក្នុង Express និងការបង្កើត Global Error Handler។
+title: Global Error Handling & Custom Exceptions
+description: រៀបចំប្រព័ន្ធគ្រប់គ្រង Error កម្រិតកណ្តាល (Centralized Error Handling) និង Custom Error Classes ក្នុង Express.js។
+objectives:
+  - យល់ពីរបៀបដំណើរការរបស់ Express 4-parameter Error Middleware `(err, req, res, next)`
+  - បង្កើត Custom Application Exception Classes (AppError, NotFoundError, UnauthorizedError)
+  - ចេះប្រើ asyncHandler / express-async-errors ដើម្បី catch Asynchronous Exceptions
+  - ញែក Error Information រវាង Development (Stack trace) និង Production (Safe message)
 module: module-2-expressjs
 order: 6
+quiz:
+  - question: "តើអ្វីដែលធ្វើឱ្យ Express សម្គាល់ Middleware មួយថាជា Error-handling Middleware?"
+    options:
+      - "ការដាក់ឈ្មោះ file ថា error.js"
+      - "ចំនួន Arguments ទាំង 4 គឺ `(err, req, res, next)`"
+      - "ការប្រើពាក្យគន្លឹះ try/catch ខាងក្នុង"
+      - "ការហៅ `app.useError()`"
+    correctAnswer: 2
+    explanation: "Express ត្រួតពិនិត្យចំនួន Arguments នៃ Function (fn.length)។ ប្រសិនបើ Function មាន Arguments ចំនួន 4 (err, req, res, next) នោះ Express នឹងកំណត់វាជា Error-handling Middleware ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🚨 បញ្ហានៃការសរសេរ Try/Catch ច្រើនដង
+## 💥 បញ្ហានៃការ Handle Error គ្មានស្តង់ដារ
 
-នៅក្នុងមេរៀនមុនៗ ពេលយើងប្រើ `async/await` នៅក្នុង Route នីមួយៗ យើងត្រូវតែសរសេរ `try/catch` ដើម្បីការពារកម្មវិធីកុំអោយគាំង៖
+ប្រសិនបើគ្មានប្រព័ន្ធ Error Handling កណ្តាលទេ អ្នកនឹងត្រូវសរសេរ `try/catch` នៅគ្រប់ Controller ហើយប្រសិនបើមាន Unhandled Rejection ណាមួយកើតឡើង កម្មវិធី Node.js ទាំងមូលអាចនឹងត្រូវ **Crash**។
 
-```javascript
-// ❌ វិធីចាស់ (ត្រូវសរសេរ try/catch គ្រប់ Route)
-app.get('/users', async (req, res) => {
-    try {
-        const users = await db.getUsers();
-        res.json(users);
-    } catch (error) {
-        res.status(500).json({ error: "មានបញ្ហានៅ Server" });
-    }
-});
+```mermaid
+graph TD
+    REQ["HTTP Request"] --> R1["Route / Controller"]
+    R1 -->|"throw new AppError('Resource Not Found', 404)"| ERR_MW["Central Global Error Middleware (err, req, res, next)"]
+    R1 -->|"Unhandled Promise Rejection"| ERR_MW
+    ERR_MW -->|"Format Error Response"| RES["res.status(statusCode).json(...)"]
 ```
 
-នេះមិនមែនជា Best Practice ទេ! កូដយើងនឹងវែង ហើយស្មុគស្មាញ។
-
-### ដំណោះស្រាយ: Global Error Handler & Async Wrapper
-
-នៅក្នុង Express កាលណាយើងបង្កើត Middleware ដែលមានប៉ារ៉ាម៉ែត្រ ៤ `(err, req, res, next)` Express នឹងដឹងភ្លាមថាវាជាអ្នកចាំចាប់ Error។
-
-```tabs
-javascript
-// utils/asyncHandler.js
-// 1. បង្កើត Wrapper សម្រាប់ចាប់ Error ដោយមិនបាច់សរសេរ try/catch គ្រប់កន្លែង
-  export const asyncHandler = (fn) => (req, res, next) => {
-      Promise.resolve(fn(req, res, next)).catch(next);
-  };
 ---
-javascript
-// middlewares/errorHandler.js
-// 2. បង្កើត Global Error Middleware
-  export const globalErrorHandler = (err, req, res, next) => {
-      console.error(err.stack); // Print ទុកមើលខ្លួនឯង
 
-      // កំណត់ Status Code និង Message
-      const statusCode = err.statusCode || 500;
-      const message = err.message || "មានបញ្ហាពីខាងម៉ាស៊ីនមេ (Internal Server Error)";
+## 🏗️ ការបង្កើត Custom AppError Class
 
-      res.status(statusCode).json({
-          success: false,
-          error: message,
-          // បង្ហាញកំហុសលម្អិតតែពេល Development ប៉ុណ្ណោះ
-          stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
-      });
-  };
+```javascript
+// src/errors/AppError.js
+export class AppError extends Error {
+  constructor(message, statusCode = 500) {
+    super(message);
+    this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+    this.isOperational = true; // Error ដែលយើងស្គាល់ (Operational error)
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(resource = 'Resource') {
+    super(`${resource} រកមិនឃើញឡើយ (404 Not Found)`, 404);
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message = 'មិនមានសិទ្ធិចូលដំណើរការ (Unauthorized)') {
+    super(message, 401);
+  }
+}
+```
+
 ---
-javascript
-// app.js
+
+## 🛡️ Wrapper សម្រាប់ Async Handlers (`asyncHandler`)
+
+ចាប់តាំងពី Express 4 មិនទាន់ Catch Async Errors ដោយស្វ័យប្រវត្តិ យើងបង្កើត Utility `asyncHandler`៖
+
+```javascript
+// src/utils/asyncHandler.js
+export const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};
+```
+
+---
+
+## ⚙️ ការរៀបចំ Global Error Middleware
+
+```javascript
+// src/middlewares/errorHandler.js
+export const errorHandler = (err, req, res, next) => {
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+
+  const isDev = process.env.NODE_ENV === 'development';
+
+  if (isDev) {
+    // ពេល Development៖ បង្ហាញ Stack Trace ពេញលេញដើម្បីងាយស្រួល Debug
+    return res.status(err.statusCode).json({
+      success: false,
+      status: err.status,
+      message: err.message,
+      stack: err.stack,
+      error: err,
+    });
+  }
+
+  // ពេល Production៖ បង្ហាញតែសារដែលមានសុវត្ថិភាព មិនឱ្យបែកធ្លាយ Internal Code
+  if (err.isOperational) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+    });
+  }
+
+  // កំហុសដែលមិនស្គាល់ (Bug / 500 Server Error)
+  console.error("💥 UNEXPECTED ERROR:", err);
+  return res.status(500).json({
+    success: false,
+    message: "មានបញ្ហាបច្ចេកទេសខាងម៉ាស៊ីនមេ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ!",
+  });
+};
+```
+
+### ការចុះឈ្មោះក្នុង `app.js`:
+```javascript
 import express from 'express';
-  import { asyncHandler } from './utils/asyncHandler.js';
-  import { globalErrorHandler } from './middlewares/errorHandler.js';
+import { NotFoundError } from './errors/AppError.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
-  const app = express();
+const app = express();
+app.use(express.json());
 
-  // 3. ការប្រើប្រាស់នៅក្នុង Route ដោយគ្មាន try/catch
-  app.get('/users', asyncHandler(async (req, res) => {
-      // ឧបមាថាមាន Error ធ្លាក់នៅទីនេះ
-      throw new Error("ទិន្នន័យ Database ដាច់ទំនាក់ទំនង!");
-      
-      res.json({ message: "ជោគជ័យ" }); // នឹងមិនដើរដល់ទីនេះទេ
-  }));
+// Routes...
 
-  // 4. ដាក់ Global Error Handler នៅខាងក្រោមគេបង្អស់!! (សំខាន់)
-  app.use(globalErrorHandler);
+// 404 Catch-all handler សម្រាប់ routes ដែលគ្មាន
+app.all('*', (req, res, next) => {
+  next(new NotFoundError(`មិនមាន Endpoint ${req.originalUrl} នៅលើ Server ឡើយ`));
+});
 
-  app.listen(3000);
+// Global Error Handler ត្រូវតែនៅខាងក្រោមគេបង្អស់ជានិច្ច!
+app.use(errorHandler);
 ```

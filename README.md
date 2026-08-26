@@ -48,7 +48,7 @@ src/
 │   ├── rdbms/
 │   ├── react/
 │   ├── nextjs/
-│   ├── backend-architecture/
+│   ├── backend/
 │   └── deployment/
 ├── lib/
 │   └── courses.ts         # Content loading utilities

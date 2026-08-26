@@ -1,51 +1,104 @@
 ---
 title: Event Loop Deep Dive
 description: ស្វែងយល់ស៊ីជម្រៅពីរបៀបដែល Node.js អាចធ្វើការងារបានច្រើនក្នុងពេលតែមួយតាមរយៈ Event Loop។
+objectives:
+  - យល់ច្បាស់ពីយន្តការ Call Stack, Node APIs, និង Task Queues
+  - បែងចែកភាពខុសគ្នារវាង Microtask Queue (Promises) និង Macrotask Queue (Timers, I/O)
+  - ស្គាល់ 6 ដំណាក់កាល (Phases) នៃ libuv Event Loop
+  - ដឹងពីរបៀបការពារ CPU-Intensive Tasks មិនឱ្យ Block Event Loop
 module: module-1-nodejs-fundamentals
 order: 5
+quiz:
+  - question: "ក្នុងចំនោម Tasks ខាងក្រោម តើមួយណាដែល Event Loop នឹងដំណើរការមុនគេបង្អស់?"
+    options:
+      - "setTimeout(fn, 0)"
+      - "setImmediate(fn)"
+      - "process.nextTick() និង Promise.then() (Microtasks)"
+      - "fs.readFile() callback"
+    correctAnswer: 3
+    explanation: "Microtask Queue (ជាពិសេស process.nextTick() និង Promise.then()) ទទួលបានអាទិភាពខ្ពស់ជាងគេ ហើយត្រូវបានដំណើរការភ្លាមៗបន្ទាប់ពី Call Stack ទំនេរ មុនពេល Event Loop ឆ្លងទៅ Phase បន្ទាប់។"
 ---
 
 ## 🎡 អ្វីទៅជា Event Loop?
 
-**Event Loop** គឺជាបេះដូងរបស់ Node.js ដែលធ្វើអោយវាអាចមានសមត្ថភាព Non-blocking I/O បើទោះបីជាវាមានត្រឹមតែ Single-Thread ក៏ដោយ។
-វាមានតួនាទីទទួលយកការងារ បញ្ជូនការងារដែលចំណាយពេលយូរទៅអោយប្រព័ន្ធកុំព្យូទ័រ (OS/libuv) ធ្វើ ហើយចាំយកលទ្ធផលត្រលប់មកវិញនៅពេលការងារនោះចប់។
-
-### ដ្យាក្រាមដំណើរការរបស់ Event Loop
+**Event Loop** គឺជាបេះដូងរបស់ Node.js ដែលធ្វើឱ្យ Single-Threaded JavaScript អាចសម្រេចកិច្ចការ **High Concurrency** បាន។ វាត្រួតពិនិត្យ **Call Stack** ជាបន្តបន្ទាប់ ហើយនៅពេលដែល Call Stack ទំនេរ វាទាញយក Callbacks ពី Queues មកដំណើរការ។
 
 ```mermaid
 graph TD
-    JS["កូដ JavaScript របស់អ្នក"] --> CALL["Call Stack <br/>(កន្លែងដែលកូដរត់ផ្ទាល់)"]
-    CALL -->|"បើការងារយូរ <br/>(អាន File, DB)"| WEB["C++ APIs / libuv Thread Pool"]
-    WEB -->|"ពេលការងារចប់"| Q["Callback Queue <br/>(ជួររង់ចាំ)"]
-    Q -->|"Event Loop ឆែកមើលបើ Call Stack ទំនេរ"| CALL
+    JS["JavaScript Code Execution"] --> CS["Call Stack (Synchronous Code)"]
+    
+    CS -->|"Async Tasks (Timers, FS, Network)"| LIBUV["libuv Background Workers / OS Kernel"]
+    
+    LIBUV -->|"Tasks Ready"| MICRO["Microtask Queue<br/>(process.nextTick, Promise.then)"]
+    LIBUV -->|"Tasks Ready"| MACRO["Macrotask Queue / Phases<br/>(Timers, I/O, Immediate)"]
+    
+    MICRO -->|"High Priority (Drain First)"| CS
+    MACRO -->|"Next in Phase Cycle"| CS
 ```
 
-### ការអនុវត្តជាក់ស្តែង៖ តើកូដមួយណាដើរមុន?
+---
 
-តោះមើលឧទាហរណ៍ដ៏ពេញនិយមមួយ៖
+## 🔄 ៦ ដំណាក់កាល (Phases) នៃ Event Loop ក្នុង libuv
+
+រាល់ Loop មួយជុំ (Tick) ឆ្លងកាត់ដំណាក់កាលទាំងនេះតាមលំដាប់លំដោយ៖
+
+```mermaid
+graph LR
+    P1["1. Timers<br/>(setTimeout, setInterval)"] --> P2["2. Pending Callbacks<br/>(OS I/O Errors)"]
+    P2 --> P3["3. Idle, Prepare<br/>(Internal Node Use)"]
+    P3 --> P4["4. Poll<br/>(Fetch new I/O events)"]
+    P4 --> P5["5. Check<br/>(setImmediate)"]
+    P5 --> P6["6. Close Callbacks<br/>(socket.on('close'))"]
+    P6 --> P1
+```
+
+1. **Timers Phase:** ដំណើរការ callbacks របស់ `setTimeout()` និង `setInterval()` ដែលដល់កំណត់។
+2. **Pending Callbacks:** ដំណើរការ I/O callbacks មួយចំនួនដែលសេសសល់ពីជុំមុន។
+3. **Idle, Prepare:** ប្រើប្រាស់សម្រាប់តែប្រព័ន្ធខាងក្នុងរបស់ Node.js ប៉ុណ្ណោះ។
+4. **Poll Phase:** ទទួលយក I/O events ថ្មីៗ (ការអានឯកសារ, Network connections)។
+5. **Check Phase:** ដំណើរការ callbacks របស់ `setImmediate()` ភ្លាមៗបន្ទាប់ពី Poll phase។
+6. **Close Callbacks:** ដំណើរការ cleanup callbacks ដូចជា `socket.on('close', ...)`.
+
+---
+
+## 🧪 ការវិភាគលំដាប់លទ្ធផលកូដជាក់ស្តែង
 
 ```javascript
-console.log("លេខ 1");
+console.log("1. Sync Start");
 
 setTimeout(() => {
-    console.log("លេខ 2 (ពី setTimeout)");
+  console.log("2. setTimeout (Macrotask)");
 }, 0);
 
-Promise.resolve().then(() => {
-    console.log("លេខ 3 (ពី Promise)");
+setImmediate(() => {
+  console.log("3. setImmediate (Check Phase)");
 });
 
-console.log("លេខ 4");
+Promise.resolve().then(() => {
+  console.log("4. Promise (Microtask)");
+});
+
+process.nextTick(() => {
+  console.log("5. process.nextTick (Top Priority Microtask)");
+});
+
+console.log("6. Sync End");
 ```
 
-**លទ្ធផលដែលទទួលបាន៖**
-1. `លេខ 1`
-2. `លេខ 4`
-3. `លេខ 3 (ពី Promise)`
-4. `លេខ 2 (ពី setTimeout)`
+### លំដាប់លទ្ធផលដែលទទួលបាន៖
+1. `1. Sync Start` (Call Stack Synchronous)
+2. `6. Sync End` (Call Stack Synchronous)
+3. `5. process.nextTick` (Microtask អាទិភាពទី ១)
+4. `4. Promise` (Microtask អាទិភាពទី ២)
+5. `2. setTimeout` (Timers Phase)
+6. `3. setImmediate` (Check Phase)
 
-**ហេតុអ្វីបានជាអញ្ចឹង?**
-- លេខ 1 និង លេខ 4 ជាកូដធម្មតា (Synchronous) ទើបវាចូលដល់ Call Stack ហើយរត់ភ្លាមៗ។
-- ទោះបីជា `setTimeout` កំណត់ពេល 0 វិនាទីក៏ដោយ ក៏វាត្រូវបានបញ្ជូនទៅរង់ចាំនៅក្នុង **MacroTask Queue**។
-- ចំណែកឯ Promise ត្រូវបានបញ្ជូនទៅ **MicroTask Queue**។ 
-- Event Loop តែងតែផ្តល់អាទិភាពអោយ MicroTask Queue ដើរមុន MacroTask Queue ជានិច្ច ទើបលេខ 3 ចេញមុនលេខ 2។
+---
+
+## ⚠️ ច្បាប់មាសសម្រាប់ Backend Developer
+
+> [!WARNING]
+> **Don't Block the Event Loop!**
+> កុំដំណើរការកូដដែលគណនាធ្ងន់ៗ (CPU-intensive tasks) ដូចជា ការ Encode វីដេអូ, ការគណនា Complex Cryptography ឬ Synchronous JSON parsing ឯកសារធំៗ (`fs.readFileSync`, `JSON.parse` លើ file 100MB) នៅលើ Main Thread ព្រោះវានឹងធ្វើឱ្យ Server ទាំងមូលគាំងមិនអាចទទួល Request ផ្សេងទៀតបានឡើយ។
+> 
+> *ដំណោះស្រាយ:* ប្រើ **Worker Threads (`worker_threads`)** ឬបញ្ជូនការងារធ្ងន់ៗទៅកាន់ **Background Job Queue (BullMQ, Redis)**។

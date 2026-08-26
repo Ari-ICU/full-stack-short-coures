@@ -1,59 +1,116 @@
 ---
-title: Integration Testing
-description: ការធ្វើតេស្តសាកល្បងដោយបញ្ចូល Modules ច្រើនចូលគ្នា ដើម្បីមើលថាពួកវាដំណើរការជាមួយគ្នាបានល្អឫអត់។
-module: module-8-testing
+title: Integration Testing & Database Lifecycle
+description: ការធ្វើតេស្តសាកល្បងដោយរួមបញ្ចូល Controller, Service, និង Database ជាមួយគ្នា ព្រមទាំងការគ្រប់គ្រង Test DB Lifecycle (beforeAll / afterAll)។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Unit Test (Isolated) និង Integration Test (Combined)
+  - គ្រប់គ្រង Test Lifecycle តាមរយៈ `beforeAll`, `beforeEach`, `afterEach`, `afterAll`
+  - ចេះ Reset / Clean Database Tables រវាង Test Cases នីមួយៗ
+  - សរសេរ Integration Test ពេញលេញសម្រាប់ Auth & Product flows
+module: module-7-testing
 order: 2
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវ Clear ឬ Truncate Database Tables នៅក្នុង `beforeEach` ឬ `afterEach` Hook ពេលធ្វើ Integration Test?"
+    options:
+      - "ដើម្បីសន្សំទំហំ RAM របស់កុំព្យូទ័រ"
+      - "ដើម្បីធានាថា Test Case នីមួយៗមានភាពឯករាជ្យ (Test Isolation) មិនមានទិន្នន័យសេសសល់ពី Test មុនដែលបណ្តាលឱ្យ Test ក្រោយបរាជ័យដោយចៃដន្យ"
+      - "ព្រោះ PostgreSQL បិទមិនឱ្យដាក់ទិន្នន័យលើសពី 5 rows ពេល test"
+      - "ដើម្បីបិទ Docker"
+    correctAnswer: 2
+    explanation: "Test Isolation ធានាថារាល់ Test Case ដំណើរការលើ Clean State ដដែលជានិច្ច ធ្វើឱ្យលទ្ធផលតេស្តអាចទុកចិត្តបាន (Deterministic / Non-flaky)។"
 ---
 
 ## 🧩 អ្វីទៅជា Integration Testing?
 
-ខុសពី Unit Test ដែលតេស្តតែ Function ឯកកោ, **Integration Test** តេស្តមើលថាតើ Controller អាចនិយាយគ្នាជាមួយ Service ហើយ Service អាចនិយាយជាមួយ Repository (Database) បានត្រឹមត្រូវឬទេ។
+ខុសពី Unit Test ដែលតេស្តតែ Function មួយដាច់ដោយឡែក **Integration Testing** ផ្ទៀងផ្ទាត់ថាតើ Modules ផ្សេងៗគ្នា (Controller + Service + Repository + Database) អាចដំណើរការរួមគ្នាបានត្រឹមត្រូវឬទេ។
 
 ```mermaid
 graph LR
-    UNIT[Unit Test] -->|តេស្តតែ| FUNC[Function មួយៗ]
-    INTEG[Integration Test] -->|តេស្ត| ALL[Route -> Controller -> Service -> Database]
+    SUB["Integration Test Runner"] --> APP["Express App Instance"]
+    APP --> CTRL["Controller Layer"]
+    CTRL --> SRV["Service Layer"]
+    SRV --> REPO["TypeORM Repository"]
+    REPO --> TEST_DB[("PostgreSQL Test Database (ecommerce_test)")]
 ```
 
-### ការប្រើប្រាស់ Supertest
+---
 
-ដើម្បីធ្វើតេស្ត Route របស់ Express ដោយមិនចាំបាច់បើក Server ផ្ទាល់ យើងប្រើប្រាស់ Library ដែលមានឈ្មោះថា **Supertest**។
+## 🔄 Test Hooks Lifecycle ក្នុង Vitest
 
-```bash
-npm install --save-dev supertest
-```
+| Hook | ពេលដែលដំណើរការ | ករណីប្រើប្រាស់ទូទៅ |
+|---|---|---|
+| `beforeAll` | រត់តែម្តងគត់ មុនគេបង្អស់ក្នុង Test File | បើក Database Connection, Start Mock Server |
+| `beforeEach` | រត់រាល់ពេល មុន Test Case (`it(...)`) នីមួយៗ | Clear Database Tables, Reset Mocks |
+| `afterEach` | រត់រាល់ពេល បន្ទាប់ពី Test Case នីមួយៗចប់ | Cleanup temporary files |
+| `afterAll` | រត់តែម្តងគត់ ក្រោយគេបង្អស់ពេល Test ចប់ទាំងអស់ | បិទ Database Connection (`db.destroy()`) |
 
-```tabs
-javascript
-// tests/integration/userApi.test.js
-import request from 'supertest';
-import app from '../../src/app.js'; // កម្មវិធី Express របស់អ្នក
-import { AppDataSource } from '../../src/config/database.js';
+---
 
-describe('User API', () => {
-    
-    // បើក Database មុនពេលតេស្តទាំងអស់ចាប់ផ្តើម
-    beforeAll(async () => {
-        await AppDataSource.initialize();
-    });
+## 💻 ឧទាហរណ៍ជាក់ស្តែង៖ Auth Integration Test
 
-    // បិទ Database វិញពេលតេស្តចប់
-    afterAll(async () => {
-        await AppDataSource.destroy();
-    });
+```typescript
+// tests/integration/auth.test.ts
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
+import request from "supertest";
+import app from "../../src/app";
+import { AppDataSource } from "../../src/config/data-source";
+import { User } from "../../src/entities/User.entity";
 
-    it('គួរតែបង្កើត User ថ្មីបាននៅពេលបញ្ជូនទិន្នន័យត្រឹមត្រូវ', async () => {
-        const res = await request(app)
-            .post('/api/users')
-            .send({
-                name: "សិស្ស",
-                email: "student@test.com",
-                password: "password123"
-            });
-        
-        expect(res.statusCode).toBe(201);
-        expect(res.body.success).toBe(true);
-        expect(res.body.data.email).toBe("student@test.com");
-    });
+describe("POST /api/v1/auth/register", () => {
+  // 1. បើក Database Test មុនពេលចាប់ផ្តើម
+  beforeAll(async () => {
+    await AppDataSource.initialize();
+  });
+
+  // 2. Clear Database មុន TestCase នីមួយៗ
+  beforeEach(async () => {
+    const userRepo = AppDataSource.getRepository(User);
+    await userRepo.query('TRUNCATE TABLE "users" CASCADE;');
+  });
+
+  // 3. បិទ Connection ពេលចប់
+  afterAll(async () => {
+    await AppDataSource.destroy();
+  });
+
+  it("គួរតែចុះឈ្មោះ User ថ្មីបានជោគជ័យ (201 Created) និង Hash password", async () => {
+    const payload = {
+      email: "newuser@test.com",
+      password: "securepassword123",
+      fullName: "Sok San",
+    };
+
+    const res = await request(app)
+      .post("/api/v1/auth/register")
+      .send(payload)
+      .expect(201);
+
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.email).toBe(payload.email);
+    expect(res.body.data.password).toBeUndefined(); // មិនត្រូវបង្ហាញ password ទេ
+
+    // ផ្ទៀងផ្ទាត់ក្នុង Database ពិតប្រាកដ
+    const userInDb = await AppDataSource.getRepository(User).findOneBy({ email: payload.email });
+    expect(userInDb).not.toBeNull();
+    expect(userInDb?.passwordHash).not.toBe(payload.password); // ត្រូវតែ Hash រួច
+  });
+
+  it("គួរតែបដិសេធ (400/409) ប្រសិនបើ Email ត្រូវបានចុះឈ្មោះរួចហើយ", async () => {
+    const payload = {
+      email: "duplicate@test.com",
+      password: "securepassword123",
+      fullName: "Sok San",
+    };
+
+    // បង្កើតលើកទី ១
+    await request(app).post("/api/v1/auth/register").send(payload).expect(201);
+
+    // បង្កើតលើកទី ២ ដោយប្រើ Email ដដែល
+    const res = await request(app)
+      .post("/api/v1/auth/register")
+      .send(payload)
+      .expect(400);
+
+    expect(res.body.success).toBe(false);
+  });
 });
 ```

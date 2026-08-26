@@ -1,33 +1,99 @@
 ---
-title: ORM Migrations
-description: របៀបប្រើប្រាស់ប្រព័ន្ធ Migrations របស់ TypeORM សម្រាប់ Production។
+title: TypeORM Migrations Workflow in Production
+description: ស្វែងយល់ពីរបៀបបង្កើត, ដំណើរការ, និង Rollback TypeORM Migrations ដោយស្វ័យប្រវត្តិតាមរយៈ CLI សម្រាប់ Production។
+objectives:
+  - Configure TypeORM CLI Scripts ក្នុង package.json
+  - ចេះបង្កើត Migration ដោយស្វ័យប្រវត្តិផ្អែកលើ Entities (`migration:generate`)
+  - ចេះសរសេរ Blank Custom Migration Script (`migration:create`)
+  - យល់ពីរបៀបដំណើរការ Migration ក្នុង Production Docker Container
 module: module-4-orm
 order: 7
+quiz:
+  - question: "តើ Command ណាដែលបង្កើត Migration file ដោយស្វ័យប្រវត្តិដោយផ្អែកលើការប្រៀបធៀបរវាង Entity Classes និង Database Schema បច្ចុប្បន្ន?"
+    options:
+      - "typeorm migration:create"
+      - "typeorm migration:generate"
+      - "typeorm migration:run"
+      - "typeorm schema:drop"
+    correctAnswer: 2
+    explanation: "`migration:generate` ប្រៀបធៀប code ក្នុង Entities ជាមួយនឹង Database Schema ពិតប្រាកដ រួចបង្កើត SQL queries (UP និង DOWN) ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🏗️ ហេតុអ្វីកុំប្រើ `synchronize: true` នៅពេល Production?
+## 🏗️ ការកំណត់ TypeORM CLI ក្នុង `package.json`
 
-នៅក្នុងមេរៀនមុនៗ យើងប្រើប្រាស់ `synchronize: true` នៅក្នុងការភ្ជាប់ TypeORM ដែលវាបង្កើត និងកែប្រែតារាងអោយយើងដោយស្វ័យប្រវត្តិ។ 
-**ប៉ុន្តែ** វាងាយនឹងធ្វើអោយបាត់បង់ទិន្នន័យ (Data Loss) ខ្លាំងណាស់ ប្រសិនបើអ្នកប្តូរឈ្មោះ Column ខុស។
+ដើម្បីងាយស្រួលរត់ពាក្យបញ្ជា Migration ក្នុង TypeScript យើងបន្ថែម Scripts ក្នុង `package.json`៖
 
-សម្រាប់បរិយាកាសពិត (Production) អ្នក **ត្រូវតែ** ប្រើប្រាស់ **Migrations**។
-
-### របៀបដំណើរការ Migration ក្នុង TypeORM
-
-1. **បិទ Sync:** កំណត់ `synchronize: false` នៅក្នុង DataSource។
-2. **បង្កើត ឯកសារ Migration:** TypeORM នឹងប្រៀបធៀប Entities របស់អ្នក ជាមួយនឹងតារាងក្នុង Database ជាក់ស្តែង រួចវានឹងបង្កើតកូដ Migration ដោយស្វ័យប្រវត្តិ។
-
-```bash
-# ពាក្យបញ្ជាសម្រាប់បង្កើត Migration (វានឹងបង្កើតឯកសារ .ts ឫ .js នៅក្នុងថត migrations)
-typeorm migration:generate src/migrations/CreateUsersTable -d src/config/database.js
+```json
+{
+  "scripts": {
+    "typeorm": "typeorm-ts-node-commonjs -d ./src/config/data-source.ts",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert",
+    "migration:create": "typeorm-ts-node-commonjs migration:create"
+  }
+}
 ```
 
-3. **ដំណើរការ Migration (Run):**
+---
 
-```bash
-# ពាក្យបញ្ជាសម្រាប់បញ្ជូនការផ្លាស់ប្តូរនោះទៅកាន់ Database 
-typeorm migration:run -d src/config/database.js
+## 🔄 Workflow នៃការធ្វើ Migration ជាក់ស្តែង
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Backend Developer
+    participant Entity as TypeScript Entity
+    participant CLI as TypeORM CLI
+    participant DB as PostgreSQL Database
+
+    Dev->>Entity: 1. បន្ថែម Column 'phone VARCHAR(20)'
+    Dev->>CLI: 2. npm run migration:generate src/migrations/AddPhoneToUsers
+    CLI->>DB: 3. ប្រៀបធៀប Entity ជាមួយ DB Schema
+    CLI-->>Dev: 4. បង្កើតឯកសារ 1714000000000-AddPhoneToUsers.ts
+    Dev->>CLI: 5. npm run migration:run
+    CLI->>DB: 6. អនុវត្ត ALTER TABLE users ADD phone ...
+    DB-->>CLI: 7. កត់ត្រាចូលតារាង 'migrations'
 ```
 
-> [!IMPORTANT]
-> ពេលអ្នកដាក់កម្មវិធី (Deploy) ទៅលើ Server ដូចជា AWS ឫ DigitalOcean អ្នកត្រូវប្រាកដថាបាន Run Command `migration:run` នេះមុននឹងបើកអោយ Server ដើរ ដើម្បីអោយប្រាកដថា Database ត្រូវបាន Update រួចរាល់។
+---
+
+## 💻 ឧទាហរណ៍ឯកសារ Migration ដែលបានបង្កើត
+
+```typescript
+// src/migrations/1714000000000-AddPhoneToUsers.ts
+import { MigrationInterface, QueryRunner } from "typeorm";
+
+export class AddPhoneToUsers1714000000000 implements MigrationInterface {
+  name = "AddPhoneToUsers1714000000000";
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "users" ADD "phone" character varying(20)`
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_users_phone" ON "users" ("phone")`
+    );
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX "IDX_users_phone"`);
+    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "phone"`);
+  }
+}
+```
+
+---
+
+## ⚡ ពាក្យបញ្ជាសំខាន់ៗ
+
+```bash
+# 1. បង្កើត Migration ដោយស្វ័យប្រវត្តិតាម Entity Changes
+npm run migration:generate src/migrations/InitialSchema
+
+# 2. អនុវត្ត Migrations ទាំងអស់ដែលមិនទាន់បាន Run
+npm run migration:run
+
+# 3. Rollback Migration ចុងក្រោយគេបង្អស់ថយក្រោយ ១ ជំហាន
+npm run migration:revert
+```

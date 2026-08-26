@@ -1,47 +1,90 @@
 ---
 title: Node.js & Runtime Environment
 description: ស្វែងយល់ពីអ្វីទៅជា Node.js, V8 Engine, និងរបៀបដែលវាដំណើរការ JavaScript នៅលើ Server។
+objectives:
+  - យល់ដឹងពីនិយមន័យពិតរបស់ Node.js ជា JavaScript Runtime Environment
+  - ស្គាល់សមាសភាគស្នូល Google V8 Engine និង C++ libuv
+  - យល់ច្បាស់ពីយន្តការ Single-Threaded Event-Driven & Non-blocking I/O
+  - ចេះបង្កើត និងដំណើរការ Script ដំបូងនៅលើ Node.js CLI
 module: module-1-nodejs-fundamentals
 order: 1
+quiz:
+  - question: "តើ Node.js ជាអ្វីពិតប្រាកដ?"
+    options:
+      - "ជាភាសា Programming ថ្មីមួយដែលបង្កើតឡើងសម្រាប់សរសេរ Server"
+      - "ជា JavaScript Runtime Environment បង្កើតឡើងលើ Chrome V8 Engine និង libuv"
+      - "ជា Database System ដូចគ្នាទៅនឹង MongoDB"
+      - "ជា Framework សម្រាប់សរសេរ UI ដូច React"
+    correctAnswer: 2
+    explanation: "Node.js មិនមែនជាភាសា ឬ Database ទេ វាជា JavaScript Runtime Environment ដែលអនុញ្ញាតឱ្យ JavaScript ដំណើរការនៅខាងក្រៅ Browser (Server-side)។"
 ---
 
 ## 🚀 អ្វីទៅជា Node.js?
 
-**Node.js** មិនមែនជាភាសា Programming ទេ ហើយក៏មិនមែនជា Framework ដែរ។ វាគឺជា **JavaScript Runtime Environment** ដែលអនុញ្ញាតឱ្យអ្នកដំណើរការកូដ JavaScript នៅក្រៅ Browser (ពោលគឺនៅលើ Server)។
+**Node.js** មិនមែនជាភាសា Programming ថ្មីទេ ហើយក៏មិនមែនជា Framework ដែរ។ វាគឺជា **JavaScript Runtime Environment** បង្កើតឡើងដោយ Ryan Dahl ក្នុងឆ្នាំ ២០០៩ ដោយយក **V8 Engine** របស់ Google Chrome មកផ្សំជាមួយ Library **libuv** (សរសេរដោយភាសា C/C++)។
 
-មុនពេលមាន Node.js, JavaScript អាចរត់បានតែនៅលើ Browser ប៉ុណ្ណោះ (ដូចជា Chrome, Firefox) ដើម្បីធ្វើការងារជាមួយ UI។ Node.js បាននាំយក JavaScript មកកាន់ពិភព Backend។
-
-### រចនាសម្ព័ន្ធរបស់ Node.js (Node.js Architecture)
-
-Node.js ត្រូវបានបង្កើតឡើងដោយប្រើប្រាស់បច្ចេកវិទ្យាសំខាន់ៗពីរ៖
-
-1. **V8 Engine (ពី Google Chrome):** ជាអ្នកបំប្លែងកូដ JavaScript ទៅជា Machine Code (ភាសាកុំព្យូទ័រ) ដើម្បីឱ្យ CPU អាចយល់បាន។
-2. **libuv:** ជាបណ្ណាល័យ (Library) សរសេរដោយភាសា C ដែលផ្តល់នូវមុខងារ Event Loop និង Asynchronous I/O ធ្វើឱ្យ Node.js អាចធ្វើការងារបានច្រើនក្នុងពេលតែមួយដោយមិនចាំបាច់រង់ចាំ (Non-blocking I/O)។
+មុនពេលមាន Node.js, JavaScript អាចរត់បានតែនៅក្នុង Web Browser ប៉ុណ្ណោះ (ដូចជា Chrome, Firefox, Safari) សម្រាប់តែ Client-side UI។ Node.js បាននាំយក JavaScript មកកាន់ពិភព **Backend, Desktop Utilities, Microservices, និង Cloud Computing**។
 
 ```mermaid
 graph TD
-    JS[JavaScript Code] --> NODE[Node.js Bindings / C++ API]
-    NODE --> V8[V8 Engine <br/>បកប្រែ JS ទៅ Machine Code]
-    NODE --> LIBUV[libuv <br/>គ្រប់គ្រង Event Loop & Async I/O]
-    LIBUV --> OS[OS / System <br/>Network, File System, etc.]
+    subgraph "Node.js Runtime Architecture"
+        JS["JavaScript Source Code (.js / .ts)"]
+        V8["V8 Engine (Google)<br/>• Just-In-Time (JIT) Compiler<br/>• Call Stack & Memory Heap"]
+        BIND["Node.js Bindings (C++ API)<br/>fs, http, crypto, path, net"]
+        LIBUV["libuv (C Library)<br/>• Event Loop<br/>• Thread Pool (4 Workers by default)<br/>• Async Non-blocking I/O"]
+        OS["Operating System<br/>(File System, Network Sockets, Kernel Async)"]
+        
+        JS --> BIND
+        BIND --> V8
+        BIND --> LIBUV
+        LIBUV --> OS
+    end
 ```
+
+---
+
+## ⚙️ សមាសភាគស្នូលទាំង ២ របស់ Node.js
+
+### 1. Google V8 Engine
+- បំប្លែងកូដ JavaScript ទៅជា **Machine Code (Assembly/Binary)** ដោយផ្ទាល់តាមរយៈបច្ចេកវិទ្យា **JIT (Just-In-Time) Compilation**។
+- គ្រប់គ្រង Memory Heap (ការបែងចែកអង្គចងចាំ) និង Call Stack (ការដំណើរការអនុគមន៍)។
+
+### 2. libuv Library
+- ផ្តល់នូវយន្តការ **Event Loop** និង **Thread Pool**។
+- ទទួលខុសត្រូវលើប្រតិបត្តិការ **Asynchronous I/O** ដូចជាការអាន/សរសេរ Files, ទទួល Network Requests, និងការភ្ជាប់ Database ដោយមិនរារាំង (Non-blocking) Thread មេ។
+
+---
+
+## 💡 ហេតុអ្វី Node.js ពេញនិយមក្នុងវិស័យ Backend?
+
+| លក្ខណៈពិសេស | ការពិពណ៌នា | អត្ថប្រយោជន៍ជាក់ស្តែង |
+|---|---|---|
+| **Unified Language** | ប្រើ JavaScript/TypeScript ទាំង Frontend និង Backend | ក្រុមការងារ Full-Stack ងាយស្រួល Share Types និង Logic |
+| **Non-blocking I/O** | មិនរង់ចាំប្រតិបត្តិការយឺត (Disk/Network) | ទ្រទ្រង់ Concurrent Connections បានរាប់ម៉ឺនក្នុងពេលតែមួយ |
+| **NPM Ecosystem** | ឃ្លាំងកញ្ចប់កូដធំជាងគេលើពិភពលោក (ជាង ២ លាន packages) | សម្បូរ Tools, SDKs, និង Libraries ស្រាប់ៗ |
+| **High Throughput** | ស៊ី Memory ទាប និង Startup Time លឿន | ស័ក្តិសមបំផុតសម្រាប់ REST APIs, GraphQL, Microservices, Real-time Chat |
 
 > [!TIP]
-> **Pro Insight:** Node.js ប្រើប្រាស់ **Single-Threaded Architecture** តែវាអាចទប់ទល់នឹង Request រាប់ម៉ឺនក្នុងពេលតែមួយបានយ៉ាងល្អប្រសើរ ដោយសារតែសមត្ថភាព Non-blocking I/O របស់វា។
+> **Pro Insight:** Node.js មាន **Single-threaded Event Loop** សម្រាប់ JavaScript Execution ប៉ុន្តែនៅពីក្រោយខ្នង វាប្រើ **Multi-threaded Worker Pool** (libuv) សម្រាប់ប្រតិបត្តិការធ្ងន់ៗដូចជា File System, Cryptography, និង DNS Lookup។
 
-### ហេតុអ្វីបានជាគេពេញនិយមប្រើ Node.js?
-- ប្រើភាសា **JavaScript តែមួយ** ទាំង Frontend ទាំង Backend (Full-Stack)។
-- ល្បឿនលឿន និងស៊ីធនធានតិច (Lightweight)។
-- មានប្រព័ន្ធ Ecosystem ធំបំផុត (NPM)។
+---
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+## 🛠️ ការអនុវត្តជាក់ស្តែង (Lab Exercise)
 
-តោះសាកល្បងសរសេរកូដ Node.js ដំបូងរបស់អ្នក៖
+តោះសាកល្បងពិនិត្យមើលព័ត៌មាន Runtime Environment នៅលើម៉ាស៊ីនរបស់អ្នក៖
 
-1. បង្កើតឯកសារឈ្មោះ `app.js`
-2. សរសេរកូដ៖
+### ជំហានទី ១: បង្កើតឯកសារ `runtime-test.js`
 ```javascript
-console.log("Hello Backend Engineering!");
-console.log("OS Platform:", process.platform);
+console.log("🚀 Welcome to Backend Engineering with Node.js!");
+console.log("---------------------------------------------");
+console.log("Node.js Version :", process.version);
+console.log("Platform        :", process.platform);
+console.log("Architecture    :", process.arch);
+console.log("Memory Usage    :", Math.round(process.memoryUsage().heapUsed / 1024 / 1024), "MB");
+console.log("Process ID (PID):", process.pid);
 ```
-3. ដំណើរការវានៅក្នុង Terminal តាមរយៈពាក្យបញ្ជា `node app.js`
+
+### ជំហានទី ២: ដំណើរការកូដក្នុង Terminal
+```bash
+node runtime-test.js
+```

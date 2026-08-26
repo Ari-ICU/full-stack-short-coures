@@ -1,43 +1,118 @@
 ---
-title: API Testing & Postman
-description: របៀបប្រើប្រាស់ឧបករណ៍សម្រាប់សាកល្បង API មុននឹងបញ្ជូនទៅអោយ Frontend។
+title: API Testing with Postman, Thunder Client & Supertest
+description: ស្វែងយល់ពីរបៀបសាកល្បង Endpoints ដោយប្រើ HTTP Clients និងការសរសេរ Automated Integration Tests ជាមួយ Vitest/Jest និង Supertest។
+objectives:
+  - ចេះប្រើប្រាស់ Postman / Thunder Client (VS Code) សម្រាប់ Manual API Testing
+  - យល់ពីការកំណត់ Environment Variables និង Collections ក្នុង Postman
+  - ចេះសរសេរ Automated Integration Tests ជាមួយ Supertest & Vitest
+  - យល់ពី Test Coverage សម្រាប់ REST Endpoints
 module: module-2-expressjs
 order: 7
+quiz:
+  - question: "តើ Supertest ជួយយើងធ្វើអ្វីក្នុងការតេស្ត Express API?"
+    options:
+      - "ជួយបង្កើត Database ថ្មីដោយស្វ័យប្រវត្តិ"
+      - "អនុញ្ញាតឱ្យយើងផ្ញើ HTTP Requests ទៅកាន់ Express `app` ដោយផ្ទាល់ដោយមិនចាំបាច់បើក Server (`app.listen`) ក្នុងម៉ាស៊ីនពិតប្រាកដ"
+      - "ជា Tool សម្រាប់ Render UI របស់ React"
+      - "ជួយ compile TypeScript ទៅ JavaScript"
+    correctAnswer: 2
+    explanation: "Supertest ធ្វើតេស្ត HTTP Requests ទៅលើ Express App instance ផ្ទាល់ ដោយបង្កើត Ephemeral network listeners នៅពីក្រោយខ្នង ធ្វើឱ្យ automated test រត់បានលឿនបំផុត។"
 ---
 
-## 🧪 ការធ្វើតេស្ត API ជាមួយ Postman / Thunder Client
+## 🧪 វិធីសាស្ត្រតេស្ត API ទាំង ២ ប្រភេទ
 
-ក្នុងនាមជា Backend Developer អ្នកមិនចាំបាច់មាន Frontend UI ដើម្បីដឹងថា API របស់អ្នកដើរ ឬមិនដើរនោះទេ។ អ្នកអាចប្រើប្រាស់កម្មវិធី (API Clients) ដើម្បីធ្វើការបញ្ជូនសំណើ (Requests) ដោយផ្ទាល់។
+ក្នុងការអភិវឌ្ឍន៍ Backend យើងមានវិធីសាស្ត្រតេស្ត ២ សំខាន់៖
+1. **Manual Testing (ការតេស្តដោយផ្ទាល់ដៃ):** ប្រើ GUI Tools ដូចជា Postman, Thunder Client, Insomnia ឬ Bruno។
+2. **Automated Integration Testing (ការតេស្តស្វ័យប្រវត្តិ):** សរសេរ Script ដោយប្រើ Test Runner (Vitest / Jest) ជាមួយ **Supertest**។
 
-កម្មវិធីពេញនិយមមាន៖
-1. **Postman:** កម្មវិធីដ៏ពេញនិយមបំផុត (ត្រូវដំឡើងដាច់ដោយឡែក)
-2. **Thunder Client:** ជា Extension នៅក្នុង VS Code ផ្ទាល់ (ងាយស្រួល មិនបាច់ចេញពី VS Code)
-3. **Insomnia:** ស្រដៀង Postman ដែរ តែមានល្បឿនលឿន។
-
-### របៀបធ្វើតេស្ត POST Request ដែលមាន Body
-
-ឧបមាថាយើងមាន Route ខាងក្រោម៖
-
-```tabs
-javascript
-// app.js
-import express from 'express';
-  const app = express();
-  app.use(express.json());
-
-  app.post('/api/products', (req, res) => {
-      const { name, price } = req.body;
-      res.status(201).json({ id: 99, name, price });
-  });
-
-  app.listen(3000);
----
-json
-{
-      "name": "MacBook Pro M3",
-      "price": 2500
-  }
+```mermaid
+graph LR
+    API["Express App (app.js)"]
+    GUI["Postman / Thunder Client<br/>(Manual Dev Check)"] -->|HTTP / localhost| API
+    AUTO["Vitest + Supertest<br/>(Automated CI/CD Pipeline)"] -->|Direct Request Simulation| API
 ```
 
-> [!TIP]
-> ពេលអ្នកបង្កើត API ច្រើន អ្នកគួរតែ Save Requests ទាំងអស់ទុកនៅក្នុង Folders (Collections) ក្នុង Postman ដើម្បីងាយស្រួលធ្វើតេស្តនៅថ្ងៃក្រោយ ដោយមិនបាច់វាយបញ្ចូលថ្មីរាល់ដង។
+---
+
+## ⚡ 1. Manual Testing ជាមួយ Thunder Client (VS Code Extension)
+
+Thunder Client គឺជា Extension ស្រាលនៅក្នុង VS Code ដែលអនុញ្ញាតឱ្យអ្នកតេស្ត API ដោយមិនបាច់ចេញពី Editor៖
+
+1. ដំឡើង Extension **Thunder Client** ពី VS Code Marketplace
+2. ចុច New Request -> ជ្រើសរើស Method `POST` -> ដាក់ URL `http://localhost:3000/api/v1/products`
+3. ក្នុងផ្ទាំង **Headers:** បន្ថែម `Content-Type: application/json`
+4. ក្នុងផ្ទាំង **Body:** បញ្ចូល JSON Payload៖
+   ```json
+   {
+     "name": "Sony WH-1000XM5",
+     "price": 349.99,
+     "category": "electronics"
+   }
+   ```
+5. ចុច **Send** រួចពិនិត្យមើល Status Code (`201 Created`) និង Response Data។
+
+---
+
+## 🤖 2. Automated Testing ជាមួយ Supertest & Vitest
+
+### ជំហានទី ១: ដំឡើង Testing Libraries
+```bash
+npm install -D vitest supertest @types/supertest
+```
+
+### ជំហានទី ២: បំបែក `app.js` និង `server.js`
+> [!IMPORTANT]
+> **Best Practice:** កុំហៅ `app.listen()` នៅក្នុង `app.js`។ ទុក `app.js` សម្រាប់តែ Export `app` instance ហើយបង្កើត `server.js` ដាច់ដោយឡែកសម្រាប់ `app.listen()`។ វិធីនេះ Supertest អាច Import `app` ទៅតេស្តបានយ៉ាងរលូន។
+
+### ជំហានទី ៣: សរសេរ Test Suite (`tests/product.test.js`)
+```javascript
+import { describe, it, expect } from 'vitest';
+import request from 'supertest';
+import app from '../src/app.js';
+
+describe('GET /api/v1/products', () => {
+  it('គួរតែឆ្លើយតបមកវិញនូវ Status 200 និង Array នៃ Products', async () => {
+    const res = await request(app)
+      .get('/api/v1/products')
+      .expect('Content-Type', /json/)
+      .expect(200);
+
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
+});
+
+describe('POST /api/v1/products', () => {
+  it('គួរតែបង្កើត Product ថ្មីបានជោគជ័យ (201 Created)', async () => {
+    const newProduct = {
+      name: "Logitech MX Master 3S",
+      price: 99.99,
+      category: "electronics"
+    };
+
+    const res = await request(app)
+      .post('/api/v1/products')
+      .send(newProduct)
+      .expect(201);
+
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.name).toBe(newProduct.name);
+  });
+
+  it('គួរតែបដិសេធ (422/400) ប្រសិនបើខ្វះ name ឬ price', async () => {
+    const invalidPayload = { price: 50 }; // ខ្វះ field name
+
+    const res = await request(app)
+      .post('/api/v1/products')
+      .send(invalidPayload)
+      .expect(422);
+
+    expect(res.body.success).toBe(false);
+  });
+});
+```
+
+### ជំហានទី ៤: ដំណើរការ Tests
+```bash
+npx vitest run
+```

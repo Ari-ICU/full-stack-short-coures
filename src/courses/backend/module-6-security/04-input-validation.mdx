@@ -1,17 +1,73 @@
 ---
-title: Input Validation
-description: ត្រូវតែចងចាំថា "Never Trust Client Input"
+title: Input Sanitization & Data Cleansing
+description: ការពារប្រព័ន្ធពី Parameter Pollution (HPP), NoSQL/JSON Injection, និង Malicious Inputs តាមរយៈ Sanitization Middlewares។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Validation (ការផ្ទៀងផ្ទាត់) និង Sanitization (ការសម្អាតទិន្នន័យ)
+  - ការពារ HTTP Parameter Pollution (HPP)
+  - សម្អាត HTML tags និង scripts ចេញពី Input strings តាមរយៈ `sanitize-html`
+  - យល់ពីការកំណត់ Body Size Limits ដើម្បីទប់ស្កាត់ Memory Flooding
 module: module-6-security
 order: 4
+quiz:
+  - question: "តើ HTTP Parameter Pollution (HPP) គឺជាអ្វី?"
+    options:
+      - "ជាការបំពុលបរិស្ថាន"
+      - "ជាពេលដែល Client ផ្ញើ query parameter ដូចគ្នាច្រើនដង (ឧ. `?role=user&role=admin`) ដែលធ្វើឱ្យ Express បកប្រែវាជា Array `['user', 'admin']` និងនាំឱ្យខូច Logic Authorization"
+      - "ជាការបិទ Server ដោយប្រើ CSS"
+      - "ជាការផ្ញើ Request គ្មាន Header"
+    correctAnswer: 2
+    explanation: "HPP កើតឡើងពេល query params ស្ទួនគ្នាបង្កើតជា Array ដែលអាចឆ្លងផុត type check បែប string និង bypass authorization checks។ យើងប្រើ package `hpp` ដើម្បីការពារ។"
 ---
 
-## 🔍 ការបញ្ជាក់សុវត្ថិភាពទិន្នន័យ (Input Validation & Sanitization)
+## 🧼 Validation vs Sanitization
 
-នៅក្នុង Module ទី២ យើងបានរៀនប្រើ **Zod** ដើម្បីឆែកមើល Validation ម្តងរួចមកហើយ។ 
-ចំនុចសំខាន់នៅក្នុងសុវត្ថិភាពគឺ **Sanitization (ការសំអាតទិន្នន័យ)**។ 
+- **Validation:** ត្រួតពិនិត្យមើលថាតើទិន្នន័យត្រឹមត្រូវតាមច្បាប់ឬអត់ (ឧ. Email មាន `@`, អាយុ > 18)។ បើខុស គឺបដិសេធ (Reject)។
+- **Sanitization:** លាងសម្អាត ឬកែប្រែទិន្នន័យដែលគ្រោះថ្នាក់ឱ្យមានសុវត្ថិភាព (ឧ. Trim space, Remove `<script>` tags, Normalize email) មុននឹងរក្សាទុក។
 
-Hacker អាចបញ្ជូនកូដ JavaScript (XSS) ឫកូដ SQL (SQL Injection) មកតាមរយៈទិន្នន័យធម្មតាដូចជា ឈ្មោះ ឬ អត្ថបទបញ្ចេញមតិ (Comments)។
+```mermaid
+graph LR
+    RAW["Raw User Input: '  <script>alert(1)</script> Hello!  '"] --> SAN["Sanitizer Pipeline"]
+    SAN --> CLEAN["Clean Safe Data: 'Hello!'"]
+    CLEAN --> VAL["Schema Validator (Zod)"]
+    VAL --> DB[("Database")]
+```
 
-> ការប្រើប្រាស់ Validation Library ដូចជា Zod ឬ Joi ជួយដោះស្រាយបញ្ហានេះបានយ៉ាងច្រើន ព្រោះវាកាត់ចោល (Strip) នូវ Field ដែលយើងមិនបានកំណត់ ព្រមទាំងពិនិត្យប្រវែង និងប្រភេទអក្សរយ៉ាងត្រឹមត្រូវ។
+---
 
-*(យើងបានរៀនពីចំណុចនេះរួចហើយនៅក្នុង Module 2 ដូច្នេះសូមមើលមេរៀនមុនសម្រាប់កូដឧទាហរណ៍នៃការប្រើ Zod)*
+## 🛠️ ការប្រើប្រាស់ Sanitization Packages
+
+```bash
+npm install hpp sanitize-html
+npm install -D @types/hpp @types/sanitize-html
+```
+
+```typescript
+import express from "express";
+import hpp from "hpp";
+import sanitizeHtml from "sanitize-html";
+
+const app = express();
+
+// 1. កម្រិត Body Size ត្រឹម 10KB សម្រាប់ទប់ស្កាត់ Payload Flooding
+app.use(express.json({ limit: "10kb" }));
+
+// 2. ការពារ HTTP Parameter Pollution
+app.use(hpp({ whitelist: ["sort", "page", "limit"] })); // អនុញ្ញាត array លើតែ parameters ទាំងនេះ
+
+// 3. Custom String Sanitizer Middleware
+export const sanitizeInputs = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.body && typeof req.body === "object") {
+    for (const key of Object.keys(req.body)) {
+      if (typeof req.body[key] === "string") {
+        req.body[key] = sanitizeHtml(req.body[key].trim(), {
+          allowedTags: [], // លុប HTML tags ទាំងអស់ចោល
+          allowedAttributes: {},
+        });
+      }
+    }
+  }
+  next();
+};
+
+app.use(sanitizeInputs);
+```

@@ -1,45 +1,91 @@
 ---
-title: Database Relationships
-description: របៀបបង្កើតទំនាក់ទំនងរវាងតារាងផ្សេងៗគ្នា និងការប្រើប្រាស់ JOIN។
+title: Database Relationships, Foreign Keys & SQL JOINs
+description: ស្វែងយល់ពីទំនាក់ទំនងរវាង Tables (1-to-1, 1-to-Many, Many-to-Many), Foreign Key Constraints, និងការ Query JOINs។
+objectives:
+  - យល់ច្បាស់ពី 3 ប្រភេទនៃ Database Relationships (1:1, 1:N, N:M)
+  - ចេះបង្កើត Junction / Pivot Tables សម្រាប់ Many-to-Many
+  - ស្គាល់ ON DELETE CASCADE, ON DELETE SET NULL, ON DELETE RESTRICT
+  - ចេះសរសេរ INNER JOIN, LEFT JOIN, និង Aggregations (GROUP BY, COUNT)
 module: module-3-postgresql
 order: 3
+quiz:
+  - question: "តើ SQL JOIN ប្រភេទណាដែលទាញយក Rows ទាំងអស់ពី Table ខាងឆ្វេង ទោះបីជាគ្មាន Record ត្រូវគ្នានៅក្នុង Table ខាងស្តាំក៏ដោយ?"
+    options:
+      - "INNER JOIN"
+      - "LEFT JOIN (LEFT OUTER JOIN)"
+      - "CROSS JOIN"
+      - "RIGHT JOIN ONLY"
+    correctAnswer: 2
+    explanation: "LEFT JOIN នឹងរក្សាទុករាល់ Records ទាំងអស់នៃ Table ខាងឆ្វេង (Left table) ហើយបំពេញតម្លៃ NULL សម្រាប់ columns នៃ Table ខាងស្តាំដែលរកមិនឃើញ match។"
 ---
 
-## 🔗 ទំនាក់ទំនងទិន្នន័យ (Relationships)
-
-នៅក្នុងប្រព័ន្ធ Relational Database ទិន្នន័យត្រូវបានរក្សាទុកដាច់ពីគ្នាជាតារាងតូចៗ ដើម្បីកុំអោយមានការជាន់គ្នា (Data Redundancy)។ បន្ទាប់មក យើងប្រើ **Foreign Keys** ដើម្បីភ្ជាប់ពួកវាចូលគ្នាវិញ។
-
-### ប្រភេទនៃទំនាក់ទំនងទាំង ៣
+## 🔗 ៣ ប្រភេទនៃ Database Relationships
 
 ```mermaid
 erDiagram
-    USERS ||--o{ POSTS : "One-to-Many (អ្នកប្រើម្នាក់ មានអត្ថបទច្រើន)"
-    USERS ||--|| PROFILE : "One-to-One (អ្នកប្រើម្នាក់ មាន Profile តែមួយ)"
-    STUDENTS }|--|{ COURSES : "Many-to-Many (សិស្សច្រើននាក់ រៀនមុខវិជ្ជាច្រើន)"
+    USERS ||--|| PROFILES : "1 to 1 (One-to-One)"
+    USERS ||--o{ ORDERS : "1 to N (One-to-Many)"
+    PRODUCTS }o--o{ CATEGORIES : "N to M (Many-to-Many via Junction)"
 ```
 
-### របៀបបង្កើត Foreign Key និងការប្រើប្រាស់ JOIN
+### 1. One-to-One (1:1)
+User ម្នាក់មាន Profile តែមួយគត់៖
+```sql
+CREATE TABLE user_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID UNIQUE NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    avatar_url TEXT,
+    bio TEXT
+);
+```
 
-```tabs
-sql
--- tables
--- តារាងមេ (Users)
-  CREATE TABLE users (
-      id SERIAL PRIMARY KEY,
-      name VARCHAR(100)
-  );
+### 2. One-to-Many (1:N)
+User ម្នាក់អាចបញ្ជាទិញ Orders បានច្រើន៖
+```sql
+CREATE TABLE orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    total_amount NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+```
 
-  -- តារាងកូន (Posts) ភ្ជាប់ទៅ Users
-  CREATE TABLE posts (
-      id SERIAL PRIMARY KEY,
-      title VARCHAR(200),
-      user_id INT,
-      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
+### 3. Many-to-Many (N:M)
+Product មួយអាចនៅក្នុង Categories ច្រើន ហើយ Category មួយអាចផ្ទុក Products ច្រើន។ យើងត្រូវការ **Junction / Pivot Table**៖
+```sql
+CREATE TABLE product_categories (
+    product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+    category_id UUID REFERENCES categories(id) ON DELETE CASCADE,
+    PRIMARY KEY (product_id, category_id)
+);
+```
+
 ---
-sql
--- join
-SELECT posts.title, users.name
-  FROM posts
-  JOIN users ON posts.user_id = users.id;
+
+## 🤝 ប្រភេទនៃ SQL JOINs
+
+```mermaid
+graph TD
+    subgraph "SQL JOIN Types"
+        IJ["INNER JOIN<br/>ផ្គូផ្គងតែ Records ដែលត្រូវគ្នាទាំងសងខាង"]
+        LJ["LEFT JOIN<br/>យកទាំងអស់ពី Table ឆ្វេង + ផ្គូផ្គងពី Table ស្តាំ (បើគ្មានដាក់ NULL)"]
+        RJ["RIGHT JOIN<br/>យកទាំងអស់ពី Table ស្តាំ + ផ្គូផ្គងពី Table ឆ្វេង"]
+        FJ["FULL OUTER JOIN<br/>យកទិន្នន័យទាំងអស់ពី Table ទាំងសងខាង"]
+    end
+```
+
+### ឧទាហរណ៍ជាក់ស្តែង៖
+
+```sql
+-- 1. INNER JOIN: ទាញយកបញ្ជី User ដែលមាន Order
+SELECT u.username, o.id AS order_id, o.total_amount
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+-- 2. LEFT JOIN: ទាញយក User ទាំងអស់ (ទោះមិនធ្លាប់ Order ក៏បង្ហាញឈ្មោះ)
+SELECT u.username, COUNT(o.id) AS total_orders, COALESCE(SUM(o.total_amount), 0) AS total_spent
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id, u.username
+ORDER BY total_spent DESC;
 ```

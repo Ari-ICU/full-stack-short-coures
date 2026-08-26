@@ -1,74 +1,125 @@
 ---
-title: Middleware
-description: យល់ដឹងពីមុខងាររបស់ Middleware និងរបៀបប្រើប្រាស់វាដើម្បីត្រួតពិនិត្យ Request។
+title: Express Middleware Masterclass
+description: ស្វែងយល់ពី Middleware Pipeline, ការបង្កើត Custom Middleware, Error Middleware, និង Built-in/Third-party Middlewares។
+objectives:
+  - យល់ច្បាស់ពី Middleware Pipeline pattern (req, res, next)
+  - ចេះបង្កើត Application-level, Router-level, និង Route-specific Custom Middlewares
+  - ស្គាល់ Built-in Middlewares (express.json, express.urlencoded, express.static)
+  - ចេះប្រើ Third-party Middlewares ពេញនិយមដូចជា morgan, cors, cookie-parser
 module: module-2-expressjs
 order: 3
+quiz:
+  - question: "តើមានអ្វីកើតឡើងប្រសិនបើ Middleware របស់អ្នកមិនបានហៅ `next()` ហើយក៏មិនបានផ្ញើ `res.send()` ឬ `res.json()` ទៅកាន់ Client ដែរ?"
+    options:
+      - "Express នឹងបោះ Error ដោយស្វ័យប្រវត្តិ"
+      - "Request នឹងគាំងជាប់ (Hang) ហើយ Client នឹងរង់ចាំរហូតដល់ផុតកំណត់ Timeout"
+      - "Express នឹងរំលងទៅកាន់ Route Handler បន្ទាប់ភ្លាមៗ"
+      - "Database នឹងត្រូវ Restart"
+    correctAnswer: 2
+    explanation: "Middleware នីមួយៗត្រូវតែបញ្ជូនការគ្រប់គ្រងទៅជំហានបន្ទាប់តាមរយៈ next() ឬបញ្ចប់ Request-Response cycle តាមរយៈ res.json()/res.send()។ បើមិនធ្វើទាំងពីរទេ Request នឹងជាប់គាំងមិនចប់ឡើយ។"
 ---
 
-## 🛡️ អ្វីទៅជា Middleware?
+## 🧱 អ្វីទៅជា Middleware?
 
-**Middleware** គឺជា Function មួយដែលនៅចំកណ្តាលរវាង **Request** និង **Response**។ រាល់ពេលដែល Client ផ្ញើ Request មក វានឹងឆ្លងកាត់ Middleware ជាមុនសិន មុននឹងទៅដល់ Route របស់អ្នក។
+**Middleware** គឺជា Function ដែលមានសិទ្ធិចូលទៅកាន់ **Request Object (`req`)**, **Response Object (`res`)**, និង Function **`next`** នៅក្នុង Request-Response cycle របស់ Express។
+
+អ្នកអាចស្រមៃថា Middleware ដូចជា **ប៉ុស្តិ៍ត្រួតពិនិត្យ (Checkpoint/Interceptor)** នៅតាមផ្លូវ៖
 
 ```mermaid
-sequenceDiagram
-    participant C as Client
-    participant M as Middleware (ឧ. Check Token)
-    participant R as Route Handler (Controller)
-    
-    C->>M: HTTP Request
-    alt Token ត្រឹមត្រូវ
-        M->>R: ហៅ next() អោយទៅមុខទៀត
-        R-->>C: HTTP Response (200 OK)
-    else Token មិនត្រឹមត្រូវ
-        M-->>C: HTTP Response (401 Unauthorized)
-    end
+graph LR
+    REQ["HTTP Request"] --> M1["Middleware 1<br/>Logger (morgan)"]
+    M1 -->|"next()"| M2["Middleware 2<br/>Authentication (JWT)"]
+    M2 -->|"next()"| M3["Middleware 3<br/>Role Validation"]
+    M3 -->|"next()"| HANDLER["Controller Handler<br/>res.json()"]
+    M2 -.->|"Invalid Token"| ERR["res.status(401).json()"]
 ```
 
-### របៀបបង្កើត Custom Middleware
+---
 
-Middleware function តែងតែមានប៉ារ៉ាម៉ែត្រ ៣ ចម្បង: `(req, res, next)`។
-ពាក្យបញ្ជា `next()` គឺសំខាន់បំផុត បើគ្មានវាទេ Request នឹងគាំងនៅនឹងកន្លែង។
+## 🔍 ប្រភេទនៃ Middleware ក្នុង Express
 
-```tabs
-javascript
-// app.js
-import express from 'express';
-  import { loggerMiddleware } from './middlewares/logger.js';
-  import { checkAuth } from './middlewares/auth.js';
+1. **Application-level Middleware:** ដំណើរការលើរាល់ Request ទាំងអស់ (`app.use(...)`)
+2. **Router-level Middleware:** ដំណើរការសម្រាប់តែ Router ជាក់លាក់ (`router.use(...)`)
+3. **Route-specific Middleware:** ដំណើរការសម្រាប់តែ Route ណាមួយ (`router.get('/profile', authMiddleware, getProfile)`)
+4. **Error-handling Middleware:** ទទួល Parameters ចំនួន ៤ `(err, req, res, next)`
+5. **Built-in Middleware:** មកស្រាប់ជាមួយ Express (`express.json()`, `express.static()`)
+6. **Third-party Middleware:** ដំឡើងពី NPM (`cors`, `morgan`, `helmet`)
 
-  const app = express();
+---
 
-  // ប្រើប្រាស់ Global Middleware (មានប្រសិទ្ធភាពលើគ្រប់ Route)
-  app.use(loggerMiddleware);
+## 💻 ការបង្កើត Custom Middlewares ជាក់ស្តែង
 
-  // ប្រើប្រាស់ Middleware សម្រាប់តែ Route មួយនេះប៉ុណ្ណោះ
-  app.get('/dashboard', checkAuth, (req, res) => {
-      res.json({ message: "សូមស្វាគមន៍មកកាន់ Dashboard លាក់កំបាំង!" });
+### 1. Request Logger Middleware (`src/middlewares/logger.js`)
+```javascript
+export const requestLogger = (req, res, next) => {
+  const start = Date.now();
+  const { method, url, ip } = req;
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    console.log(`[${method}] ${url} - Status: ${res.statusCode} (${duration}ms) - IP: ${ip}`);
   });
+  
+  next(); // ត្រូវតែហៅ next() ដើម្បីទៅ Middleware បន្ទាប់
+};
+```
 
-  app.listen(3000);
+### 2. Authentication Guard Middleware (`src/middlewares/auth.js`)
+```javascript
+export const requireAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized: Token ត្រូវបានទាមទារ"
+    });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  // ឧទាហរណ៍ពិនិត្យ token
+  if (token !== "secret-token-xyz") {
+    return res.status(403).json({
+      success: false,
+      error: "Forbidden: Token មិនត្រឹមត្រូវ ឬផុតកំណត់"
+    });
+  }
+
+  // ភ្ជាប់ព័ត៌មាន user ចូល req សម្រាប់ routes បន្ទាប់ប្រើ
+  req.user = { id: 101, username: "admin", role: "superadmin" };
+  next();
+};
+```
+
 ---
-javascript
-// middlewares/logger.js
-// បង្កើត Middleware សម្រាប់កត់ត្រាការហៅ
-  export const loggerMiddleware = (req, res, next) => {
-      console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-      
-      // បញ្ជូនទៅ Function បន្ទាប់
-      next(); 
-  };
----
-javascript
-// middlewares/auth.js
-// បង្កើត Middleware សម្រាប់ត្រួតពិនិត្យសិទ្ធិ
-  export const checkAuth = (req, res, next) => {
-      const token = req.headers.authorization;
-      
-      if (token === "my_secret_token") {
-          next(); // អនុញ្ញាតអោយទៅមុខទៀត
-      } else {
-          // បញ្ចប់ Request នៅទីនេះ ហើយបញ្ជូនកំហុសទៅវិញ
-          res.status(401).json({ error: "អ្នកមិនមានសិទ្ធិចូលមើលទីនេះទេ!" });
-      }
-  };
+
+## 🔌 ការប្រើប្រាស់ Third-Party Middlewares សំខាន់ៗ
+
+```bash
+npm install morgan cors helmet cookie-parser
+```
+
+```javascript
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+
+const app = express();
+
+// Security Headers
+app.use(helmet());
+
+// Cross-Origin Resource Sharing
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+// HTTP Request Logger
+app.use(morgan('dev'));
+
+// Parsing Payloads & Cookies
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 ```

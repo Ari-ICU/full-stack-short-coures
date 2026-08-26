@@ -1,53 +1,109 @@
 ---
 title: Environment Variables (.env)
 description: របៀបលាក់ទុកព័ត៌មានសម្ងាត់ (Secrets) ដូចជា លេខសម្ងាត់ Database និង API Keys។
+objectives:
+  - យល់ដឹងពីគោលការណ៍ 12-Factor App ស្តីពី Configuration & Secrets
+  - ចេះប្រើប្រាស់ dotenv package និង Node.js v20+ built-in --env-file
+  - ចេះរៀបចំ TypeScript Configuration Validation ជាមួយ Zod ឬ Envalid
+  - យល់ច្បាស់ពីការប្រើប្រាស់ .env.example និងសុវត្ថិភាព Git
 module: module-1-nodejs-fundamentals
 order: 6
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងមិនត្រូវ Commit ឯកសារ .env ចូលទៅក្នុង Git Repository?"
+    options:
+      - "ព្រោះ Git មិនគាំទ្រឯកសារដែលមានសញ្ញាចុច (.) ពីមុខ"
+      - "ព្រោះឯកសារ .env ផ្ទុកនូវ Sensitive Secrets (Database passwords, API Keys, JWT Secret) ដែលអាចឱ្យ Hacker លួចចូលប្រព័ន្ធបាន"
+      - "ព្រោះវានឹងធ្វើឱ្យ Server ដើរយឺតពេល Deploy"
+      - "ព្រោះ Node.js មិនអាចអាន .env ពី GitHub បាន"
+    correctAnswer: 2
+    explanation: "ឯកសារ .env ផ្ទុក Credentials និង API Keys សំខាន់ៗ។ ការ Commit ចូល Git (ពិសេស Public Repos) គឺជាមូលហេតុចម្បងនៃការលេចធ្លាយទិន្នន័យ (Security Breach)។"
 ---
 
-## 🔒 ហេតុអ្វីយើងត្រូវការ Environment Variables?
+## 🔒 គោលការណ៍ 12-Factor App & Configuration
 
-នៅក្នុងការសរសេរកម្មវិធី យើងតែងតែមានព័ត៌មានដែល **មិនអាចបង្ហាញជាសាធារណៈបាន** ដូចជា៖
-- លេខសម្ងាត់ភ្ជាប់ទៅកាន់ Database
-- លេខសម្ងាត់សម្រាប់បង្កើត JWT Token
-- API Keys ផ្សេងៗ (Stripe, AWS)
+នៅក្នុងការអភិវឌ្ឍន៍ Backend កម្រិត Production ការកំណត់ Configuration នៃ App ត្រូវតែបំបែកដាច់ចេញពី Codebase (**Config in the Environment**)៖
 
-ប្រសិនបើយើងសរសេរវាផ្ទាល់នៅក្នុងកូដ (Hardcode) នោះពេលយើង Push កូដទៅ GitHub អ្នកគ្រប់គ្នានឹងអាចយកលេខសម្ងាត់ទាំងនោះទៅប្រើប្រាស់បាន ដែលនេះជាហានិភ័យសុវត្ថិភាពធំបំផុត។
-
-> [!CAUTION]  
-> **កុំ** សរសេរលេខសម្ងាត់ផ្ទាល់នៅក្នុងកូដរបស់អ្នកអោយសោះ ឧទាហរណ៍៖ `const dbPassword = "mySuperSecretPassword"`។
-
-### ការដោះស្រាយជាមួយ `dotenv`
-
-ស្តង់ដារក្នុងការដោះស្រាយបញ្ហានេះ គឺការប្រើប្រាស់ឯកសារ `.env` តាមរយៈ Library ដែលមានឈ្មោះថា `dotenv`។
+- **Development:** ភ្ជាប់ទៅកាន់ Local Database (`localhost:5432`)
+- **Staging/QA:** ភ្ជាប់ទៅកាន់ Cloud Test Database
+- **Production:** ភ្ជាប់ទៅកាន់ High-Availability Managed Cluster
 
 ```mermaid
 graph LR
-    ENV[.env File <br/>ផ្ទុកលេខសម្ងាត់] -->|dotenv| PROC[process.env <br/>Node.js Global Object]
-    PROC --> APP[ប្រើប្រាស់ក្នុងកូដ App]
+    ENV[".env / Cloud Secrets Manager<br/>(PORT, DB_URL, JWT_SECRET)"] -->|"dotenv / Node Runtime"| PROC["process.env"]
+    PROC -->|"Type-Safe Parsing (Zod)"| CONFIG["App Config Module<br/>(config.port, config.dbUrl)"]
+    CONFIG --> APP["Express / Database Services"]
 ```
 
-### របៀបប្រើប្រាស់
+---
 
-1. ដំឡើង Library `dotenv`:
-   ```bash
-   npm install dotenv
-   ```
+## 🛠️ វិធីសាស្ត្រប្រើប្រាស់ Environment Variables
 
-2. បង្កើតឯកសារឈ្មោះ `.env` នៅខាងក្រៅគេបង្អស់ (Root Directory) ហើយសរសេរ៖
-   ```text
-   PORT=8000
-   DATABASE_URL=postgres://user:password@localhost:5432/mydb
-   JWT_SECRET=super_secret_key_123
-   ```
+### វិធីទី ១: ការប្រើប្រាស់ Library `dotenv` (ទូទៅបំផុត)
+```bash
+npm install dotenv
+```
 
-3. ទាញយកមកប្រើនៅក្នុងកូដរបស់អ្នក៖
-   ```javascript
-   import 'dotenv/config'; // សម្រាប់ ES Modules បច្ចុប្បន្ន
+```javascript
+import 'dotenv/config';
 
-   const port = process.env.PORT;
-   console.log(`Server ដំណើរការលើ Port ${port}`);
-   ```
+const port = process.env.PORT || 4000;
+const databaseUrl = process.env.DATABASE_URL;
+
+console.log(`Server starting on port ${port}...`);
+```
+
+### វិធីទី ២: មុខងារ Native របស់ Node.js (Node v20.6.0+)
+ចាប់ពី Node.js v20.6 ឡើងទៅ អ្នកអាចអាន `.env` ដោយផ្ទាល់ដោយមិនចាំបាច់ដំឡើង Library ឡើយ៖
+```bash
+node --env-file=.env src/index.js
+```
+
+---
+
+## 🛡️ Best Practice: Type-Safe Configuration ជាមួយ Zod
+
+ដើម្បីការពារកុំឱ្យ Server រត់ទាំងមិនមាន Environment Variables ចាំបាច់ យើងគួរតែធ្វើ Validation ជាមុន៖
+
+```typescript
+import { z } from 'zod';
+import 'dotenv/config';
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  PORT: z.string().transform(Number).default('3000'),
+  DATABASE_URL: z.string().url("DATABASE_URL ត្រូវតែជា URL ត្រឹមត្រូវ"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET ត្រូវតែមានយ៉ាងតិច 32 តួអក្សរ"),
+});
+
+// Validate ភ្លាមៗពេល Server ចាប់ផ្តើម
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error("❌ Invalid environment variables:", parsed.error.format());
+  process.exit(1); // បិទ Server ភ្លាមបើខ្វះ Secrets
+}
+
+export const env = parsed.data;
+```
+
+---
+
+## 📋 ការរៀបចំឯកសារ `.env.example`
+
+ដើម្បីឱ្យសមាជិកក្រុមដឹងថាត្រូវការ Variables អ្វីខ្លះ ចូរបង្កើតឯកសារ `.env.example`៖
+
+```text
+# Server Configuration
+PORT=4000
+NODE_ENV=development
+
+# Database Connection
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ecommerce_db?schema=public"
+
+# Authentication Secrets
+JWT_SECRET="replace_with_a_secure_random_string_in_production"
+JWT_EXPIRES_IN="7d"
+```
 
 > [!IMPORTANT]
-> អ្នកត្រូវតែប្រាកដថាបានដាក់ឈ្មោះឯកសារ `.env` ចូលទៅក្នុងឯកសារ `.gitignore` ដើម្បីកុំអោយវា Push ចូលទៅកាន់ GitHub។ តែអ្នកគួរតែបង្កើតឯកសារ `.env.example` មួយសម្រាប់ទុកមើលជាគំរូ។
+> ត្រូវប្រាកដថាបានបន្ថែម `.env` ទៅក្នុង `.gitignore` ជានិច្ច!

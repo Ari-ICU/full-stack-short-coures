@@ -1,73 +1,120 @@
 ---
-title: Raw SQL with node-postgres (pg)
-description: របៀបប្រើប្រាស់ Library pg ដើម្បីសរសេរកូដ SQL ភ្ជាប់ទៅកាន់ PostgreSQL ផ្ទាល់ពី Node.js។
+title: Raw SQL with node-postgres (pg) & Connection Pooling
+description: របៀបប្រើប្រាស់ Library pg ដើម្បីសរសេរកូដ SQL ភ្ជាប់ទៅកាន់ PostgreSQL ផ្ទាល់ពី Node.js ជាមួយ Connection Pooling និង Parameterized Queries។
+objectives:
+  - យល់ពីតួនាទីរបស់ Database Driver `pg` (node-postgres)
+  - យល់ច្បាស់ពី Connection Pooling (Pool vs Client) សម្រាប់ការគ្រប់គ្រង Memory
+  - ចេះសរសេរ Parameterized Queries ($1, $2) ដើម្បីទប់ស្កាត់ SQL Injection
+  - ចេះបង្កើត Data Access Object (DAO) ជាមួយ pg Pool
 module: module-3-postgresql
 order: 4
+quiz:
+  - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើ Parameterized Queries ដូចជា `pool.query('SELECT * FROM users WHERE id = $1', [id])`?"
+    options:
+      - "ដើម្បីឱ្យកូដដំណើរការលឿនជាងមុន ១០០ ដង"
+      - "ដើម្បីទប់ស្កាត់ការវាយប្រហារ SQL Injection ពីសំណាក់ Hacker"
+      - "ព្រោះ PostgreSQL មិនអាចទទួល string បានទេ"
+      - "ដើម្បីបំប្លែងទិន្នន័យទៅជា JSON ដោយស្វ័យប្រវត្តិ"
+    correctAnswer: 2
+    explanation: "Parameterized Queries បញ្ជូន SQL structure និង data ដាច់ដោយឡែកពីគ្នាទៅកាន់ Database Engine ធ្វើឱ្យ Hacker មិនអាច inject SQL commands បន្លំចូលក្នុង query បានឡើយ។"
 ---
 
-## 🔌 ការភ្ជាប់ Node.js ជាមួយ PostgreSQL
+## 🔌 ការភ្ជាប់ Node.js ជាមួយ PostgreSQL តាមរយៈ `pg`
 
-មុននឹងឈានទៅដល់ការប្រើប្រាស់ ORM (ដែលងាយស្រួលជាង) អ្នកគួរតែចេះសរសេរ Raw SQL ភ្ជាប់ទៅ Database សិន ដើម្បីយល់ពីដំណើរការខាងក្នុង។ 
+មុនពេលប្រើ ORM ការយល់ដឹងពី Low-Level Database Driver ដូចជា `pg` ជួយឱ្យយើងយល់ពី Query Performance, Connection Lifecycle, និង Security។
 
-Library ដែលពេញនិយមបំផុតសម្រាប់កិច្ចការនេះគឺ `pg` (node-postgres)។
-
-### ការដំឡើង និងប្រើប្រាស់
-
-```bash
-npm install pg
+```mermaid
+graph LR
+    APP["Node.js Application"] --> POOL["pg.Pool (5-20 Ready Connections)"]
+    POOL --> C1["DB Connection 1"]
+    POOL --> C2["DB Connection 2"]
+    POOL --> C3["DB Connection 3"]
+    C1 --> PG["PostgreSQL Server"]
+    C2 --> PG
+    C3 --> PG
 ```
 
-យើងតែងតែប្រើប្រាស់ **Connection Pool** ជំនួសអោយការបង្កើត Connection ថ្មីរាល់ពេលមាន Request ចូល ព្រោះវាជួយសន្សំសំចៃធនធាន និងដំណើរការលឿនជាង។
-
-```tabs
-javascript
-// config/db.js
-import pkg from 'pg';
-  const { Pool } = pkg;
-
-  // បង្កើត Pool ដែលផ្ទុក Connections ជាច្រើនត្រៀមរួចជាស្រេច
-  export const pool = new Pool({
-      user: 'postgres',
-      host: 'localhost',
-      database: 'ecommerce',
-      password: 'secretpassword',
-      port: 5432,
-      max: 20 // ចំនួន Connection ច្រើនបំផុតដែលអាចបើកក្នុងពេលតែមួយ
-  });
-
-  // សាកល្បងភ្ជាប់
-  pool.connect()
-      .then(() => console.log('✅ ភ្ជាប់ទៅកាន់ PostgreSQL ជោគជ័យ'))
-      .catch((err) => console.error('❌ បរាជ័យ:', err.message));
 ---
-javascript
-// controllers/userController.js
-import { pool } from '../config/db.js';
 
-  // ការទាញទិន្នន័យ (GET)
-  export const getUsers = async (req, res) => {
-      try {
-          const result = await pool.query('SELECT id, name FROM users');
-          res.json(result.rows);
-      } catch (err) {
-          res.status(500).json({ error: err.message });
-      }
-  };
+## ⚙️ ការរៀបចំ Database Pool (`src/config/db.js`)
 
-  // ការបញ្ចូលទិន្នន័យ (POST) ការពារ SQL Injection តាមរយៈ $1, $2
-  export const createUser = async (req, res) => {
-      const { name, email } = req.body;
-      try {
-          const result = await pool.query(
-              'INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', 
-              [name, email] // Data ត្រូវបញ្ជូនតាម Array នេះ (Parameterized Query)
-          );
-          res.status(201).json(result.rows[0]);
-      } catch (err) {
-          res.status(500).json({ error: err.message });
-      }
-  };
+```javascript
+import pg from 'pg';
+import 'dotenv/config';
+
+const { Pool } = pg;
+
+export const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20, // ចំនួន Connection អតិបរមាក្នុង Pool
+  idleTimeoutMillis: 30000, // បិទ connection ដែលទំនេរលើស 30s
+  connectionTimeoutMillis: 2000, // Timeout បើមិនអាចភ្ជាប់ក្នុង 2s
+});
+
+// សាកល្បងភ្ជាប់ Database ពេល Startup
+db.on('connect', () => {
+  console.log('✅ PostgreSQL Pool connection established');
+});
+
+db.on('error', (err) => {
+  console.error('❌ Unexpected error on idle PostgreSQL client', err);
+  process.exit(-1);
+});
 ```
 
-> [!IMPORTANT]
-> **ការការពារ SQL Injection:** កុំប្រើប្រាស់ការបូកបញ្ចូលអក្សរផ្ទាល់ (ឧ. `'INSERT ... VALUES (' + name + ')'`)។ ត្រូវប្រើទម្រង់ `$1, $2` (Parameterized Query) ជានិច្ច ដើម្បីការពារ Hacker បញ្ចូលកូដផ្តេសផ្តាសចូល Database។
+---
+
+## 🛡️ ការអនុវត្ត CRUD Controller ជាមួយ Parameterized Queries
+
+```javascript
+// src/controllers/user.controller.js
+import { db } from '../config/db.js';
+
+// 1. GET ALL USERS
+export const getUsers = async (req, res, next) => {
+  try {
+    const { search = '', limit = 10, offset = 0 } = req.query;
+    
+    // Parameterized Query ការពារ SQL Injection
+    const queryText = `
+      SELECT id, username, email, is_active, created_at 
+      FROM users 
+      WHERE username ILIKE $1 
+      ORDER BY created_at DESC 
+      LIMIT $2 OFFSET $3
+    `;
+    const values = [`%${search}%`, Number(limit), Number(offset)];
+    
+    const result = await db.query(queryText, values);
+    res.status(200).json({ success: true, data: result.rows });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// 2. CREATE USER
+export const createUser = async (req, res, next) => {
+  try {
+    const { username, email } = req.body;
+    
+    const queryText = `
+      INSERT INTO users (username, email) 
+      VALUES ($1, $2) 
+      RETURNING id, username, email, created_at
+    `;
+    const result = await db.query(queryText, [username, email]);
+    
+    res.status(201).json({ success: true, data: result.rows[0] });
+  } catch (error) {
+    next(error);
+  }
+};
+```
+
+> [!CAUTION]
+> **ដាច់ខាតកុំធ្វើបែបនេះ (SQL Injection Vulnerability):**
+> ```javascript
+> // ❌ គ្រោះថ្នាក់បំផុត! Hacker អាចបញ្ចូល `' OR '1'='1`
+> const query = `SELECT * FROM users WHERE email = '${req.body.email}'`;
+> await db.query(query);
+> ```

@@ -1,45 +1,68 @@
 ---
-title: SQL Injection
-description: តើការវាយប្រហារបែប SQL Injection ជាអ្វី ហើយត្រូវការពារវាបែបណា។
+title: SQL Injection (SQLi) Anatomy & Defense
+description: វិភាគពីរបៀបដែល SQL Injection កើតឡើង, ការវាយប្រហារជាក់ស្តែង (Tautology, Union-based), និងវិធីការពារជាដាច់ខាត។
+objectives:
+  - យល់ពីកាយវិភាគនៃ SQL Injection Attack (SQLi) ក្នុង OWASP Top 10
+  - ស្គាល់ភាពខុសគ្នារវាង String Concatenation និង Parameterized Queries / Prepared Statements
+  - យល់ពីរបៀបដែល ORM (TypeORM / Prisma) ការពារ SQL Injection
+  - ដឹងពីចំនុចដែល ORM នៅតែអាចប្រឈម SQL Injection (Raw Queries, Dynamic OrderBy)
 module: module-6-security
 order: 5
+quiz:
+  - question: "តើកូដមួយណាខាងក្រោមដែលមានហានិភ័យ SQL Injection ធ្ងន់ធ្ងរបំផុត?"
+    options:
+      - "`db.query('SELECT * FROM users WHERE id = $1', [userId])`"
+      - "`db.query(\"SELECT * FROM users WHERE email = '\" + userEmail + \"'\")`"
+      - "`userRepo.findOneBy({ email: userEmail })`"
+      - "`userRepo.createQueryBuilder('u').where('u.id = :id', { id: userId })`"
+    correctAnswer: 2
+    explanation: "ការបូកអក្សរ String Concatenation ផ្ទាល់ក្នុង SQL Query គឺជាមូលហេតុចម្បងនៃ SQL Injection ព្រោះ Hacker អាចបញ្ចូល `' OR '1'='1` ដើម្បីទាញទិន្នន័យទាំងអស់ដោយមិនចាំបាច់មាន Password។"
 ---
 
-## 💉 អ្វីទៅជា SQL Injection?
+## 💉 អ្វីទៅជា SQL Injection (SQLi)?
 
-**SQL Injection** គឺជាការវាយប្រហារដ៏ចំណាស់ ប៉ុន្តែនៅតែមានគ្រោះថ្នាក់បំផុតមួយ។ វាទាញយកចន្លោះប្រហោងពីការដែល Developer យកទិន្នន័យដែល Client បញ្ជូនមក ទៅតភ្ជាប់ (Concatenate) ជាកូដ SQL ផ្ទាល់ដោយមិនបានការពារ។
+**SQL Injection** កើតឡើងនៅពេលដែលកម្មវិធី Backend យកទិន្នន័យពី User មកបូកបញ្ចូលផ្ទាល់ (String Concatenation/Interpolation) ទៅក្នុង SQL Command ដោយមិនបានឆ្លងកាត់ការ Parameterize។
 
-### ឧទាហរណ៍នៃកូដដែលមានគ្រោះថ្នាក់ ❌
+```mermaid
+graph TD
+    ATTACKER["Hacker Input: 'admin@test.com' OR '1'='1'"] --> SRV["Server Query Construction"]
+    SRV --> SQL["SELECT * FROM users WHERE email = 'admin@test.com' OR '1'='1'"]
+    SQL --> DB[("Database executes injected logic")]
+    DB --> LEAK["Returns ALL user records & passwords! 💥"]
+```
 
+---
+
+## 🛑 ការប្រៀបធៀបកូដដែលគ្រោះថ្នាក់ vs កូដមានសុវត្ថិភាព
+
+### ❌ កូដងាយរងគ្រោះ (Vulnerable Code)
 ```javascript
-// ឧបមាថា user បញ្ជូន email មក: "admin@email.com' OR '1'='1"
-
-const email = req.body.email;
-// កូដខាងក្រោមនេះតភ្ជាប់ String ផ្ទាល់ (គ្រោះថ្នាក់ណាស់!!!)
-const query = "SELECT * FROM users WHERE email = '" + email + "'";
-
-// កូដ SQL ដែល Server នឹងអានគឺ:
-// SELECT * FROM users WHERE email = 'admin@email.com' OR '1'='1'
-// លទ្ធផល: លក្ខខណ្ឌ '1'='1' តែងតែពិត ដូច្នេះ Hacker អាចទាញយកទិន្នន័យ Users ទាំងអស់បាន!!
+// ប្រសិនបើ req.body.email គឺ "' OR '1'='1" នោះ Result នឹងចេញ True ជានិច្ច!
+const sql = `SELECT * FROM users WHERE email = '${req.body.email}' AND password = '${req.body.password}'`;
+const result = await db.query(sql);
 ```
 
-### វិធីការពារ (Parameterized Queries) ✅
+### ✅ កូដមានសុវត្ថិភាព (Parameterized Query / Prepared Statement)
+```javascript
+const sql = `SELECT * FROM users WHERE email = $1 AND password = $2`;
+const result = await db.query(sql, [req.body.email, req.body.password]);
+```
 
-រាល់ពេលអ្នកប្រើប្រាស់បណ្ណាល័យ (Library) Database ត្រូវតែប្រើ Parameterized Queries (`$1`, `$2`) ជានិច្ច ឫក៏ប្រើប្រាស់ ORM (Prisma/TypeORM)។
-
-```tabs
-javascript
-// 1. បើប្រើ pg (Raw SQL)
-const email = req.body.email;
-// Database នឹងដឹងថា $1 គឺជា "ទិន្នន័យ" មិនមែនជា "កូដ SQL" ទេ ទោះ Hacker ដាក់អ្វីមកក៏ដោយ
-const result = await pool.query(
-    "SELECT * FROM users WHERE email = $1", 
-    [email]
-);
 ---
-javascript
-// 2. បើប្រើ TypeORM
-const email = req.body.email;
-// ORM នឹងធ្វើការការពារ SQL Injection ដោយស្វ័យប្រវត្តិ
-const user = await userRepository.findOneBy({ email });
+
+## ⚠️ SQL Injection ក្នុង ORM (តើ ORM មានសុវត្ថិភាព ១០០% ទេ?)
+
+TypeORM និង ORM ភាគច្រើនការពារ SQLi ដោយស្វ័យប្រវត្តិតាមរយៈ Parameter binding។ ប៉ុន្តែបើអ្នកប្រើ **Raw strings ក្នុង QueryBuilder** អ្នកនៅតែអាចជួបបញ្ហា៖
+
+```typescript
+// ❌ គ្រោះថ្នាក់៖ ការ Interpolate String ចូលក្នុង QueryBuilder
+userRepo.createQueryBuilder("user")
+  .where(`user.name = '${userName}'`); // ❌ SQL Injection Vulnerable!
+
+// ✅ សុវត្ថិភាព៖ ប្រើ Parameters Object ជានិច្ច
+userRepo.createQueryBuilder("user")
+  .where("user.name = :name", { name: userName }); // ✅ Safe
 ```
+
+> [!IMPORTANT]
+> **ច្បាប់ដាច់ខាត:** កុំប្រើ Template Literals (`` `${var}` ``) ឬ String Concat (`+`) ដើម្បីផ្គុំទិន្នន័យ User ចូលទៅក្នុង SQL string ឱ្យសោះ មិនថាក្នុង Raw SQL ឬ ORM ឡើយ!

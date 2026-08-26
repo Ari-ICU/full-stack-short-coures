@@ -1,21 +1,97 @@
 ---
-title: End-to-End API Testing
-description: ភាពខុសគ្នារវាងការធ្វើតេស្តដោយស្វ័យប្រវត្តិ (Jest) និងការធ្វើតេស្តដោយដៃ (Postman)។
-module: module-8-testing
+title: End-to-End API Testing & Continuous Integration (CI)
+description: ស្វែងយល់ពីយុទ្ធសាស្ត្រ End-to-End Testing, Postman Automated Collections, Newman CLI, និងការរត់ Tests ក្នុង GitHub Actions CI/CD។
+objectives:
+  - យល់ពីតួនាទីរបស់ E2E Tests ក្នុង Continuous Integration (CI)
+  - ចេះ Export Postman Collections និងដំណើរការតាម Newman CLI
+  - បង្កើត GitHub Actions Workflow សម្រាប់រត់ Automated Tests រាល់ពេល Git Push / PR
+  - ស្គាល់រង្វាស់ Code Coverage និងការកំណត់ Coverage Thresholds
+module: module-7-testing
 order: 3
+quiz:
+  - question: "តើ Newman គឺជាអ្វីក្នុងប្រព័ន្ធ Testing?"
+    options:
+      - "ជា Code Editor ថ្មី"
+      - "ជា Command-Line Collection Runner សម្រាប់ Postman ដែលអនុញ្ញាតឱ្យដំណើរការ Postman Tests ក្នុង Terminal ឬ CI/CD Pipelines"
+      - "ជា Database ដូច MongoDB"
+      - "ជា Browser សម្រាប់ Android"
+    correctAnswer: 2
+    explanation: "Newman គឺជា CLI tool ផ្លូវការរបស់ Postman ដែលអាចយក Collections និង Environments មក run ក្នុង Terminal និង GitHub Actions ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🔍 ការប្រៀបធៀបរបៀបធ្វើតេស្ត
+## 🚀 ស្ថាបត្យកម្ម Continuous Integration (CI) Testing
 
-ក្នុងនាមជាអ្នកអភិវឌ្ឍ (Developer) អ្នកត្រូវតែចេះធ្វើតេស្តទាំងពីរប្រភេទ៖
+នៅក្នុងគម្រោង Backend កម្រិតស្តង់ដារ រាល់ពេលដែល Developer ធ្វើការ **Push កូដ** ឬបង្កើត **Pull Request (PR)** ប្រព័ន្ធ **CI Pipeline** នឹងដំណើរការ Tests ទាំងអស់ដោយស្វ័យប្រវត្តិ។ បើមាន Test ណាមួយធ្លាក់ (Fail) វានឹងរារាំងការ Merge កូដចូល Production ភ្លាមៗ។
 
-1. **Manual Testing (Postman / Thunder Client):**
-   - **ពេលណាត្រូវប្រើ:** ពេលអ្នកកំពុងសរសេរកូដបណ្តើរ ចង់មើលលទ្ធផលបណ្តើរ ដើម្បីអោយប្រាកដថាកូដរត់បានតាមការគិត។
-   - **ចំណុចខ្សោយ:** នៅពេល API អ្នកមានច្រើន (ឧទាហរណ៍ ៥០ Routes) អ្នកមិនអាចចំណាយពេលអង្គុយចុច Test ម្តងមួយៗរាល់ពេលកែប្រែកូដនោះទេ។
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant Git as GitHub Repo
+    participant CI as GitHub Actions Runner
+    participant Prod as Production Server
 
-2. **Automated Testing (Jest + Supertest):**
-   - **ពេលណាត្រូវប្រើ:** នៅពេលមុខងារនោះសរសេរចប់ ហើយចង់ធានាថាថ្ងៃក្រោយទោះមានការកែប្រែកូដ ក៏មិនធ្វើអោយមុខងារនោះ Error ដែរ។ កូដតេស្តនឹងរត់ដោយស្វ័យប្រវត្តិមុនពេលអ្នក Deploy ទៅកាន់ Production (CI/CD)។
-   - **ចំណុចខ្សោយ:** ចំណាយពេលសរសេរកូដតេស្តយូរជាងពេលសរសេរកូដមុខងារទៅទៀត!
+    Dev->>Git: 1. git push origin feature-branch
+    Git->>CI: 2. Trigger CI Workflow (.github/workflows/test.yml)
+    Note over CI: Setup Node.js + Postgres Service Container
+    Note over CI: Run `npm run test:coverage`
+    alt Tests Pass ✅
+        CI-->>Git: 3. Status Check: Green (Ready to Merge)
+        Git->>Prod: 4. Auto-deploy to Production
+    else Tests Fail ❌
+        CI-->>Git: 3. Status Check: Red (Merge Blocked!)
+    end
+```
 
-> [!TIP]
-> នៅក្នុងការអនុវត្តជាក់ស្តែង ក្រុមហ៊ុនមិនសូវតម្រូវអោយអ្នកសរសេរតេស្ត ૧០០% នៃកម្មវិធី (100% Coverage) ទេ។ គេផ្តោតលើការសរសេរតេស្តសម្រាប់តែមុខងារសំខាន់ៗបំផុត (Core Business Logic) ប៉ុណ្ណោះ ដូចជាការទូទាត់លុយ និងប្រព័ន្ធ Login។
+---
+
+## 🛠️ ការរៀបចំ GitHub Actions Workflow (`.github/workflows/ci.yml`)
+
+```yaml
+name: Backend CI Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Test Suite with Coverage
+        run: npm run test:run
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:testpassword@localhost:5432/test_db
+          JWT_SECRET: super_secret_ci_test_key_1234567890
+```

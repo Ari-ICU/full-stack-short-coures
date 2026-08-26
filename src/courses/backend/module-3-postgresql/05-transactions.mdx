@@ -1,63 +1,104 @@
 ---
-title: Database Transactions
-description: ការប្រើប្រាស់ Transactions ដើម្បីធានាសុវត្ថិភាពទិន្នន័យពេលមានប្រតិបត្តិការច្រើនក្នុងពេលតែមួយ។
+title: Database Transactions & ACID Guarantees
+description: ធានាភាពសុក្រឹត និងសុវត្ថិភាពនៃទិន្នន័យ (Data Integrity) តាមរយៈ SQL Transactions (BEGIN, COMMIT, ROLLBACK) ក្នុង Node.js។
+objectives:
+  - យល់ច្បាស់ពីគោលការណ៍ ACID (Atomicity, Consistency, Isolation, Durability)
+  - ស្គាល់បញ្ហា Race Conditions និង Dirty Reads
+  - ចេះសរសេរ Transaction Lifecycle (BEGIN -> Queries -> COMMIT / ROLLBACK) ជាមួយ `pg`
+  - យល់ពីការ Release Client ត្រលប់ទៅ Pool វិញពេលចប់ Transaction
 module: module-3-postgresql
 order: 5
+quiz:
+  - question: "តើគោលការណ៍ 'Atomicity' ក្នុង ACID មានន័យដូចម្តេច?"
+    options:
+      - "ទិន្នន័យត្រូវតែតូចដូចអាតូម"
+      - "រាល់ SQL Operations ក្នុង Transaction ត្រូវតែជោគជ័យទាំងអស់ (All) ឬបើមានកំហុសមួយ គឺត្រូវ Cancel ត្រឡប់ក្រោយទាំងអស់ (Nothing/Rollback)"
+      - "Database ដំណើរការលើ Server តែមួយប៉ុណ្ណោះ"
+      - "ទិន្នន័យត្រូវបាន Backup រៀងរាល់ ១ វិនាទី"
+    correctAnswer: 2
+    explanation: "Atomicity (All-or-Nothing) ធានាថា ប្រសិនបើជំហានណាមួយក្នុង Transaction បរាជ័យ នោះការផ្លាស់ប្តូរទាំងអស់នឹងត្រូវ Rollback ដូចដើមវិញ ដោយគ្មានសេសសល់ទិន្នន័យខូចពាក់កណ្តាលផ្លូវឡើយ។"
 ---
 
-## 🔒 អ្វីទៅជា Transaction?
+## 🏦 ហេតុអ្វីយើងត្រូវការ Transactions?
 
-**Transaction** គឺជាការប្រមូលផ្តុំប្រតិបត្តិការ SQL ច្រើនបញ្ចូលគ្នា ទៅជាប្រតិបត្តិការតែមួយ។ 
-លក្ខខណ្ឌរបស់វាគឺ៖ **"ត្រូវតែជោគជ័យទាំងអស់ ឫ ក៏បរាជ័យទាំងអស់"**។
+សូមស្រមៃមើលសេណារីយ៉ូនៃការផ្ទេរប្រាក់ពី **Account A** ទៅ **Account B**៖
+1. ដកប្រាក់ $100 ពី Account A
+2. បន្ថែមប្រាក់ $100 ទៅ Account B
 
-ឧទាហរណ៍ជាក់ស្តែង៖ ការវេរលុយពី "ក" ទៅ "ខ" ៥០ ដុល្លារ។
-1. ដកលុយ ៥០$ ពីកុង "ក" (ជោគជ័យ)
-2. *...ស្រាប់តែភ្លើងដាច់ / Server គាំង...*
-3. បូកលុយ ៥០$ ចូលកុង "ខ" (មិនទាន់បានធ្វើ)
+ប្រសិនបើ Server ស្រាប់តែដាច់ភ្លើង ឬ Error កើតឡើងនៅចន្លោះជំហានទី ១ និងទី ២ នោះលុយ $100 នឹងបាត់បង់ដោយគ្មានដាន!
 
-បើគ្មាន Transaction ទេ លុយ ៥០$ នោះនឹងបាត់ពីរព័ន្ធ។ បើមាន Transaction វិញ វាដឹងថាជំហានទី ២ បរាជ័យ វានឹង **Rollback** (ត្រលប់ក្រោយវិញ) លុយទៅអោយ "ក" វិញភ្លាមៗ។
+ដំណោះស្រាយគឺ **Database Transaction**៖
 
-### របៀបប្រើប្រាស់ Transaction ជាមួយ `pg`
+```mermaid
+graph TD
+    START["BEGIN TRANSACTION"] --> STEP1["1. UPDATE accounts SET balance = balance - 100 WHERE id = 'A'"]
+    STEP1 --> STEP2["2. UPDATE accounts SET balance = balance + 100 WHERE id = 'B'"]
+    STEP2 --> STEP3["3. INSERT INTO transaction_logs (...)"]
+    
+    STEP3 -->|"All Successful"| COMMIT["COMMIT<br/>(កត់ត្រាចូល DB ជាស្ថាពរ)"]
+    STEP1 -.->|"Any Error Occurs"| ROLLBACK["ROLLBACK<br/>(ត្រឡប់ស្ថានភាពដើម ១០០%)"]
+    STEP2 -.->|"Any Error Occurs"| ROLLBACK
+    STEP3 -.->|"Any Error Occurs"| ROLLBACK
+```
 
-```tabs
-javascript
-// services/bankService.js
-import { pool } from '../config/db.js';
+---
 
-  export const transferMoney = async (fromId, toId, amount) => {
-      // 1. សុំ Connection មួយពី Pool ដើម្បីធ្វើ Transaction
-      const client = await pool.connect();
-      
-      try {
-          // 2. ចាប់ផ្តើម Transaction
-          await client.query('BEGIN');
-          
-          // 3. ប្រតិបត្តិការទី១ (ដកលុយ)
-          await client.query(
-              'UPDATE accounts SET balance = balance - $1 WHERE id = $2',
-              [amount, fromId]
-          );
-          
-          // ឧបមាថាមាន Error កើតឡើងនៅត្រង់នេះ (វាលោតទៅ catch ភ្លាម)
-          // throw new Error("ប្រព័ន្ធគាំង!"); 
+## 💻 ការអនុវត្ត Transaction ជាមួយ `pg.Pool`
 
-          // 4. ប្រតិបត្តិការទី២ (បូកលុយ)
-          await client.query(
-              'UPDATE accounts SET balance = balance + $1 WHERE id = $2',
-              [amount, toId]
-          );
-          
-          // 5. ជោគជ័យទាំងអស់ សុំបញ្ចប់បញ្ជូនទៅ Database ពិតប្រាកដ
-          await client.query('COMMIT');
-          return "ផ្ទេរប្រាក់ជោគជ័យ";
-          
-      } catch (err) {
-          // 6. បើមានកន្លែងណាមួយបរាជ័យ ត្រូវលុបចោលប្រតិបត្តិការទាំងអស់វិញ
-          await client.query('ROLLBACK');
-          throw err;
-      } finally {
-          // 7. ប្រគល់ Connection ទៅអោយ Pool វិញ ទោះជោគជ័យឫបរាជ័យក៏ដោយ
-          client.release();
-      }
-  };
+> [!IMPORTANT]
+> សម្រាប់ Transaction អ្នកត្រូវតែទាញយក Dedicated Client ម្នាក់ចេញពី Pool (`await pool.connect()`) ព្រោះ Commands ដូចជា `BEGIN`, `COMMIT`, `ROLLBACK` ត្រូវតែដំណើរការលើ Database Session តែមួយ។
+
+```javascript
+import { db } from '../config/db.js';
+
+export async function transferMoney(fromAccountId, toAccountId, amount) {
+  // 1. ខ្ចី Client មួយពី Pool
+  const client = await db.connect();
+
+  try {
+    // 2. ចាប់ផ្តើម Transaction
+    await client.query('BEGIN');
+
+    // 3. ដកប្រាក់ពីអ្នកផ្ញើ
+    const deductQuery = `
+      UPDATE accounts 
+      SET balance = balance - $1 
+      WHERE id = $2 AND balance >= $1
+      RETURNING balance;
+    `;
+    const deductRes = await client.query(deductQuery, [amount, fromAccountId]);
+
+    if (deductRes.rowCount === 0) {
+      throw new Error("សមតុល្យទឹកប្រាក់មិនគ្រប់គ្រាន់ ឬគណនីរកមិនឃើញឡើយ");
+    }
+
+    // 4. បន្ថែមប្រាក់ទៅអ្នកទទួល
+    const addQuery = `
+      UPDATE accounts 
+      SET balance = balance + $1 
+      WHERE id = $2;
+    `;
+    await client.query(addQuery, [amount, toAccountId]);
+
+    // 5. កត់ត្រាក្នុង Log
+    await client.query(
+      'INSERT INTO transfers (from_id, to_id, amount) VALUES ($1, $2, $3)',
+      [fromAccountId, toAccountId, amount]
+    );
+
+    // 6. បញ្ជាក់ជោគជ័យ
+    await client.query('COMMIT');
+    return { success: true, message: "ការផ្ទេរប្រាក់ទទួលបានជោគជ័យ!" };
+
+  } catch (error) {
+    // 7. ប្រសិនបើមានបញ្ហា ត្រឡប់ក្រោយទាំងអស់
+    await client.query('ROLLBACK');
+    console.error("Transaction Rollbacked:", error.message);
+    throw error;
+
+  } finally {
+    // 8. ដាច់ខាតត្រូវ Release Client ត្រឡប់ទៅ Pool វិញជានិច្ច!
+    client.release();
+  }
+}
 ```

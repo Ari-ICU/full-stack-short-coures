@@ -1,49 +1,114 @@
 ---
-title: Entities
-description: របៀបបង្កើត Entities (Model) ដើម្បីប្រាប់ TypeORM អោយដឹងពីរចនាសម្ព័ន្ធតារាង Database របស់អ្នក។
+title: TypeORM Entities & Column Decorators
+description: ការបង្កើត Entities, Primary Generated Columns (UUID / Increment), Special Columns (Timestamps, Enums, JSONB), និង Indexes។
+objectives:
+  - យល់ពីតួនាទីរបស់ Decorators (@Entity, @Column, @PrimaryGeneratedColumn)
+  - ចេះកំណត់ Column Types, Constraints (nullable, unique, default)
+  - ស្គាល់ Special Columns (@CreateDateColumn, @UpdateDateColumn, @DeleteDateColumn)
+  - ចេះបង្កើត Composite Indexes និង Unique Constraints លើ Entity
 module: module-4-orm
 order: 3
+quiz:
+  - question: "តើ Decorator មួយណាដែល TypeORM ប្រើសម្រាប់កត់ត្រាកាលបរិច្ឆេទបង្កើត Record ដោយស្វ័យប្រវត្តិ?"
+    options:
+      - "@AutoDate()"
+      - "@CreateDateColumn()"
+      - "@TimestampColumn()"
+      - "@RecordDate()"
+    correctAnswer: 2
+    explanation: "@CreateDateColumn() នឹងកំណត់តម្លៃ Current Timestamp ពេល Entity ត្រូវបាន INSERT ចូល Database ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🧍 អ្វីទៅជា Entity?
+## 🏛️ អ្វីទៅជា TypeORM Entity?
 
-**Entity** គឺជា Class របស់ JavaScript ដែលតំណាងអោយតារាង (Table) មួយនៅក្នុង Database។ យើងប្រើប្រាស់ Decorators (`@`) ដើម្បីប្រាប់ TypeORM ថាតើ Column មួយណាជាប្រភេទអ្វី។
+**Entity** គឺជា TypeScript Class ដែលត្រូវគ្នានឹង Table មួយនៅក្នុង Database។ តាមរយៈ **Decorators** យើងអាចកំណត់ Attributes នៃ Columns នីមួយៗបានយ៉ាងលម្អិត។
 
-```tabs
-javascript
-// entities/User.js
-import { EntitySchema } from "typeorm";
-
-  // ដោយសារយើងប្រើ Javascript មិនមែន TypeScript យើងត្រូវប្រើ EntitySchema
-  export const User = new EntitySchema({
-      name: "User",          // ឈ្មោះ Entity សម្រាប់ TypeORM ស្គាល់
-      tableName: "users",    // ឈ្មោះតារាងពិតប្រាកដក្នុង PostgreSQL
-      columns: {
-          id: {
-              primary: true,
-              type: "int",
-              generated: true // AUTO_INCREMENT / SERIAL
-          },
-          firstName: {
-              type: "varchar",
-              length: 100
-          },
-          email: {
-              type: "varchar",
-              length: 150,
-              unique: true
-          },
-          isActive: {
-              type: "boolean",
-              default: true
-          },
-          createdAt: {
-              type: "timestamp",
-              createDate: true // អោយ TypeORM បញ្ចូលម៉ោងដោយស្វ័យប្រវត្តិ
-          }
-      }
-  });
+```mermaid
+classDiagram
+    class User {
+        +UUID id
+        +string email
+        +string passwordHash
+        +UserRole role
+        +object metadata
+        +Date createdAt
+        +Date updatedAt
+    }
 ```
 
-> [!TIP]
-> ពេលអ្នកប្រើ `synchronize: true` នៅក្នុង `DataSource` រាល់ពេលអ្នកបន្ថែម Column ថ្មីចូលទៅក្នុង EntitySchema នេះ TypeORM នឹងរត់ទៅបង្កើត Column នោះក្នុង Database អោយអ្នកដោយស្វ័យប្រវត្តិ!
+---
+
+## 💻 ឧទាហរណ៍ជាក់ស្តែង៖ `User.entity.ts`
+
+```typescript
+// src/entities/User.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  Index,
+} from "typeorm";
+
+export enum UserRole {
+  ADMIN = "admin",
+  MANAGER = "manager",
+  CUSTOMER = "customer",
+}
+
+@Entity("users")
+@Index(["email"], { unique: true })
+export class User {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ type: "varchar", length: 100 })
+  fullName: string;
+
+  @Column({ type: "varchar", length: 255, unique: true })
+  email: string;
+
+  @Column({ type: "varchar", length: 255, select: false }) // select: false លាក់ password ពេល query
+  passwordHash: string;
+
+  @Column({
+    type: "enum",
+    enum: UserRole,
+    default: UserRole.CUSTOMER,
+  })
+  role: UserRole;
+
+  @Column({ type: "boolean", default: true })
+  isActive: boolean;
+
+  @Column({ type: "jsonb", nullable: true })
+  preferences: {
+    theme?: string;
+    notifications?: boolean;
+  };
+
+  @CreateDateColumn({ type: "timestamptz" })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: "timestamptz" })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ type: "timestamptz", select: false }) // សម្រាប់ Soft Delete
+  deletedAt?: Date;
+}
+```
+
+---
+
+## 🔍 Column Options សំខាន់ៗ
+
+| Option | ប្រភេទ | ការពិពណ៌នា |
+|---|---|---|
+| `type` | String | ប្រភេទ Data type ក្នុង Database (ឧ. `varchar`, `int`, `decimal`, `jsonb`) |
+| `length` | Number | ប្រវែងអតិបរមាសម្រាប់ varchar/char |
+| `unique` | Boolean | កំណត់ឱ្យទិន្នន័យមិនអាចស្ទួន (Unique constraint) |
+| `nullable` | Boolean | អនុញ្ញាតឱ្យមានតម្លៃ `NULL` (Default: `false`) |
+| `default` | Any | តម្លៃលំនាំដើមពេលបង្កើត Record ថ្មី |
+| `select` | Boolean | ប្រសិនបើកំណត់ `false` column នេះនឹងមិនបង្ហាញពេល SELECT ធម្មតា (ស័ក្តិសមសម្រាប់ Passwords) |

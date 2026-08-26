@@ -1,61 +1,118 @@
 ---
-title: ORM Relationships
-description: របៀបបង្កើតទំនាក់ទំនង (One-to-Many, Many-to-Many) ដោយប្រើប្រាស់ TypeORM Entities។
+title: TypeORM Relationships (1:1, 1:N, N:M)
+description: ការកំណត់ Relationships ក្នុង TypeORM (@OneToOne, @OneToMany, @ManyToOne, @ManyToMany) និង Join Columns / Tables។
+objectives:
+  - "យល់ពីរបៀបរៀបចំ OneToOne, OneToMany / ManyToOne, និង ManyToMany ក្នុង TypeORM"
+  - "ស្គាល់តួនាទីរបស់ @JoinColumn() (នៅលើ Owner Side) និង @JoinTable()"
+  - "ចេះប្រើ Cascades (cascade: true, onDelete: 'CASCADE')"
+  - "ចេះ Query Eager Loading vs Lazy Loading vs Explicit Relations"
 module: module-4-orm
 order: 4
+quiz:
+  - question: "នៅក្នុងទំនាក់ទំនង One-to-Many រវាង User និង Order តើ Entity ណាដែលត្រូវមាន Decorator `@ManyToOne` និង Foreign Key column?"
+    options:
+      - "User Entity"
+      - "Order Entity"
+      - "Database Configuration File"
+      - "Express Router"
+    correctAnswer: 2
+    explanation: "នៅក្នុង 1:N ទំនាក់ទំនង Order ជាច្រើនជាកម្មសិទ្ធិរបស់ User តែម្នាក់ ដូច្នេះ Order Entity គឺជាអ្នកផ្ទុក Foreign Key `userId` ហើយត្រូវប្រើ Decorator `@ManyToOne`។"
 ---
 
-## 🔗 ការភ្ជាប់ Entities ចូលគ្នា
+## 🔗 ការបង្កើត Relationships ក្នុង TypeORM
 
-នៅក្នុង TypeORM ការបង្កើត Foreign Key ត្រូវបានធ្វើឡើងតាមរយៈការកំណត់ "Relations" នៅក្នុង EntitySchema។
+```mermaid
+erDiagram
+    USER ||--o{ ORDER : "has many (@OneToMany)"
+    ORDER }|--|| USER : "belongs to (@ManyToOne)"
+    PRODUCT }o--o{ CATEGORY : "many-to-many (@ManyToMany via @JoinTable)"
+```
 
-ឧទាហរណ៍៖ ការបង្កើតទំនាក់ទំនង **One-to-Many** រវាង `User` និង `Post`។
-
-```tabs
-javascript
-// entities/Post.js
-import { EntitySchema } from "typeorm";
-
-  export const Post = new EntitySchema({
-      name: "Post",
-      tableName: "posts",
-      columns: {
-          id: {
-              primary: true,
-              type: "int",
-              generated: true
-          },
-          title: {
-              type: "varchar",
-              length: 200
-          },
-      },
-      relations: {
-          // Post មួយ ជារបស់ User តែម្នាក់ (Many-to-One ពីជ្រុង Post)
-          user: {
-              target: "User",       // តំណាងអោយ Entity User
-              type: "many-to-one",  
-              joinColumn: { name: "user_id" }, // ឈ្មោះ Foreign Key ក្នុងតារាង
-              onDelete: "CASCADE"   // បើលុប User លុប Post នេះចោលដែរ
-          }
-      }
-  });
 ---
-javascript
-// entities/User.js
-import { EntitySchema } from "typeorm";
 
-  export const User = new EntitySchema({
-      name: "User",
-      tableName: "users",
-      columns: { /* ... ដូចមេរៀនមុន ... */ },
-      relations: {
-          // User ម្នាក់ មាន Post ច្រើន (One-to-Many)
-          posts: {
-              target: "Post",
-              type: "one-to-many",
-              inverseSide: "user" // តភ្ជាប់ទៅកាន់ឈ្មោះ relation "user" ក្នុង Post Entity
-          }
-      }
-  });
+## 1. One-to-Many & Many-to-One (User ↔ Order)
+
+### `src/entities/Order.entity.ts` (Owner Side)
+```typescript
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
+import { User } from "./User.entity";
+
+@Entity("orders")
+export class Order {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ type: "decimal", precision: 10, scale: 2 })
+  totalAmount: number;
+
+  @Column({ type: "varchar", default: "pending" })
+  status: string;
+
+  // Many Orders belong to One User
+  @ManyToOne(() => User, (user) => user.orders, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "user_id" })
+  user: User;
+}
+```
+
+### `src/entities/User.entity.ts` (Inverse Side)
+```typescript
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Order } from "./Order.entity";
+
+@Entity("users")
+export class User {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column()
+  name: string;
+
+  // One User has Many Orders
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
+}
+```
+
+---
+
+## 2. Many-to-Many (Product ↔ Category)
+
+```typescript
+// src/entities/Product.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
+import { Category } from "./Category.entity";
+
+@Entity("products")
+export class Product {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column()
+  title: string;
+
+  @ManyToMany(() => Category, (category) => category.products)
+  @JoinTable({
+    name: "product_categories", // ឈ្មោះ Junction Table
+    joinColumn: { name: "product_id", referencedColumnName: "id" },
+    inverseJoinColumn: { name: "category_id", referencedColumnName: "id" },
+  })
+  categories: Category[];
+}
+```
+
+---
+
+## 🚀 ការទាញយកទិន្នន័យដែលមាន Relations
+
+```typescript
+const userRepository = AppDataSource.getRepository(User);
+
+// Explicit Relations Loading
+const userWithOrders = await userRepository.findOne({
+  where: { id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11" },
+  relations: {
+    orders: true,
+  },
+});
 ```

@@ -15,7 +15,7 @@ const COURSE_TITLES: Record<string, string> = {
   "typescript": "TypeScript",
   "react": "React Fundamentals",
   "nextjs": "Next.js & App Router",
-  "backend-architecture": "Backend Architecture",
+  "backend": "Backend Architecture & Engineering",
   "rdbms": "Relational Database (RDBMS)",
   "deployment": "Deployment & Final Project",
 };
@@ -30,7 +30,7 @@ const COURSE_DESCRIPTIONS: Record<string, string> = {
   "typescript": "រៀនពីការសរសេរ JavaScript ដែលមាន Static Typing ដើម្បីកាត់បន្ថយបញ្ហា និងងាយស្រួលថែទាំ។",
   "react": "បង្កើតកម្មវិធី web ដ៏ទំនើប (Single Page Applications) ដោយប្រើប្រាស់ React។",
   "nextjs": "រៀនពីការសាងសង់ Full-stack App ដែលមានល្បឿនលឿន និង SEO ល្អជាមួយ Next.js App Router។",
-  "backend-architecture": "រៀនពីការរៀបចំ Server-side, ការគ្រប់គ្រងទិន្នន័យ និង API ជាមួយ Node.js។",
+  "backend": "រៀនពីការរៀបចំ Server-side, RESTful API, PostgreSQL, TypeORM, Auth, Security, Docker និង Production Architecture ជាមួយ Node.js។",
   "rdbms": "ស្វែងយល់ពីការរចនាមូលដ្ឋានទិន្នន័យ (Database Design), SQL, និងទំនាក់ទំនងទិន្នន័យ។",
   "deployment": "រៀនពីការដាក់អោយដំណើរការ (Deploy) ទាំង Frontend និង Backend ព្រមទាំងការបង្ហាញគម្រោងចុងក្រោយ។",
 };
@@ -62,10 +62,14 @@ const MODULE_TITLES: Record<string, string> = {
   "module-6-routing": "Module 6 — Client-Side Routing",
   "module-7-global-state": "Module 7 — Global State & Context API",
   "module-8-performance-patterns": "Module 8 — Performance & Advanced Patterns",
-  "module-1-nodejs": "Module 1 — Node.js & Architecture",
-  "module-2-express-and-rest": "Module 2 — Express.js & RESTful APIs",
-  "module-3-database-integration": "Module 3 — Database Integration",
-  "module-4-security-and-advanced": "Module 4 — Security & Advanced Concepts",
+  "module-1-nodejs-fundamentals": "Module 1 — Node.js Fundamentals",
+  "module-2-expressjs": "Module 2 — Express.js & RESTful APIs",
+  "module-3-postgresql": "Module 3 — PostgreSQL & Database Design",
+  "module-4-orm": "Module 4 — TypeORM & Data Modeling",
+  "module-5-authentication": "Module 5 — Authentication & Authorization (JWT)",
+  "module-6-security": "Module 6 — Backend Security & Best Practices",
+  "module-7-testing": "Module 7 — Automated Testing (Unit & Integration)",
+  "module-8-capstone": "Module 8 — Full-Stack E-Commerce API Capstone",
   "module-1-rdbms-setup": "Module 1 — RDBMS Architecture & Tooling",
   "module-2-rdbms-schema": "Module 2 — Schema Design & Database Modeling",
   "module-3-rdbms-sql": "Module 3 — SQL Queries & CRUD Operations",
@@ -203,7 +207,7 @@ const COURSE_ORDER = [
   "react",
   "nextjs",
   "rdbms",
-  "backend-architecture",
+  "backend",
   "deployment"
 ];
 

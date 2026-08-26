@@ -1,45 +1,100 @@
 ---
-title: Protected Routes Integration
-description: ការអនុវត្តជាក់ស្តែងនៃការផ្គុំ Authentication និង Authorization Middleware បញ្ចូលគ្នាជាមួយ Route។
+title: Implementing Complete Protected Routes Pipeline
+description: ការរួមបញ្ចូល Authentication, JWT Verification, RBAC, និង TypeScript Request Declarations ទៅក្នុង Protected Pipeline ពេញលេញ។
+objectives:
+  - ចេះពង្រីក Express Request Type ក្នុង TypeScript (Declare global Express.Request)
+  - បង្កើត `authenticate` middleware ដើម្បីទាញយក Bearer Token និង Attach user context
+  - រៀបចំ Clean Router Pipeline ជាមួយ Chained Middlewares
+  - សាកល្បង Protected Routes តាមរយៈ Postman / Automated Tests
 module: module-5-authentication
 order: 6
+quiz:
+  - question: "តើក្នុង Express TypeScript របៀបណាដែលត្រឹមត្រូវបំផុតដើម្បីឱ្យ VS Code ស្គាល់ `req.user` ដោយគ្មាន Type Errors?"
+    options:
+      - "ប្រើ `(req as any).user` នៅគ្រប់កន្លែង"
+      - "ពង្រីក Interface `Express.Request` តាមរយៈ TypeScript Declaration Merging (`declare global { namespace Express { interface Request { user?: UserPayload } } }`)"
+      - "លុប TypeScript ចោលហើយប្រើ JavaScript ធម្មតា"
+      - "បង្កើត req ថ្មីរាល់ពេល"
+    correctAnswer: 2
+    explanation: "TypeScript Declaration Merging អនុញ្ញាតឱ្យយើង Extend Interface `Express.Request` ជាសកល ធ្វើឱ្យ `req.user` មាន Type Safety ពេញលេញទូទាំង Codebase។"
 ---
 
-## 🚦 ការការពារ API Routes
+## 🛠️ TypeScript Declaration Merging សម្រាប់ Express
 
-ឥឡូវនេះ យើងមាន `requireAuth` និង `requireRole` រួចរាល់ហើយ។ តោះយើងយកវាទៅប្រើប្រាស់ក្នុង Router ជាក់ស្តែង។
+បង្កើតឯកសារ Type Definition ដើម្បីបន្ថែម `req.user`៖
 
-```tabs
-javascript
-// routes/adminRoutes.js
-import express from 'express';
-import { requireAuth, requireRole } from '../middlewares/authMiddleware.js';
+```typescript
+// src/types/express.d.ts
+import { UserTokenPayload } from "../utils/jwt";
 
-const router = express.Router();
+declare global {
+  namespace Express {
+    interface Request {
+      user?: UserTokenPayload;
+    }
+  }
+}
+```
 
-// Route ធម្មតា: នរណាក៏អាចចូលមើលបាន
-router.get('/public', (req, res) => {
-    res.json({ message: "ទិន្នន័យសាធារណៈ" });
-});
+---
 
-// Route ការពារទី១: ត្រូវតែមានគណនី (Login រួច) ទើបចូលមើលបាន
-router.get('/profile', requireAuth, (req, res) => {
-    res.json({ 
-        message: "ព័ត៌មានផ្ទាល់ខ្លួនរបស់អ្នក",
-        userId: req.user.id 
+## 🛡️ Authentication Middleware ពេញលេញ
+
+```typescript
+// src/middlewares/authenticate.ts
+import { Request, Response, NextFunction } from "express";
+import { verifyToken } from "../utils/jwt";
+
+export const authenticate = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Token ត្រូវបានទាមទារ (Bearer <token>)",
     });
-});
+  }
 
-// Route ការពារទី២: ត្រូវតែជា Admin ទើបអាចលុបទិន្នន័យបាន!
-// យើងអាចដាក់ Middleware ចូលគ្នាបានច្រើនតាមចិត្ត
-router.delete('/users/:id', requireAuth, requireRole('Admin'), (req, res) => {
-    res.json({ message: `បានលុប User ${req.params.id} ដោយជោគជ័យ` });
-});
+  const token = authHeader.split(" ")[1];
 
-// Route ការពារទី៣: Manager ក៏បាន Admin ក៏បាន
-router.get('/reports', requireAuth, requireRole('Admin', 'Manager'), (req, res) => {
-    res.json({ message: "ទិន្នន័យរបាយការណ៍ហិរញ្ញវត្ថុ" });
-});
+  try {
+    const payload = verifyToken(token);
+    req.user = payload; // Attach user payload ទៅកាន់ Request object
+    next();
+  } catch (error: any) {
+    return res.status(401).json({
+      success: false,
+      message: error.message || "Invalid or expired token",
+    });
+  }
+};
+```
+
+---
+
+## 🚀 Router Pipeline Integration ជាក់ស្តែង
+
+```typescript
+// src/routes/admin.routes.ts
+import { Router } from "express";
+import { authenticate } from "../middlewares/authenticate";
+import { authorizeRoles } from "../middlewares/authorize";
+import { getAdminDashboardStats, deleteUserAccount } from "../controllers/admin.controller";
+
+const router = Router();
+
+// គ្រប់ Routes ទាំងអស់ខាងក្រោមនេះទាមទារ Login ជាមុនសិន
+router.use(authenticate);
+
+// គ្រប់ Routes ទាំងអស់ខាងក្រោមនេះទាមទារ Role ជា 'admin'
+router.use(authorizeRoles("admin"));
+
+router.get("/dashboard-stats", getAdminDashboardStats);
+router.delete("/users/:id", deleteUserAccount);
 
 export default router;
 ```

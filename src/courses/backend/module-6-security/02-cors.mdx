@@ -1,56 +1,88 @@
 ---
-title: Cross-Origin Resource Sharing (CORS)
-description: របៀបត្រួតពិនិត្យថា តើគេហទំព័រ (Domain) មួយណាខ្លះដែលអាចហៅមកកាន់ API របស់អ្នកបាន។
+title: Cross-Origin Resource Sharing (CORS) Demystified
+description: យល់ច្បាស់ពី Same-Origin Policy (SOP), Preflight OPTIONS requests, និងការ Configure CORS Middleware ត្រឹមត្រូវសម្រាប់ Production។
+objectives:
+  - យល់ពី Same-Origin Policy (SOP) របស់ Browser (Protocol + Domain + Port)
+  - ស្គាល់យន្តការ Preflight Request (HTTP OPTIONS) សម្រាប់ Complex Requests
+  - ចេះ Configure `cors` package សម្រាប់ Multiple Allowed Origins និង Credentials
+  - ដោះស្រាយបញ្ហាទូទៅ 'Blocked by CORS policy' ដោយសុវត្ថិភាព
 module: module-6-security
 order: 2
+quiz:
+  - question: "ហេតុអ្វីបានជាការកំណត់ `cors({ origin: '*' })` ជាមួយ `credentials: true` ត្រូវបានបដិសេធដោយ Browser Security Standard?"
+    options:
+      - "ព្រោះ '*' មិនមែនជា URL ត្រឹមត្រូវ"
+      - "ព្រោះស្តង់ដារសុវត្ថិភាព Browser ហាមឃាត់ការបញ្ជូន Cookies/Credentials ទៅកាន់ Wildcard Origin ('*') ដើម្បីការពារការលួចទិន្នន័យ (CSRF/Data Exfiltration)"
+      - "ព្រោះ Express មិនគាំទ្រ CORS"
+      - "ព្រោះ Node.js ត្រូវការ SSL"
+    correctAnswer: 2
+    explanation: "នៅពេលដែល Server អនុញ្ញាត `credentials: true` (Cookies, Authorization headers) នោះ `origin` ត្រូវតែបញ្ជាក់ Domain ជាក់លាក់ (Specific origin) មិនអាចប្រើ Wildcard `*` បានឡើយ។"
 ---
 
-## 🚧 អ្វីទៅជា CORS?
+## 🌐 អ្វីទៅជា CORS & Same-Origin Policy?
 
-**CORS (Cross-Origin Resource Sharing)** គឺជាយន្តការសុវត្ថិភាពដែលបង្កើតឡើងដោយ Browser មិនមែនដោយ Server ទេ។
-តាមលំនាំដើម Browser នឹងរារាំងមិនអោយគេហទំព័រមួយ (ឧ. `frontend.com`) ទាញទិន្នន័យពី API មួយផ្សេងទៀត (ឧ. `backend.com`) ទេ លុះត្រាតែ API នោះមានការអនុញ្ញាត (បញ្ជូន CORS Header ត្រលប់មកវិញ)។
+**SOP (Same-Origin Policy)** គឺជាយន្តការសុវត្ថិភាពស្នូលរបស់ Web Browser ដែលហាមឃាត់ Script នៅលើ Domain មួយ (ឧ. `http://localhost:3000` - React) មិនឱ្យស្នើសុំទិន្នន័យពី Domain មួយផ្សេងទៀត (ឧ. `http://localhost:5000` - Express)។
+
+**CORS (Cross-Origin Resource Sharing)** គឺជាវិធីដែល Backend Server ប្រាប់ Browser ថា Domain ណាខ្លះដែលត្រូវបានអនុញ្ញាត!
 
 ```mermaid
 sequenceDiagram
-    participant B as Browser (Frontend - port 5173)
-    participant S as Server (Backend - port 3000)
-    
-    B->>S: OPTIONS /api/data (Preflight Request - តើខ្ញុំសុំទាញទិន្នន័យបានទេ?)
-    alt មិនអនុញ្ញាត
-        S-->>B: 403 Forbidden
-        Note over B: Browser មិនអោយកូដ React រត់ទៅមុខទៀតទេ (CORS Error)
-    else អនុញ្ញាត (CORS Setup ត្រូវ)
-        S-->>B: 204 No Content (Access-Control-Allow-Origin: *)
-        B->>S: GET /api/data (ទាញទិន្នន័យមែនទែន)
-        S-->>B: 200 OK + JSON
-    end
+    autonumber
+    participant React as Frontend (localhost:3000)
+    participant Browser as Browser Security Engine
+    participant API as Express API (api.domain.com)
+
+    React->>Browser: 1. Fetch POST /orders (with JSON & Auth Header)
+    Note over Browser: Detects Complex Cross-Origin Request
+    Browser->>API: 2. Preflight Request (OPTIONS /orders)
+    API-->>Browser: 3. Headers: Access-Control-Allow-Origin: http://localhost:3000<br/>Access-Control-Allow-Methods: POST, GET, OPTIONS
+    Note over Browser: Preflight Approved!
+    Browser->>API: 4. Actual Request (POST /orders + Token)
+    API-->>Browser: 5. 201 Created + JSON Data
+    Browser-->>React: 6. Handover Data to JS Code
 ```
 
-### របៀបកំណត់ CORS នៅក្នុង Express
+---
+
+## 💻 ការ Configure CORS សម្រាប់ Production
 
 ```bash
 npm install cors
+npm install -D @types/cors
 ```
 
-```tabs
-javascript
-// app.js
-import express from 'express';
-import cors from 'cors';
+```typescript
+// src/config/cors.ts
+import cors, { CorsOptions } from "cors";
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://my-ecommerce-app.com",
+  "https://admin.my-ecommerce-app.com",
+];
+
+export const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    // អនុញ្ញាត Mobile Apps, Postman, ឬ Servers ដែលគ្មាន Origin Header
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS Blocked: Origin ${origin} មិនត្រូវបានអនុញ្ញាតឡើយ`));
+    }
+  },
+  credentials: true, // អនុញ្ញាតការផ្ញើ Cookies & Auth Headers
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  maxAge: 86400, // Cache Preflight Response រយៈពេល 24 ម៉ោង (កាត់បន្ថយ OPTIONS calls)
+};
+```
+
+### ការប្រើប្រាស់ក្នុង `app.ts`:
+```typescript
+import express from "express";
+import cors from "cors";
+import { corsOptions } from "./config/cors";
 
 const app = express();
-
-// 1. បើកអោយអ្នកគ្រប់គ្នាចូលបាន (កុំប្រើបែបនេះសម្រាប់ Production API របស់អ្នក!)
-// app.use(cors()); 
-
-// 2. ការកំណត់ដែលត្រឹមត្រូវ និងមានសុវត្ថិភាព (Best Practice)
-const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://www.mydomain.com', 'https://admin.mydomain.com'] // អនុញ្ញាតតែ Domain ផ្លូវការប៉ុណ្ណោះ
-        : 'http://localhost:5173', // សម្រាប់ពេល Development (React/Vite)
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // អនុញ្ញាតតែ Methods ប៉ុណ្ណេះ
-    credentials: true // អនុញ្ញាតអោយបញ្ជូន Cookies ឆ្លង Domain (សំខាន់បើប្រើ Refresh Token!)
-};
-
 app.use(cors(corsOptions));
 ```

@@ -1,29 +1,86 @@
 ---
-title: Database Migrations Concepts
-description: ហេតុអ្វីបានជាយើងត្រូវការប្រព័ន្ធគ្រប់គ្រងការផ្លាស់ប្តូរតារាង (Migrations)។
+title: Database Migrations & Version Control
+description: ស្វែងយល់ពីរបៀបគ្រប់គ្រង Schema Changes តាមរយៈ Migration Scripts ដោយសុវត្ថិភាពក្នុង Production Environment។
+objectives:
+  - យល់ពីតួនាទីរបស់ Database Migrations ក្នុងការងារជាក្រុម និង CI/CD
+  - ស្គាល់រចនាសម្ព័ន្ធ Migration Script (UP Script vs DOWN Script)
+  - ចេះប្រើប្រាស់ Migration Tools ដូចជា `node-pg-migrate` ឬ `db-migrate`
+  - យល់ពី Best Practices ក្នុងការ Alter Tables នៅ Production ដោយមិនបាត់បង់ទិន្នន័យ
 module: module-3-postgresql
 order: 6
+quiz:
+  - question: "តើតួនាទីរបស់ 'DOWN' function នៅក្នុង Database Migration Script គឺជាអ្វី?"
+    options:
+      - "សម្រាប់បិទម៉ាស៊ីន Database Server"
+      - "សម្រាប់ Rollback / បញ្ច្រាសការផ្លាស់ប្តូរដែលបានធ្វើឡើងដោយ UP function ត្រឡប់ទៅ Version មុនវិញ"
+      - "សម្រាប់ទាញយកទិន្នន័យ (Download) ពី Server"
+      - "សម្រាប់ Delete Database ចោលទាំងមូល"
+    correctAnswer: 2
+    explanation: "UP function អនុវត្ត Schema ថ្មី (ឧ. CREATE TABLE, ADD COLUMN) រីឯ DOWN function ធ្វើសកម្មភាពផ្ទុយគ្នា (DROP TABLE, DROP COLUMN) ដើម្បីអនុញ្ញាតឱ្យ Rollback បានពេលមានបញ្ហា។"
 ---
 
-## 🏗️ បញ្ហានៃការផ្លាស់ប្តូររចនាសម្ព័ន្ធទិន្នន័យ
+## 🗂️ ហេតុអ្វីត្រូវប្រើ Database Migrations?
 
-ស្រមៃថាអ្នកធ្វើការក្នុងក្រុមមួយមានគ្នាច្រើននាក់៖
-- អ្នកបានសរសេរកូដ `ALTER TABLE users ADD COLUMN phone_number VARCHAR(15);` នៅក្នុង Database របស់អ្នក។
-- បន្ទាប់មកអ្នក Push កូដ Node.js ថ្មីទៅកាន់ GitHub។
-- មិត្តរួមក្រុមរបស់អ្នកទាញកូដមក Run ស្រាប់តែ Error ព្រោះ Database របស់គាត់អត់ទាន់មាន Column `phone_number` នោះទេ។
+ប្រសិនបើអ្នកធ្វើការជាមួយក្រុម Developer ច្រើននាក់ ហើយម្នាក់ៗបន្ថែម Column ដោយផ្ទាល់ដៃក្នុង Table នោះ Database ក្នុងម៉ាស៊ីននីមួយៗនឹងខុសគ្នា (Schema Drift)។
 
-### អ្វីទៅជា Migration?
-
-**Migration** ប្រៀបដូចជាប្រព័ន្ធគ្រប់គ្រង Version (Version Control ដូច Git ដែរ) ប៉ុន្តែសម្រាប់ Database។ 
-វាអនុញ្ញាតអោយអ្នកសរសេរកូដផ្លាស់ប្តូរតារាង រួចចែកចាយកូដនោះទៅអ្នកផ្សេង។ ពេលពួកគេ Run Command ម្តង Database របស់ពួកគេនឹងផ្លាស់ប្តូរទៅជាទម្រង់ថ្មីដូចអ្នកដែរ។
+**Database Migrations** ដើរតួជា **Git សម្រាប់ Database Schema**៖
+- កត់ត្រារាល់ការកែប្រែ Table ក្នុង File មាន Timestamp (ឧ. `1700000000000_create_users_table.sql`)
+- អាច Replicate Schema ដូចគ្នា ១០០% លើម៉ាស៊ីន Dev, Staging, និង Production
+- អាច Upgrade (`UP`) និង Downgrade (`DOWN/ROLLBACK`) បានគ្រប់ពេលវេលា
 
 ```mermaid
-timeline
-    title ដំណើរការនៃ Migrations
-    V1 : 001_create_users : បង្កើតតារាងដំបូង
-    V2 : 002_add_phone : បន្ថែមលេខទូរស័ព្ទ
-    V3 : 003_create_products : បង្កើតតារាងទំនិញ
+graph LR
+    M1["001_create_users.sql (UP)"] --> M2["002_create_orders.sql (UP)"]
+    M2 --> M3["003_add_discount_to_orders.sql (UP)"]
+    M3 --> DB["PostgreSQL Database<br/>(schema_migrations table tracks applied scripts)"]
 ```
 
-> [!NOTE]
-> ជំនួសអោយការសរសេរ Migration ដោយផ្ទាល់តាមរយៈ Raw SQL នៅក្នុង Module បន្ទាប់ យើងនឹងរៀនប្រើប្រាស់ **ORM (TypeORM ឫ Prisma)** ដែលមានភ្ជាប់មកជាមួយនូវប្រព័ន្ធ Migration យ៉ាងស្រួលប្រើ។ យើងនឹងទុកការអនុវត្តជាក់ស្តែងនៅ Module ក្រោយ!
+---
+
+## 🛠️ ការប្រើប្រាស់ `node-pg-migrate`
+
+### 1. ដំឡើង Tool
+```bash
+npm install -D node-pg-migrate
+```
+
+### 2. បង្កើត Migration Script ដំបូង
+```bash
+npx node-pg-migrate create create-users-table
+```
+វានឹងបង្កើតឯកសារមួយក្នុងថត `migrations/`៖
+
+```javascript
+// migrations/1710000000000_create-users-table.js
+export const up = (pgm) => {
+  pgm.createTable('users', {
+    id: { type: 'uuid', primaryKey: true, default: pgm.func('gen_random_uuid()') },
+    email: { type: 'varchar(255)', notNull: true, unique: true },
+    password_hash: { type: 'text', notNull: true },
+    role: { type: 'varchar(20)', notNull: true, default: 'customer' },
+    created_at: {
+      type: 'timestamptz',
+      notNull: true,
+      default: pgm.func('current_timestamp'),
+    },
+  });
+
+  pgm.createIndex('users', 'email');
+};
+
+export const down = (pgm) => {
+  pgm.dropTable('users');
+};
+```
+
+### 3. ដំណើរការ Migration
+```bash
+# ដំណើរការ UP (អនុវត្ត Schema ថ្មី)
+npx node-pg-migrate up
+
+# ដំណើរការ DOWN (ត្រឡប់ថយក្រោយ ១ ជំហាន)
+npx node-pg-migrate down
+```
+
+> [!TIP]
+> នៅក្នុង Production CI/CD Pipeline យើងតែងតែរត់ពាក្យបញ្ជា `npm run migrate:up` មុនពេល `npm start` ដើម្បីធានាថា Database មាន Tables ចាំបាច់រួចជាស្រេចសម្រាប់ Version កូដថ្មី។

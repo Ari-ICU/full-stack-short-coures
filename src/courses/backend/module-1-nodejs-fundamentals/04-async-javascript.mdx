@@ -1,68 +1,109 @@
 ---
 title: Asynchronous JavaScript (Promises & Async/Await)
 description: របៀបដោះស្រាយជាមួយប្រតិបត្តិការដែលត្រូវការចំណាយពេលយូរដូចជា ការអានឯកសារ ឬការទាញទិន្នន័យពី Database។
+objectives:
+  - យល់ដឹងពីសារៈសំខាន់នៃ Asynchronous Programming ក្នុង Backend Services
+  - ស្គាល់វិវត្តន៍ពី Callbacks ទៅ Promises និង Modern Async/Await
+  - ចេះប្រើប្រាស់ Promise.all, Promise.allSettled សម្រាប់ Parallel I/O
+  - ចេះដោះស្រាយ Error ជាមួយ try...catch និង Custom Error Classes
 module: module-1-nodejs-fundamentals
 order: 4
+quiz:
+  - question: "តើអ្វីទៅជាគុណសម្បត្តិធំបំផុតនៃការប្រើប្រាស់ Promise.all()?"
+    options:
+      - "វាបំប្លែងកូដ Asynchronous ឱ្យទៅជា Synchronous ធម្មតា"
+      - "វាដំណើរការ Promises ច្រើនក្នុងពេលដំណាលគ្នា (Concurrent / Parallel) និងផ្តល់លទ្ធផលមកវិញលឿនជាងរង់ចាំម្តងមួយៗ"
+      - "វាបញ្ឈប់ Server ពេលមាន Error ណាមួយកើតឡើង"
+      - "វាសរសេរបានតែជាមួយ MySQL ប៉ុណ្ណោះ"
+    correctAnswer: 2
+    explanation: "Promise.all() ដំណើរការ Async tasks ទាំងអស់ក្នុងពេលតែមួយ (Parallel) និងរង់ចាំរហូតដល់ tasks ទាំងអស់ resolve ជោគជ័យ ដែលកាត់បន្ថយ latency នៃ API យ៉ាងច្រើន។"
 ---
 
-## ⏳ Asynchronous Programming
+## ⏳ ហេតុអ្វី Backend ត្រូវការ Asynchronous?
 
-នៅក្នុង Node.js យើងតែងតែធ្វើការជាមួយអ្វីដែលតម្រូវឱ្យ "រង់ចាំ" (ឧទាហរណ៍៖ ទាញទិន្នន័យពី Database, អាន File, Call ទៅ API ផ្សេង)។ 
-ដោយសារ Node.js គឺជា Single-Thread (មានអ្នកធ្វើការតែម្នាក់) បើយើងអោយវាឈប់ចាំទាល់តែទាញទិន្នន័យពី Database ហើយទើបធ្វើការផ្សេងទៀត នោះកម្មវិធីទាំងមូលនឹងគាំង។
+នៅក្នុង Node.js, ស្ទើរតែរាល់ប្រតិបត្តិការ Backend ទាំងអស់សុទ្ធតែទាមទារ **I/O (Input/Output)**៖
+- ការ Query ទិន្នន័យពី PostgreSQL / MongoDB
+- ការអាន/សរសេរ Files លើ Disk
+- ការហៅ API ទៅកាន់ 3rd-party Services (Stripe, Twilio, SendGrid)
 
-ដំណោះស្រាយគឺ **Asynchronous** (ធ្វើការដោយមិនរង់ចាំគ្នា)។
-
-### ការវិវត្តន៍នៃការសរសេរកូដ Async
+ប្រសិនបើយើងសរសេរកូដបែប **Synchronous (Blocking)** នោះម៉ាស៊ីន Server នឹងត្រូវគាំងរង់ចាំការងារមួយៗចប់ ទើបអាចទទួល Request របស់អ្នកប្រើប្រាស់ផ្សេងទៀតបាន។
 
 ```mermaid
-timeline
-    title ការវិវត្តន៍នៃការសរសេរ Async កូដ
-    2010 : Callbacks : ពិបាកអាន ងាយនឹងមាន Callback Hell
-    2015 : Promises (.then) : ស្រួលអានជាងមុន ប៉ុន្តែនៅតែបន្តគ្នាវែង
-    2017 : Async / Await : ស្តង់ដារបច្ចុប្បន្ន មើលទៅដូចកូដធម្មតា ងាយស្រួលអានបំផុត
+sequenceDiagram
+    autonumber
+    participant Client as Client Request
+    participant Server as Node.js Thread
+    participant DB as Database Engine
+
+    Client->>Server: 1. Fetch User Data
+    Note over Server: Non-blocking Dispatch
+    Server->>DB: 2. Async SQL Query (libuv pool)
+    Note over Server: Thread ទំនេរអាចទទួល Request ផ្សេងទៀត
+    DB-->>Server: 3. Query Finished Callback
+    Server-->>Client: 4. JSON Response (200 OK)
 ```
 
-### 1. បញ្ហារបស់ Callbacks (Callback Hell)
+---
 
+## 🚀 ដំណាក់កាលវិវត្តន៍នៃ Async Code
+
+### 1. Callback Hell (❌ បុរាណ និងពិបាកគ្រប់គ្រង)
 ```javascript
-// ❌ មិនណែនាំ (ពិបាកអាន និងពិបាកចាប់ Error)
-getUser(1, (user) => {
-    getPosts(user.id, (posts) => {
-        getComments(posts[0].id, (comments) => {
-            console.log(comments);
-        });
+getUser(userId, (err, user) => {
+  if (err) return handleError(err);
+  getOrders(user.id, (err, orders) => {
+    if (err) return handleError(err);
+    getOrderDetails(orders[0].id, (err, details) => {
+      if (err) return handleError(err);
+      console.log(details);
     });
+  });
 });
 ```
 
-### 2. ការដោះស្រាយដោយប្រើ Promises
-
-Promise គឺជាការសន្យាថានឹងផ្តល់លទ្ធផលមកវិញនៅពេលអនាគត (អាចជាជោគជ័យ `resolve` ឫបរាជ័យ `reject`)។
-
+### 2. Promises Chaining (⚠️ ប្រសើរជាងមុន ប៉ុន្តែនៅតែបន្តបន្ទាត់វែង)
 ```javascript
-// ⚠️ អាចទទួលយកបាន
-getUser(1)
-    .then(user => getPosts(user.id))
-    .then(posts => getComments(posts[0].id))
-    .then(comments => console.log(comments))
-    .catch(error => console.error(error));
+getUser(userId)
+  .then((user) => getOrders(user.id))
+  .then((orders) => getOrderDetails(orders[0].id))
+  .then((details) => console.log(details))
+  .catch((err) => console.error("Error:", err.message));
 ```
 
-### 3. ស្តង់ដារបច្ចុប្បន្ន: Async / Await
-
+### 3. Async / Await (✅ ស្តង់ដារទំនើប ស្អាត និងងាយស្រួលអានបំផុត)
 ```javascript
-// ✅ ណែនាំអោយប្រើរាល់ថ្ងៃ
-const fetchUserData = async () => {
-    try {
-        const user = await getUser(1);           // រង់ចាំរហូតដល់បាន User
-        const posts = await getPosts(user.id);   // រង់ចាំរហូតដល់បាន Posts
-        const comments = await getComments(posts[0].id);
-        console.log(comments);
-    } catch (error) {
-        console.error("មានបញ្ហា:", error);
-    }
-};
+async function getCustomerSummary(userId) {
+  try {
+    const user = await getUser(userId);
+    const orders = await getOrders(user.id);
+    const details = await getOrderDetails(orders[0].id);
+    return { user, orders, details };
+  } catch (error) {
+    console.error("Failed to load customer summary:", error.message);
+    throw error;
+  }
+}
 ```
 
-> [!TIP]  
-> ត្រូវចាំជានិច្ច៖ រាល់ពេលអ្នកប្រើប្រាស់ `await` វាត្រូវតែស្ថិតនៅក្នុង Function ដែលមានពាក្យ `async` ពីមុខជានិច្ច។ ហើយត្រូវប្រើ `try/catch` ដើម្បីការពារកុំអោយកម្មវិធីគាំងពេលមាន Error។
+---
+
+## ⚡ ការដំណើរការ Asynchronous ច្រើនក្នុងពេលតែមួយ (Parallel Execution)
+
+កំហុសទូទៅរបស់អ្នកចាប់ផ្តើមដំបូង គឺការដាក់ `await` បន្តគ្នា ដែលធ្វើឱ្យកូដរង់ចាំម្តងមួយៗ (Sequential) ដោយមិនចាំបាច់៖
+
+```javascript
+// ❌ យឺត៖ សរុបចំណាយពេល = 100ms + 100ms + 100ms = 300ms
+const users = await fetchUsers();
+const products = await fetchProducts();
+const categories = await fetchCategories();
+
+// ✅ លឿនបំផុត៖ រត់ដំណាលគ្នា សរុបចំណាយពេល = Max(100ms, 100ms, 100ms) = 100ms
+const [users, products, categories] = await Promise.all([
+  fetchUsers(),
+  fetchProducts(),
+  fetchCategories()
+]);
+```
+
+> [!TIP]
+> ប្រើ **`Promise.allSettled()`** ប្រសិនបើអ្នកចង់ឱ្យ tasks ទាំងអស់ដំណើរការចប់ ទោះបីជាមាន task ខ្លះ fail ក៏មិនបណ្តាលឱ្យ tasks ផ្សេងទៀត reject ដែរ។

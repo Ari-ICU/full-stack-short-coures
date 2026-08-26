@@ -1,41 +1,100 @@
 ---
-title: Introduction to PostgreSQL
-description: ស្វែងយល់ពីលក្ខណៈពិសេសរបស់ PostgreSQL និងរបៀបតភ្ជាប់វា។
+title: PostgreSQL Setup & GUI Tools (Docker, psql, pgAdmin)
+description: ការដំឡើង PostgreSQL តាមរយៈ Docker Container, ការប្រើប្រាស់ psql CLI, និង GUI Client ដូចជា TablePlus ឬ DBeaver។
+objectives:
+  - យល់ពីមូលហេតុដែល PostgreSQL ត្រូវបានជ្រើសរើសសម្រាប់ Production Backend
+  - ចេះដំណើរការ PostgreSQL Instance តាមរយៈ Docker Compose
+  - ស្គាល់ពាក្យបញ្ជា psql CLI សំខាន់ៗ (\l, \dt, \c, \d)
+  - ចេះភ្ជាប់ Database តាម GUI Tools (TablePlus, DBeaver, pgAdmin)
 module: module-3-postgresql
 order: 2
+quiz:
+  - question: "តើអ្វីជាវិធីសាស្ត្រងាយស្រួល និងស្អាតបំផុតក្នុងការដំណើរការ PostgreSQL សម្រាប់ Local Development ដោយមិនប៉ះពាល់ដល់ Host OS?"
+    options:
+      - "ដំឡើង File .exe ដោយផ្ទាល់លើ Windows"
+      - "ដំណើរការ PostgreSQL តាមរយៈ Docker Container ដោយប្រើ `docker-compose.yml`"
+      - "សរសេរកូដ Database ដោយប្រើ JavaScript Array ជំនួស"
+      - "ផ្ញើទិន្នន័យតាម Email"
+    correctAnswer: 2
+    explanation: "ការប្រើ Docker / Docker Compose ធ្វើឱ្យការបង្កើត, បញ្ឈប់, និងលុប Database Instance ដំណើរការក្នុង Isolated Environment ដែលងាយស្រួល share ជាមួយសមាជិកក្រុមទាំងអស់។"
 ---
 
-## 🐘 ហេតុអ្វីបានជាត្រូវប្រើ PostgreSQL?
+## 🐘 ហេតុអ្វីបានជាត្រូវជ្រើសរើស PostgreSQL?
 
-**PostgreSQL (ហៅកាត់ថា Postgres)** គឺជាប្រព័ន្ធគ្រប់គ្រងមូលដ្ឋានទិន្នន័យ Open-Source ដ៏ខ្លាំងក្លា និងទំនើបបំផុតមួយនៅលើពិភពលោក។ 
+**PostgreSQL** (ត្រូវបានគេស្គាល់ថា Postgres) គឺជាប្រព័ន្ធទិន្នន័យ Open-Source RDBMS កម្រិត Advanced បំផុតលើលោក។
 
-វាត្រូវបានគេពេញនិយមខ្លាំងសម្រាប់ការអភិវឌ្ឍប្រព័ន្ធខ្នាតធំដោយសារ៖
-1. **ទំនុកចិត្ត (Reliability):** អនុលោមតាមស្តង់ដារ ACID (ធានាមិនឱ្យបាត់បង់ទិន្នន័យពេលមានបញ្ហា)។
-2. **ទិន្នន័យចម្រុះ (Advanced Data Types):** គាំទ្រទិន្នន័យបែប JSONB (NoSQL-like features) ក្រៅពីទម្រង់តារាងធម្មតា។
-3. **ឥតគិតថ្លៃ (Open Source):** ប្រើដោយមិនគិតប្រាក់ ទោះជាសម្រាប់គម្រោងធំកម្រិតណាក៏ដោយ។
+- **ACID Compliance សុក្រឹត ១០០%:** ធានាសុវត្ថិភាពទិន្នន័យខ្ពស់បំផុត
+- **Advanced Data Types:** គាំទ្រ UUID, Arrays, Geometric Data, និង **JSONB** (រហ័សស្មើ Document DB)
+- **Extensibility:** គាំទ្រ Extensions ល្បីៗដូចជា `PostGIS` (Geospatial) និង `pgvector` (AI/Embeddings)
+- **Active Community & Cloud Support:** មាននៅលើ AWS RDS, Supabase, Neon, GCP Cloud SQL
 
-### រចនាសម្ព័ន្ធតភ្ជាប់ (Connection String)
+---
 
-ដើម្បីភ្ជាប់កូដ Node.js ទៅកាន់ PostgreSQL យើងត្រូវស្គាល់ទម្រង់ **Connection URL**:
+## 🐳 ការដំណើរការ PostgreSQL ជាមួយ Docker Compose
 
-```text
-postgresql://[user]:[password]@[host]:[port]/[database_name]
+វិធីដ៏ល្អបំផុតក្នុងការ Setup Postgres ក្នុងម៉ាស៊ីនអភិវឌ្ឍន៍ គឺការបង្កើតឯកសារ `docker-compose.yml`៖
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres_ecommerce
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: supersecretpassword
+      POSTGRES_DB: ecommerce_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
 ```
 
-ឧទាហរណ៍៖
-```text
-postgresql://postgres:secret123@localhost:5432/ecommerce_db
+### ពាក្យបញ្ជាបញ្ជា Docker៖
+```bash
+# ចាប់ផ្តើម Postgres ក្នុង Background
+docker compose up -d
+
+# ពិនិត្យមើលដំណើរការ
+docker compose ps
+
+# បញ្ឈប់ Container
+docker compose down
 ```
 
-### ឧបករណ៍សម្រាប់ភ្ជាប់ទៅ Database (Database Clients)
+---
 
-អ្នកមិនចាំបាច់មើលទិន្នន័យតាមរយៈផ្ទាំងខ្មៅ (Terminal) ទេ យើងអាចប្រើកម្មវិធីដើម្បីមើលទិន្នន័យជាទម្រង់តារាងបានយ៉ាងងាយស្រួល៖
-- **DBeaver** (ឥតគិតថ្លៃ និងពេញនិយមបំផុត)
-- **pgAdmin** (ផ្លូវការពី PostgreSQL)
-- **TablePlus** (កម្មវិធីស្រាលនិងលឿន)
+## 💻 ពាក្យបញ្ជា psql CLI សំខាន់ៗ
 
-```mermaid
-graph LR
-    NODE["Node.js App"] -->|"Connection String"| PG[("PostgreSQL Server <br/> Port 5432")]
-    DBEAVER["DBeaver / pgAdmin"] -->|"Connection String"| PG
+ដើម្បីចូលទៅកាន់ Interactive Terminal របស់ Postgres៖
+
+```bash
+docker exec -it postgres_ecommerce psql -U postgres -d ecommerce_dev
 ```
+
+| ពាក្យបញ្ជា psql | មុខងារ |
+|---|---|
+| `\l` | បង្ហាញបញ្ជី Databases ទាំងអស់ |
+| `\c database_name` | ភ្ជាប់ទៅកាន់ Database ណាមួយ |
+| `\dt` | បង្ហាញបញ្ជី Tables ទាំងអស់ក្នុង Schema បច្ចុប្បន្ន |
+| `\d table_name` | បង្ហាញព័ត៌មានលម្អិតនៃ Columns, Data Types, Constraints ក្នុង Table |
+| `\q` | ចាកចេញពី psql |
+
+---
+
+## 🖥️ ការភ្ជាប់តាមរយៈ GUI Tools (TablePlus / DBeaver)
+
+1. ទាញយក **TablePlus** ឬ **DBeaver** (ឥតគិតថ្លៃ)
+2. បង្កើត New Connection -> ជ្រើសរើស **PostgreSQL**
+3. បំពេញព័ត៌មាន Connection៖
+   - **Host:** `localhost` ឬ `127.0.0.1`
+   - **Port:** `5432`
+   - **User:** `postgres`
+   - **Password:** `supersecretpassword`
+   - **Database:** `ecommerce_dev`
+4. ចុច **Test** រួចចុច **Connect** ដើម្បីមើលតារាង និង Run Query តាម GUI។

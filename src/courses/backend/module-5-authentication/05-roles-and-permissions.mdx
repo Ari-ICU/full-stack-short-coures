@@ -1,44 +1,100 @@
 ---
-title: Roles & Permissions
-description: របៀបកំណត់សិទ្ធិ (Authorization) ថាតើអ្នកប្រើប្រាស់ណាខ្លះអាចធ្វើអ្វីបានខ្លះ (ឧ. Admin vs User)។
+title: Role-Based Access Control (RBAC) & Permissions
+description: ការរៀបចំប្រព័ន្ធគ្រប់គ្រងសិទ្ធិ Role-Based Access Control (RBAC), Roles Hierarchy, និង Permission Matrix ក្នុង Express.js។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Role-Based Access Control (RBAC) និង Attribute-Based (ABAC)
+  - បង្កើត Reusable `authorizeRoles(...roles)` Middleware
+  - ស្គាល់រចនាសម្ព័ន្ធ Permission Matrix (Read, Write, Update, Delete per Resource)
+  - ចេះការពារ Endpoints ផ្អែកលើ Resource Ownership (ឧ. User អាចកែបានតែ Profile ខ្លួនឯង)
 module: module-5-authentication
 order: 5
+quiz:
+  - question: "តើអ្វីជាភាពខុសគ្នាសំខាន់រវាង RBAC និង Ownership-based Authorization?"
+    options:
+      - "RBAC មិនគាំទ្រ Node.js ទេ"
+      - "RBAC ឆែកផ្អែកលើតួនាទីទូទៅ (ឧ. admin, manager) រីឯ Ownership ឆែកមើលថាតើ Resource នោះជារបស់ User ផ្ទាល់ឬអត់ (ឧ. order.userId === req.user.id)"
+      - "Ownership ប្រើបានតែជាមួយ MongoDB"
+      - "ទាំងពីរគ្មានអ្វីខុសគ្នាឡើយ"
+    correctAnswer: 2
+    explanation: "RBAC ត្រួតពិនិត្យ Role ទូទៅ ប៉ុន្តែក្នុងករណី User ធម្មតាចង់កែសម្រួល Order របស់ខ្លួនឯង យើងត្រូវការ Ownership check ដើម្បីការពារមិនឱ្យ User ម្នាក់ទៅកែ Order របស់ User ម្នាក់ទៀត។"
 ---
 
-## 🛡️ Role-Based Access Control (RBAC)
+## 👥 អ្វីទៅជា Role-Based Access Control (RBAC)?
 
-ពេលកម្មវិធីរបស់អ្នកធំឡើង អ្នកនឹងមានអ្នកប្រើប្រាស់ច្រើនប្រភេទ (Roles) ដូចជា `User`, `Manager`, និង `Admin` ជាដើម។
-យើងអាចកំណត់សិទ្ធិដោយប្រើ Middleware នៅក្នុង Express បានយ៉ាងងាយស្រួលដោយឆែកមើល Role ដែលត្រូវបានផ្ញើមកជាមួយទិន្នន័យ (ឫ Payload របស់ JWT)។
+**RBAC** គឺជាវិធីសាស្ត្រចាត់ចែងសិទ្ធិដោយផ្អែកលើ **Roles (តួនាទី)** របស់អ្នកប្រើប្រាស់នៅក្នុងស្ថាប័ន ឬប្រព័ន្ធ។
 
-### ការបង្កើត Authorization Middleware
+```mermaid
+graph TD
+    USER["User (Role: MANAGER)"] --> AUTH_MW["authenticateToken Middleware"]
+    AUTH_MW --> RBAC_MW["authorizeRoles('ADMIN', 'MANAGER')"]
+    RBAC_MW -->|"Match!"| SUCCESS["Access Granted to Resource"]
+    
+    CUST["User (Role: CUSTOMER)"] --> AUTH_MW2["authenticateToken"]
+    AUTH_MW2 --> RBAC_MW
+    RBAC_MW -.->|"No Match"| F403["403 Forbidden Error"]
+```
 
-```tabs
-javascript
-// middlewares/authMiddleware.js
-// Middleware ដំបូង: សម្រាប់បញ្ជាក់អត្តសញ្ញាណ (តើមាន Token ទេ?)
-export const requireAuth = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "មិនមាន Token អនុញ្ញាតទេ" });
+---
 
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // ភ្ជាប់ព័ត៌មានអ្នកប្រើប្រាស់ (ឧ. id, role) ទៅកាន់ req object ដើម្បីអោយ Route ខាងមុខយកទៅប្រើបាន
-        req.user = decoded; 
-        next();
-    } catch (err) {
-        return res.status(401).json({ error: "Token មិនត្រឹមត្រូវ ឫផុតកំណត់" });
+## 🛡️ ការបង្កើត Reusable RBAC Middleware
+
+```typescript
+// src/middlewares/authorize.ts
+import { Request, Response, NextFunction } from "express";
+
+export const authorizeRoles = (...allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // ត្រូវប្រាកដថា User បាន Authenticate រួចរាល់
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: សូមធ្វើការ Login ជាមុនសិន",
+      });
     }
-};
 
-// Middleware ទីពីរ: សម្រាប់កំណត់សិទ្ធិ (តើមាន Role ត្រឹមត្រូវទេ?)
-// Function នេះទទួលយកប៉ារ៉ាម៉ែត្រ (roles) ហើយបញ្ជូនត្រលប់ទៅជា Middleware function
-export const requireRole = (...allowedRoles) => {
-    return (req, res, next) => {
-        // req.user ត្រូវបានបង្កើតដោយ requireAuth middleware មុននេះ
-        if (!req.user || !allowedRoles.includes(req.user.role)) {
-            return res.status(403).json({ error: "អ្នកមិនមានសិទ្ធិចូលមើលកន្លែងនេះទេ (Forbidden)" });
-        }
-        next();
-    };
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Forbidden: តួនាទី (${req.user.role}) មិនមានសិទ្ធិចូលដំណើរការផ្នែកនេះឡើយ`,
+      });
+    }
+
+    next();
+  };
+};
+```
+
+---
+
+## 🔒 Resource Ownership Guard Pattern
+
+```typescript
+// Middleware ឆែកមើលថាតើ User កំពុងកែប្រែ Resource របស់ខ្លួនឯង ឬជា Admin
+export const checkOrderOwnership = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { orderId } = req.params;
+  const currentUserId = req.user.userId;
+  const currentUserRole = req.user.role;
+
+  // Admin មានសិទ្ធិគ្រប់គ្រង Order ទាំងអស់
+  if (currentUserRole === "admin") {
+    return next();
+  }
+
+  const order = await orderRepository.findOneBy({ id: orderId });
+  if (!order) {
+    return res.status(404).json({ message: "រកមិនឃើញ Order ឡើយ" });
+  }
+
+  if (order.userId !== currentUserId) {
+    return res.status(403).json({
+      message: "Forbidden: អ្នកគ្មានសិទ្ធិកែប្រែ Order របស់អ្នកដទៃឡើយ",
+    });
+  }
+
+  next();
 };
 ```

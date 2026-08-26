@@ -1,55 +1,110 @@
 ---
 title: NPM & package.json
 description: ស្វែងយល់ពីរបៀបគ្រប់គ្រង Packages និងការប្រើប្រាស់ package.json នៅក្នុងគម្រោង Node.js។
+objectives:
+  - "យល់ដឹងពីតួនាទីរបស់ NPM Registry និង CLI"
+  - "យល់ច្បាស់ពីភាពខុសគ្នារវាង dependencies, devDependencies, និង peerDependencies"
+  - "ចេះបកស្រាយ Semantic Versioning (SemVer: ^ vs ~ vs exact)"
+  - "ស្គាល់សារៈសំខាន់របស់ package-lock.json ក្នុងការធានាភាពជាក់លាក់នៃ Version"
 module: module-1-nodejs-fundamentals
 order: 2
+quiz:
+  - question: "តើ package ណាខ្លះដែលគួរដាក់ក្នុង devDependencies?"
+    options:
+      - "Library ដែល Server ត្រូវការដំណើរការនៅ Production ដូចជា express និង pg"
+      - "Tool សម្រាប់ Development, Testing, Linting, និង TypeScript compiler ដូចជា nodemon, eslint, typescript"
+      - "កូដ HTML និង CSS ទាំងអស់របស់ Frontend"
+      - "ឯកសារ .env ដែលផ្ទុក Database Secrets"
+    correctAnswer: 2
+    explanation: "devDependencies សម្រាប់តែ Tools និង Libraries ដែលប្រើពេលអភិវឌ្ឍន៍ ឬ Test ប៉ុណ្ណោះ មិនត្រូវបាន Bundle ពេល Deploy ទៅ Production ឡើយ។"
 ---
 
 ## 📦 អ្វីទៅជា NPM?
 
-**NPM (Node Package Manager)** គឺជាកន្លែងផ្ទុកកញ្ចប់កូដ (Packages/Libraries) របស់ JavaScript ដ៏ធំបំផុតនៅលើពិភពលោក។ នៅពេលអ្នកដំឡើង Node.js វានឹងដំឡើង `npm` មកជាមួយដោយស្វ័យប្រវត្តិ។
-
-អ្នកអាចប្រើ NPM ដើម្បី៖
-1. ទាញយក Library ដែលអ្នកដទៃសរសេររួចមកប្រើ (ឧទាហរណ៍៖ `express`, `mongoose`)។
-2. ចែករំលែកកូដរបស់អ្នកទៅកាន់អ្នកដទៃ។
-3. គ្រប់គ្រង Version របស់ Library ក្នុង Project អ្នកកុំអោយមានបញ្ហា។
-
-### ឯកសារ `package.json`
-
-រាល់គម្រោង Node.js ទាំងអស់តែងតែចាប់ផ្តើមជាមួយឯកសារ `package.json`។ វាប្រៀបដូចជា **អត្តសញ្ញាណប័ណ្ណ** របស់គម្រោងអ្នកអញ្ចឹង។ វាផ្ទុកព័ត៌មានអំពីឈ្មោះគម្រោង, Version, និងបញ្ជីឈ្មោះ Library ដែលគម្រោងរបស់អ្នកត្រូវការ។
+**NPM (Node Package Manager)** គឺជាកន្លែងផ្ទុកកញ្ចប់កូដ (Packages/Libraries) បើកចំហររបស់ JavaScript ធំបំផុតនៅលើពិភពលោក។ NPM រួមមាន ៣ ផ្នែកធំៗ៖
+1. **NPM Website:** កន្លែងស្វែងរក packages (`npmjs.com`)។
+2. **NPM Registry:** Database សាធារណៈផ្ទុកកូដ និង versions ទាំងអស់។
+3. **NPM CLI:** ឧបករណ៍បញ្ជាតាម Command Line ក្នុងម៉ាស៊ីនរបស់យើង។
 
 ```mermaid
 graph LR
-    PROJ[Node Project] --> PKG[package.json]
-    PKG --> DEP[Dependencies <br/>សម្រាប់ Production]
-    PKG --> DEV[devDependencies <br/>សម្រាប់តែពេល Development]
-    PKG --> SCR[Scripts <br/>បញ្ជាសម្រាប់ Run Project]
+    PROJ["គម្រោង Node.js<br/>(Local Project)"] --> PKG["package.json"]
+    PKG --> DEP["dependencies<br/>(express, pg, bcrypt)"]
+    PKG --> DEV["devDependencies<br/>(nodemon, tsx, vitest)"]
+    PKG --> SCR["scripts<br/>(dev, build, start, test)"]
+    PKG --> LOCK["package-lock.json<br/>(Exact dependency tree & checksums)"]
 ```
 
-### ភាពខុសគ្នារវាង Dependencies ទាំងពីរ
+---
 
-1. **dependencies**: (ឧទាហរណ៍: `express`, `bcrypt`) 
-   - ជា Library ដែលចាំបាច់ត្រូវមានទើបកម្មវិធីយើងដើរ។
-   - ដំឡើងដោយ៖ `npm install express`
-   
-2. **devDependencies**: (ឧទាហរណ៍: `nodemon`, `jest`)
-   - ជា Library ដែលប្រើសម្រាប់តែពេលយើងកំពុងសរសេរកូដប៉ុណ្ណោះ។ ពេលដាក់អោយគេប្រើពិតប្រាកដ (Production) មិនត្រូវការវាទេ។
-   - ដំឡើងដោយ៖ `npm install --save-dev nodemon`
+## 📄 រចនាសម្ព័ន្ធឯកសារ `package.json`
 
-> [!WARNING]
-> កុំ Push ថត `node_modules` ទៅកាន់ GitHub អោយសោះ! យើងគ្រាន់តែ Push ឯកសារ `package.json` ទៅបានហើយ ព្រោះអ្នកផ្សេងអាចទាញយក Library មកវិញបានដោយគ្រាន់តែវាយ Command `npm install`។
+ឯកសារ `package.json` គឺជា **Manifest / អត្តសញ្ញាណប័ណ្ណ** នៃគម្រោង Backend របស់អ្នក៖
 
-### ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+```json
+{
+  "name": "ecommerce-backend-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pg": "^8.11.5",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5"
+  }
+}
+```
 
-1. បង្កើតថតថ្មីមួយ ហើយចូលទៅកាន់ថតនោះ៖
+---
+
+## 🔢 Semantic Versioning (SemVer)
+
+លេខ Version ក្នុង Node.js ដើរតាមទម្រង់ **MAJOR.MINOR.PATCH** (ឧទាហរណ៍៖ `4.19.2`)៖
+
+| សញ្ញា | ឧទាហរណ៍ | អត្ថន័យ |
+|---|---|---|
+| **Caret (`^`)** | `^4.19.2` | អនុញ្ញាត Update រាល់ MINOR និង PATCH ថ្មីៗ (ឧ. 4.20.0, 4.19.3) ដរាបណា MAJOR នៅលេខ 4 ដដែល |
+| **Tilde (`~`)** | `~4.19.2` | អនុញ្ញាត Update តែ PATCH bug fixes ប៉ុណ្ណោះ (ឧ. 4.19.3, 4.19.4) |
+| **Exact** | `4.19.2` | ដំឡើង Version នេះសុទ្ធសាធ គ្មានការ Update ដោយស្វ័យប្រវត្តិ |
+
+---
+
+## 🔒 សារៈសំខាន់របស់ `package-lock.json`
+
+> [!IMPORTANT]
+> ឯកសារ `package-lock.json` កត់ត្រា Version ពិតប្រាកដ និង Cryptographic Hash (SHA-512) នៃ Dependency គ្រប់កម្រិត (Sub-dependencies)។
+> - **ត្រូវតែ Commit** ឯកសារ `package-lock.json` ចូលក្នុង Git។
+> - ពេល Deploy លើ Production Server ត្រូវប្រើ `npm ci` (Clean Install) ជំនួសឱ្យ `npm install` ដើម្បីការពារបញ្ហា Version ប្លែកគ្នា។
+
+---
+
+## 🛠️ ការអនុវត្តជាក់ស្តែង (Lab Exercise)
+
+1. បង្កើតគម្រោងថ្មី និងបង្កើត `package.json` ដោយស្វ័យប្រវត្តិ៖
    ```bash
-   mkdir my-first-app && cd my-first-app
-   ```
-2. បង្កើត `package.json` ដោយស្វ័យប្រវត្តិ៖
-   ```bash
+   mkdir backend-lab && cd backend-lab
    npm init -y
    ```
-3. ដំឡើង Library ឈ្មោះ `colors`៖
+
+2. បន្ថែម `"type": "module"` ទៅក្នុង `package.json` ដើម្បីប្រើ Modern ES Modules។
+
+3. ដំឡើង Library សម្រាប់ Production និង Development៖
    ```bash
-   npm install colors
+   # Production Dependency
+   npm install chalk dotenv
+   
+   # Development Dependency
+   npm install -D nodemon
    ```

@@ -1,52 +1,105 @@
 ---
-title: Secure File Upload
-description: ការការពារប្រព័ន្ធពីការបញ្ចូលឯកសារដែលមានមេរោគ។
+title: Secure File Upload Architecture (Multer & S3)
+description: ការគ្រប់គ្រង File Uploads ដោយសុវត្ថិភាព, Multer Configuration, File Type / Magic Bytes Verification, File Size Limits, និង Cloud Storage (S3 / Cloudinary)។
+objectives:
+  - យល់ពីហានិភ័យនៃ Unrestricted File Upload (Remote Code Execution, Disk Exhaustion)
+  - ចេះ Configure `multer` ជាមួយ Memory Storage vs Disk Storage
+  - ត្រួតពិនិត្យ File Type ដោយផ្អែកលើ MIME Types និង Magic Bytes (មិនមែនត្រឹមតែ Extension)
+  - យល់ពី Architecture នៃការ Upload ដោយផ្ទាល់ទៅ Cloud Storage (Presigned URLs / S3)
 module: module-6-security
 order: 8
+quiz:
+  - question: "ហេតុអ្វីបានជាការត្រួតពិនិត្យតែ File Extension (ដូចជា .jpg, .png) មិនគ្រប់គ្រាន់ដើម្បីធានាសុវត្ថិភាព File Upload?"
+    options:
+      - "ព្រោះ Hacker អាចប្តូរឈ្មោះ file ពី `malicious_script.php` ឬ `evil.exe` ទៅជា `evil.jpg` (Extension spoofing) ដើម្បីឆ្លងផុតការត្រួតពិនិត្យ"
+      - "ព្រោះ Node.js មិនស្គាល់ extension .png"
+      - "ព្រោះ Browser មិនអាច Render file ធំៗបាន"
+      - "ព្រោះ Linux មិនគាំទ្រ extension"
+    correctAnswer: 1
+    explanation: "Hacker អាចកែឈ្មោះ Extension បានយ៉ាងងាយ។ យើងត្រូវតែផ្ទៀងផ្ទាត់ MIME Type និង **Magic Bytes (File Signatures)** ដើម្បីបញ្ជាក់ប្រភេទពិតប្រាកដនៃឯកសារ។"
 ---
 
-## 📁 ហានិភ័យនៃការអនុញ្ញាតអោយបញ្ជូលឯកសារ (File Uploads)
+## 📁 ហានិភ័យនៃ File Uploads គ្មានសុវត្ថិភាព
 
-នៅពេលកម្មវិធីរបស់អ្នកអនុញ្ញាតអោយអ្នកប្រើប្រាស់បង្ហោះឯកសារ (ឧ. រូបថត Profile, ឯកសារ PDF) វាប្រឈមនឹងហានិភ័យធំៗ៖
-1. Hacker បង្ហោះឯកសារកូដ (ឧ. `virus.js`, `shell.php`) រួចអោយ Server រត់កូដនោះ។
-2. ការបង្ហោះឯកសារធំៗពេក ធ្វើអោយពេញអង្គចងចាំ (Storage) របស់ Server (DDoS)។
+1. **Remote Code Execution (RCE):** Hacker upload file `.php`, `.js`, ឬ `.sh` រួច execute វានៅលើ Server។
+2. **Denial of Service (DoS):** Upload files ធំៗរាប់ Gigabytes ធ្វើឱ្យអស់ទំហំ Disk Space។
+3. **MIME Sniffing:** Upload HTML file ដែលបង្កប់ XSS scripts។
 
-### ការដោះស្រាយ និងការពារ
+```mermaid
+graph LR
+    CLIENT["Client (Form-data / Image)"] --> MULTER["Multer Middleware Pipeline"]
+    MULTER --> LIMITS["1. File Size Limit (Max 5MB)"]
+    LIMITS --> FILTER["2. MIME & Magic Bytes Validation (image/jpeg, image/png)"]
+    FILTER --> RENAME["3. Random UUID Filename (No original path traversal)"]
+    RENAME --> S3["4. Stream to AWS S3 / Cloudinary (Not local disk)"]
+```
 
-យើងតែងតែប្រើប្រាស់ Library ដូចជា **Multer** ដើម្បីទទួលយកឯកសារនៅក្នុង Express។ ដើម្បីអោយមានសុវត្ថិភាព យើងត្រូវកំណត់លក្ខខណ្ឌ៖
+---
 
-```tabs
-javascript
-// utils/uploadMiddleware.js
-import multer from 'multer';
-import path from 'path';
+## 💻 ការអនុវត្ត Multer Middleware ជាមួយសុវត្ថិភាព
 
-// 1. កំណត់ទំហំអតិបរមា (ឧទាហរណ៍ 2MB)
-const limits = { fileSize: 2 * 1024 * 1024 }; 
+```bash
+npm install multer
+npm install -D @types/multer
+```
 
-// 2. ពិនិត្យប្រភេទឯកសារ (MIME Type និង Extension)
-const fileFilter = (req, file, cb) => {
-    // អនុញ្ញាតតែប្រភេទរូបភាពប៉ុណ្ណោះ
-    const allowedTypes = /jpeg|jpg|png|webp/;
-    
-    const isExtnameValid = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const isMimetypeValid = allowedTypes.test(file.mimetype);
+```typescript
+// src/middlewares/upload.ts
+import multer, { FileFilterCallback } from "multer";
+import path from "path";
+import crypto from "crypto";
+import { Request } from "express";
 
-    if (isExtnameValid && isMimetypeValid) {
-        cb(null, true);
-    } else {
-        cb(new Error('អនុញ្ញាតតែឯកសារប្រភេទរូបភាពប៉ុណ្ណោះ!'), false);
-    }
+// 1. ប្រើ MemoryStorage ដើម្បីកុំឱ្យផ្ទុក files លើ Disk មូលដ្ឋាន
+const storage = multer.memoryStorage();
+
+// 2. MIME Type Filter
+const fileFilter = (
+  req: Request,
+  file: Express.Multer.File,
+  callback: FileFilterCallback
+) => {
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp"];
+
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    callback(null, true);
+  } else {
+    callback(new Error("ប្រភេទឯកសារមិនត្រូវបានអនុញ្ញាត! អនុញ្ញាតតែ JPG, PNG, WEBP ប៉ុណ្ណោះ"));
+  }
 };
 
-const storage = multer.memoryStorage(); // ឬកំណត់កន្លែងរក្សាទុក
-
-export const upload = multer({
-    storage,
-    limits,
-    fileFilter
+// 3. កំណត់ Limits (5MB max)
+export const uploadAvatar = multer({
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 Megabytes
+    files: 1,
+  },
+  fileFilter,
 });
 ```
 
-> [!TIP]
-> សម្រាប់គម្រោងធំៗ គេមិនរក្សាទុករូបភាពនៅលើ Server (ក្បែរកូដ) នោះទេ។ គេប្រើប្រាស់សេវាកម្មខាងក្រៅដូចជា **AWS S3** ឫ **Cloudinary** ដើម្បីរក្សាទុកឯកសារ ដែលជួយកាត់បន្ថយបន្ទុក Server និងមានសុវត្ថិភាពខ្ពស់ជាង។
+### 4. ការប្រើប្រាស់ក្នុង Route (`src/routes/user.routes.ts`)
+```typescript
+import { Router } from "express";
+import { uploadAvatar } from "../middlewares/upload";
+
+const router = Router();
+
+router.post("/avatar", uploadAvatar.single("avatar"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "សូមជ្រើសរើសរូបភាពដើម្បី Upload" });
+  }
+
+  // req.file.buffer អាច upload បន្តទៅកាន់ AWS S3 ឬ Cloudinary
+  console.log("File Name:", req.file.originalname);
+  console.log("File Size:", req.file.size, "bytes");
+
+  res.status(200).json({
+    success: true,
+    message: "រូបភាពត្រូវបាន Upload និងផ្ទៀងផ្ទាត់ជោគជ័យ!",
+  });
+});
+
+export default router;
+```
