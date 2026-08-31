@@ -41,11 +41,11 @@ flowchart TD
         M1["1. Component Mounts & Paints UI 🖼️"] --> M2["2. Run Setup Effect (Add Listener / Start Timer)"]
         M2 --> M3{"3. Dependency Changes / Re-render?"}
         
-        M3 -->|Yes (Dependency Changed)| M4["4. 🧹 Run Cleanup of PREVIOUS Effect first!"]
+        M3 -->|"Yes (Dependency Changed)"| M4["4. 🧹 Run Cleanup of PREVIOUS Effect first!"]
         M4 --> M5["5. ⚡ Run Setup Effect with NEW Dependency values"]
         M5 --> M3
 
-        M3 -->|Component Unmounts| M6["6. 🛑 Run Final Cleanup (Free all memory resources)"]
+        M3 -->|"Component Unmounts"| M6["6. 🛑 Run Final Cleanup (Free all memory resources)"]
     end
 
     style Lifecycle fill:#f8f9fa,stroke:#ced4da,color:#000

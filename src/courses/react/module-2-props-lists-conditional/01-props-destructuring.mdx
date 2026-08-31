@@ -34,10 +34,10 @@ flowchart TD
         Child2["&lt;UserProfile /&gt;<br>props: { name: 'សីហា', age: 30 }"]
     end
 
-    Parent -->|1. Pass Data Down (Props ⬇️)| Child1
-    Parent -->|1. Pass Data Down (Props ⬇️)| Child2
-    Child1 -.->|2. Notify Parent Up (Callback Function ⬆️)| Parent
-    Child2 -.->|2. Notify Parent Up (Callback Function ⬆️)| Parent
+    Parent -->|"1. Pass Data Down (Props ⬇️)"| Child1
+    Parent -->|"1. Pass Data Down (Props ⬇️)"| Child2
+    Child1 -.->|"2. Notify Parent Up (Callback Function ⬆️)"| Parent
+    Child2 -.->|"2. Notify Parent Up (Callback Function ⬆️)"| Parent
 
     style Parent fill:#ebf8ff,stroke:#3182ce,stroke-width:2px,color:#000
     style Children fill:#f0fff4,stroke:#38a169,stroke-width:2px,color:#000

@@ -30,8 +30,8 @@ flowchart TD
     subgraph MemoizedRender["Optimized with React.memo()"]
         direction TB
         P2["Parent Component State Updates"] --> Check{"Props Shallow Equality Check<br><code>prevProps === nextProps?</code>"}
-        Check -->|Props Changed (False)| C2["Child Re-renders 🔄"]
-        Check -->|Props Identical (True)| Skip["Skip Child Re-render ⚡ (Keeps Cached DOM)"]
+        Check -->|"Props Changed (False)"| C2["Child Re-renders 🔄"]
+        Check -->|"Props Identical (True)"| Skip["Skip Child Re-render ⚡ (Keeps Cached DOM)"]
     end
 
     style StandardRender fill:#fff5f5,stroke:#e53e3e,color:#000
