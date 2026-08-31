@@ -57,7 +57,7 @@ const MODULE_TITLES: Record<string, string> = {
   "module-1-tooling-architecture": "Module 1 — Modern Tooling & Component Architecture",
   "module-2-props-lists-conditional": "Module 2 — Props, Lists & Conditional Rendering",
   "module-3-state-events": "Module 3 — State Management & Event Handling",
-  "module-4-effects-api": "Module 4 — Lifecycle, Side Effects & API Fetching",
+  "module-4-useeffect": "Module 4 — The useEffect Hook",
   "module-5-styling-ui": "Module 5 — Component Styling & UI Kits",
   "module-6-routing": "Module 6 — Client-Side Routing",
   "module-7-global-state": "Module 7 — Global State & Context API",

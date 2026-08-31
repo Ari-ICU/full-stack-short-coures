@@ -1,0 +1,205 @@
+---
+title: Common useEffect Pitfalls & "You Might Not Need an Effect"
+description: សិក្សាពីកំហុសទូទៅក្នុងការប្រើ `useEffect`, បញ្ហា Infinite Re-render Loops, Stale Closures, និងកាលៈទេសៈដែលមិនគួរប្រើ `useEffect`។
+objectives:
+  - ស្គាល់និងចេះជៀសវាង Infinite Re-render Loop
+  - យល់ពី Stale Closures និងវិធីដោះស្រាយជាមួយ Functional Updates
+  - ស្គាល់ពីករណី "You Might Not Need an Effect" (Derived State vs Effects)
+  - ដឹងពីភាពខុសគ្នារវាង Event Handlers និង `useEffect`
+  - យល់ពីមូលហេតុដែល React 18 Strict Mode mount components ពីរដងក្នុង Development
+module: module-4-useeffect
+order: 5
+quiz:
+  - question: "ប្រសិនបើអ្នកចង់គណនាឈ្មោះពេញ (`fullName`) ដោយបូកបញ្ចូល `firstName` និង `lastName` តើវិធីសាស្ត្រណាដែលត្រឹមត្រូវបំផុតក្នុង React?"
+    options:
+      - "គណនាដោយផ្ទាល់ក្នុង Render Phase (`const fullName = firstName + ' ' + lastName;`) ដោយមិនបាច់ប្រើ useState និង useEffect ឡើយ"
+      - "បង្កើត state សម្រាប់ fullName ហើយប្រើ useEffect ដើម្បី sync វា"
+      - "ប្រើ setInterval រៀងរាល់ 100ms ដើម្បី update fullName"
+      - "កែប្រែ document.body ផ្ទាល់"
+    correctAnswer: 1
+    explanation: "កុំប្រើ useEffect សម្រាប់ទិន្នន័យដែលអាចគណនាបាន (Derived State) ពី Props ឬ State ដែលមានស្រាប់។ ការគណនាផ្ទាល់ក្នុង Render Phase លឿនជាង សាមញ្ញជាង និងជៀសវាង Extra Re-render ឥតប្រយោជន៍។"
+  - question: "ហេតុអ្វីបានជាក្នុង React 18 Strict Mode លើ Development Environment, `useEffect` ដំណើរការ ២ ដងនៅពេល Mount ដំបូង?"
+    options:
+      - "ដើម្បីជួយ Developer ស្វែងរក Bugs និងផ្ទៀងផ្ទាត់ថាតើ Cleanup Function ត្រូវបានសរសេរត្រឹមត្រូវដែរឬទេ (Mount -> Unmount -> Remount simulation)"
+      - "ព្រោះ Browser មានបញ្ហា Memory"
+      - "ព្រោះ React ចង់ឱ្យកូដដំណើរការលឿនជាងមុន ២ ដង"
+      - "ព្រោះ JavaScript រាប់លេខពី 0"
+    correctAnswer: 1
+    explanation: "React StrictMode ធ្វើការ Mount -> Unmount -> Mount ម្តងទៀតក្នុង Development តែប៉ុណ្ណោះ ដើម្បីធានាថា Component អាច Survive Remounting ដោយគ្មាន Memory Leaks (ផ្ទៀងផ្ទាត់ Cleanup Function)។ ក្នុង Production វានឹងដំណើរការតែម្តងគត់ធម្មតា។"
+---
+
+## 🛑 1. Pitfall 1: The Infinite Re-render Loop
+
+កំហុសដែលកើតឡើងញឹកញាប់បំផុតគឺការ **Update State** នៅខាងក្នុង `useEffect` ដោយមិនបានកំណត់ Dependency Array ឱ្យបានត្រឹមត្រូវ៖
+
+```jsx
+// ❌ កំហុសធ្ងន់ធ្ងរ៖ Infinite Re-render Loop!
+function BrokenCounter() {
+  const [count, setCount] = useState(0);
+
+  // 🚨 Effect នេះ run គ្រប់ render -> setCount ធ្វើឱ្យ re-render -> run effect ម្តងទៀត -> Loop គាំង Browser!
+  useEffect(() => {
+    setCount(count + 1);
+  });
+
+  return <div>{count}</div>;
+}
+```
+
+```mermaid
+flowchart LR
+    A["1. Render Component"] --> B["2. Run useEffect()"]
+    B --> C["3. setCount(count + 1)"]
+    C --> D["4. State ផ្លាស់ប្តូរ!"]
+    D -->|Schedule Re-render| A
+
+    style A fill:#ebf8ff,stroke:#3182ce,color:#000
+    style B fill:#fff5f5,stroke:#e53e3e,color:#000
+    style C fill:#fee2e2,stroke:#ef4444,color:#000
+    style D fill:#fed7d7,stroke:#e53e3e,color:#000
+```
+
+### 💡 វិធីដោះស្រាយ៖
+- កំណត់ Dependency Array ច្បាស់លាស់ (`[]` ឬ `[dep]`)។
+- ពិចារណាថាតើអ្នកពិតជាត្រូវការ `useEffect` ដែរឬទេ ឬគ្រាន់តែជា Derived State។
+
+---
+
+## 🔒 2. Pitfall 2: Stale Closures (ការចាប់យកតម្លៃចាស់)
+
+នៅពេលដែល `useEffect` ឬ `setInterval` ដំណើរការ callback function នោះនឹងបង្កើត Closure ដែលចងចាំតម្លៃ State នៅពេលវាត្រូវបានបង្កើតដំបូង៖
+
+```jsx
+// ❌ បញ្ហា Stale Closure៖
+function StaleTimer() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // ⚠️ count ក្នុង closure នេះនៅតែជា 0 ជានិច្ច ព្រោះ array ជា []!
+      setCount(count + 1); // 0 + 1 = 1 រៀងរាល់វិនាទី!
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []); // count មិនកើនឡើងលើសពី 1 ឡើយ
+
+  return <h1>{count}</h1>;
+}
+
+// ✅ ដំណោះស្រាយ៖ ប្រើ Functional Update (prev => prev + 1)
+function FixedTimer() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // ✅ ទទួលបានតម្លៃចុងក្រោយបំផុតជានិច្ចពី React State Engine
+      setCount((prev) => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return <h1>{count}</h1>;
+}
+```
+
+---
+
+## 🚫 3. You Might Not Need an Effect: Derived State
+
+> **ច្បាប់សំខាន់:** ប្រសិនបើតម្លៃមួយអាច **គណនាចេញពី Props ឬ State ដែលមានស្រាប់** ចូរ **កុំបង្កើត State ថ្មី ហើយកុំប្រើ useEffect ដើម្បី Sync វា!**
+
+```jsx
+// ❌ មិនល្អ៖ Extra State + Extra useEffect = 2 ដង Render និងកូដស្មុគស្មាញ
+function UserFullNameBad({ firstName, lastName }) {
+  const [fullName, setFullName] = useState('');
+
+  useEffect(() => {
+    setFullName(`${firstName} ${lastName}`);
+  }, [firstName, lastName]); // បង្កើន 1 Extra Re-render រាល់ពេល props ដូរ!
+
+  return <h2>{fullName}</h2>;
+}
+
+// ✅ ល្អឥតខ្ចោះ៖ គណនាផ្ទាល់ក្នុងពេល Render (Derived Value)
+function UserFullNameGood({ firstName, lastName }) {
+  // ⚡ គណនាលឿនបំផុត គ្មាន extra render គ្មាន bugs!
+  const fullName = `${firstName} ${lastName}`;
+
+  return <h2>{fullName}</h2>;
+}
+```
+
+---
+
+## 🖱️ 4. You Might Not Need an Effect: User Actions
+
+កុំប្រើ `useEffect` សម្រាប់កិច្ចការដែលកើតឡើងដោយសារ **ការចុចរបស់ User (User Interactions)** ដូចជាការបង្ហាញ alert ឬការផ្លាស់ប្តូរ state។ ចូរដាក់កូដនោះក្នុង **Event Handler** ដោយផ្ទាល់!
+
+```jsx
+// ❌ មិនល្អ៖ ប្រើ useEffect សម្រាប់ User Action
+function ResetButtonBad() {
+  const [isReset, setIsReset] = useState(false);
+  const [score, setScore] = useState(100);
+
+  useEffect(() => {
+    if (isReset) {
+      setScore(0);
+      alert("Score has been reset!");
+      setIsReset(false);
+    }
+  }, [isReset]);
+
+  return <button onClick={() => setIsReset(true)}>កំណត់ពិន្ទុឡើងវិញ</button>;
+}
+
+// ✅ ល្អឥតខ្ចោះ៖ ដាក់ក្នុង Event Handler ផ្ទាល់
+function ResetButtonGood() {
+  const [score, setScore] = useState(100);
+
+  const handleReset = () => {
+    setScore(0);
+    alert("Score has been reset!");
+  };
+
+  return <button onClick={handleReset}>កំណត់ពិន្ទុឡើងវិញ</button>;
+}
+```
+
+---
+
+## 🧪 5. React 18 StrictMode Double Invocation
+
+នៅក្នុង **React 18 Development Mode**, អ្នកនឹងសង្កេតឃើញថា `console.log` ក្នុង `useEffect` ដំណើរការ **២ ដង** នៅពេលទំពើរបើកដំបូង៖
+
+```mermaid
+flowchart TD
+    subgraph StrictModeDev["React 18 Strict Mode (Development Only)"]
+        direction TB
+        S1["1. Component Mounts"] --> S2["2. Setup Effect Runs ⚡"]
+        S2 --> S3["3. React Unmounts Component ភ្លាមៗ (Test Cleanup) 🧹"]
+        S3 --> S4["4. React Remounts Component ឡើងវិញ ⚡"]
+    end
+
+    style StrictModeDev fill:#f8f9fa,stroke:#ced4da,color:#000
+    style S2 fill:#e6fffa,stroke:#319795,color:#000
+    style S3 fill:#fff5f5,stroke:#e53e3e,color:#000
+    style S4 fill:#e6fffa,stroke:#319795,color:#000
+```
+
+### ហេតុអ្វីបានជា React ធ្វើបែបនេះ?
+- ដើម្បីជួយ Developer ផ្ទៀងផ្ទាត់ថាតើអ្នកបានសរសេរ **Cleanup Function** បានត្រឹមត្រូវឬនៅ។
+- ប្រសិនបើអ្នកសរសេរ Cleanup ត្រឹមត្រូវ (ដូចជា `clearInterval` ឬ `removeEventListener`), ការ Mount ២ ដងនឹងមិនបណ្តាលឱ្យមាន Bugs អ្វីទាំងអស់!
+- **ចំណាំ:** នៅក្នុង Production Mode, Effect នឹងដំណើរការតែ **១ ដងគត់** ដូចធម្មតា។
+
+---
+
+## 🎯 សេចក្តីសង្ខេប (Summary Checklist)
+
+| សេណារីយ៉ូ (Scenario) | គួរប្រើ useEffect ឬអត់? | ដំណោះស្រាយត្រឹមត្រូវ |
+| :--- | :---: | :--- |
+| គណនាទិន្នន័យពី Props/State | ❌ ទេ | គណនាផ្ទាល់ក្នុង Render Body (Derived State) |
+| ធ្វើការងារពេល User ចុចប៊ូតុង | ❌ ទេ | សរសេរក្នុង `onClick` Event Handler |
+| Synchronize ជាមួយ `localStorage` | ✅ គួរប្រើ | ប្រើ `useEffect` ជាមួយ key dependency |
+| ស្តាប់ Browser Window Events (`resize`, `keydown`) | ✅ គួរប្រើ | ប្រើ `useEffect` + `removeEventListener` |
+| គ្រប់គ្រង Timers (`setInterval`, `setTimeout`) | ✅ គួរប្រើ | ប្រើ `useEffect` + `clearInterval` |
