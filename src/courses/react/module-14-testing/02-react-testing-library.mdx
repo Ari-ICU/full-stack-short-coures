@@ -1,0 +1,110 @@
+---
+title: React Testing Library — Testing Components Like a User
+description: រៀនប្រើប្រាស់ React Testing Library (RTL) និង Vitest ដើម្បី Test React Components ដូចរបៀបដែល User ប្រើប្រាស់ពិតប្រាកដ ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពីទស្សនវិជ្ជា RTL (Test Behavior, Not Implementation)
+  - ចេះប្រើ `render` និង `screen` queries (getByRole, getByText, getByLabelText)
+  - ចេះ Simulate User Events (click, type) ដោយប្រើ `@testing-library/user-event`
+  - ចេះប្រើ Jest-DOM Matchers (toBeInTheDocument, toHaveValue, toBeDisabled)
+module: module-14-testing
+order: 2
+quiz:
+  - question: "ហេតុអ្វី RTL ណែនាំឱ្យប្រើ `getByRole` ជាអាទិភាពខ្ពស់ជាងគេ?"
+    options:
+      - "ព្រោះវាដំណើរការលឿនជាង"
+      - "ព្រោះ `getByRole` ស្វែងរក Elements តាមរយៈ Semantic Accessibility Roles (ដូចជា button, textbox, heading) ដែលដូចគ្នានឹងរបៀបដែល User ពិតប្រាកដ និង Screen Readers ធ្វើអន្តរកម្មលើ Screen"
+      - "ព្រោះវាជា Requirement របស់ CSS"
+      - "ដើម្បីឱ្យ Code ខ្លីជាង"
+    correctAnswer: 2
+    explanation: "RTL ណែនាំឱ្យ Test តាមទស្សនវិស័យរបស់ User។ User មិនស្គាល់ className ឬ state variables ទេ — User ស្គាល់តែប៊ូតុង ('button') ឬប្រអប់វាយអក្សរ ('textbox')។"
+---
+
+## 🎯 1. RTL Query Priority Order
+
+1. **`getByRole`** (អាទិភាពទី ១: `button`, `textbox`, `heading`, `checkbox`)
+2. **`getByLabelText`** (ល្អសម្រាប់ Form Inputs ដែលមាន `<label>`)
+3. **`getByPlaceholderText`** (សម្រាប់ Input Placeholders)
+4. **`getByText`** (សម្រាប់ Paragraphs, Spans)
+5. **`getByTestId`** (ជម្រើសចុងក្រោយ ប្រសិនបើគ្មាន Semantic Role)
+
+---
+
+## 💻 2. Testing a Button Component
+
+### 💻 Code នៃ Component ដែលត្រូវ Test (`Button.jsx`):
+
+```jsx
+// src/components/Button.jsx
+export function Button({ onClick, disabled, children }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="px-4 py-2 bg-blue-600 text-white rounded-xl disabled:opacity-50"
+    >
+      {children}
+    </button>
+  );
+}
+```
+
+### 💻 Code នៃ Test Suite (`Button.test.jsx`):
+
+```jsx
+// src/components/Button.test.jsx
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button } from './Button';
+
+describe('Button Component', () => {
+  it('renders correctly with children text', () => {
+    // 1. Render Component ចូលក្នុង Virtual DOM
+    render(<Button>ចុចទីនេះ</Button>);
+
+    // 2. ស្វែងរក Element តាម Role 'button'
+    const button = screen.getByRole('button', { name: /ចុចទីនេះ/i });
+
+    // 3. ផ្ទៀងផ្ទាត់ (Assertion)
+    expect(button).toBeInTheDocument();
+  });
+
+  it('calls onClick handler when clicked', async () => {
+    const handleClick = vi.fn(); // Mock function
+    render(<Button onClick={handleClick}>Submit</Button>);
+
+    // Simulate User Click
+    const button = screen.getByRole('button', { name: /submit/i });
+    await userEvent.click(button);
+
+    // ផ្ទៀងផ្ទាត់ថា Function ត្រូវបានហៅ ១ ដង
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT trigger onClick when disabled', async () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick} disabled>Disabled</Button>);
+
+    const button = screen.getByRole('button', { name: /disabled/i });
+    expect(button).toBeDisabled();
+
+    await userEvent.click(button);
+    expect(handleClick).not.toHaveBeenCalled(); // មិនត្រូវហៅឡើយ
+  });
+});
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `render(<Button>ចុចទីនេះ</Button>);`
+   - Render Component ចូលក្នុង jsdom environment ដើម្បីត្រៀម query។
+2. `screen.getByRole('button', { name: /ចុចទីនេះ/i })`
+   - ស្វែងរកប៊ូតុងដែលមានឈ្មោះអក្សរ "ចុចទីនេះ" (ប្រើ Regular Expression `i` មិនប្រកាន់អក្សរតូចធំ)។
+3. `expect(button).toBeInTheDocument();`
+   - Matcher ពី `@testing-library/jest-dom` បញ្ជាក់ថា Element ពិតជាមានវត្តមានលើ DOM។
+4. `const handleClick = vi.fn();`
+   - បង្កើត Mock (Spy) Function របស់ Vitest ដើម្បីតាមដានថាតើ Function នោះត្រូវបានហៅប៉ុន្មានដង និងជាមួយ parameter អ្វីខ្លះ។
+5. `await userEvent.click(button);`
+   - ក្លែងធ្វើសកម្មភាព User ចុចកណ្ដុរ (Mouse Click) លើប៊ូតុង។
+6. `expect(handleClick).toHaveBeenCalledTimes(1);`
+   - បញ្ជាក់ថា Handler ដំណើរការត្រឹមត្រូវ ១ ដងគត់។

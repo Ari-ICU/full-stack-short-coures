@@ -1,0 +1,229 @@
+---
+title: "Mini Project — GitHub User Search"
+description: សាកល្បងអនុវត្ត Data Fetching ពេញលេញ ដោយចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Card សិន រួចបំប្លែងទៅជា React GitHub User Search App ដែលមាន Debounce, Abort, Loading Skeleton, Error State, និង Empty State។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Profile Card
+  - អនុវត្ត fetch + AbortController + Debounce Pattern រួមគ្នា
+  - ចេះបង្ហាញ GitHub User Profile Card ជាមួយ Real Data
+  - ចេះគ្រប់គ្រង Tri-State UI (loading / error / success) ពេញលេញ
+module: module-9-data-fetching
+order: 4
+quiz:
+  - question: "ក្នុង GitHub Search, ហេតុអ្វីយើងប្រើ Debounce 500ms ជំនួសនឹង fetch ភ្លាមៗ?"
+    options:
+      - "GitHub API ដំណើរការបានតែ 300ms ក្នុងម្ដង"
+      - "ការ Debounce ការពារ API Rate Limiting (GitHub ៦០ requests/hour) និងកាត់បន្ថយ Network calls ដោយ fetch តែពេល User ឈប់វាយ"
+      - "ដើម្បីធ្វើឱ្យ Animation មើលទៅស្អាត"
+      - "Debounce ធ្វើឱ្យ TypeScript Error ថយចុះ"
+    correctAnswer: 2
+    explanation: "GitHub Public API មាន Rate Limit ៦០ request/hour សម្រាប់ Unauthenticated calls។ Debounce ការពារ Rate Limiting ដោយ Wait រហូតដល់ User ឈប់វាយ ហើយបន្ទាប់មកទើប fetch ម្ដង។"
+---
+
+## 🎨 1. Normal HTML Profile Card Structure
+
+មុននឹងសរសេរ React State & Fetch Logic នេះជារចនាសម្ព័ន្ធ HTML ធម្មតារបស់ User Profile Card៖
+
+```html
+<!-- HTML GitHub User Profile Card -->
+<div class="user-card">
+  <!-- Search Box -->
+  <div class="search-bar">
+    <input type="text" placeholder="ស្វែងរក GitHub username..." />
+  </div>
+
+  <!-- Profile Content -->
+  <div class="profile-body">
+    <img src="https://avatars.githubusercontent.com/u/1" alt="Avatar" class="avatar" />
+    <h3 class="name">Dara Sok</h3>
+    <p class="username">@darasok</p>
+    <p class="bio">Full-stack Web Developer passionate about React & Node.js</p>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="label">Repos</span>
+        <span class="value">24</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">Followers</span>
+        <span class="value">142</span>
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## 💻 2. React Data Fetching Logic (with Debounce & Abort)
+
+### 💻 Code សម្រាប់តែ Fetch Handler:
+
+```javascript
+const [username, setUsername] = useState('');
+const debouncedUsername = useDebounce(username, 500);
+
+const [user, setUser] = useState(null);
+const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState(null);
+
+useEffect(() => {
+  if (!debouncedUsername.trim()) {
+    setUser(null);
+    return;
+  }
+
+  const controller = new AbortController();
+  setIsLoading(true);
+  setError(null);
+
+  fetch(`https://api.github.com/users/${debouncedUsername}`, {
+    signal: controller.signal,
+  })
+    .then((res) => {
+      if (res.status === 404) throw new Error('រកមិនឃើញ User នេះទេ!');
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      return res.json();
+    })
+    .then((data) => {
+      setUser(data);
+    })
+    .catch((err) => {
+      if (err.name !== 'AbortError') {
+        setError(err.message);
+        setUser(null);
+      }
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+
+  return () => controller.abort();
+}, [debouncedUsername]);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const debouncedUsername = useDebounce(username, 500);`
+   - រង់ចាំ 500ms ក្រោយពេល User ឈប់វាយអក្សរ ទើបដំណើរការ Search (សន្សំ GitHub API Rate Limit)។
+2. `const controller = new AbortController();`
+   - បង្កើត Controller សម្រាប់ cancel request មុនៗ ប្រសិនបើ User វាយអក្សរបន្ថែមទៀត។
+3. `if (res.status === 404) throw new Error('រកមិនឃើញ User នេះទេ!');`
+   - ឆែក status 404 ដោយផ្ទាល់ដើម្បីផ្តល់សារ Error ច្បាស់លាស់។
+4. `return () => controller.abort();`
+   - Cleanup in-flight request ពេល Component Unmount ឬ keyword ផ្លាស់ប្តូរ។
+
+---
+
+## 🚀 3. Complete Integrated GitHub Search App
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function useDebounce(value, delay = 500) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debounced;
+}
+
+export default function GitHubSearchApp() {
+  const [username, setUsername] = useState('torvalds');
+  const debouncedUser = useDebounce(username, 500);
+
+  const [profile, setProfile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!debouncedUser.trim()) {
+      setProfile(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    setIsLoading(true);
+    setError(null);
+
+    fetch(`https://api.github.com/users/${debouncedUser}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (res.status === 404) throw new Error('រកមិនឃើញ GitHub User នេះទេ!');
+        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+        return res.json();
+      })
+      .then((data) => setProfile(data))
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setError(err.message);
+          setProfile(null);
+        }
+      })
+      .finally(() => setIsLoading(false));
+
+    return () => controller.abort();
+  }, [debouncedUser]);
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg">
+      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+        🐙 GitHub User Search
+      </h2>
+
+      {/* SEARCH INPUT */}
+      <input
+        type="text"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="បញ្ចូល GitHub username..."
+        className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm mb-4"
+      />
+
+      {/* LOADING SKELETON */}
+      {isLoading && (
+        <div className="animate-pulse space-y-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
+          <div className="w-16 h-16 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto" />
+          <div className="h-4 bg-slate-300 dark:bg-slate-600 rounded w-1/2 mx-auto" />
+          <div className="h-3 bg-slate-300 dark:bg-slate-600 rounded w-3/4 mx-auto" />
+        </div>
+      )}
+
+      {/* ERROR STATE */}
+      {error && !isLoading && (
+        <div className="p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* SUCCESS PROFILE CARD */}
+      {profile && !isLoading && !error && (
+        <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-xl text-center">
+          <img
+            src={profile.avatar_url}
+            alt={profile.name}
+            className="w-20 h-20 rounded-full mx-auto shadow-md border-2 border-white dark:border-slate-600"
+          />
+          <h3 className="font-bold text-lg text-slate-800 dark:text-white mt-2">
+            {profile.name || profile.login}
+          </h3>
+          <p className="text-xs text-blue-500 font-mono">@{profile.login}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-300 mt-2">{profile.bio || 'គ្មាន Bio'}</p>
+
+          <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t dark:border-slate-600">
+            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
+              <span className="block text-xs text-slate-400">Public Repos</span>
+              <span className="font-bold text-slate-800 dark:text-white">{profile.public_repos}</span>
+            </div>
+            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
+              <span className="block text-xs text-slate-400">Followers</span>
+              <span className="font-bold text-slate-800 dark:text-white">{profile.followers}</span>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```

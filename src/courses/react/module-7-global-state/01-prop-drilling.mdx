@@ -1,46 +1,86 @@
 ---
-title: The Problem of Prop Drilling in Large Component Trees
-description: សិក្សាពីបញ្ហា Prop Drilling ក្នុង React កម្មវិធីខ្នាតធំ និងដំណោះស្រាយឆ្លាតវៃជាមួយ Context API។
+title: "Prop Drilling Problem & State Management Architecture"
+description: សិក្សាពីបញ្ហា Prop Drilling ក្នុង React Component Trees ខ្នាតធំ — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Component Hierarchy សិន រួចបំប្លែងទៅជា Global State Solution និងពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីនិយមន័យនៃ Prop Drilling
-  - ដឹងពីផលវិបាកលើ Code Maintainability និង Refactoring
-  - ត្រៀមខ្លួនប្រើប្រាស់ `createContext` និង `useContext`
+  - យល់ពីនិយមន័យនៃ Prop Drilling (ការបាញ់ Props កាត់ Components ច្រើនជាន់)
+  - ដឹងពីផលប៉ះពាល់នៃការ Maintain កូដពេល Component Tree មានជម្រៅជ្រៅ
+  - ស្គាល់ដំណោះស្រាយ Component Composition (Passing JSX as Children)
+  - យល់ពីពេលណាដែលត្រូវប្រើ Context API សម្រាប់ Shared Global State
 module: module-7-global-state
 order: 1
 quiz:
-  - question: "តើអ្វីទៅជា Prop Drilling?"
+  - question: "តើ 'Prop Drilling' សំដៅទៅលើអ្វី?"
     options:
-      - "ជាការដំឡើង extension ក្នុង VS Code"
-      - "ជាដំណើរការនៃការបញ្ជូន Props កាត់តាម Intermediate Components ជាច្រើនជាន់ដែលមិនត្រូវការទិន្នន័យនោះសោះ គ្រាន់តែដើម្បីបញ្ជូនទៅឱ្យ Deep Child Component"
-      - "ជាការលុប Props ចោលទាំងអស់"
-      - "ជាកំហុសនៃការសរសេរ CSS"
-    correctAnswer: 2
-    explanation: "Prop Drilling កើតឡើងនៅពេលដែល Intermediate Components (ដូចជា Layout, Sidebar) ត្រូវតែទទួល និង pass props បន្តចុះក្រោម បើទោះបីជាពួកវាមិនប្រើប្រាស់ទិន្នន័យនោះក៏ដោយ។"
+      - "ការបញ្ជូន Props ពី Parent ឆ្លងកាត់ Intermediate Components ជាច្រើនដែលមិនត្រូវការប្រើប្រាស់ Props ទាំងនោះ ដោយគ្រាន់តែធ្វើជាស្ពានចម្លងទៅឱ្យ Deeply Nested Child"
+      - "ការ Download Props ពី Database"
+      - "ការបង្កើត CSS Animation លើ Props"
+      - "ជា Tool មួយក្នុង React DevTools"
+    correctAnswer: 1
+    explanation: "Prop Drilling កើតឡើងនៅពេល Component នៅកណ្តាល (ដូចជា Layout, Container, List) ត្រូវទទួល និងបញ្ជូន Props បន្តទៅមុខទៀត ទោះបីខ្លួនវាមិនត្រូវការទិន្នន័យនោះសោះក៏ដោយ។"
 ---
 
-## 😫 1. បញ្ហា Prop Drilling
-
-នៅពេល Component Tree កាន់តែជ្រៅ ការបញ្ជូន State ចុះក្រោមតាមរយៈ Props ច្រើនជាន់ ធ្វើឱ្យកូដពិបាក Maintain និងងាយ Error ពេល Refactor៖
+## 🕳️ 1. The Prop Drilling Hierarchy Problem
 
 ```mermaid
-flowchart TD
-    subgraph Problem["❌ Prop Drilling: Cluttered Intermediate Components"]
-        direction TB
-        App["&lt;App /&gt; (Holds user state)"] -->|Passes user prop| Layout["&lt;Layout /&gt; (Doesn't use user)"]
-        Layout -->|Passes user prop| Side["&lt;Sidebar /&gt; (Doesn't use user)"]
-        Side -->|Passes user prop| Nav["&lt;NavMenu /&gt; (Doesn't use user)"]
-        Nav -->|Finally uses user!| Avatar["&lt;UserAvatar /&gt; 🎯"]
-    end
+graph TD
+    App["App (Has User State)"] --> Layout["Layout (Doesn't care about User) ⚠️"]
+    Layout --> Sidebar["Sidebar (Doesn't care about User) ⚠️"]
+    Sidebar --> NavItem["NavItem (Doesn't care about User) ⚠️"]
+    NavItem --> UserAvatar["UserAvatar (Needs User! 🎯)"]
 
-    subgraph Solution["✅ React Context API: Direct Teleportation"]
-        direction TB
-        Provider["&lt;UserContext.Provider value={user}&gt;"]
-        Target["&lt;UserAvatar /&gt;<br><code>const user = useContext(UserContext)</code> 🚀"]
-        Provider -.->|"Direct Wireless Access (No Middlemen)"| Target
-    end
+    style App fill:#ebf8ff,stroke:#3182ce,color:#000
+    style Layout fill:#fff5f5,stroke:#e53e3e,color:#000
+    style Sidebar fill:#fff5f5,stroke:#e53e3e,color:#000
+    style NavItem fill:#fff5f5,stroke:#e53e3e,color:#000
+    style UserAvatar fill:#f0fff4,stroke:#38a169,color:#000
+```
 
-    style Problem fill:#fff5f5,stroke:#e53e3e,color:#000
-    style Solution fill:#f0fff4,stroke:#38a169,color:#000
-    style Avatar fill:#fed7d7,stroke:#e53e3e,color:#000
-    style Target fill:#c6f6d5,stroke:#38a169,color:#000
+---
+
+## 💻 2. Prop Drilling in Code vs Direct Context Access
+
+### ❌ Code បង្ហាញពី Prop Drilling Problem:
+
+```jsx
+// App.jsx (Top)
+function App() {
+  const [user] = useState({ name: 'Sok Dara', avatar: '/dara.jpg' });
+  // ⚠️ ត្រូវបាញ់ user កាត់ Layout
+  return <Layout user={user} />;
+}
+
+// Layout.jsx (Middle — មិនត្រូវការ user ទេតែត្រូវបញ្ជូនបន្ត)
+function Layout({ user }) {
+  return <Sidebar user={user} />;
+}
+
+// Sidebar.jsx (Middle — មិនត្រូវការ user ទេតែត្រូវបញ្ជូនបន្ត)
+function Sidebar({ user }) {
+  return <UserAvatar user={user} />;
+}
+
+// UserAvatar.jsx (Target Leaf Node)
+function UserAvatar({ user }) {
+  return <img src={user.avatar} alt={user.name} />;
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `Layout({ user })` និង `Sidebar({ user })`
+   - Components នៅកណ្តាលមិនបានយក `user` មកប្រើប្រាស់ផ្ទាល់ខ្លួនឡើយ តែត្រូវបង្ខំចិត្តសរសេរ `user={user}` គ្រប់ទីកន្លែង។
+2. **Maintenance Nightmare:** ប្រសិនបើយើងចង់ប្តូរឈ្មោះ prop ពី `user` ទៅ `currentUser` យើងត្រូវតាមកែប្រែគ្រប់ intermediate files ទាំងអស់!
+
+---
+
+## 🚀 3. Solution Preview: React Context API
+
+ជាមួយ React Context API ឬ Zustand យើងអាចបង្កើត **Direct Tunnel**:
+
+```jsx
+// 1. UserAvatar អាចទាញយកទិន្នន័យផ្ទាល់ពី Context ដោយមិនឆ្លងកាត់ Layout/Sidebar ឡើយ!
+function UserAvatar() {
+  const user = useUser(); // ✅ Direct Access (0 Intermediate Props!)
+  return <img src={user.avatar} alt={user.name} />;
+}
 ```

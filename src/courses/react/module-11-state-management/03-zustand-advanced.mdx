@@ -1,0 +1,123 @@
+---
+title: Zustand Advanced — Persist Middleware & Store Slices
+description: ស្វែងយល់ពី Zustand Persist Middleware ដើម្បី Auto-save State ទៅកាន់ Browser Storage, DevTools Integration, និង Slice Pattern សម្រាប់រៀបចំ Store ខ្នាតធំ ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - ចេះប្រើ `persist` Middleware ដើម្បី Save State ទៅ LocalStorage ស្វ័យប្រវត្តិ
+  - ចេះជ្រើសរើស Property ជាក់លាក់មក Persist ដោយប្រើ `partialize`
+  - ចេះបំបែក Store ធំៗជាច្រើនឱ្យទៅជា Slices ដាច់ដោយឡែក (Slice Pattern)
+  - ចេះប្រើ Redux DevTools ជាមួយ Zustand សម្រាប់ Debugging
+module: module-11-state-management
+order: 3
+quiz:
+  - question: "តើ Persist Middleware របស់ Zustand ធ្វើអ្វីខ្លះ?"
+    options:
+      - "វាការពារមិនឱ្យ Component Re-render"
+      - "វាស្ទាក់ចាប់ State Update រួច Serialize ទៅកាន់ LocalStorage ដោយស្វ័យប្រវត្តិ និង Rehydrate (Load ត្រឡប់មកវិញ) ពេលបើក App ឡើងវិញ"
+      - "វា encrypt database passwords"
+      - "វាដំណើរការតែលើ Node.js backend ប៉ុណ្ណោះ"
+    correctAnswer: 2
+    explanation: "Persist middleware លុបបំបាត់ការសរសេរ localStorage.setItem / getItem ដោយដៃ។ វានឹង save state updates ស្វ័យប្រវត្តិ និង restore state មកវិញពេល user refresh browser។"
+---
+
+## 💾 1. Persist Middleware (Auto-sync to Storage)
+
+### 💻 Code សម្រាប់តែ Persist Middleware:
+
+```javascript
+// src/store/settingsStore.js
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export const useSettingsStore = create(
+  persist(
+    (set) => ({
+      theme: 'light',
+      language: 'km',
+      sidebarOpen: true,
+
+      setTheme: (theme) => set({ theme }),
+      setLanguage: (lang) => set({ language: lang }),
+      toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+    }),
+    {
+      name: 'app-settings-storage', // Key ឈ្មោះក្នុង LocalStorage
+      // កំណត់តែ property ណាខ្លះដែលចង់ save ចូល storage
+      partialize: (state) => ({
+        theme: state.theme,
+        language: state.language,
+        // sidebarOpen មិនត្រូវបាន save ទេ (នឹង reset ពេល refresh)
+      }),
+    }
+  )
+);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `import { persist } from 'zustand/middleware';`
+   - Import `persist` function ពី Zustand middleware module។
+2. `create(persist((set) => ({ ... }), { name: '...' }))`
+   - រុំព័ទ្ធ (Wrap) Store Definition របស់យើងជាមួយ `persist(...)`។
+3. `name: 'app-settings-storage'`
+   - ឈ្មោះ Key ដែលនឹងត្រូវបង្កើតនៅក្នុង Browser LocalStorage។
+4. `partialize: (state) => ({ theme: state.theme, language: state.language })`
+   - **Selective Persistence:** អនុញ្ញាតឱ្យយើងជ្រើសរើសតែ property ណាដែលសំខាន់មករក្សាទុក ចំណែក temporary UI state ដូចជា `sidebarOpen` មិនបាច់ save ឡើយ។
+
+---
+
+## 🔪 2. The Store Slice Pattern (Organizing Large Apps)
+
+នៅពេល App មានទំហំធំ យើងមិនគួរញាត់ state ទាំងអស់ក្នុង file តែមួយឡើយ។ យើងបំបែកវាជា **Slices**៖
+
+### 💻 Code សម្រាប់បង្កើត Auth Slice:
+
+```javascript
+// src/store/slices/authSlice.js
+export const createAuthSlice = (set) => ({
+  user: null,
+  isAuthenticated: false,
+
+  login: (userData) => set({ user: userData, isAuthenticated: true }),
+  logout: () => set({ user: null, isAuthenticated: false }),
+});
+```
+
+### 💻 Code សម្រាប់បង្កើត Cart Slice:
+
+```javascript
+// src/store/slices/cartSlice.js
+export const createCartSlice = (set, get) => ({
+  cart: [],
+
+  addToCart: (product) =>
+    set((state) => ({ cart: [...state.cart, product] })),
+
+  removeFromCart: (productId) =>
+    set((state) => ({ cart: state.cart.filter((p) => p.id !== productId) })),
+
+  getCartTotal: () =>
+    get().cart.reduce((total, item) => total + item.price, 0),
+});
+```
+
+### 💻 Code សម្រាប់ច្របាច់បញ្ចូលគ្នាក្នុង Root Store:
+
+```javascript
+// src/store/useAppStore.js
+import { create } from 'zustand';
+import { createAuthSlice } from './slices/authSlice';
+import { createCartSlice } from './slices/cartSlice';
+
+export const useAppStore = create((...a) => ({
+  ...createAuthSlice(...a),
+  ...createCartSlice(...a),
+}));
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `createAuthSlice = (set) => ({ ... })`
+   - Slice នីមួយៗទទួល parameter `set` និង `get` ដូច Store ធម្មតា ប៉ុន្តែផ្តោតតែលើមុខងារជាក់លាក់មួយ (Single Responsibility)។
+2. `export const useAppStore = create((...a) => ({ ...createAuthSlice(...a), ...createCartSlice(...a) }))`
+   - ប្រើ Spread Operator `...` ដើម្បីច្របាច់ State និង Actions ទាំងអស់ពីគ្រប់ Slice ឱ្យក្លាយជា **One Unified Root Store** តែមួយគត់។
+3. **Usage:** ក្នុង Component គ្រាន់តែហៅ `useAppStore(s => s.user)` ឬ `useAppStore(s => s.addToCart)` បានយ៉ាងងាយស្រួល។

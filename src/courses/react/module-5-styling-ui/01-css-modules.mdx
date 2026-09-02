@@ -1,61 +1,75 @@
 ---
-title: CSS Modules for Scoped Component Styling
-description: សិក្សាពីរបៀបសរសេរ Scoped CSS ដោយប្រើ CSS Modules (`.module.css`) ដើម្បីការពារបញ្ហាជាន់គ្នានៃ Global Class Names។
+title: "CSS Modules & Scoped Styling in React"
+description: សិក្សាពី CSS Modules ដើម្បីការពារបញ្ហា CSS Class Name Collision ក្នុង React — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML & CSS សិន រួចបំប្លែងទៅជា Scoped CSS Modules និងពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពី Global Namespace Pollution ក្នុង CSS ធម្មតា
-  - ចេះបង្កើត និងនាំចូល `.module.css` ក្នុង React Components
-  - យល់ពីរបៀបដែល Build Tool ធ្វើការ Hash Class Names
+  - យល់ពីបញ្ហា Global CSS Class Collision ក្នុង Single Page Applications
+  - ស្គាល់ទម្រង់ Normal HTML & Standard CSS
+  - ចេះបង្កើត និង Import `[name].module.css` ក្នុង React
+  - យល់ពីរចនាសម្ព័ន្ធ Unique Hashes ដែល Vite បង្កើតដោយស្វ័យប្រវត្តិ
 module: module-5-styling-ui
 order: 1
 quiz:
-  - question: "តើ CSS Modules ការពារកុំឱ្យ Class Name ជាន់គ្នាដោយរបៀបណា?"
+  - question: "តើ CSS Modules ដោះស្រាយបញ្ហាអ្វីខ្លះក្នុង React?"
     options:
-      - "ដោយលុប Class Name ចាស់ចោល"
-      - "ដោយបម្លែង Class Name ទៅជា Unique Hashed String (ឧ. `.Button_btn__a1b2c`) នៅពេល Build"
-      - "ដោយបិទមិនឱ្យប្រើ CSS ក្នុង JavaScript"
-      - "ដោយប្រើប្រាស់តែ Inline Styles"
-    correctAnswer: 2
-    explanation: "CSS Modules ដំណើរការជាមួយ Build Tool ដើម្បី Hash ឈ្មោះ class ឱ្យទៅជា Unique Name ធានាថាកូដ styling មានប្រសិទ្ធភាពតែលើ Component របស់វាប៉ុណ្ណោះ។"
+      - "ការពារបញ្ហា Class Name Collisions (ឈ្មោះ Class ដូចគ្នានៅកន្លែងពីរជាន់គ្នា) ដោយបំប្លែង Class Name នីមួយៗឱ្យទៅជា Unique Hash ដោយស្វ័យប្រវត្តិ"
+      - "លុបបំបាត់ការសរសេរ CSS"
+      - "ធ្វើឱ្យរូបភាពច្បាស់ជាងមុន"
+      - "ដំណើរការតែក្នុង Node.js backend"
+    correctAnswer: 1
+    explanation: "CSS Modules ធ្វើ Scoping លើ CSS classes ដោយបន្ថែម Unique Hash (ឧ. .button_btn__a1b2c) ធ្វើឱ្យ styles មានសុពលភាពតែក្នុង Component ផ្ទាល់ខ្លួនប៉ុណ្ណោះ មិនប៉ះពាល់ដល់ Components ផ្សេងឡើយ។"
 ---
 
-## 🎨 1. Global CSS Issue vs CSS Modules Solution
+## 💥 1. Global CSS Collision vs CSS Modules
 
 ```mermaid
-flowchart TD
-    subgraph GlobalCSSProblem["Global CSS Issue: Class Name Collision"]
-        direction LR
-        G1["Header.jsx (.btn)"] --> GC["Global Scope CSS (.btn { bg: red })"]
-        G2["Card.jsx (.btn)"] --> GC
-        GC -->|Styles Clash 💥| GResult["UI អាចបែកពណ៌ ឬទម្រង់ដោយអចេតនា"]
+graph TD
+    subgraph GlobalCSS["Global CSS Problem ❌"]
+        G1["Header.css -> .btn { background: blue; }"]
+        G2["Footer.css -> .btn { background: red; }"]
+        G1 --> Conflict["Styles Overwrite each other globally! 💥"]
+        G2 --> Conflict
     end
 
-    subgraph CSSModulesSolution["CSS Modules: Automatic Hash Scoping"]
-        direction LR
-        M1["Header.module.css (.btn)"] --> Compile["Build / Hash Compiler"]
-        M2["Card.module.css (.btn)"] --> Compile
-        Compile --> M1Out["<code>.Header_btn__a1b2c</code>"]
-        Compile --> M2Out["<code>.Card_btn__x9y8z</code>"]
-        M1Out --> MResult["Scoped 100% គ្មានការជាន់គ្នា 🎉"]
-        M2Out --> MResult
+    subgraph CSSModules["CSS Modules Solution ✅"]
+        M1["Header.module.css -> .btn__header_x9a"]
+        M2["Footer.module.css -> .btn__footer_z8b"]
+        M1 --> Isolated["Scoped & Unique (Zero Conflicts) 🛡️"]
+        M2 --> Isolated
     end
-
-    style GlobalCSSProblem fill:#fff5f5,stroke:#e53e3e,color:#000
-    style CSSModulesSolution fill:#f0fff4,stroke:#38a169,color:#000
 ```
 
 ---
 
-## 🛠️ 2. ការអនុវត្តក្នុងកូដជាក់ស្តែង
+## 🎨 2. Standard CSS vs CSS Modules
 
-### ក. បង្កើតឯកសារ `Button.module.css`៖
+### 🌐 Normal HTML & Standard CSS:
+
+```html
+<!-- HTML Structure -->
+<button class="primary-btn">ចុចទីនេះ</button>
+
+<!-- style.css (Global Scope) -->
+<style>
+  .primary-btn {
+    background-color: #2563eb;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 12px;
+  }
+</style>
+```
+
+### 💻 React CSS Module Code:
+
 ```css
+/* src/components/Button.module.css */
 .primaryBtn {
   background-color: #2563eb;
-  color: white;
+  color: #ffffff;
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 12px;
+  font-weight: bold;
   border: none;
-  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
 }
@@ -63,22 +77,51 @@ flowchart TD
 .primaryBtn:hover {
   background-color: #1d4ed8;
 }
+```
 
-.dangerBtn {
-  background-color: #dc2626;
+```jsx
+// src/components/Button.jsx
+import styles from './Button.module.css';
+
+export function Button({ children, onClick }) {
+  // ប្រើ styles.primaryBtn ជា JavaScript Object
+  return (
+    <button className={styles.primaryBtn} onClick={onClick}>
+      {children}
+    </button>
+  );
 }
 ```
 
-### ខ. នាំចូលទៅប្រើក្នុង `Button.jsx`៖
-```jsx
-import styles from './Button.module.css';
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
 
-export function ActionButton({ label, isDanger = false }) {
-  // styles គឺជា JS Object ដែលផ្ទុក Hashed Class Names
+1. `import styles from './Button.module.css';`
+   - Import CSS Module ជា JavaScript Object។
+2. `className={styles.primaryBtn}`
+   - React នឹងចង Class Name ទៅកាន់ Unique Hash ដូចជា `Button_primaryBtn__d7a8e` ដែលបង្កើតឡើងដោយ Vite/Webpack។
+3. **Scoped Styling:** ទោះបីជាមាន Component ផ្សេងទៀតមាន class ឈ្មោះ `.primaryBtn` ក៏ដោយ ក៏វាមិនប៉ះពាល់ ឬជាន់គ្នាឡើយ។
+
+---
+
+## 🚀 3. Complete Integrated Component
+
+```jsx
+// src/components/Card.jsx
+import styles from './Card.module.css';
+
+export default function ScopedCard() {
   return (
-    <button className={`${styles.primaryBtn} ${isDanger ? styles.dangerBtn : ''}`}>
-      {label}
-    </button>
+    <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow max-w-sm mx-auto text-center">
+      <h3 className="text-xl font-bold mb-2 text-slate-800 dark:text-white">
+        🛡️ CSS Module Scoping
+      </h3>
+      <p className="text-xs text-slate-400 mb-4">
+        Class ទាំងអស់ត្រូវបាន Scoped យ៉ាងមានសុវត្ថិភាព 100%។
+      </p>
+      <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition">
+        Scoped Action Button
+      </button>
+    </div>
   );
 }
 ```

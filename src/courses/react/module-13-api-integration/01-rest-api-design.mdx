@@ -1,0 +1,118 @@
+---
+title: REST API Design & CORS — What Every Frontend Dev Must Know
+description: ស្វែងយល់ពី RESTful API Conventions, HTTP Methods, Status Codes, CORS Configuration, និងរបៀប Read API Documentation ដើម្បីភ្ជាប់ Frontend ទៅ Backend ដោយ Confident។
+objectives:
+  - ស្គាល់ HTTP Methods (GET, POST, PUT, PATCH, DELETE) និង Use Cases
+  - ស្គាល់ HTTP Status Codes សំខាន់ (200, 201, 400, 401, 403, 404, 500)
+  - យល់ពី CORS — ហេតុអ្វីវាទប់ requests និងរបៀប Fix
+  - ចេះ Read REST API Endpoint Documentation
+module: module-13-api-integration
+order: 1
+quiz:
+  - question: "HTTP Status Code 401 vs 403 — ខុសគ្នាដូចម្តេច?"
+    options:
+      - "ពួកវាដូចគ្នា"
+      - "401 = Unauthorized (You haven't proven who you are — Login required). 403 = Forbidden (Server knows who you are, but you don't have Permission for this resource)"
+      - "401 = Server Error, 403 = Client Error"
+      - "401 = Not Found, 403 = Bad Request"
+    correctAnswer: 2
+    explanation: "401 Unauthorized: 'Who are you?' — Token missing/expired, Login needed. 403 Forbidden: 'I know who you are, but NO.' — Logged in as Student trying to access Admin endpoint។ Frontend should redirect to Login on 401, show 'Access Denied' on 403។"
+---
+
+## 🌐 1. RESTful Endpoint Conventions
+
+```
+Base URL: https://api.myapp.com/v1
+
+Resource: /posts
+
+GET    /posts          → Get all posts (list)
+GET    /posts/:id      → Get single post
+POST   /posts          → Create new post
+PUT    /posts/:id      → Replace entire post
+PATCH  /posts/:id      → Update partial fields
+DELETE /posts/:id      → Delete post
+
+Nested resources:
+GET    /posts/:id/comments    → Get comments for a post
+POST   /posts/:id/comments    → Add comment to a post
+
+Query params:
+GET    /posts?page=1&limit=10&category=react&sort=newest
+```
+
+---
+
+## 📊 2. HTTP Status Code Reference
+
+| Code | Name | When to Use |
+|------|------|-------------|
+| **200** | OK | Successful GET, PUT, PATCH |
+| **201** | Created | Successful POST (resource created) |
+| **204** | No Content | Successful DELETE (no body) |
+| **400** | Bad Request | Invalid input, validation error |
+| **401** | Unauthorized | Not logged in / token expired |
+| **403** | Forbidden | Logged in but insufficient permissions |
+| **404** | Not Found | Resource doesn't exist |
+| **422** | Unprocessable Entity | Valid request but semantic errors |
+| **429** | Too Many Requests | Rate limit exceeded |
+| **500** | Internal Server Error | Server bug (check server logs) |
+
+---
+
+## 🚫 3. CORS — Cross-Origin Resource Sharing
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant React as React App (localhost:5173)
+    participant API as API Server (localhost:3000)
+
+    React->>Browser: fetch('http://localhost:3000/api/posts')
+    Browser->>API: OPTIONS /api/posts (Preflight Request)
+    Note over API: Check: Is localhost:5173 in allowed origins?
+    API-->>Browser: 200 + Access-Control-Allow-Origin: http://localhost:5173 ✅
+    Browser->>API: GET /api/posts (Actual Request)
+    API-->>Browser: 200 + Data
+
+    Note over Browser: If API returns NO CORS headers:
+    Browser--xReact: CORS Error! Request blocked ❌
+```
+
+**Fix on Node/Express backend:**
+```js
+import cors from 'cors';
+
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://myapp.vercel.app'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+```
+
+> **⚠️ Important:** CORS is enforced by the **Browser** — you cannot fix CORS from the React side. The backend server must send the correct `Access-Control-Allow-Origin` header.
+
+---
+
+## 🛠️ 4. React + API Pattern Checklist
+
+```jsx
+// ✅ Always follow this pattern when calling any API:
+const createPost = async (payload) => {
+  const res = await fetch('/api/posts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,    // Auth header
+    },
+    body: JSON.stringify(payload),            // Serialize body
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.message || `HTTP ${res.status}`);
+  }
+
+  return res.json();                          // Parse response
+};
+```

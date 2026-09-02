@@ -1,0 +1,154 @@
+---
+title: TanStack Query (React Query) Fundamentals
+description: រៀនប្រើ TanStack Query v5 សម្រាប់គ្រប់គ្រង Server State — useQuery សម្រាប់ Auto-caching, useMutation សម្រាប់កែប្រែទិន្នន័យ, និង Cache Invalidation ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពី Server State vs Client State
+  - ចេះ Setup QueryClientProvider ក្នុង React App
+  - ចេះប្រើ `useQuery` ជាមួយ queryKey និង queryFn
+  - ចេះប្រើ `useMutation` និង Invalidate Queries ដើម្បី Auto-refresh Data
+module: module-13-api-integration
+order: 3
+quiz:
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ `queryKey` ក្នុង TanStack Query?"
+    options:
+      - "វាជា Password សម្រាប់ Fetch API"
+      - "វាជា Unique Identifier សម្រាប់ Cache — TanStack Query ប្រើ Key នេះដើម្បីដឹងថាទិន្នន័យណាត្រូវ Cache, ពេលណាត្រូវ Refetch, និងពេលណាត្រូវ Invalidate"
+      - "ដើម្បីកំណត់ល្បឿនអ៊ីនធឺណិត"
+      - "វាជា CSS Class"
+    correctAnswer: 2
+    explanation: "queryKey ដូចជា Cache Key (ឧ. ['posts'], ['posts', id])។ ប្រសិនបើ Component ពីរហៅ useQuery ជាមួយ queryKey ដូចគ្នា វានឹងប្រើ Cache រួមគ្នាដោយមិនបាច់បាញ់ Request ទៅ Server ពីរដងឡើយ។"
+---
+
+## 📦 1. Installation & Provider Setup
+
+```bash
+npm install @tanstack/react-query
+```
+
+### 💻 Code សម្រាប់ Provider Setup (`main.jsx`):
+
+```jsx
+// src/main.jsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+// 1. បង្កើត QueryClient instance
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // ទិន្នន័យនៅស្រស់ (Fresh) រយៈពេល ៥ នាទី
+      retry: 2,                 // បើបរាជ័យ ព្យាយាម fetch ម្តងទៀត ២ ដង
+    },
+  },
+});
+
+export default function Root() {
+  return (
+    // 2. ស្រោប Provider លើ App ទាំងមូល
+    <QueryClientProvider client={queryClient}>
+      <App />
+    </QueryClientProvider>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `new QueryClient({...})`
+   - បង្កើត Cache Manager មេ។
+2. `staleTime: 1000 * 60 * 5`
+   - កំណត់ថាទិន្នន័យដែលទាញបាននឹងត្រូវចាត់ទុកថា Fresh រយៈពេល 5 នាទី។ ក្នុងអំឡុង 5 នាទីនេះ បើ user បើក component នេះឡើងវិញ វានឹងបង្ហាញលទ្ធផលពី Cache ភ្លាមៗ 0ms!
+
+---
+
+## 🔍 2. `useQuery` (Fetching with Auto-caching)
+
+### 💻 Code សម្រាប់តែ `useQuery`:
+
+```jsx
+import { useQuery } from '@tanstack/react-query';
+import { postService } from '../services/post.service';
+
+export function PostList() {
+  // ហៅ useQuery
+  const {
+    data: posts,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ['posts'],             // 1. Unique Cache Key
+    queryFn: () => postService.getAll(), // 2. Async Function ដែល fetch data
+  });
+
+  if (isLoading) return <p>⏳ កំពុងទាញទិន្នន័យ...</p>;
+  if (isError) return <p>⚠️ មានបញ្ហា៖ {error.message}</p>;
+
+  return (
+    <ul>
+      {posts.map((p) => (
+        <li key={p.id}>{p.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `queryKey: ['posts']`
+   - កំណត់ Cache Key — TanStack Query នឹងរក្សាទុកលទ្ធផលក្រោម Key នេះ។
+2. `queryFn: () => postService.getAll()`
+   - Function ណាដែល Return Promise។ TanStack Query នឹងគ្រប់គ្រង `isLoading`, `isError`, និង `data` ឱ្យយើងស្វ័យប្រវត្តិ។
+3. **No `useEffect` Needed!** លែងត្រូវការសរសេរ `useEffect` + `useState` ទៀតហើយ!
+
+---
+
+## ✏️ 3. `useMutation` & Cache Invalidation
+
+### 💻 Code សម្រាប់ `useMutation` (Create & Auto-refresh):
+
+```jsx
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { postService } from '../services/post.service';
+
+export function AddPostForm() {
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (newPost) => postService.create(newPost), // 1. API Call
+    
+    // 2. ពេល Server បង្កើត Post ជោគជ័យ
+    onSuccess: () => {
+      // បញ្ជាឱ្យ Query Cache ឈ្មោះ ['posts'] ចាត់ទុកថាហួសសម័យ (Invalidate)
+      // TanStack Query នឹង Auto-refetch បញ្ជី Posts ថ្មីមកវិញភ្លាម!
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: (err) => {
+      alert(`បរាជ័យ៖ ${err.message}`);
+    },
+  });
+
+  const handleAdd = (text) => {
+    createMutation.mutate({ title: text, body: 'Sample content' });
+  };
+
+  return (
+    <button
+      onClick={() => handleAdd('New Post Title')}
+      disabled={createMutation.isPending}
+      className="px-4 py-2 bg-blue-600 text-white rounded-xl"
+    >
+      {createMutation.isPending ? 'កំពុងបង្កើត...' : '➕ បង្កើត Post'}
+    </button>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `useMutation({ mutationFn: ... })`
+   - ប្រើសម្រាប់ប្រតិបត្តិការ Create, Update, ឬ Delete (CUD)។
+2. `queryClient.invalidateQueries({ queryKey: ['posts'] })`
+   - **មន្តអាគមនៃ React Query:** ក្រោយពេល Post ថ្មីត្រូវបានបង្កើត យើងគ្រាន់តែប្រាប់ឱ្យ invalidate `['posts']` នោះ Component ណាដែលកំពុងបង្ហាញ Post List នឹងត្រូវ Refetch ទិន្នន័យថ្មីមកបង្ហាញភ្លាមៗដោយស្វ័យប្រវត្តិ!
+3. `createMutation.isPending`
+   - ផ្តល់ boolean indicator ពេល API call កំពុងដំណើរការ សម្រាប់ disable ប៊ូតុង។

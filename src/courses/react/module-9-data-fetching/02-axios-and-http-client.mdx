@@ -1,0 +1,194 @@
+---
+title: Axios — HTTP Client Setup & Interceptors
+description: រៀនពីរបៀបប្រើប្រាស់ Axios ជំនួស Native Fetch ដោយបំបែកការកំណត់ Base URL, Request/Response Interceptors, និង Automatic Error Handling ជាផ្នែកៗជាមួយការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពីភាពខុសគ្នារវាង Native Fetch និង Axios
+  - ចេះបង្កើត Axios Custom Instance ជាមួយ baseURL និង default headers
+  - ចេះប្រើ Request Interceptor ដើម្បី Auto-inject Auth Token
+  - ចេះប្រើ Response Interceptor ដើម្បី Handle Global Errors (401, 500)
+module: module-9-data-fetching
+order: 2
+quiz:
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ Response Interceptor ក្នុង Axios?"
+    options:
+      - "ធ្វើឱ្យ Request រត់លឿនជាងមុន ១០ ដង"
+      - "អាចចាប់ និងគ្រប់គ្រង Global HTTP Errors (ដូចជា 401 Unauthorized ដើម្បី Auto-logout) នៅកន្លែងតែមួយ ដោយមិនបាច់សរសេរ try/catch ដដែលៗគ្រប់ Component"
+      - "ដើម្បីលុបបំបាត់ការប្រើប្រាស់ Promise"
+      - "វាជា CSS Framework មួយ"
+    correctAnswer: 2
+    explanation: "Response Interceptors ដំណើរការមុនពេល response ទៅដល់ then/catch នៃ component។ វាល្អបំផុតសម្រាប់ Global Error Handling ដូចជា auto-redirect ទៅ login page ពេល token អស់សុពលភាព (401)។"
+---
+
+## 🆚 1. Fetch vs Axios Comparison
+
+| លក្ខណៈពិសេស (Feature) | Native `fetch()` | `axios` |
+|----------------------|------------------|---------|
+| **JSON Data Parsing** | ត្រូវហៅ `await res.json()` | Auto-parse JSON (នៅក្នុង `res.data`) |
+| **HTTP Error Handling** | ត្រូវឆែក `if (!res.ok)` ដោយដៃ | Reject Promise ស្វ័យប្រវត្តលើ status 4xx/5xx |
+| **Base URL Configuration** | គ្មាន | មាន `axios.create({ baseURL })` |
+| **Interceptors** | គ្មាន | មាន Request & Response Interceptors |
+| **Request Cancellation** | ប្រើ AbortController | មាន AbortController & CancelToken |
+
+---
+
+## ⚙️ 2. Creating an Axios Instance
+
+### 💻 Code សម្រាប់តែ Instance Configuration:
+
+```javascript
+// src/api/axiosClient.js
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://jsonplaceholder.typicode.com',
+  timeout: 8000, // បោះបង់បើ Server មិនឆ្លើយតបក្នុង 8 វិនាទី
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+});
+
+export default api;
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `axios.create({...})`
+   - បង្កើត Instance ថ្មីមួយដែលផ្ទុក Configuration ស្តង់ដារសម្រាប់ប្រើទូទាំង App។
+2. `baseURL: 'https://...'`
+   - កំណត់អាសយដ្ឋានមេ។ នៅពេលហៅ `api.get('/users')` វានឹងយក baseURL បូកបន្ថែមជាមួយ `/users` ដោយស្វ័យប្រវត្តិ។
+3. `timeout: 8000`
+   - កំណត់រយៈពេលអតិបរមា (Milliseconds) ក្នុងការរង់ចាំ។ បើ Server គាំង វានឹង cancel request មិនឱ្យ user រង់ចាំរហូតឡើយ។
+4. `headers: { ... }`
+   - កំណត់ Default Headers ដូចជា `Content-Type: application/json` ទៅគ្រប់ request ទាំងអស់។
+
+---
+
+## 📤 3. Request Interceptor (Auto-attach Token)
+
+### 💻 Code សម្រាប់តែ Request Interceptor:
+
+```javascript
+api.interceptors.request.use(
+  (config) => {
+    // 1. ទាញយក Auth Token ពី LocalStorage
+    const token = localStorage.getItem('access_token');
+
+    // 2. ប្រសិនបើមាន token ត្រូវបញ្ចូលក្នុង Authorization Header
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config; // បន្តដំណើរការ Request ទៅ Server
+  },
+  (error) => {
+    return Promise.reject(error); // ចាប់ error ករណី request setup បរាជ័យ
+  }
+);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `api.interceptors.request.use(...)`
+   - ស្ទាក់ចាប់ Request គ្រប់ពេល មុនពេលវាត្រូវបានបញ្ជូនចេញទៅកាន់ Server។
+2. `localStorage.getItem('access_token')`
+   - ទាញយក JWT token របស់ User ដែលបាន Login រួច។
+3. `config.headers.Authorization = 'Bearer ...'`
+   - បន្ថែម Bearer Token ទៅក្នុង Headers ស្វ័យប្រវត្តិ — Developer មិនបាច់សរសេរ header នេះដដែលៗគ្រប់កន្លែងឡើយ។
+4. `return config;`
+   - បញ្ជូន config ដែលបានកែប្រែរួចទៅឱ្យ Axios បន្តការ Request។
+
+---
+
+## 📥 4. Response Interceptor (Global Error Handling)
+
+### 💻 Code សម្រាប់តែ Response Interceptor:
+
+```javascript
+api.interceptors.response.use(
+  (response) => {
+    // 1. បើ Server ឆ្លើយតប 2xx ជោគជ័យ ផ្ញើ data ទៅមុខទៀត
+    return response;
+  },
+  (error) => {
+    // 2. ពិនិត្យ status code បើ 401 (Unauthorized / Token Expired)
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem('access_token');
+      window.location.href = '/login'; // Auto-redirect ទៅ Login Page
+    }
+
+    // 3. បង្កើត custom error message ងាយយល់
+    const customMessage = error.response?.data?.message || error.message || 'Server Error';
+    return Promise.reject(new Error(customMessage));
+  }
+);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `api.interceptors.response.use(...)`
+   - ស្ទាក់ចាប់ Response មុនពេលវាទៅដល់ `.then()` ឬ `try/catch` ក្នុង Component។
+2. `if (error.response.status === 401)`
+   - ស្វែងរកករណីដែល User អស់សុពលភាព Token (Session Expired)។
+3. `localStorage.removeItem(...) & window.location.href = '/login'`
+   - សម្អាត Token ចាស់ចោល និងនាំ User ទៅកាន់ Login Page ភ្លាមៗដោយស្វ័យប្រវត្តិ។
+4. `return Promise.reject(new Error(customMessage))`
+   - Forward error ដែលស្អាត និងមានន័យច្បាស់លាស់ទៅឱ្យ Component handle បន្ត។
+
+---
+
+## 🚀 5. Using Axios in a React Component
+
+### 💻 Code សម្រាប់ប្រើប្រាស់ក្នុង Component:
+
+```jsx
+import { useState, useEffect } from 'react';
+import api from '../api/axiosClient';
+
+export default function PostManager() {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        // ហៅ GET request ទៅកាន់ /posts (baseURL ត្រូវបានបញ្ចូលស្វ័យប្រវត្តិ)
+        const response = await api.get('/posts?_limit=5');
+        // Axios parse json ស្វ័យប្រវត្តដាក់ក្នុង response.data
+        setPosts(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  if (isLoading) return <p className="text-center p-4">⏳ Loading...</p>;
+  if (error) return <p className="text-center text-red-500 p-4">⚠️ {error}</p>;
+
+  return (
+    <div className="max-w-lg mx-auto p-4 space-y-3">
+      <h2 className="text-xl font-bold text-slate-800 dark:text-white">📰 Axios Posts</h2>
+      {posts.map((post) => (
+        <div key={post.id} className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+          <h3 className="font-bold text-sm text-slate-800 dark:text-white capitalize">{post.title}</h3>
+          <p className="text-xs text-slate-500 mt-1">{post.body}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const response = await api.get('/posts?_limit=5');`
+   - ខ្លី និងងាយស្រួល — មិនបាច់សរសេរ full URL ហើយក៏មិនបាច់សរសេរ headers ឬ `await res.json()` ឡើយ។
+2. `setPosts(response.data);`
+   - ទិន្នន័យ Response របស់ Server គឺស្ថិតនៅក្នុង `response.data` ផ្ទាល់តែម្តង។
+3. `catch (err)`
+   - Error ទាំងអស់ (Network Error, 404, 500) នឹងធ្លាក់ចូល `catch` ដោយស្វ័យប្រវត្តិ មិនបាច់ឆែក `res.ok` ដោយដៃឡើយ។

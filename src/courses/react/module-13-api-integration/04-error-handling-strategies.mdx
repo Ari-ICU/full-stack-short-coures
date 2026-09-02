@@ -1,0 +1,172 @@
+---
+title: Error Handling Strategies — Boundaries, Toasts & Retry
+description: រៀនបង្កើត Robust Error Handling System — React Error Boundaries, Global Toast Notifications, Axios Error Interceptors, និង Retry Logic ដើម្បីបង្ហាញ Error Messages ប្រកបដោយ Professional UX។
+objectives:
+  - ចេះ Implement React Error Boundary Component
+  - ចេះ Build Toast Notification System ដោយ useContext
+  - ចេះ Classify Error Types (Network, HTTP, Validation) ហើយ Handle ខុសៗ
+  - ចេះ Implement Retry with Exponential Backoff
+module: module-13-api-integration
+order: 4
+quiz:
+  - question: "ហេតុអ្វី Error Boundary ត្រូវ Class Component ក្នុង React?"
+    options:
+      - "Class Components ដំណើរការបានលឿនជាង"
+      - "React Error Boundary ត្រូវការ lifecycle method `componentDidCatch` និង `getDerivedStateFromError` ដែលបច្ចុប្បន្ន Hooks APIs មិនទាន់ Support — React team ប្រកាសនឹង Add Hook Support ក្នុងខាងមុខ"
+      - "Functional Components មិន Support JSX"
+      - "Class Components ល្អជាង Functional"
+    correctAnswer: 2
+    explanation: "React Error Boundaries ស្ទប់ Uncaught Errors ក្នុង Component tree។ ពួកវា ត្រូវការ `getDerivedStateFromError` (to render fallback UI) និង `componentDidCatch` (to log errors) — lifecycle methods ដែលមាន Class Components ប៉ុណ្ណោះ ក្នុង React v18។"
+---
+
+## 🛡️ 1. React Error Boundary
+
+```jsx
+// src/components/ErrorBoundary.jsx
+import { Component } from 'react';
+
+export class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log to error tracking service (e.g., Sentry)
+    console.error('Error caught by boundary:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-6">
+          <div className="max-w-sm text-center bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-red-100 dark:border-red-900">
+            <p className="text-5xl mb-4">💥</p>
+            <h2 className="text-xl font-black text-slate-800 dark:text-white mb-2">Something went wrong!</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-mono bg-slate-50 dark:bg-slate-900 p-2 rounded-lg">
+              {this.state.error?.message}
+            </p>
+            <button
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Usage:
+// <ErrorBoundary>
+//   <App />
+// </ErrorBoundary>
+```
+
+---
+
+## 🍞 2. Toast Notification System
+
+```jsx
+// src/context/ToastContext.jsx
+import { createContext, useContext, useState, useCallback } from 'react';
+
+const ToastContext = createContext(null);
+
+export function ToastProvider({ children }) {
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = useCallback((message, type = 'info', duration = 4000) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, duration);
+  }, []);
+
+  const removeToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+
+  const STYLES = {
+    success: 'bg-green-600',
+    error: 'bg-red-600',
+    warning: 'bg-yellow-500',
+    info: 'bg-blue-600',
+  };
+
+  const ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+
+  return (
+    <ToastContext.Provider value={{ addToast }}>
+      {children}
+
+      {/* Toast Container */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`${STYLES[toast.type]} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 max-w-xs pointer-events-auto animate-in slide-in-from-right-4`}
+          >
+            <span>{ICONS[toast.type]}</span>
+            <p className="text-sm font-semibold flex-1">{toast.message}</p>
+            <button onClick={() => removeToast(toast.id)} className="opacity-70 hover:opacity-100 font-black">✕</button>
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  const ctx = useContext(ToastContext);
+  if (!ctx) throw new Error('useToast must be inside ToastProvider');
+  return ctx.addToast;
+}
+```
+
+```jsx
+// Usage anywhere in the app:
+import { useToast } from '../context/ToastContext';
+
+function SaveButton() {
+  const toast = useToast();
+
+  const handleSave = async () => {
+    try {
+      await postsService.create({ title: 'New Post', body: '...' });
+      toast('Post created successfully! 🎉', 'success');
+    } catch (err) {
+      toast(`Failed: ${err.message}`, 'error');
+    }
+  };
+
+  return <button onClick={handleSave}>Save</button>;
+}
+```
+
+---
+
+## 🔄 3. Error Classification & Retry
+
+```js
+// src/lib/errorHandler.js
+export function classifyError(error) {
+  if (!navigator.onLine) return { type: 'NETWORK', message: 'No internet connection' };
+  if (error.message.includes('timeout')) return { type: 'TIMEOUT', message: 'Request timed out' };
+  if (error.response) {
+    const status = error.response.status;
+    if (status === 400) return { type: 'VALIDATION', message: error.response.data.message };
+    if (status === 401) return { type: 'AUTH', message: 'Please login again' };
+    if (status === 403) return { type: 'PERMISSION', message: 'Access denied' };
+    if (status === 404) return { type: 'NOT_FOUND', message: 'Resource not found' };
+    if (status >= 500) return { type: 'SERVER', message: 'Server error, try again later' };
+  }
+  return { type: 'UNKNOWN', message: error.message };
+}
+```

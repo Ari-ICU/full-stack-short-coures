@@ -1,0 +1,188 @@
+---
+title: "Mini Project — Write Tests for Login Form & Data Component"
+description: អនុវត្ត Testing Skills ដោយ Write Test Suite ពេញលេញ ក្នុង Login Form Component ជាមួយ Validation Tests, Submit Tests, Loading State Tests, និង Data-Fetching Component Tests ជាមួយ Mocked fetch()។
+objectives:
+  - ចេះ Write Complete Test Suite ដោយ Cover Happy Path + Error Cases
+  - ចេះ Test Form Validation Logic ជាមួយ userEvent.type + submit
+  - ចេះ Test Async Data Components ជាមួយ Mocked fetch + waitFor
+  - ចេះ Achieve High Test Coverage ដោយ Cover ​ Edge Cases
+module: module-14-testing
+order: 4
+quiz:
+  - question: "Test Coverage 100% មានន័យថា Code Correct ១០០% ឬ?"
+    options:
+      - "Yes — 100% Coverage = No Bugs"
+      - "No — Coverage ប្រាប់ Lines of Code ដែលត្រូវ Execute ក្នុង Tests ប៉ុណ្ណោះ — Tests False Positives (ត្រូវ Test ដោយ Assert ​ Wrong Expectations) ឬ Missing Edge Cases ក៏អាចផ្ដល់ 100% Coverage ហើយ Still Bug"
+      - "100% Coverage ខ្ពស់ពេកបង្ករ Problems"
+      - "Coverage Report ជំនួស Code Review"
+    correctAnswer: 2
+    explanation: "Coverage = Code Execution, NOT Correctness। 100% Coverage ប្រាប់ All Code Lines Execute ក្នុង Tests — ប៉ុន្តែ Tests អាច Execute Wrong Assertions ឬ Miss Edge Cases។ Good Tests = Right Assertions + Edge Cases Coverage + Meaningful Test Names > Coverage Number។"
+---
+
+## 🧪 Project: Complete Test Suite
+
+### File Structure
+```
+src/
+├── components/
+│   ├── LoginForm.jsx
+│   ├── LoginForm.test.jsx   ← We write this
+│   ├── UserCard.jsx
+│   └── UserCard.test.jsx    ← We write this
+```
+
+---
+
+### LoginForm.test.jsx
+
+```jsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import LoginForm from './LoginForm';
+
+// Helper: Fill and submit the form
+async function fillAndSubmit(email, password) {
+  const emailInput = screen.getByLabelText(/email/i);
+  const passwordInput = screen.getByLabelText(/password/i);
+  const submitBtn = screen.getByRole('button', { name: /login/i });
+
+  if (email) await userEvent.type(emailInput, email);
+  if (password) await userEvent.type(passwordInput, password);
+  await userEvent.click(submitBtn);
+}
+
+describe('LoginForm', () => {
+  // ── Rendering Tests ──────────────────────────────────────
+  describe('Rendering', () => {
+    it('renders all form elements', () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+    });
+
+    it('inputs start empty', () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      expect(screen.getByLabelText(/email/i)).toHaveValue('');
+      expect(screen.getByLabelText(/password/i)).toHaveValue('');
+    });
+  });
+
+  // ── Validation Tests ─────────────────────────────────────
+  describe('Validation', () => {
+    it('shows email error when submitting empty', async () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      await userEvent.click(screen.getByRole('button', { name: /login/i }));
+      expect(screen.getByText(/email.*required/i)).toBeInTheDocument();
+    });
+
+    it('shows error for invalid email format', async () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      await fillAndSubmit('notanemail', 'password123');
+      expect(screen.getByText(/valid email/i)).toBeInTheDocument();
+    });
+
+    it('shows password error when password is empty', async () => {
+      render(<LoginForm onSubmit={vi.fn()} />);
+      await fillAndSubmit('test@example.com', '');
+      expect(screen.getByText(/password.*required/i)).toBeInTheDocument();
+    });
+  });
+
+  // ── Submission Tests ─────────────────────────────────────
+  describe('Submission', () => {
+    it('calls onSubmit with correct data on valid form', async () => {
+      const mockSubmit = vi.fn().mockResolvedValue(undefined);
+      render(<LoginForm onSubmit={mockSubmit} />);
+      await fillAndSubmit('user@example.com', 'secret123');
+
+      await waitFor(() => {
+        expect(mockSubmit).toHaveBeenCalledWith({
+          email: 'user@example.com',
+          password: 'secret123',
+        });
+      });
+    });
+
+    it('disables submit button while loading', async () => {
+      const mockSubmit = vi.fn(() => new Promise(() => {})); // Never resolves
+      render(<LoginForm onSubmit={mockSubmit} />);
+      await fillAndSubmit('user@example.com', 'secret123');
+      expect(screen.getByRole('button', { name: /login/i })).toBeDisabled();
+    });
+
+    it('shows server error when onSubmit rejects', async () => {
+      const mockSubmit = vi.fn().mockRejectedValue(new Error('Invalid credentials'));
+      render(<LoginForm onSubmit={mockSubmit} />);
+      await fillAndSubmit('user@example.com', 'wrong');
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials');
+      });
+    });
+  });
+});
+```
+
+---
+
+### UserCard.test.jsx (Async Fetch)
+
+```jsx
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import UserCard from './UserCard';
+
+describe('UserCard', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('shows skeleton while loading', () => {
+    fetch.mockImplementation(() => new Promise(() => {}));
+    render(<UserCard userId={1} />);
+    expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
+  });
+
+  it('renders user data after fetch', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ id: 1, name: 'Leanne Graham', email: 'lg@april.biz', company: { name: 'Romaguera' } }),
+    });
+
+    render(<UserCard userId={1} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Leanne Graham')).toBeInTheDocument();
+      expect(screen.getByText('lg@april.biz')).toBeInTheDocument();
+    });
+  });
+
+  it('shows error message on network failure', async () => {
+    fetch.mockRejectedValueOnce(new Error('Network Error'));
+    render(<UserCard userId={1} />);
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Network Error');
+    });
+  });
+});
+```
+
+```bash
+# Run with verbose output
+npx vitest --reporter=verbose
+
+# ✓ LoginForm > Rendering > renders all form elements
+# ✓ LoginForm > Rendering > inputs start empty
+# ✓ LoginForm > Validation > shows email error when submitting empty
+# ✓ LoginForm > Validation > shows error for invalid email format
+# ✓ LoginForm > Submission > calls onSubmit with correct data
+# ✓ LoginForm > Submission > disables submit button while loading
+# ✓ LoginForm > Submission > shows server error
+# ✓ UserCard > shows skeleton while loading
+# ✓ UserCard > renders user data after fetch
+# ✓ UserCard > shows error message on network failure
+# Test Files: 2 passed (10 tests)
+```

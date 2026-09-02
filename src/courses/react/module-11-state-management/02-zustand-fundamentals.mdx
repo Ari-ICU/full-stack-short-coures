@@ -1,0 +1,155 @@
+---
+title: Zustand Fundamentals — Create Store & Selectors
+description: រៀនប្រើប្រាស់ Zustand ដើម្បីគ្រប់គ្រង Global State — ការបង្កើត Store ដោយ create(), ការប្រើ Selectors ដើម្បីការពារ Re-render, និង Async Actions ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - ចេះដំឡើង និងបង្កើត Zustand Global Store ដំបូង
+  - ចេះប្រើ Store Selectors ដើម្បី Subscribe តែផ្នែកដែលត្រូវការ
+  - ចេះសរសេរ Synchronous Actions និង Async Actions ក្នុង Store
+  - យល់ពីអត្ថប្រយោជន៍ដែល Zustand មិនត្រូវការ Context Provider ស្រោបពីលើ App
+module: module-11-state-management
+order: 2
+quiz:
+  - question: "ហេតុអ្វីគួរប្រើ Selector (ឧ. state => state.count) ជំនួសឱ្យ useStore() ទាំងមូល?"
+    options:
+      - "ដើម្បីសរសេរ Code ឱ្យខ្លីជាង"
+      - "Selector ធានាថា Component នឹង Re-render ត្រឹមតែពេល State Slice ជាក់លាក់នោះផ្លាស់ប្តូរ មិនមែន Re-render ពេល State ផ្សេងៗទៀតក្នុង Store ប្រែប្រួលឡើយ"
+      - "ព្រោះ Zustand បង្ខំឱ្យប្រើ បើមិនប្រើនឹងបោះ Error"
+      - "ដើម្បីសន្សំទំហំ Hard Drive"
+    correctAnswer: 2
+    explanation: "useStore() ដោយគ្មាន selector នឹង subscribe លើ store ទាំងមូល។ ការប្រើ useStore((s) => s.count) ធ្វើឱ្យ component តាមដានតែ count ប៉ុណ្ណោះ ជៀសវាង unnecessary re-renders លើ component ផ្សេងទៀត។"
+---
+
+## 📦 1. Installation
+
+```bash
+npm install zustand
+```
+
+---
+
+## 🏗️ 2. Creating a Zustand Store
+
+### 💻 Code សម្រាប់បង្កើត Counter Store:
+
+```javascript
+// src/store/counterStore.js
+import { create } from 'zustand';
+
+export const useCounterStore = create((set, get) => ({
+  // 1. Initial States
+  count: 0,
+  step: 1,
+
+  // 2. Synchronous Actions
+  increment: () => set((state) => ({ count: state.count + state.step })),
+  decrement: () => set((state) => ({ count: state.count - state.step })),
+  reset: () => set({ count: 0 }),
+  setStep: (newStep) => set({ step: newStep }),
+
+  // 3. Computed Getter (ប្រើ get() ដើម្បីអាន state ផ្សេងៗ)
+  getDoubleCount: () => get().count * 2,
+}));
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `import { create } from 'zustand';`
+   - Import function មេ `create` ពី Zustand library។
+2. `export const useCounterStore = create((set, get) => ({ ... }));`
+   - បង្កើត Custom Hook ឈ្មោះ `useCounterStore` ដែលផ្តល់ឱ្យនូវ parameter ពីរ៖ `set` (សម្រាប់កែប្រែ state) និង `get` (សម្រាប់អាន state បច្ចុប្បន្ន)។
+3. `increment: () => set((state) => ({ count: state.count + state.step }))`
+   - Function `set` ធ្វើការ Shallow Merge លើ State។ យើងមិនចាំបាច់សរសេរ `...state` ដោយដៃឡើយ — គ្រាន់តែបញ្ជូន property ដែលចង់កែប្រែជាការស្រេច។
+4. `reset: () => set({ count: 0 })`
+   - កំណត់តម្លៃ `count: 0` ឡើងវិញដោយផ្ទាល់។
+
+---
+
+## 🎯 3. Consuming Store with Selectors
+
+### 💻 Code សម្រាប់ Component A (Display Only):
+
+```jsx
+import { useCounterStore } from '../store/counterStore';
+
+export function CounterDisplay() {
+  // ✅ Selective Subscription: Component នេះ Re-render តែពេល 'count' ប្តូរ!
+  const count = useCounterStore((state) => state.count);
+
+  return (
+    <div className="text-4xl font-black text-blue-600 text-center py-4">
+      {count}
+    </div>
+  );
+}
+```
+
+### 💻 Code សម្រាប់ Component B (Controls Only):
+
+```jsx
+import { useCounterStore } from '../store/counterStore';
+
+export function CounterControls() {
+  // ទាញយក Actions (Functions ក្នុង Zustand មិនប្រែប្រួលទេ ដូច្នេះគ្មាន Re-render ឡើយ)
+  const increment = useCounterStore((state) => state.increment);
+  const decrement = useCounterStore((state) => state.decrement);
+  const reset = useCounterStore((state) => state.reset);
+
+  return (
+    <div className="flex justify-center gap-2">
+      <button onClick={decrement} className="px-3 py-1 bg-red-500 text-white rounded-lg font-bold">
+        −
+      </button>
+      <button onClick={reset} className="px-3 py-1 bg-slate-200 text-slate-700 rounded-lg text-sm">
+        Reset
+      </button>
+      <button onClick={increment} className="px-3 py-1 bg-green-500 text-white rounded-lg font-bold">
+        +
+      </button>
+    </div>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `useCounterStore((state) => state.count)`
+   - នេះជា **Selector Function**។ Component នឹង Re-render លុះត្រាតែ `state.count` ប្រែប្រួលប៉ុណ្ណោះ។
+2. `useCounterStore((state) => state.increment)`
+   - ទាញយក Action function — ដោយសារ Action មិនដែលផ្លាស់ប្តូរ reference ទេ Component `CounterControls` នឹងមិនដែល Re-render ឥតប្រយោជន៍ឡើយ!
+3. **No `<Provider>` Needed:** អ្នកអាចប្រើ Components ទាំងពីរនេះនៅទីតាំងណាក៏បានក្នុង App ដោយមិនបាច់រុំព័ទ្ធដោយ Provider Tag ឡើយ។
+
+---
+
+## 🌐 4. Async Actions in Zustand
+
+### 💻 Code សម្រាប់ Async Store:
+
+```javascript
+// src/store/userStore.js
+import { create } from 'zustand';
+
+export const useUserStore = create((set) => ({
+  users: [],
+  isLoading: false,
+  error: null,
+
+  // Async Action
+  fetchUsers: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await fetch('https://jsonplaceholder.typicode.com/users');
+      const data = await res.json();
+      set({ users: data, isLoading: false }); // Update data ពេលជោគជ័យ
+    } catch (err) {
+      set({ error: err.message, isLoading: false }); // Update error ពេលបរាជ័យ
+    }
+  },
+}));
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `fetchUsers: async () => { ... }`
+   - ក្នុង Zustand យើងអាចសរសេរ `async/await` នៅក្នុង Store Action ដោយផ្ទាល់ មិនបាច់ត្រូវការ Redux Thunk ឬ Middleware បន្ថែមឡើយ។
+2. `set({ isLoading: true })` $\rightarrow$ `set({ users: data, isLoading: false })`
+   - គ្រប់គ្រង State Lifecycle បានយ៉ាងងាយស្រួល និងស្អាតបាត។

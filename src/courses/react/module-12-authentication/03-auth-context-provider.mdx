@@ -1,0 +1,122 @@
+---
+title: AuthContext Provider — Global Auth State
+description: រៀនបង្កើត AuthContext Provider ពេញលេញដែលគ្រប់គ្រង User State, Token Storage, Auto-Rehydration, និង Logout Action ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - ចេះរៀបចំ AuthContext និង Provider Structure ក្នុង React
+  - ចេះ Rehydrate User State ពី localStorage ពេលទំព័រទើបបើក
+  - យល់ពីសារៈសំខាន់នៃ `isLoading` State ក្នុង AuthContext
+  - ចេះបង្កើត `useAuth()` Custom Hook សម្រាប់ Consume Auth Context
+module: module-12-authentication
+order: 3
+quiz:
+  - question: "ហេតុអ្វី AuthContext ត្រូវមាន `isLoading: true` នៅពេលទើបបើក App ដំបូង?"
+    options:
+      - "ដើម្បីបង្ហាញ Loading Animation ឱ្យស្អាត"
+      - "ដើម្បីទប់ស្កាត់ Protected Route មិនឱ្យ Redirect User ទៅ Login Page មុនពេល App បានអាន Token ពី LocalStorage ចប់សព្វគ្រប់"
+      - "វាជាច្បាប់របស់ CSS"
+      - "ដើម្បីឱ្យ Token មិនផុតកំណត់"
+    correctAnswer: 2
+    explanation: "ពេលទើប Refresh ទំព័រ State ក្នុង memory គឺ null។ AuthContext ត្រូវចំណាយពេលអាន Storage សិន។ បើគ្មាន isLoading ទេ Protected Route នឹងស្មានថា User មិនទាន់ Login រួច kick ទៅកាន់ Login Page ខុសភ្លាមៗ (Flash of Redirect)។"
+---
+
+## 🏗️ 1. Auth Flow Architecture
+
+```mermaid
+graph TD
+    subgraph AuthContextTree["Auth Context Structure"]
+        AP["<AuthProvider> (Wraps App)"]
+        AC["AuthContext State:\n{ user, token, isLoading, login(), logout() }"]
+    end
+
+    AP --> AC
+    AC --> C1["<ProtectedRoute>"]
+    AC --> C2["<Navbar> (User Avatar)"]
+    AC --> C3["<LoginPage>"]
+```
+
+---
+
+## 💻 2. Building AuthContext Step by Step
+
+### 💻 Code សម្រាប់តែ AuthContext Definition:
+
+```jsx
+// src/context/AuthContext.jsx
+import { createContext, useContext, useState, useEffect } from 'react';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // 1. ចាប់ផ្តើមដោយ true
+
+  // 2. Rehydrate State ពី LocalStorage ពេល Mount
+  useEffect(() => {
+    try {
+      const savedToken = localStorage.getItem('auth_token');
+      const savedUser = localStorage.getItem('auth_user');
+
+      if (savedToken && savedUser) {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (err) {
+      console.error('Failed to restore auth session:', err);
+    } finally {
+      setIsLoading(false); // 3. អានរួចរាល់ទើបបិទ loading
+    }
+  }, []);
+
+  // 4. Action: Login
+  const login = (userData, authToken) => {
+    setUser(userData);
+    setToken(authToken);
+    localStorage.setItem('auth_token', authToken);
+    localStorage.setItem('auth_user', JSON.stringify(userData));
+  };
+
+  // 5. Action: Logout
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+  };
+
+  const value = {
+    user,
+    token,
+    isLoading,
+    isAuthenticated: !!user && !!token,
+    login,
+    logout,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+// 6. Custom Hook ងាយស្រួល Consume
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [isLoading, setIsLoading] = useState(true);`
+   - ចាប់ផ្តើមដោយ `true` ដើម្បីផ្តល់សញ្ញាថា App កំពុងឆែកមើល Storage ថា User ធ្លាប់ Login ទុកពីមុនឬអត់។
+2. `useEffect(() => { ... const savedToken = localStorage.getItem(...) }, []);`
+   - ទាញយក Token និង User Object ពី Browser Storage មក restore ចូល React State វិញ។
+3. `setIsLoading(false);`
+   - បន្ទាប់ពី Restore រួចរាល់ យើងបិទ `isLoading = false` ដើម្បីឱ្យ Route Protection អាចធ្វើការសម្រេចចិត្តបានត្រឹមត្រូវ។
+4. `const login = (userData, authToken) => { ... }`
+   - Update ទាំង React State និង Storage ដំណាលគ្នា។
+5. `const logout = () => { ... }`
+   - សម្អាត State និង Storage ទាំងអស់ចោលដើម្បីបញ្ចប់ Session។
+6. `export function useAuth()`
+   - បង្កើត Custom Hook សម្រាប់ឱ្យ Components ផ្សេងៗប្រើប្រាស់ដោយមិនបាច់ import `AuthContext` និង `useContext` ដោយដៃឡើយ។

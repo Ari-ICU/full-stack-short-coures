@@ -1,0 +1,158 @@
+---
+title: "Mini Project — Product Search with Custom Hooks"
+description: អនុវត្ត Custom Hooks ច្រើន (useFetch, useDebounce, useLocalStorage) រួមគ្នា — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា Live Search, Persistent Wishlist, និង Tri-State Rendering ជាមួយការពន្យល់មួយជួរៗ។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Product Search Grid & Filters
+  - ចេះ Compose Custom Hooks ច្រើនក្នុង Component តែមួយ
+  - អនុវត្ត useFetch + useDebounce ដើម្បី Efficient Live Search
+  - អនុវត្ត useLocalStorage ដើម្បី Persist Wishlist ឆ្លងកាត់ Page Reload
+module: module-10-custom-hooks
+order: 5
+quiz:
+  - question: "អ្វីជា អត្ថប្រយោជន៍ធំបំផុត នៃការ Compose Custom Hooks ច្រើន?"
+    options:
+      - "Code ដំណើរការបានលឿនជាង"
+      - "Component Body ស្អាត ងាយ Test នីមួយៗដោយឯករាជ្យ ហើយ Logic អាចប្រើបានឡើងវិញ (Reuse) ក្នុង Components ដទៃ"
+      - "ធ្វើឱ្យ Bundle Size តូចជាង"
+      - "ការពារ Security Vulnerabilities"
+    correctAnswer: 2
+    explanation: "Custom Hook Composition ធ្វើឱ្យ Component Body ស្អាត ក្លាយជា High-Level Description of Intent ('fetch products, debounce search, persist wishlist') ជំនួស Low-level implementation details ហើយ Logic នីមួយៗ (useFetch, useDebounce) អាច Test ដោយ Isolated។"
+---
+
+## 🛍️ 1. Normal HTML Product Catalog Structure
+
+មុននឹងបន្ថែម Custom Hooks នេះជារចនាសម្ព័ន្ធ HTML ធម្មតានៃទំព័រស្វែងរកផលិតផល៖
+
+```html
+<!-- HTML Product Search Layout -->
+<div class="product-page">
+  <!-- Search & Category Filters -->
+  <div class="filters-row">
+    <input type="text" placeholder="ស្វែងរកផលិតផល..." />
+    <select>
+      <option value="all">គ្រប់ប្រភេទ</option>
+      <option value="electronics">Electronics</option>
+    </select>
+  </div>
+
+  <!-- Product Cards Grid -->
+  <div class="products-grid">
+    <div class="product-card">
+      <img src="/jacket.jpg" alt="Jacket" />
+      <h4>Winter Jacket</h4>
+      <p class="price">$89.99</p>
+      <button type="button" class="btn-wishlist">❤️ Wishlist</button>
+    </div>
+  </div>
+</div>
+```
+
+---
+
+## 🪝 2. Composing Custom Hooks in React
+
+### 💻 Code សម្រាប់តែ Custom Hooks Integration:
+
+```jsx
+// 1. Debounce user search input
+const [query, setQuery] = useState('');
+const debouncedQuery = useDebounce(query, 400);
+
+// 2. Fetch API products
+const { data: products, isLoading, error } = useFetch('https://fakestoreapi.com/products');
+
+// 3. Persistent Wishlist ក្នុង LocalStorage
+const [wishlist, setWishlist] = useLocalStorage('user-wishlist', []);
+
+// Toggle Wishlist Item
+const toggleWishlist = (id) => {
+  setWishlist((prev) =>
+    prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+  );
+};
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `useDebounce(query, 400)`
+   - ពន្យារការ Filter និង Fetch រហូតទាល់តែ User ឈប់វាយ។
+2. `useFetch('https://fakestoreapi.com/products')`
+   - គ្រប់គ្រង State `products`, `isLoading`, និង `error` ដោយស្វ័យប្រវត្តិ។
+3. `useLocalStorage('user-wishlist', [])`
+   - រក្សាទុក IDs នៃផលិតផលដែល User ចុច ❤️ ក្នុង Storage មិនបាត់បង់ពេល Refresh។
+
+---
+
+## 🚀 3. Complete Integrated Product Search Project
+
+```jsx
+import { useState } from 'react';
+import { useFetch } from '../hooks/useFetch';
+import { useDebounce } from '../hooks/useDebounce';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export default function ProductSearchApp() {
+  const [query, setQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 400);
+
+  const { data: products, isLoading, error } = useFetch('https://fakestoreapi.com/products');
+  const [wishlist, setWishlist] = useLocalStorage('saved-wishlist', []);
+
+  const toggleWishlist = (id) => {
+    setWishlist((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const filtered = (products || []).filter((p) =>
+    p.title.toLowerCase().includes(debouncedQuery.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">🛍️ Product Catalog</h2>
+        <span className="text-xs bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold">
+          ❤️ Wishlist ({wishlist.length})
+        </span>
+      </div>
+
+      {/* SEARCH BAR */}
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="ស្វែងរកផលិតផល..."
+        className="w-full px-4 py-2 border rounded-xl mb-6 dark:bg-slate-800 dark:text-white text-sm"
+      />
+
+      {/* STATES */}
+      {isLoading && <p className="text-center py-8 text-slate-400">⏳ កំពុងទាញយកទិន្នន័យ...</p>}
+      {error && <p className="text-center py-8 text-red-500">⚠️ {error}</p>}
+
+      {/* GRID */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {filtered.map((item) => {
+          const isFavorited = wishlist.includes(item.id);
+          return (
+            <div key={item.id} className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border flex flex-col justify-between">
+              <div>
+                <h4 className="font-bold text-sm text-slate-800 dark:text-white line-clamp-1">{item.title}</h4>
+                <p className="text-blue-600 font-black mt-1">${item.price}</p>
+              </div>
+              <button
+                onClick={() => toggleWishlist(item.id)}
+                className={`mt-4 py-1.5 rounded-xl text-xs font-bold transition ${
+                  isFavorited ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {isFavorited ? '❤️ Favorited' : '🤍 Add to Wishlist'}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+```

@@ -1,77 +1,77 @@
 ---
-title: URL Parameters (useParams) & Programmatic Navigation (useNavigate)
-description: សិក្សាពី Dynamic Routing ជាមួយ `useParams` (`/products/:id`) និងការបញ្ជា Navigation តាមរយៈកូដ JavaScript ជាមួយ `useNavigate`។
+title: "Dynamic Routes & URL Parameters — useParams & useNavigate"
+description: សិក្សាពីការបង្កើត Dynamic Routes ជាមួយ URL Parameters (`:id`) — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Query URL សិន រួចបំប្លែងទៅជា React Router `useParams` និង Programmatic Navigation `useNavigate` ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះបង្កើត Dynamic Route Parameters ដូចជា `/products/:productId`
-  - ចេះទាញយក Parameters តាមរយៈ `useParams()` Hook
-  - ចេះប្រើ `useNavigate()` សម្រាប់ Redirects និង Form Submission Navigation
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML URLs ជាមួយ Dynamic IDs
+  - ចេះកំណត់ Dynamic Segment Path (ឧ. `/products/:id`)
+  - ចេះទាញយក URL Parameters ដោយប្រើ `useParams()` Hook
+  - ចេះបញ្ជា Navigation តាម Program (Code) ដោយប្រើ `useNavigate()`
 module: module-6-routing
 order: 4
 quiz:
-  - question: "ប្រសិនបើ Route ត្រូវបានកំណត់ជា `<Route path='/users/:userId' element={<UserProfile />} />` តើត្រូវទាញយក `userId` ដោយរបៀបណា?"
+  - question: "តើ `useParams()` ត្រឡប់ទិន្នន័យជាប្រភេទអ្វី?"
     options:
-      - "`const { userId } = useParams();`"
-      - "`const userId = window.userId;`"
-      - "`const userId = props.url;`"
-      - "`const userId = useRoute();`"
+      - "JavaScript Object ដែលមាន Keys ត្រូវគ្នានឹងឈ្មោះ Dynamic Segments ក្នុង Path (ឧ. { id: '123' })"
+      - "JavaScript Array"
+      - "String តែមួយ"
+      - "Boolean"
     correctAnswer: 1
-    explanation: "`useParams()` Hook របស់ React Router នឹង return object មួយដែលផ្ទុក key-value pairs នៃ dynamic segment ក្នុង URL (ឧ. `{ userId: '123' }`)។"
+    explanation: "useParams() ផ្តល់ Object មួយដែលផ្ទុក key-value pairs នៃ dynamic parameters ពី URL (ឧ. /users/:userId -> { userId: '42' })។"
 ---
 
-## 🚏 1. Dynamic Routing Architecture
+## 📍 1. Dynamic Route Matching
 
 ```mermaid
-flowchart LR
-    A["User clicks '/products/42'"] --> Router["React Router Pattern Matching"]
-    Router --> Match["Matches <code>/products/:productId</code>"]
-    Match --> Component["&lt;ProductDetail /&gt;"]
-    Component --> Hook["<code>const { productId } = useParams(); // '42'</code>"]
-    Hook --> Fetch["<code>fetch('/api/products/42')</code> 🚀"]
-
-    style A fill:#ebf8ff,stroke:#3182ce,color:#000
-    style Router fill:#fffaf0,stroke:#dd6b20,color:#000
-    style Component fill:#f0fff4,stroke:#38a169,color:#000
-    style Fetch fill:#faf5ff,stroke:#805ad5,color:#000
+graph LR
+    URL["Browser URL: /courses/react-101"] --> Router["React Router Pattern: /courses/:courseSlug"]
+    Router --> Hook["useParams() -> { courseSlug: 'react-101' }"]
+    Hook --> Comp["CourseDetailPage Component"]
 ```
 
 ---
 
-## 🛠️ 2. កូដគំរូ: `useParams` & `useNavigate`
+## 🔗 2. URL Parameters in Code
+
+### 🌐 Normal HTML Links:
+
+```html
+<!-- HTML Product Links with Dynamic IDs -->
+<a href="/products/1">iPhone 15</a>
+<a href="/products/2">MacBook Pro</a>
+```
+
+### 💻 React Router Code:
 
 ```jsx
+// src/pages/ProductDetail.jsx
 import { useParams, useNavigate } from 'react-router-dom';
 
-export default function ProductDetail() {
-  const { productId } = useParams();
+export function ProductDetail() {
+  // 1. ទាញយក dynamic parameter ':id' ពី URL
+  const { id } = useParams();
+  
+  // 2. Navigation Hook
   const navigate = useNavigate();
 
-  const handleBuyNow = () => {
-    // ធ្វើការទូទាត់ប្រាក់...
-    alert("ការទិញបានជោគជ័យ!");
-    
-    // បញ្ជា Redirect ទៅកាន់ទំព័រជោគជ័យ
-    navigate('/checkout/success', { replace: true });
-  };
-
   return (
-    <div className="p-6 max-w-md mx-auto border rounded-2xl bg-white shadow-sm">
-      <button 
-        onClick={() => navigate(-1)} // ត្រឡប់ក្រោយ (Go Back)
-        className="text-sm text-blue-600 font-bold mb-4"
+    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow">
+      <h3 className="font-bold">📱 ព័ត៌មានលម្អិតទំនិញ ID: #{id}</h3>
+      <button
+        onClick={() => navigate('/products')} // Programmatic Navigation
+        className="mt-3 px-3 py-1 bg-slate-100 dark:bg-slate-700 text-xs rounded font-bold"
       >
         ← ត្រឡប់ក្រោយ
-      </button>
-
-      <h2 className="text-2xl font-bold">ព័ត៌មានលម្អិតផលិតផល #{productId}</h2>
-      <p className="text-gray-600 my-4">នេះជាទំព័របង្ហាញព័ត៌មានជាក់លាក់តាម ID...</p>
-
-      <button 
-        onClick={handleBuyNow}
-        className="w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700"
-      >
-        ទិញឥឡូវនេះ
       </button>
     </div>
   );
 }
 ```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const { id } = useParams();`
+   - ទាញយកតម្លៃពី URL Path។ បើ User បើក `/products/42` នោះ `id` នឹងមានតម្លៃស្មើ `'42'`។
+2. `const navigate = useNavigate();`
+   - ផ្តល់ Function សម្រាប់ប្តូរទំព័រតាមរយៈ JavaScript Code (ដូចជា ក្រោយ submit form ឬចុចប៊ូតុង Back)។
+3. `navigate('/products')`
+   - នាំ User ត្រឡប់ទៅកាន់បញ្ជី Products វិញភ្លាមៗ។

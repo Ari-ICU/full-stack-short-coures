@@ -1,0 +1,126 @@
+---
+title: Building useLocalStorage — Persistent State Hook
+description: សាងសង់ Custom Hook useLocalStorage(key, initialValue) ដែល Sync React State ជាមួយ Browser localStorage ដោយស្វ័យប្រវត្តិ ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពី Lazy Initial State ក្នុងការទាញតម្លៃដំបូងពី localStorage
+  - ចេះ Parse និង Stringify JSON ទិន្នន័យដោយមាន Error Handling Safe
+  - ចេះ Sync React State ទៅកាន់ localStorage រាល់ពេល State ផ្លាស់ប្តូរ
+  - ចេះយក useLocalStorage ទៅអនុវត្តជាមួយ Theme Toggle និង Persistent Cart
+module: module-10-custom-hooks
+order: 3
+quiz:
+  - question: "ហេតុអ្វីត្រូវ JSON.stringify() Data មុនពេល Write ទៅ localStorage?"
+    options:
+      - "ដើម្បីធ្វើឱ្យ Storage ប្រើ Memory តិចជាង"
+      - "localStorage Store តែ Strings — JSON.stringify() បំប្លែង Objects/Arrays/Numbers ទៅជា String format ដើម្បី Persist បានត្រឹមត្រូវ"
+      - "ដើម្បីការពារ Hackers"
+      - "ដើម្បី Compress Data"
+    correctAnswer: 2
+    explanation: "Browser localStorage API អាច Store Values ជា Strings ប៉ុណ្ណោះ។ JSON.stringify() បំប្លែង JavaScript Values (Objects, Arrays, Booleans, Numbers) ទៅជា JSON String ហើយ JSON.parse() ប្ដូរ String ត្រឡប់ទៅជា JavaScript Value ពេល Read ចេញ។"
+---
+
+## 🗄️ 1. Native localStorage API vs React Hook
+
+```javascript
+// ❌ បញ្ហារបស់ Native localStorage ក្នុង React:
+// ការកែប្រែ localStorage.setItem() មិន trigger ឱ្យ React Component Re-render ឡើយ!
+
+// ✅ ដំណោះស្រាយ: useLocalStorage Custom Hook
+// រួមបញ្ចូល React useState + useEffect ដើម្បី Sync ទាំង React UI និង LocalStorage ដំណាលគ្នា!
+```
+
+---
+
+## 💻 2. Building `useLocalStorage` Hook
+
+### 💻 Code សម្រាប់តែ `useLocalStorage` Hook:
+
+```javascript
+// src/hooks/useLocalStorage.js
+import { useState, useEffect } from 'react';
+
+export function useLocalStorage(key, initialValue) {
+  // 1. Lazy Initialization: អានទិន្នន័យពី localStorage តែម្តងគត់នៅពេល mount
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      // បើមានក្នុង localStorage យកមក parse បើគ្មានយក initialValue
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.warn(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
+
+  // 2. Sync ទៅកាន់ localStorage រាល់ពេល key ឬ storedValue ប្រែប្រួល
+  useEffect(() => {
+    try {
+      if (storedValue === undefined) {
+        window.localStorage.removeItem(key);
+      } else {
+        window.localStorage.setItem(key, JSON.stringify(storedValue));
+      }
+    } catch (error) {
+      console.warn(`Error setting localStorage key "${key}":`, error);
+    }
+  }, [key, storedValue]);
+
+  // 3. Return ជា Array ដូច useState [value, setValue]
+  return [storedValue, setStoredValue];
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [storedValue, setStoredValue] = useState(() => { ... });`
+   - ប្រើ **Lazy Initial State** (បញ្ជូន callback function ចូលក្នុង useState)។ វិធីនេះធានាថា `localStorage.getItem` នឹងត្រូវបាន execute តែមួយដងគត់ពេល component ដំបូង មិនមែនរាល់ពេល render ឡើយ (Performance Optimization)។
+2. `item ? JSON.parse(item) : initialValue;`
+   - ប្រសិនបើរកឃើញ key ក្នុង Storage យើង parse JSON string មកជា object/array វិញ។ បើគ្មាន យកតម្លៃ default `initialValue`។
+3. `useEffect(() => { ... }, [key, storedValue]);`
+   - រាល់ពេលដែល Developer ហៅ `setStoredValue(newValue)` React នឹង run Effect នេះដើម្បីសរសេរទិន្នន័យថ្មីចូល `localStorage.setItem(key, JSON.stringify(...))` ដោយស្វ័យប្រវត្តិ។
+4. `return [storedValue, setStoredValue];`
+   - Return ជា Array Tuple `[value, setValue]` ដើម្បីឱ្យ developer ប្រើដូច `useState` ធម្មតា ១០០%។
+
+---
+
+## 🛠️ 3. Practical Example: Dark Mode Theme Switcher
+
+### 💻 Code សម្រាប់ Component:
+
+```jsx
+import { useLocalStorage } from '../hooks/useLocalStorage';
+
+export default function ThemeSwitcher() {
+  // ប្រើ Hook ដូច useState ប៉ុន្តែទិន្នន័យនៅជាប់រហូតទោះ Refresh ក៏ដោយ!
+  const [theme, setTheme] = useLocalStorage('app-theme', 'light');
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  return (
+    <div className={`p-6 rounded-2xl transition ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900 shadow-md'}`}>
+      <h3 className="font-bold text-lg mb-2">
+        {theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+      </h3>
+      <p className="text-sm opacity-75 mb-4">
+        សាកល្បង Refresh Page មើល! Theme របស់អ្នកនឹងនៅរក្សាដដែល។
+      </p>
+      <button
+        onClick={toggleTheme}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition"
+      >
+        ប្តូរទៅ {theme === 'light' ? 'Dark' : 'Light'}
+      </button>
+    </div>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [theme, setTheme] = useLocalStorage('app-theme', 'light');`
+   - ចុះឈ្មោះ state ឈ្មោះ `theme` ភ្ជាប់ជាមួយ localStorage key `'app-theme'`។ បើទើបបើកដំបូង តម្លៃវាគឺ `'light'`។
+2. `setTheme(prev => ...)`
+   - ពេលចុចប៊ូតុង `setTheme` នឹង update state ក្នុង React UI ផង និង save ចូល browser storage ផង។
+3. ពេល User ចុច Refresh (`F5`) Browser នឹងទាញតម្លៃចុងក្រោយពី `'app-theme'` មកបង្ហាញភ្លាមៗ។

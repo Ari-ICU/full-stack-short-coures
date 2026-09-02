@@ -1,0 +1,147 @@
+---
+title: Protected Routes with React Router v6
+description: រៀនបង្កើត ProtectedRoute Component ដើម្បីការពារទំព័រ Private (ដូចជា Dashboard, Profile) ដោយបង្វែរ Unauthenticated Users ទៅកាន់ Login Page ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពីរបៀបដំណើរការនៃ Protected Route Component ក្នុង React Router v6
+  - ចេះគ្រប់គ្រង Auth Loading State ដើម្បីការពារ Flash of Login Redirect
+  - ចេះរក្សាទុក Intended Location (URL ដើម) ដើម្បី Redirect ត្រឡប់មកវិញក្រោយ Login
+  - ចេះ Implement Role-based Authorization (Admin only pages)
+module: module-12-authentication
+order: 4
+quiz:
+  - question: "ហេតុអ្វី `ProtectedRoute` ត្រូវឆែក `isLoading` មុនគេបង្អស់?"
+    options:
+      - "ដើម្បីធ្វើឱ្យ CSS Animation ដំណើរការ"
+      - "ដើម្បីកុំឱ្យ Component Redirect ទៅ Login Page ខុស ក្នុងអំឡុងពេល AuthContext កំពុងអាន Token ពី LocalStorage"
+      - "វាជា TypeScript Requirement"
+      - "ដើម្បីសន្សំ Bandwidth"
+    correctAnswer: 2
+    explanation: "ពេល Refresh ទំព័រ AuthContext ចំណាយពេលអាន Storage (isLoading=true)។ បើគ្មានការឆែក isLoading ទេ User ដែលមាន Token ស្រាប់នឹងត្រូវ Redirect ចេញទៅ Login Page ភ្លាមៗដោយអយុត្តិធម៌។"
+---
+
+## 🛡️ 1. Building `ProtectedRoute` Component
+
+### 💻 Code សម្រាប់តែ `ProtectedRoute` Wrapper:
+
+```jsx
+// src/components/ProtectedRoute.jsx
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+export function ProtectedRoute({ children, requiredRole }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const location = useLocation(); // ចងចាំ URL បច្ចុប្បន្ន
+
+  // 1. ប្រសិនបើ AuthContext កំពុងពិនិត្យ Token នៅឡើយ សូមបង្ហាញ Spinner
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p className="animate-pulse text-slate-500">🔒 កំពុងផ្ទៀងផ្ទាត់សិទ្ធិ...</p>
+      </div>
+    );
+  }
+
+  // 2. ប្រសិនបើមិនទាន់ Login: Redirect ទៅ /login និងភ្ជាប់ URL ចាស់តាម state
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // 3. ប្រសិនបើទំព័រនោះត្រូវការ Role ជាក់លាក់ (ឧ. 'admin')
+  if (requiredRole && user?.role !== requiredRole) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  // 4. ប្រសិនបើត្រឹមត្រូវទាំងអស់ អនុញ្ញាតឱ្យ Render Private Page
+  return children;
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const location = useLocation();`
+   - ទាញយក URL Path បច្ចុប្បន្នដែល User កំពុងព្យាយាមបើក (ឧ. `/dashboard/settings`)។
+2. `if (isLoading) return <LoadingSpinner />;`
+   - **ចំណុចការពារ Flash Redirect:** រង់ចាំរហូតដល់ `isLoading = false` ទើបធ្វើការសម្រេចចិត្ត។
+3. `<Navigate to="/login" state={{ from: location }} replace />`
+   - បញ្ជូន User ទៅ Login Page ព្រមទាំងភ្ជាប់ `state={{ from: location }}` ដើម្បីឱ្យក្រោយពេល Login ជោគជ័យ យើងអាច Redirect User ត្រឡប់មកកាន់ទំព័រដើមដែលគាត់ចង់ចូលវិញ។
+4. `if (requiredRole && user?.role !== requiredRole)`
+   - ពិនិត្យ Role-based Permission (បើទំព័រនោះសម្រាប់តែ Admin តែ User ធម្មតាចូល នឹងត្រូវបង្វែរទៅកាន់ទំព័រ 403 Forbidden)។
+5. `return children;`
+   - បង្ហាញ Component កូន (Private Page Content) ជូន User។
+
+---
+
+## 🗺️ 2. Route Configuration in `App.jsx`
+
+### 💻 Code សម្រាប់ Routes Setup:
+
+```jsx
+// src/App.jsx
+import { Routes, Route } from 'react-router-dom';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+// Public Pages
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+
+// Private Pages
+import DashboardPage from './pages/DashboardPage';
+import AdminSettings from './pages/AdminSettings';
+
+export default function App() {
+  return (
+    <Routes>
+      {/* 🌐 Public Routes (នរណាក៏ចូលបាន) */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+
+      {/* 🔒 Protected Routes (ទាមទារ Login) */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 👑 Role-based Protected Route (ទាមទារ Admin Role) */}
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <AdminSettings />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `<ProtectedRoute><DashboardPage /></ProtectedRoute>`
+   - រុំ `<DashboardPage />` ជាកូន (Children) នៃ `<ProtectedRoute>`។ មុនពេល `DashboardPage` អាចបង្ហាញបាន `ProtectedRoute` នឹងដំណើរការ Logic ផ្ទៀងផ្ទាត់សិទ្ធិជាមុនសិន។
+2. `requiredRole="admin"`
+   - បញ្ជូន prop ដើម្បីបញ្ជាក់ថា Route នេះត្រូវការ Role ជា Admin។
+
+---
+
+## 🔄 3. Redirect Back After Login Logic
+
+### 💻 Code សម្រាប់ LoginPage:
+
+```javascript
+// ក្នុង LoginPage.jsx ក្រោយ Login ជោគជ័យ
+const location = useLocation();
+const navigate = useNavigate();
+
+// ទាញយក URL ដើម បើគ្មានយក default ជា /dashboard
+const from = location.state?.from?.pathname || '/dashboard';
+
+const handleLoginSuccess = (user, token) => {
+  login(user, token);
+  navigate(from, { replace: true }); // នាំទៅទំព័រដើមវិញភ្លាមៗ!
+};
+```

@@ -1,10 +1,11 @@
 ---
 title: DOM Manipulation & Imperative Actions using useRef
-description: សិក្សាពីការប្រើប្រាស់ `useRef` Hook សម្រាប់ផ្ទុក Mutable Values ដោយមិន Re-render និងការគ្រប់គ្រង Real DOM Elements (Focus, Scroll, Video Playback)។
+description: សិក្សាពីការប្រើប្រាស់ `useRef` Hook សម្រាប់ផ្ទុក Mutable Values ដោយមិន Re-render និងការគ្រប់គ្រង Real DOM Elements (Focus, Scroll, Video Playback) ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
 objectives:
-  - "យល់ពីភាពខុសគ្នារវាង useState (Trigger Re-render) និង useRef (No Re-render)"
-  - "ចេះភ្ជាប់ ref prop ទៅលើ Real DOM Elements"
-  - "ចេះបញ្ជា Imperative Actions ដូចជា Input Auto-focus, Scrolling, និង Storing Timers"
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Input & Video មុនពេលបញ្ជាដោយ JS
+  - យល់ពីភាពខុសគ្នារវាង useState (Trigger Re-render) និង useRef (No Re-render)
+  - ចេះភ្ជាប់ ref prop ទៅលើ Real DOM Elements ក្នុង React
+  - ចេះបញ្ជា Imperative Actions ដូចជា Input Auto-focus, Scrolling, និង Storing Timers
 module: module-8-performance-patterns
 order: 3
 quiz:
@@ -18,7 +19,7 @@ quiz:
     explanation: "`useRef` គឺជា JavaScript Object ធម្មតាមួយ `{ current: initialValue }` ដែលតម្លៃរបស់វាត្រូវបាន persist រវាងគ្រប់ renders ដោយការផ្លាស់ប្តូរតម្លៃ `ref.current = newValue` នឹងមិនបង្កឱ្យ Component ត្រូវ Re-render ឡើយ។"
 ---
 
-## 🔍 1. `useState` vs `useRef` Architecture
+## 🔍 1. `useState` vs `useRef` Comparison
 
 ```mermaid
 flowchart TD
@@ -40,59 +41,139 @@ flowchart TD
 
 ---
 
-## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង: Focus Input & Video Control
+## 🎯 2. Use Case 1: Input Auto-Focus
+
+### 🌐 Normal HTML Structure:
+
+```html
+<!-- HTML Input & Button ធម្មតា -->
+<div class="search-box">
+  <input type="text" id="search-input" placeholder="វាយស្វែងរក..." />
+  <button type="button" onclick="document.getElementById('search-input').focus()">
+    🔍 Focus Input
+  </button>
+</div>
+```
+
+### 💻 React Code (ជាមួយ `useRef`):
 
 ```jsx
 import { useRef } from 'react';
 
-export default function RefDemo() {
+export function InputFocusDemo() {
+  // 1. បង្កើត Ref object ចាប់ផ្តើមដោយ null
   const inputRef = useRef(null);
-  const videoRef = useRef(null);
 
+  // 2. Handler បញ្ជាឱ្យ Focus
   const handleFocus = () => {
-    // បញ្ជា DOM ផ្ទាល់ឱ្យ Focus នៅលើ Input
-    inputRef.current.focus();
-  };
-
-  const handlePlayVideo = () => {
-    videoRef.current.play();
-  };
-
-  const handlePauseVideo = () => {
-    videoRef.current.pause();
+    inputRef.current.focus(); // ហៅ DOM method ដោយផ្ទាល់
   };
 
   return (
-    <div className="p-8 max-w-md mx-auto space-y-6">
-      {/* 1. DOM Focus */}
-      <div className="p-5 border rounded-2xl bg-white shadow-sm space-y-3">
-        <h3 className="font-bold">Input Focus Control</h3>
-        <input 
-          ref={inputRef}
-          type="text" 
-          placeholder="ចុចប៊ូតុងដើម្បី Focus ខ្ញុំ..." 
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-        <button onClick={handleFocus} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold text-sm">
-          Focus Input 🎯
-        </button>
-      </div>
+    <div>
+      {/* 3. ភ្ជាប់ Ref ទៅកាន់ Input DOM Node */}
+      <input ref={inputRef} type="text" placeholder="វាយស្វែងរក..." />
+      <button onClick={handleFocus}>🔍 Focus Input</button>
+    </div>
+  );
+}
+```
 
-      {/* 2. Video Player Imperative Play/Pause */}
-      <div className="p-5 border rounded-2xl bg-white shadow-sm space-y-3">
-        <h3 className="font-bold">Video Player Control</h3>
-        <video 
-          ref={videoRef}
-          width="100%" 
-          className="rounded-lg"
-          src="https://www.w3schools.com/html/mov_bbb.mp4" 
-        />
-        <div className="flex gap-2">
-          <button onClick={handlePlayVideo} className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-sm">Play</button>
-          <button onClick={handlePauseVideo} className="px-4 py-2 bg-rose-600 text-white rounded-lg font-bold text-sm">Pause</button>
-        </div>
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const inputRef = useRef(null);`
+   - បង្កើត Object `{ current: null }` ដែល React នឹងរក្សាទុកក្នុង Memory រវាង Render ទាំងអស់។
+2. `<input ref={inputRef} ... />`
+   - ភ្ជាប់ `ref` prop ទៅកាន់ Element — ពេល React Render ចប់ `inputRef.current` នឹងចង្អុលទៅកាន់ Real DOM Element `<input>`។
+3. `inputRef.current.focus();`
+   - ហៅ native DOM method `.focus()` ដោយផ្ទាល់ (Imperative Action) ដោយមិនបង្កឱ្យ Component Re-render ឡើយ។
+
+---
+
+## 🎬 3. Use Case 2: Custom Video Player Controls
+
+### 🌐 Normal HTML Structure:
+
+```html
+<!-- HTML5 Video Player ធម្មតា -->
+<video id="my-video" src="/promo.mp4" width="400"></video>
+<div class="controls">
+  <button onclick="document.getElementById('my-video').play()">Play</button>
+  <button onclick="document.getElementById('my-video').pause()">Pause</button>
+</div>
+```
+
+### 💻 React Code (ជាមួយ `useRef`):
+
+```jsx
+import { useRef } from 'react';
+
+export function VideoPlayer() {
+  const videoRef = useRef(null);
+
+  const handlePlay = () => videoRef.current.play();
+  const handlePause = () => videoRef.current.pause();
+
+  return (
+    <div className="video-card">
+      <video ref={videoRef} src="https://www.w3schools.com/html/mov_bbb.mp4" width="320" />
+      <div className="flex gap-2 mt-2">
+        <button onClick={handlePlay} className="px-3 py-1 bg-green-600 text-white rounded">Play</button>
+        <button onClick={handlePause} className="px-3 py-1 bg-red-600 text-white rounded">Pause</button>
       </div>
     </div>
   );
 }
 ```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const videoRef = useRef(null);`
+   - ចាប់យក DOM reference នៃ `<video>` tag។
+2. `videoRef.current.play()` និង `videoRef.current.pause()`
+   - បញ្ជា HTML5 Media API ដោយផ្ទាល់ — សាមញ្ញ លឿន និងគ្មាន Re-render overhead ឡើយ។
+
+---
+
+## ⏱️ 4. Use Case 3: Storing Timers & Mutable Values (No Re-render)
+
+### 💻 Code សម្រាប់ Timer Ref:
+
+```jsx
+import { useState, useRef } from 'react';
+
+export function Stopwatch() {
+  const [seconds, setSeconds] = useState(0);
+  // ផ្ទុក Timer ID ក្នុង Ref (ដើម្បីកុំឱ្យ Timer ID update បង្ក Re-render)
+  const timerRef = useRef(null);
+
+  const startTimer = () => {
+    if (timerRef.current !== null) return;
+    timerRef.current = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerRef.current);
+    timerRef.current = null; // Reset ref
+  };
+
+  return (
+    <div>
+      <h3 className="text-2xl font-bold">{seconds}s</h3>
+      <button onClick={startTimer}>Start</button>
+      <button onClick={stopTimer}>Stop</button>
+    </div>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const timerRef = useRef(null);`
+   - រក្សាទុក `setInterval` ID។ ប្រសិនបើយើងប្រើ `useState` សម្រាប់ Timer ID វានឹង Re-render ឥតប្រយោជន៍។
+2. `timerRef.current = setInterval(...)`
+   - កែប្រែតម្លៃ `.current` ដោយផ្ទាល់ (Silent Mutation)។
+3. `clearInterval(timerRef.current)`
+   - លុប Timer ចេញដើម្បីបញ្ឈប់ Stopwatch។

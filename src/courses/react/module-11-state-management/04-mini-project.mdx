@@ -1,0 +1,193 @@
+---
+title: "Mini Project — E-Commerce Cart with Zustand"
+description: សាងសង់ E-Commerce Shopping Cart ពេញលេញ ដោយចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Card & Summary សិន រួចបំប្លែងទៅជា Zustand Persist Store — Product Grid, Add/Remove/Quantity, និង Order Summary។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML សម្រាប់ Product Grid និង Cart Sidebar
+  - អនុវត្ត Zustand Persist Store ក្នុង Shopping Cart
+  - ចេះ Implement Cart Logic (add, remove, quantity update)
+  - ចេះ Compute Cart Total Price & Items ចេញពី Store State
+module: module-11-state-management
+order: 4
+quiz:
+  - question: "ហេតុអ្វី Zustand ល្អជាង Context API សម្រាប់ Shopping Cart?"
+    options:
+      - "Zustand ស្ថិតក្នុង React Library ផ្ទាល់"
+      - "Zustand Persist Middleware Save Cart ទៅ localStorage ដោយស្វ័យប្រវត្តិ, Selective Subscriptions ការពារ Product Grid Re-render ពេល Cart Summary ផ្លាស់ប្ដូរ, ហើយគ្មាន Provider Tree ឡើយ"
+      - "Zustand ជំនួស useState ទាំងអស់"
+      - "Zustand ដំណើរការ Faster ដោយ Machine Learning"
+    correctAnswer: 2
+    explanation: "Zustand ផ្ដល់ Cart Persistence ដោយ persist middleware (zero localStorage code), Optimized Re-renders ដោយ Selectors (Product grid មិន Re-render ពេល cart summary update), និង Clean Architecture ដោយ Slice Pattern — ១ Store ច្បាស់ ១ Responsibility។"
+---
+
+## 🛒 1. Normal HTML Shopping Cart Layout
+
+មុននឹងបន្ថែម Zustand Global Store នេះជារចនាសម្ព័ន្ធ HTML ធម្មតារវាង Product Card និង Cart Summary Sidebar៖
+
+```html
+<!-- HTML Layout: Products Grid + Cart Sidebar -->
+<div class="shop-container">
+  <!-- Left Column: Product Items -->
+  <div class="products-grid">
+    <div class="product-card">
+      <div class="emoji">⚛️</div>
+      <h4>React Pro Course</h4>
+      <p class="price">$49.00</p>
+      <button type="button" class="btn-add">Add to Cart</button>
+    </div>
+  </div>
+
+  <!-- Right Column: Cart Sidebar -->
+  <aside class="cart-sidebar">
+    <h3>🛒 Shopping Cart (1)</h3>
+    <ul class="cart-items">
+      <li>
+        <span>React Pro Course</span>
+        <div class="qty-controls">
+          <button>-</button>
+          <span>1</span>
+          <button>+</button>
+        </div>
+        <span class="item-price">$49.00</span>
+      </li>
+    </ul>
+    <div class="total-row">
+      <strong>Total:</strong>
+      <strong>$49.00</strong>
+    </div>
+  </aside>
+</div>
+```
+
+---
+
+## 📦 2. Zustand Cart Store Logic
+
+### 💻 Code សម្រាប់តែ Zustand Store:
+
+```javascript
+// src/store/cartStore.js
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+export const useCartStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
+
+      // 1. ADD ITEM
+      addItem: (product) =>
+        set((state) => {
+          const exists = state.items.find((i) => i.id === product.id);
+          if (exists) {
+            return {
+              items: state.items.map((i) =>
+                i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+              ),
+            };
+          }
+          return { items: [...state.items, { ...product, qty: 1 }] };
+        }),
+
+      // 2. UPDATE QUANTITY / REMOVE
+      updateQty: (id, delta) =>
+        set((state) => ({
+          items: state.items
+            .map((i) => (i.id === id ? { ...i, qty: i.qty + delta } : i))
+            .filter((i) => i.qty > 0), // បើ qty <= 0 លុបចេញពី Cart
+        })),
+
+      // 3. REMOVE ITEM
+      removeItem: (id) =>
+        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+
+      // 4. GETTERS
+      getTotalPrice: () =>
+        get().items.reduce((sum, item) => sum + item.price * item.qty, 0),
+    }),
+    { name: 'shopping-cart-storage' }
+  )
+);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `persist((set, get) => ({ ... }), { name: '...' })`
+   - Store នឹង Auto-save រាល់ Item ចូល LocalStorage ស្វ័យប្រវត្តិ។
+2. `exists ? map(...) : [...items, { ...product, qty: 1 }]`
+   - បើទំនិញមានក្នុង Cart រួចហើយ បន្ថែម `qty + 1`។ បើមិនទាន់មាន បន្ថែមទំនិញថ្មីដោយកំណត់ `qty: 1`។
+3. `.filter((i) => i.qty > 0)`
+   - ប្រសិនបើ User ចុចបន្ថយចំនួនដល់ 0 វានឹងលុបទំនិញនោះចេញពី Cart ស្វ័យប្រវត្តិ។
+4. `getTotalPrice: () => get().items.reduce(...)`
+   - គណនាតម្លៃសរុបនៃទំនិញទាំងអស់ក្នុង Cart យ៉ាងលឿន។
+
+---
+
+## 🚀 3. Complete Integrated Cart Application
+
+```jsx
+import { useCartStore } from '../store/cartStore';
+
+const PRODUCTS = [
+  { id: 1, name: 'React Pro Course', price: 49, emoji: '⚛️' },
+  { id: 2, name: 'Node.js Mastery', price: 59, emoji: '🟢' },
+  { id: 3, name: 'Next.js 15 Fullstack', price: 69, emoji: '▲' },
+];
+
+export default function ShopApp() {
+  const { items, addItem, updateQty, removeItem, getTotalPrice } = useCartStore();
+
+  return (
+    <div className="max-w-4xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* PRODUCTS GRID */}
+      <div className="md:col-span-2 grid grid-cols-2 gap-4">
+        {PRODUCTS.map((product) => (
+          <div key={product.id} className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border">
+            <div className="text-3xl mb-2">{product.emoji}</div>
+            <h4 className="font-bold text-sm text-slate-800 dark:text-white">{product.name}</h4>
+            <p className="text-blue-600 font-black mt-1">${product.price}</p>
+            <button
+              onClick={() => addItem(product)}
+              className="mt-3 w-full py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold"
+            >
+              Add to Cart
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* CART SIDEBAR */}
+      <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border h-fit">
+        <h3 className="font-black text-lg text-slate-800 dark:text-white mb-3">
+          🛒 Cart ({items.length})
+        </h3>
+
+        {items.length === 0 ? (
+          <p className="text-xs text-slate-400 py-4 text-center">Cart ទទេ</p>
+        ) : (
+          <div className="space-y-3">
+            {items.map((item) => (
+              <div key={item.id} className="flex justify-between items-center text-xs">
+                <div>
+                  <p className="font-bold text-slate-800 dark:text-white">{item.name}</p>
+                  <p className="text-slate-400">${item.price} × {item.qty}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => updateQty(item.id, -1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">-</button>
+                  <span className="font-bold px-1">{item.qty}</span>
+                  <button onClick={() => updateQty(item.id, 1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">+</button>
+                  <button onClick={() => removeItem(item.id)} className="text-red-500 ml-1">✕</button>
+                </div>
+              </div>
+            ))}
+
+            <div className="border-t pt-3 mt-3 flex justify-between font-black text-sm text-slate-800 dark:text-white">
+              <span>Total:</span>
+              <span className="text-blue-600">${getTotalPrice()}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```

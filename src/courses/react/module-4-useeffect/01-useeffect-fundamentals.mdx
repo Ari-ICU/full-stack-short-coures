@@ -1,38 +1,25 @@
 ---
 title: Understanding Side Effects & The useEffect Mental Model
-description: ស្វែងយល់ពី Side Effects ក្នុង React, ភាពខុសគ្នារវាង Pure Rendering និង Effects, និងយន្តការដំណើរការរបស់ Hook `useEffect`។
+description: ស្វែងយល់ពី Side Effects ក្នុង React, ភាពខុសគ្នារវាង Pure Rendering និង Effects, និងយន្តការដំណើរការរបស់ Hook `useEffect` ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីនិយមន័យនៃ Side Effects (DOM Manipulation, Browser APIs, Timers, Listeners)
-  - ដឹងពីមូលហេតុដែលមិនអាចដាក់ Side Effects ក្នុង Render Phase (Pure Component Rule)
-  - យល់ពី Execution Cycle របស់ React (Render Phase -> Commit/Paint Phase -> Effect Phase)
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML & Browser DOM APIs (document.title)
+  - យល់ពីនិយមន័យនៃ Side Effects (DOM Manipulation, Timers, Listeners)
+  - ដឹងពីមូលហេតុដែលមិនអាចដាក់ Side Effects ក្នុង Render Phase
   - ចេះសរសេរ Syntax មូលដ្ឋាននៃ `useEffect(setup, dependencies)`
 module: module-4-useeffect
 order: 1
 quiz:
-  - question: "ហេតុអ្វីបានជាយើងមិនគួរដាក់ Side Effects (ដូចជាការកែប្រែ document.title ឬ timer) នៅខាងក្នុង Function Body ផ្ទាល់ (Render Phase)?"
+  - question: "ហេតុអ្វីបានជាយើងមិនគួរដាក់ Side Effects (ដូចជាការកែប្រែ document.title) នៅខាងក្នុង Function Body ផ្ទាល់ (Render Phase)?"
     options:
-      - "ព្រោះ Render Phase ត្រូវតែជា Pure Function ដែលគ្មាន Side Effect ដើម្បីកុំឱ្យមានការប្រែប្រួលដែលមិនអាចទស្សន៍ទាយទុកជាមុន (Bugs) និង Infinite Re-renders"
-      - "ព្រោះ JavaScript មិនអនុញ្ញាតឱ្យហៅ function ក្រៅពី JSX"
-      - "ព្រោះវានឹងបិទដំណើរការ CSS ទាំងអស់នៅលើ Browser"
-      - "ព្រោះ React នឹងលុប Component នោះចេញពី DOM ភ្លាមៗ"
+      - "ព្រោះ Render Phase ត្រូវតែជា Pure Function ដែលគ្មាន Side Effect ដើម្បីកុំឱ្យមាន Infinite Re-renders ឬ Bugs"
+      - "ព្រោះ JavaScript មិនអនុញ្ញាត"
+      - "ព្រោះវានឹងបិទដំណើរការ CSS"
+      - "ព្រោះ React នឹងលុប Component ចោល"
     correctAnswer: 1
-    explanation: "React Render Phase ត្រូវតែ Pure (គ្មាន Side Effects)។ ការដាក់ Effects ក្នុង Render នឹងបណ្តាលឱ្យ Side Effects ដំណើរការរាល់ពេលមាន Render ដែលបង្កជា Bugs, Memory Leaks ឬ Infinite Render Loops។"
-  - question: "តើ `useEffect` ដំណើរការនៅពេលណា?"
-    options:
-      - "ដំណើរការបន្ទាប់ពី React បាន Render និង Paint UI ទៅលើ Browser Screen រួចរាល់"
-      - "ដំណើរការមុនពេល Component គណនា JSX"
-      - "ដំណើរការស្របគ្នានៅក្នុងពេលកំពុងបង្កើត Virtual DOM"
-      - "ដំណើរការតែនៅពេល User បិទ Browser Tab ប៉ុណ្ណោះ"
-    correctAnswer: 1
-    explanation: "`useEffect` ត្រូវពន្យារពេល (defer) ការ execute រហូតដល់ Browser បាន paint អេក្រង់រួចរាល់ ដើម្បីកុំឱ្យរារាំង (block) ការបង្ហាញ UI ដល់អ្នកប្រើប្រាស់។"
+    explanation: "React Render Phase ត្រូវតែ Pure (គ្មាន Side Effects)។ ការដាក់ Effects ក្នុង Render នឹងបណ្តាលឱ្យ Side Effects ដំណើរការរាល់ពេលមាន Render ដែលបង្កជា Bugs ឬ Infinite Loops។"
 ---
 
-## 🧭 1. តើអ្វីទៅជា Side Effects ក្នុង React?
-
-នៅក្នុង React, Functional Component ដ៏ល្អត្រូវតែជា **Pure Function**៖
-- **Input:** ទទួល `props` និង `state`
-- **Output:** Return ចេញជា `JSX` (UI representation)
-- **លក្ខណៈពិសេស:** រាល់ពេលដែល Input ដូចគ្នា វាតែងតែ Return JSX ដដែល ដោយមិនកែប្រែអ្វីមួយនៅខាងក្រៅខ្លួនឡើយ (No Side Effects)។
+## 🧭 1. Mental Model: Pure Rendering vs Side Effects
 
 ```mermaid
 flowchart LR
@@ -45,165 +32,107 @@ flowchart LR
     subgraph SideEffects["Client Side Effects (External Sync)"]
         direction TB
         E1["📄 Modifying document.title"]
-        E2["⏱️ Setting Timers (setInterval / setTimeout)"]
-        E3["🖱️ DOM / Window Event Listeners"]
-        E4["💾 LocalStorage & SessionStorage Sync"]
-        E5["🎵 Controlling Audio / Video Elements"]
+        E2["⏱️ Timers (setInterval / setTimeout)"]
+        E3["🖱️ Window Event Listeners"]
+        E4["💾 LocalStorage Sync"]
     end
 
     Comp -.->|Managed by useEffect| SideEffects
-
-    style PureComponent fill:#f0fff4,stroke:#38a169,color:#000
-    style SideEffects fill:#fffaf0,stroke:#dd6b20,color:#000
-```
-
-> **និយមន័យ Side Effect:** គឺជាប្រតិបត្តិការ (Operation) ទាំងឡាយណាដែល **ទាក់ទង ឬ កែប្រែអ្វីមួយនៅខាងក្រៅ** Scope នៃ Component Function របស់ React ដូចជា៖
-> 1. **Direct DOM Mutation:** ការកែប្រែ `document.title`, `document.body.style`
-> 2. **Timers:** ការប្រើប្រាស់ `setTimeout` ឬ `setInterval`
-> 3. **Window Event Listeners:** ការចាប់ព្រឹត្តិការណ៍ `resize`, `scroll`, `keydown` លើ `window`
-> 4. **Browser Storage:** ការអាន ឬ សរសេរទៅកាន់ `localStorage` / `sessionStorage`
-> 5. **Media Controls:** ការបញ្ជា `audio.play()`, `video.pause()` ឬ Canvas Drawing
-
----
-
-## 🚫 2. ហេតុអ្វីមិនអាចដាក់ Side Effects ក្នុង Render Phase?
-
-ចូរពិនិត្យមើលកូដមិនត្រឹមត្រូវខាងក្រោម៖
-
-```jsx
-// ❌ កូដខុសធ្ងន់ធ្ងរ៖ Side effect ដាក់ក្នុង render phase ដោយផ្ទាល់
-export function BadComponent({ count }) {
-  // គ្រោះថ្នាក់៖ កែប្រែ DOM ខាងក្រៅក្នុងពេល render
-  document.title = `Count: ${count}`;
-
-  // គ្រោះថ្នាក់៖ បង្កើត timer ថ្មីរាល់ពេល render ដោយគ្មាន cleanup
-  setInterval(() => {
-    console.log("Tick!");
-  }, 1000);
-
-  return <h1>Count is {count}</h1>;
-}
-```
-
-### បញ្ហាដែលកើតឡើង៖
-1. **Block ការបង្ហាញ UI:** ប្រតិបត្តិការដែលស៊ីពេលនឹងធ្វើឱ្យ UI គាំង (Freeze) មិនទាន់ paint លើអេក្រង់។
-2. **Zombie Timers & Leaks:** `setInterval` ត្រូវបានបង្កើតម្តងហើយម្តងទៀតរាល់ render ធ្វើឱ្យ memory ពេញ។
-3. **Inconsistent UI:** Side Effects ដំណើរការមុនពេល DOM ពិតប្រាកដត្រូវបាន update។
-
----
-
-## ⚙️ 3. Execution Cycle របស់ React ជាមួយ useEffect
-
-React បែងចែកការងារជា ៣ ដំណាក់កាលច្បាស់លាស់៖
-
-```mermaid
-flowchart TD
-    subgraph Step1["1. Render Phase (Pure)"]
-        R1["React ហៅ Component Function"] --> R2["គណនា JSX & Virtual DOM Diffing"]
-    end
-
-    subgraph Step2["2. Commit & Paint Phase (Browser DOM)"]
-        C1["React បញ្ចូលការផ្លាស់ប្តូរទៅកាន់ Real DOM"] --> C2["Browser Paint UI លើអេក្រង់ 🖼️"]
-    end
-
-    subgraph Step3["3. Effect Phase (Post-Paint)"]
-        E1["React ដំណើរការ callback ក្នុង useEffect() ⚡"] --> E2["Sync document.title / Timers / Listeners"]
-    end
-
-    Step1 --> Step2 --> Step3
-
-    style Step1 fill:#ebf8ff,stroke:#3182ce,color:#000
-    style Step2 fill:#f8f9fa,stroke:#4a5568,color:#000
-    style Step3 fill:#f0fff4,stroke:#38a169,color:#000
-```
-
-```reactdiagram
-Lifecycle
 ```
 
 ---
 
-## 📝 4. Syntax និង Mental Model នៃ `useEffect`
+## 📄 2. Example: Synchronizing Document Title
 
-`useEffect` គឺជា Hook មួយដែលអនុញ្ញាតឱ្យយើង **Synchronize (ធ្វើសមកាលកម្ម)** Component របស់យើងជាមួយ External System (ដូចជា Browser APIs, Timers, DOM) បន្ទាប់ពី UI ត្រូវបានបង្ហាញលើអេក្រង់។
+### 🌐 Normal HTML / JavaScript (របៀបធម្មតា):
 
-```jsx
-import { useEffect } from 'react';
-
-useEffect(() => {
-  // 1. Setup Code (ដំណើរការបន្ទាប់ពី Paint DOM រួចរាល់)
-  console.log("Effect បានដំណើរការ!");
-
-  return () => {
-    // 2. Cleanup Code (ដំណើរការមុន Re-run Effect ឬ ពេល Unmount)
-    console.log("សម្អាត (Cleanup)!");
-  };
-}, [/* 3. Dependencies */]);
+```html
+<!-- HTML Document Title & Button ធម្មតា -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Website</title>
+  </head>
+  <body>
+    <button onclick="document.title = '🔔 Notification (1)'">
+      Send Notification
+    </button>
+  </body>
+</html>
 ```
 
-### Parameter ទាំងពីររបស់ `useEffect`៖
-1. **Effect Callback Function (`setup`):** ជា Function ដែលផ្ទុកកូដ Side Effect របស់យើង។
-2. **Dependency Array (`dependencies`):** ជា Array នៃតម្លៃ (Props ឬ State) ដែល React ត្រូវតាមដានដើម្បីសម្រេចថាតើត្រូវ Re-run Effect នេះនៅពេលណា។
-
----
-
-## 💻 5. ឧទាហរណ៍អនុវត្តជាក់ស្តែង៖ Sync Document Title & Notification Badge
-
-ចូរពិនិត្យមើលឧទាហរណ៍ជាក់ស្តែងមួយនៃការ Sync State ទៅកាន់ Browser Tab Title តាមរយៈ `useEffect`៖
+### 💻 React Code (ជាមួយ `useEffect`):
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export default function NotificationBadge() {
+export function TitleSyncDemo() {
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // ✅ Synchronize document.title ជាមួយ unreadCount state
+  // 1. ដំណើរការ Side Effect ក្រោយ Paint UI
   useEffect(() => {
-    if (unreadCount > 0) {
-      document.title = `(${unreadCount}) សារថ្មី - Dashboard`;
-    } else {
-      document.title = `Dashboard - គ្មានសារថ្មី`;
-    }
-
-    console.log(`Document title ត្រូវបាន Sync ទៅ៖ ${document.title}`);
-  }, [unreadCount]); // Re-run តែនៅពេល unreadCount ប្រែប្រួលប៉ុណ្ណោះ
+    // កែប្រែ Title លើ Browser Tab
+    document.title = unreadCount > 0 
+      ? `(${unreadCount}) សារថ្មី - My App` 
+      : 'My App';
+  }, [unreadCount]); // 2. រត់តែពេល unreadCount ផ្លាស់ប្តូរ
 
   return (
-    <div className="p-6 max-w-sm mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm text-center">
-      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mb-4 font-black text-xl">
-        🔔
-      </div>
-      
-      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-        ប្រព័ន្ធដំណឹង (Notification Badge)
+    <button onClick={() => setUnreadCount((c) => c + 1)}>
+      📩 ផ្ញើសារ ({unreadCount})
+    </button>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `useEffect(() => { ... }, [unreadCount]);`
+   - ចុះឈ្មោះ Side Effect ជាមួយ React។ React នឹងរង់ចាំឱ្យ Browser បង្ហាញ UI រួចរាល់សិន ទើបមកដំណើរការកូដក្នុង Callback នេះ។
+2. `document.title = ...`
+   - កែប្រែ Browser Tab Title ខាងក្រៅ React Component (Side Effect) ទៅតាមចំនួន `unreadCount`។
+3. `[unreadCount]` (Dependency Array)
+   - ប្រាប់ React ថា: "ដំណើរការ Effect នេះតែនៅពេលណាដែលតម្លៃ `unreadCount` ប្រែប្រួលប៉ុណ្ណោះ"។ បើ `unreadCount` នៅដដែល វាមិន run ឥតប្រយោជន៍ឡើយ។
+
+---
+
+## 🚀 3. Complete Integrated Component
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export default function DocumentTitleSync() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    document.title = count > 0 ? `(${count}) សារថ្មី | EduApp` : 'EduApp';
+  }, [count]);
+
+  return (
+    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow border text-center">
+      <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">
+        📄 Browser Tab Title Sync
       </h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-        ចំនួនសារមិនទាន់អាន៖ <span className="font-bold text-blue-600 dark:text-blue-400">{unreadCount}</span>
+      <p className="text-xs text-slate-400 mb-4">
+        មើលចំណងជើង Browser Tab របស់អ្នកពេលចុចប៊ូតុងខាងក្រោម៖
       </p>
 
-      <div className="flex gap-2 justify-center">
+      <div className="flex justify-center items-center gap-3">
         <button
-          onClick={() => setUnreadCount(prev => prev + 1)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition shadow-sm"
+          onClick={() => setCount((c) => Math.max(0, c - 1))}
+          className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm"
         >
-          + ផ្ញើសារថ្មី
+          −
         </button>
+        <span className="font-black text-xl text-blue-600 dark:text-blue-400 w-8">{count}</span>
         <button
-          onClick={() => setUnreadCount(0)}
-          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition"
+          onClick={() => setCount((c) => c + 1)}
+          className="px-3 py-1.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
         >
-          សម្អាត (Clear)
+          +
         </button>
       </div>
     </div>
   );
 }
 ```
-
----
-
-## 🎯 សេចក្តីសង្ខេប (Key Takeaways)
-
-1. **Pure Rendering:** Render Phase ត្រូវតែគ្មាន Side Effects ជានិច្ច។
-2. **Post-Paint Timing:** `useEffect` ដំណើរការបន្ទាប់ពី Browser បាន Paint DOM រួច ដើម្បីកុំឱ្យប៉ះពាល់ដល់ល្បឿន Render។
-3. **Synchronization Focus:** គិតពី `useEffect` ថាជាឧបករណ៍សម្រាប់ **Sync Component ជាមួយ External Systems** (DOM, Browser APIs, Timers, Window Listeners)។

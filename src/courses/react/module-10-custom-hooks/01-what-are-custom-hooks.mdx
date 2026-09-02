@@ -1,0 +1,143 @@
+---
+title: What Are Custom Hooks & The Rules of Hooks
+description: រៀនពីមូលដ្ឋានគ្រឹះនៃ Custom Hooks, របៀបទាញ Stateful Logic ចេញពី Component ឱ្យក្លាយជា Reusable Function, និងច្បាប់សំខាន់ៗនៃ Hooks ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពីនិយមន័យនៃ Custom Hook ក្នុង React
+  - ចេះបំប្លែង Duplicate Logic (ដូចជា Window Width ឬ Counter) ឱ្យទៅជា Custom Hook
+  - យល់ច្បាស់ពី Rules of Hooks (Top-level only, Call from React functions only)
+  - ចេះជ្រើសរើស Return Type (Array vs Object) សម្រាប់ Hook
+module: module-10-custom-hooks
+order: 1
+quiz:
+  - question: "តើ Custom Hook ត្រូវតែចាប់ផ្តើមដោយពាក្យអ្វីជាកាតព្វកិច្ច?"
+    options:
+      - "get..."
+      - "use... (ឧ. useWindowSize, useFetch)"
+      - "handle..."
+      - "create..."
+    correctAnswer: 2
+    explanation: "React ប្រើ Prefix 'use' ដើម្បីដឹងថា function នោះជា Hook និងអាចអនុវត្ត Linter Rules (Hooks rules validation) លើវាបានត្រឹមត្រូវ។"
+---
+
+## 🎯 1. What is a Custom Hook?
+
+Custom Hook គឺជា JavaScript Function ធម្មតាមួយដែល៖
+1. ចាប់ផ្តើមដោយឈ្មោះ **`use`** (ដូចជា `useWindowSize`, `useFetch`, `useAuth`)
+2. អាចហៅ React Built-in Hooks ផ្សេងទៀត (ដូចជា `useState`, `useEffect`, `useRef`) នៅខាងក្នុងខ្លួនវាបាន
+3. ផ្តល់លទ្ធភាពឱ្យយើង Share **Stateful Logic** (មិនមែន Share UI JSX ទេ) ទៅកាន់ Components ជាច្រើន
+
+---
+
+## 💻 2. Building `useWindowSize` Hook
+
+### 💻 Code សម្រាប់តែ Hook Definition:
+
+```javascript
+// src/hooks/useWindowSize.js
+import { useState, useEffect } from 'react';
+
+export function useWindowSize() {
+  // 1. State រក្សាទុកទទឹង និងកម្ពស់ window បច្ចុប្បន្ន
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() => {
+    // 2. Handler function ពេល window resize
+    const handleResize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    // 3. Add Event Listener ទៅ Window
+    window.addEventListener('resize', handleResize);
+
+    // 4. Cleanup Listener ពេល Component Unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []); // រត់តែម្តងគត់លើ Mount
+
+  // 5. Return State Object ឱ្យ Component យកទៅប្រើ
+  return size;
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [size, setSize] = useState({ width: window.innerWidth, ... })`
+   - បង្កើត State ផ្ទុកតម្លៃទំហំ screen ដំបូងគេពេល Component ចាប់ផ្តើម។
+2. `const handleResize = () => setSize(...)`
+   - Function នេះនឹងទាញយក `window.innerWidth/innerHeight` ថ្មីមក update state រាល់ពេល screen ត្រូវប្តូរទំហំ។
+3. `window.addEventListener('resize', handleResize);`
+   - ចុះឈ្មោះស្ដាប់ព្រឹត្តិការណ៍ resize លើ Browser Window។
+4. `return () => window.removeEventListener('resize', handleResize);`
+   - **Cleanup ចាំបាច់:** ដក Event Listener ចេញវិញការពារ Memory Leak និងការរត់កូដឥតប្រយោជន៍។
+5. `return size;`
+   - បញ្ជូន Object `{ width, height }` ត្រឡប់ទៅឱ្យ Component ណាដែលហៅ Hook នេះ។
+
+---
+
+## 🛠️ 3. Using Custom Hook in Components
+
+### 💻 Code សម្រាប់ប្រើប្រាស់ក្នុង Component:
+
+```jsx
+import { useWindowSize } from '../hooks/useWindowSize';
+
+export default function ResponsiveHeader() {
+  // ហៅ Custom Hook ដោយខ្លី និងស្អាត
+  const { width } = useWindowSize();
+
+  const isMobile = width < 768;
+
+  return (
+    <header className="p-4 bg-slate-900 text-white flex justify-between items-center">
+      <h1 className="font-bold">📱 My App</h1>
+
+      {isMobile ? (
+        <button className="px-3 py-1 bg-blue-600 rounded">🍔 Menu</button>
+      ) : (
+        <nav className="flex gap-4 text-sm">
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      )}
+    </header>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const { width } = useWindowSize();`
+   - Component លែងត្រូវការសរសេរ `addEventListener`, `removeEventListener` ឬ `useState` ដោយខ្លួនឯងទៀតហើយ — គ្រាន់តែ Call Hook មួយជួរចប់!
+2. `const isMobile = width < 768;`
+   - គណនាលក្ខខណ្ឌ Mobile vs Desktop ភ្លាមៗ។
+3. `{isMobile ? (...) : (...)}`
+   - បង្ហាញ UI តាមទំហំ Screen ជាក់ស្តែងដោយ Re-render ស្វ័យប្រវត្តិ។
+
+---
+
+## 📜 4. The 2 Golden Rules of Hooks
+
+### ❌ 1. Don't call Hooks inside Loops, Conditions, or Nested Functions
+```javascript
+// ❌ ខុសធ្ងន់ធ្ងរ (Inside condition)
+if (isLoggedIn) {
+  useEffect(() => { ... }, []);
+}
+
+// ✅ ត្រូវ (Top-level ជានិច្ច)
+useEffect(() => {
+  if (isLoggedIn) {
+    // ដាក់ Condition នៅខាងក្នុង Effect វិញ
+  }
+}, [isLoggedIn]);
+```
+
+### ❌ 2. Only call Hooks from React Functions
+- Call បានតែពី **React Functional Components** ឬ **Custom Hooks** ដទៃទៀតប៉ុណ្ណោះ។
+- មិនអាចហៅក្នុង Regular JavaScript Functions ធម្មតាបានឡើយ។

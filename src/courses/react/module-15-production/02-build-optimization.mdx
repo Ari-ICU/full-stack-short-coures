@@ -1,0 +1,115 @@
+---
+title: Production Build & Bundle Optimization
+description: រៀនពីដំណើរការ Build Optimization របស់ Vite — Code Splitting តាម Routes ដោយ React.lazy និង Suspense, Tree Shaking, និងការវិភាគ Bundle Size ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពីដំណើរការ Bundle Minification និង Tree Shaking
+  - ចេះប្រើ `React.lazy()` និង `<Suspense>` ដើម្បីធ្វើ Route-based Code Splitting
+  - ចេះ Setup Rollup Visualizer ដើម្បីពិនិត្យទំហំ JS Chunks
+  - ដឹងពី Best Practices ក្នុងការកាត់បន្ថយ Initial Load Time (LCP)
+module: module-15-production
+order: 2
+quiz:
+  - question: "តើ Code Splitting ដោយប្រើ `React.lazy()` ជួយបង្កើន Performance យ៉ាងដូចម្តេច?"
+    options:
+      - "វាបង្រួមរូបភាពឱ្យច្បាស់ជាងមុន"
+      - "វាបំបែក JavaScript Bundle ធំតែមួយ ឱ្យទៅជា Chunks តូចៗជាច្រើន ដែលនឹងត្រូវ Download តែពេលណា User បើកទៅកាន់ Route នោះប៉ុណ្ណោះ — ធ្វើឱ្យទំព័រដើម Load លឿនខ្លាំង"
+      - "វាលុប CSS ចេញពី App"
+      - "ដើម្បីឱ្យ Server មិនបាច់ប្រើ Memory"
+    correctAnswer: 2
+    explanation: "ដោយគ្មាន Code Splitting Browser ត្រូវទាញយកកូដ 2MB-5MB នៃទំព័រទាំងអស់ (ទាំង Dashboard, Admin Settings) មុនពេលបង្ហាញទំព័រដើម។ ជាមួយ React.lazy() ទំព័រដើម Download ត្រឹមតែ 150KB ប៉ុណ្ណោះ។"
+---
+
+## ⚡ 1. Production Build Command
+
+```bash
+# 1. ដំណើរការ Build សម្រាប់ Production
+npm run build
+
+# 2. Preview Production Build នៅ Local Machine
+npm run preview
+```
+
+---
+
+## ✂️ 2. Route-based Code Splitting ជាមួយ `React.lazy`
+
+### 💻 Code សម្រាប់ Code Splitting (`App.jsx`):
+
+```jsx
+// src/App.jsx
+import { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+
+// 1. Eager Loading សម្រាប់ទំព័រដំបូងដែលត្រូវការបង្ហាញភ្លាមៗ
+import HomePage from './pages/HomePage';
+
+// 2. Lazy Loading: Download ទំព័រទាំងនេះតែពេលណា User ចុចចូលប៉ុណ្ណោះ!
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const AdminSettings = lazy(() => import('./pages/AdminSettings'));
+
+// Loading Fallback Component
+function PageLoader() {
+  return (
+    <div className="flex h-64 items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    // 3. ស្រោប Suspense ពីលើ Routes
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/admin" element={<AdminSettings />} />
+      </Routes>
+    </Suspense>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `import HomePage from './pages/HomePage';`
+   - **Eager Import:** ត្រូវបានដាក់បញ្ចូលក្នុង Main Bundle ភ្លាមៗ ព្រោះ User ត្រូវការមើលឃើញ Home Page មុនគេ។
+2. `const DashboardPage = lazy(() => import('./pages/DashboardPage'));`
+   - **Dynamic Import:** Vite នឹងកាត់ `DashboardPage` ទៅជា File ដាច់ដោយឡែកមួយ (ឧ. `Dashboard-B4.js`)។ កូដនេះនឹងមិនត្រូវបាន Download ឡើយ រហូតទាល់តែ User ចុចបើក URL `/dashboard`។
+3. `<Suspense fallback={<PageLoader />}>`
+   - ក្នុងអំឡុងពេល Browser កំពុង Download JS Chunk នៃទំព័រថ្មី `Suspense` នឹងបង្ហាញ `PageLoader` (Spinner) ជូន User ជាបណ្ដោះអាសន្ន។
+
+---
+
+## 📊 3. Bundle Analysis ជាមួយ Rollup Visualizer
+
+```bash
+npm install -D rollup-plugin-visualizer
+```
+
+### 💻 Code សម្រាប់ `vite.config.js`:
+
+```javascript
+// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
+
+export default defineConfig({
+  plugins: [
+    react(),
+    visualizer({
+      open: true, // បើក Browser បង្ហាញក្រាហ្វិកទំហំកូដស្វ័យប្រវត្តិក្រោយ Build
+      filename: 'dist/stats.html',
+      gzipSize: true,
+    }),
+  ],
+});
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `visualizer({ open: true, filename: 'dist/stats.html' })`
+   - ពេលអ្នក run `npm run build` Plugin នេះនឹងបង្កើត Interactive Visual Map មួយបង្ហាញយ៉ាងច្បាស់ថា Library ណាធំជាងគេ (ឧ. Lodash, Moment.js, Lucide Icons) ដើម្បីងាយស្រួល Refactor។

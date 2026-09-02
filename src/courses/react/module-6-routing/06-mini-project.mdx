@@ -1,91 +1,110 @@
 ---
-title: "Hands-on Mini Project: Multi-Page Store with Product Details & Auth Gates"
-description: អនុវត្តបង្កើត Multi-Page E-Commerce Application ដែលមាន Dynamic Routes (`/products/:id`), Shared Navbar Layout, និង Protected Checkout Route។
+title: "Hands-on Mini Project: Multi-Page Portal Application"
+description: អនុវត្តបង្កើត Multi-Page Portal Application ពេញលេញ ជាមួយ React Router (Nested Layouts, Active NavLinks, Dynamic Route Detail Pages, និង 404 Page) ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
 objectives:
-  - អនុវត្ត Multi-page Navigation ជាមួយ React Router
-  - អនុវត្ត Dynamic Route Matching (`useParams`)
-  - អនុវត្ត Protected Route Gate និង State Redirection
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Multi-Page Layout
+  - អនុវត្ត Nested Routes ជាមួយ `<Outlet />`
+  - បង្កើត Dynamic Detail Page ដោយប្រើ `useParams`
+  - បង្កើត Catch-all 404 Not Found Route
 module: module-6-routing
 order: 6
 quiz:
-  - question: "នៅពេល User មិនទាន់ Login ព្យាយាមចូល `/checkout`, តើ Protected Route គួរធ្វើដូចម្តេច?"
+  - question: "តើ `<Outlet />` ក្នុង React Router ប្រើសម្រាប់អ្វី?"
     options:
-      - "Redirect ទៅ `/login` រួចបញ្ជូន User ត្រឡប់មក `/checkout` វិញបន្ទាប់ពី Login ជោគជ័យ"
-      - "បិទ Browser របស់ User"
-      - "លុបប្រព័ន្ធទិន្នន័យចោល"
-      - "បង្ហាញផ្ទាំងស គ្មានអក្សរ"
+      - "ជាកន្លែងដែល Child Routes នឹងត្រូវ Render ចូលក្នុង Parent Layout (ឧ. បង្ហាញ Page Content នៅក្រោម Navbar & Sidebar)"
+      - "ដើម្បីបង្កើត Link ទៅកាន់ External Website"
+      - "ដើម្បីលុប State ចោល"
+      - "ជាប៊ូតុង Logout"
     correctAnswer: 1
-    explanation: "ការរក្សាទុក URL ដើម (`state: { from: location }`) អនុញ្ញាតឱ្យយើងបញ្ជូន User ត្រឡប់មកកាន់ទំព័រ checkout វិញបន្ទាប់ពីគាត់ Login រួចរាល់។"
+    explanation: "<Outlet /> ត្រូវបានប្រើប្រាស់ក្នុង Layout Components ដើម្បីកំណត់ទីតាំងដែល Nested Child Route Components ត្រូវបង្ហាញ។"
 ---
 
-## 🎯 គោលដៅ Mini Project
+## 🗺️ 1. Portal Application Architecture
 
-យើងនឹងបង្កើត **Multi-Page Store App** ដែលរួមមាន៖
-1. Shared Layout ជាមួយ Header & Navigation Links
-2. Products Catalog (`/`)
-3. Product Details Dynamic View (`/products/:id`)
-4. Login Page (`/login`)
-5. Protected Checkout Gate (`/checkout`)
+```mermaid
+graph TD
+    App["<AppLayout> (Header & Sidebar)"]
+    App --> Outlet["<Outlet /> Area"]
+    Outlet --> P1["/ (Home Dashboard)"]
+    Outlet --> P2["/courses (Course Grid)"]
+    Outlet --> P3["/courses/:id (Course Details)"]
+    Outlet --> P4["* (404 Not Found)"]
+```
 
 ---
 
-## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+## 🎨 2. Normal HTML Multi-Page Structure vs React Router Outlet
+
+### 🌐 Normal HTML Master Layout:
+
+```html
+<!-- HTML Master Layout -->
+<header>
+  <h1>Portal Header</h1>
+</header>
+<div class="layout-body">
+  <aside>Sidebar Navigation</aside>
+  <!-- Content Area Changes -->
+  <main id="content">Dashboard Content</main>
+</div>
+```
+
+---
+
+## 🚀 3. Complete Integrated Multi-Page Portal
 
 ```jsx
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, NavLink, Outlet, useParams, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, NavLink, useParams, Outlet } from 'react-router-dom';
 
-const PRODUCTS = [
-  { id: '101', name: 'Premium Leather Backpack', price: 120, desc: 'កាបូបស្បែកពិត គុណភាពខ្ពស់ ធន់នឹងទឹក' },
-  { id: '102', name: 'Wireless Ergonomic Mouse', price: 65, desc: 'កណ្ដុរឥតខ្សែ ការពារការចុកដៃពេលធ្វើការយូរ' },
-  { id: '103', name: 'Mechanical Keyboard (Khmer Layout)', price: 95, desc: 'ក្តារចុចមេកានិច Switch ស្ងាត់ ស្រួលវាយអក្សរខ្មែរ' },
+// 1. DATA
+const COURSES = [
+  { id: 'react', title: 'React Mastery', desc: 'Hooks, State, Architecture' },
+  { id: 'nextjs', title: 'Next.js 15 Fullstack', desc: 'App Router & SSR' },
 ];
 
-// 1. Layout
-function AppLayout({ user, onLogout }) {
+// 2. ROOT LAYOUT
+function AppLayout() {
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <header className="bg-slate-900 text-white px-6 py-4 flex justify-between items-center shadow-md">
-        <Link to="/" className="text-xl font-black tracking-wide text-blue-400">🛍️ QuickStore</Link>
-        <nav className="flex items-center gap-4 text-sm font-semibold">
-          <NavLink to="/" className={({ isActive }) => isActive ? 'text-blue-400' : 'text-slate-300'}>ទំព័រដើម</NavLink>
-          <NavLink to="/checkout" className={({ isActive }) => isActive ? 'text-blue-400' : 'text-slate-300'}>Checkout</NavLink>
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-xs bg-slate-800 px-3 py-1 rounded-full">{user.name}</span>
-              <button onClick={onLogout} className="text-red-400 hover:underline">ចាកចេញ</button>
-            </div>
-          ) : (
-            <Link to="/login" className="bg-blue-600 px-3 py-1 rounded-lg text-white">ចូលគណនី</Link>
-          )}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <header className="p-4 bg-white dark:bg-slate-800 border-b flex justify-between items-center">
+        <h1 className="font-black text-lg text-blue-600">🎓 Portal App</h1>
+        <nav className="flex gap-4 text-xs font-bold">
+          <NavLink to="/" className={({ isActive }) => (isActive ? 'text-blue-600' : 'text-slate-500')}>
+            Home
+          </NavLink>
+          <NavLink to="/courses" className={({ isActive }) => (isActive ? 'text-blue-600' : 'text-slate-500')}>
+            Courses
+          </NavLink>
         </nav>
       </header>
 
-      <main className="flex-1 p-6 max-w-4xl mx-auto w-full">
+      <main className="p-6 max-w-2xl mx-auto">
+        {/* Child routes render here */}
         <Outlet />
       </main>
     </div>
   );
 }
 
-// 2. Product Catalog
-function Catalog() {
+// 3. PAGES
+function Home() {
+  return <div><h2 className="text-xl font-bold mb-2">👋 Welcome Home!</h2><p className="text-xs text-slate-500">ស្វាគមន៍មកកាន់ Learning Portal</p></div>;
+}
+
+function CourseList() {
   return (
     <div>
-      <h1 className="text-2xl font-black text-slate-800 mb-6">ទំនិញពេញនិយម</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {PRODUCTS.map((p) => (
-          <div key={p.id} className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+      <h2 className="text-xl font-bold mb-4">📚 Available Courses</h2>
+      <div className="space-y-2">
+        {COURSES.map((c) => (
+          <div key={c.id} className="p-4 bg-white dark:bg-slate-800 rounded-xl shadow border flex justify-between items-center">
             <div>
-              <h3 className="font-bold text-slate-900">{p.name}</h3>
-              <p className="text-slate-500 text-xs mt-1 line-clamp-2">{p.desc}</p>
+              <h4 className="font-bold text-sm">{c.title}</h4>
+              <p className="text-xs text-slate-400">{c.desc}</p>
             </div>
-            <div className="mt-4 flex justify-between items-center">
-              <span className="font-black text-slate-800">${p.price}</span>
-              <Link to={`/products/${p.id}`} className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100">
-                មើលលម្អិត →
-              </Link>
-            </div>
+            <Link to={`/courses/${c.id}`} className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold">
+              View Details →
+            </Link>
           </div>
         ))}
       </div>
@@ -93,80 +112,36 @@ function Catalog() {
   );
 }
 
-// 3. Dynamic Product Detail
-function ProductDetail() {
+function CourseDetail() {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const product = PRODUCTS.find((p) => p.id === id);
+  const course = COURSES.find((c) => c.id === id);
 
-  if (!product) return <p>រកមិនឃើញទំនិញឡើយ!</p>;
+  if (!course) return <p className="text-red-500 text-xs">Course មិនមានឡើយ!</p>;
 
   return (
-    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-lg mx-auto">
-      <button onClick={() => navigate(-1)} className="text-xs font-bold text-slate-400 mb-4 hover:text-slate-600">
-        ← ត្រឡប់ក្រោយ
-      </button>
-      <h2 className="text-2xl font-black text-slate-800 mb-2">{product.name}</h2>
-      <p className="text-slate-600 text-sm mb-6">{product.desc}</p>
-      <div className="flex justify-between items-center border-t pt-4">
-        <span className="text-3xl font-black text-blue-600">${product.price}</span>
-        <button onClick={() => navigate('/checkout')} className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow hover:bg-blue-700">
-          ទិញទំនិញនេះ
-        </button>
-      </div>
+    <div className="p-6 bg-white dark:bg-slate-800 rounded-2xl shadow border space-y-2">
+      <h2 className="text-xl font-black text-blue-600">{course.title}</h2>
+      <p className="text-sm text-slate-600 dark:text-slate-300">{course.desc}</p>
+      <Link to="/courses" className="inline-block mt-4 text-xs font-bold text-slate-500 hover:underline">
+        ← Back to all courses
+      </Link>
     </div>
   );
 }
 
-// 4. Login Page
-function LoginPage({ onLogin, user }) {
-  const navigate = useNavigate();
-  if (user) return <Navigate to="/" replace />;
-
-  return (
-    <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 max-w-sm mx-auto text-center">
-      <h2 className="text-2xl font-black text-slate-800 mb-4">ចូលគណនី</h2>
-      <p className="text-slate-500 text-sm mb-6">ចុចប៊ូតុងខាងក្រោមដើម្បីក្លែងធ្វើការ Login</p>
-      <button 
-        onClick={() => { onLogin({ name: 'រដ្ឋា ធឿន', email: 'ratha@demo.com' }); navigate('/'); }}
-        className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition"
-      >
-        Sign in as Ratha
-      </button>
-    </div>
-  );
+function NotFound() {
+  return <div className="text-center py-12"><h2 className="text-3xl font-black text-red-500 mb-2">404</h2><p className="text-xs text-slate-400">រកមិនឃើញទំព័រនេះឡើយ!</p></div>;
 }
 
-// 5. Protected Checkout Gate
-function CheckoutPage() {
-  return (
-    <div className="bg-white p-8 rounded-3xl shadow-sm border border-emerald-100 max-w-md mx-auto text-center">
-      <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 font-black text-xl">
-        ✓
-      </div>
-      <h2 className="text-2xl font-black text-slate-800">ទំព័រទូទាត់ប្រាក់ (Checkout)</h2>
-      <p className="text-slate-500 text-sm mt-2 mb-6">អ្នកបានឆ្លងកាត់ Protected Route ដោយជោគជ័យ!</p>
-      <button className="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl">
-        បញ្ជាក់ការទូទាត់ឥឡូវនេះ
-      </button>
-    </div>
-  );
-}
-
-export default function App() {
-  const [user, setUser] = useState(null);
-
+export default function PortalMiniProject() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<AppLayout user={user} onLogout={() => setUser(null)} />}>
-          <Route path="/" element={<Catalog />} />
-          <Route path="/products/:id" element={<ProductDetail />} />
-          <Route path="/login" element={<LoginPage onLogin={setUser} user={user} />} />
-          <Route 
-            path="/checkout" 
-            element={user ? <CheckoutPage /> : <Navigate to="/login" replace />} 
-          />
+        <Route path="/" element={<AppLayout />}>
+          <Route index element={<Home />} />
+          <Route path="courses" element={<CourseList />} />
+          <Route path="courses/:id" element={<CourseDetail />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

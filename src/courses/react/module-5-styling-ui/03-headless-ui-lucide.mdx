@@ -1,78 +1,69 @@
 ---
-title: Headless UI & Modern Component Libraries (shadcn/ui & Lucide)
-description: សិក្សាពីការប្រើប្រាស់ Modern UI Ecosystem ដូចជា Lucide React Icons, Headless UI Primitives (Radix UI), និង shadcn/ui។
+title: "Icons & Accessible Components — Lucide React & Headless UI"
+description: សិក្សាពីការប្រើប្រាស់ Modern Icon Library (Lucide React) និង Accessible UI Components (Headless UI) ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះបញ្ចូល SVG Icons ដោយប្រើ `lucide-react`
-  - យល់ពីភាពខុសគ្នារវាង Black-box Component Libraries និង shadcn/ui
-  - យល់ពីសារៈសំខាន់នៃ Accessibility (A11y) ជាមួយ Headless UI
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Dropdown & Modal
+  - ចេះ Install និងប្រើប្រាស់ SVG Icons ពី `lucide-react`
+  - យល់ពីអត្ថប្រយោជន៍នៃ Headless Components (Unstyled, 100% Accessible)
+  - ចេះបង្កើត Dropdown Menu និង Animated Transitions
 module: module-5-styling-ui
 order: 3
 quiz:
-  - question: "តើ shadcn/ui មានលក្ខណៈខុសប្លែកពី Traditional Component Libraries (ដូចជា MUI) ដូចម្តេច?"
+  - question: "តើអ្វីទៅជា 'Headless UI Component'?"
     options:
-      - "វាទាញយកកូដ Components មកដាក់ក្នុង `src/components/ui/` ដោយផ្ទាល់ ផ្តល់ Full Ownership និងងាយស្រួលកែប្រែ"
-      - "វាជា CSS Framework ដាច់ដោយឡែក"
-      - "វាដំណើរការតែជាមួយ PHP"
-      - "វាមិនអាចប្រើជាមួយ Tailwind បានទេ"
+      - "Component ដែលផ្តល់នូវ Logic, State, និង Accessibility (ARIA/Keyboard navigation) ពេញលេញ ១០០% ដោយគ្មាន CSS Style ជាប់មកជាមួយ — ទុកសិទ្ធិឱ្យ Developer ប្រើ Tailwind CSS រចនាដោយសេរី"
+      - "Component ដែលគ្មាន Header"
+      - "Icon Library មួយ"
+      - "Database Tool មួយ"
     correctAnswer: 1
-    explanation: "shadcn/ui មិនមែនជា npm dependency ធ្ងន់ក្នុង node_modules ទេ គឺវា Copy-paste component source code មកកាន់ project របស់អ្នកផ្ទាល់ ដែលអនុញ្ញាតឱ្យអ្នក customize styling និង logic បាន ១០០%។"
+    explanation: "Headless UI ដោះស្រាយបញ្ហាធំៗដូចជា Keyboard Navigation (Tab, Enter, Escape), ARIA accessibility, និង focus management ដោយមិនបង្ខិតបង្ខំ CSS ណាមួយឡើយ។"
 ---
 
-## 🧩 1. Modern Component Architecture ជាមួយ shadcn/ui
+## 🎨 1. Normal HTML Select vs Headless Accessible Dropdown
 
-```mermaid
-flowchart TD
-    subgraph Traditional["Traditional UI Libraries (Black Box)"]
-        direction TB
-        T1["Install <code>node_modules/material-ui</code>"] --> T2["Hard to customize styles & logic"]
-        T2 --> T3["Heavy bundle size with unused components"]
-    end
+### 🌐 Normal HTML Structure:
 
-    subgraph Modern["Modern shadcn/ui Architecture (Full Ownership)"]
-        direction TB
-        M1["Radix UI (Accessible Headless Primitives)"] --> M2["Tailwind CSS (Utility Styling)"]
-        M2 --> M3["CLI Copies Code Direct to <code>src/components/ui/</code>"]
-        M3 --> M4["100% Editable Source Code in your Project 🚀"]
-    end
-
-    style Traditional fill:#fff5f5,stroke:#e53e3e,color:#000
-    style Modern fill:#f0fff4,stroke:#38a169,color:#000
+```html
+<!-- HTML Native Select Dropdown -->
+<select class="custom-select">
+  <option value="edit">✏️ Edit Profile</option>
+  <option value="settings">⚙️ Settings</option>
+  <option value="delete">🗑️ Delete Account</option>
+</select>
 ```
 
----
-
-## 🎨 2. ការប្រើប្រាស់ Lucide React Icons
-
-```bash
-npm install lucide-react
-```
+### 💻 React Code ជាមួយ Lucide Icons:
 
 ```jsx
-import { LayoutDashboard, Users, ShoppingCart, Settings, Bell } from 'lucide-react';
+import { User, Settings, Trash2, ChevronDown } from 'lucide-react';
 
-export function SidebarNav() {
+export function ActionMenu() {
   return (
-    <nav className="w-64 bg-slate-900 text-slate-300 min-h-screen p-4 space-y-2">
-      <div className="flex items-center gap-3 px-3 py-4 text-white font-bold border-b border-slate-800">
-        <LayoutDashboard className="text-blue-500" />
-        <span>Admin Panel</span>
-      </div>
+    <div className="w-56 p-2 bg-white dark:bg-slate-800 rounded-2xl shadow border space-y-1">
+      <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">
+        <User className="w-4 h-4 text-blue-500" />
+        <span>Edit Profile</span>
+      </button>
 
-      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg bg-blue-600 text-white font-medium">
-        <Users size={18} />
-        <span>អតិថិជន</span>
-      </a>
+      <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition">
+        <Settings className="w-4 h-4 text-slate-400" />
+        <span>Settings</span>
+      </button>
 
-      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-        <ShoppingCart size={18} />
-        <span>ការបញ្ជាទិញ</span>
-      </a>
-
-      <a href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition">
-        <Settings size={18} />
-        <span>ការកំណត់</span>
-      </a>
-    </nav>
+      <button className="w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition">
+        <Trash2 className="w-4 h-4" />
+        <span>Delete Account</span>
+      </button>
+    </div>
   );
 }
 ```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `import { User, Settings, Trash2 } from 'lucide-react';`
+   - Import Icon ជា React Components (Tree-shakable SVGs)។
+2. `<User className="w-4 h-4 text-blue-500" />`
+   - អាច Style ទំហំ និងពណ៌របស់ Icon តាមរយៈ Tailwind CSS classes បានយ៉ាងងាយស្រួល។
+3. `flex items-center gap-3`
+   - រៀបចំ Icon និងអក្សរឱ្យតម្រឹមផ្ដេកស្អាតបាត។

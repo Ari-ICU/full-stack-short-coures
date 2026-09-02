@@ -1,0 +1,180 @@
+---
+title: "Mini Project — Deploy React App to Vercel with Production Config"
+description: Complete Production Deployment Walkthrough — Pre-deploy Checklist, Environment Variables Setup, Vercel Deploy, Domain Configuration, និង Post-deploy Verification ដើម្បី Launch React App ដ៏ Professional ទៅ Internet។
+objectives:
+  - អនុវត្ត Full Deployment Workflow ពី Code → Vercel Production
+  - ចេះ Setup Production Env Vars ក្នុង Vercel Dashboard
+  - ចេះ Verify Production App (Routes, API, Performance)
+  - ចេះ Debug Common Deployment Issues (404, CORS, Blank Page)
+module: module-15-production
+order: 4
+quiz:
+  - question: "App Deploy ជោគជ័យ ប៉ុន្តែ User Navigate ទៅ /dashboard ភ្លាមៗ ហើយ ទទួល 404 Error — ហេតុអ្វី?"
+    options:
+      - "JavaScript Error ក្នុង DashboardPage Component"
+      - "Missing SPA Redirect Rule — Static Server ព្យាយាម Serve /dashboard ជា File ហើយ 404 ព្រោះ File មិន Exist; ត្រូវ Add /* → index.html Redirect Rule"
+      - "CORS Error"
+      - "Environment Variable Missing"
+    correctAnswer: 2
+    explanation: "React Router Handle Routes Client-side — ប៉ុន្តែ Static Server (Vercel/Netlify) Serve Files ដោយ Path ។ Direct URL Access /dashboard → Server looks for dashboard file → Not found → 404! Fix: Configure SPA Redirect (/* → index.html 200) ហើយ Let React Router Handle Routes Client-side ។"
+---
+
+## 🚀 Complete Deployment Walkthrough
+
+### Step 1: Final Code Review
+
+```bash
+# Check for common issues before deploying
+grep -r "localhost" src/            # Find hardcoded localhost URLs
+grep -r "console.log" src/          # Find debug logs (optional cleanup)
+cat .gitignore | grep ".env"        # Verify .env.local is gitignored
+```
+
+### Step 2: Build Verification
+
+```bash
+# Run full verification suite
+npm run build       # Must pass with 0 errors
+
+# Check bundle size
+ls -la dist/assets/*.js
+# Good: main chunk < 500kb
+# Warning: main chunk > 1MB (consider code splitting)
+
+npm run preview     # Test at http://localhost:4173
+# Manually test: Login, Navigation, API calls, Logout
+```
+
+### Step 3: Push to GitHub
+
+```bash
+git add .
+git commit -m "feat: production-ready React app with auth, API, testing"
+git push origin main
+```
+
+### Step 4: Deploy to Vercel
+
+**Option A: Vercel Dashboard (GUI)**
+1. Login at [vercel.com](https://vercel.com)
+2. **New Project** → Import from GitHub → Select your repo
+3. Vercel auto-detects Vite:
+   - Framework: **Vite**
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+4. Click **Deploy** → Wait 60-90 seconds
+5. ✅ Live at `https://your-app.vercel.app`
+
+**Option B: Vercel CLI**
+```bash
+npm install -g vercel
+vercel login
+vercel --prod
+```
+
+### Step 5: Configure Environment Variables
+
+```
+Vercel Dashboard → your-project → Settings → Environment Variables
+
+Name: VITE_API_URL
+Value: https://api.yourbackend.com
+Environments: ✅ Production ✅ Preview
+
+→ Save → Redeploy (Settings → Deployments → Redeploy latest)
+```
+
+---
+
+## 🔍 Post-Deploy Verification Checklist
+
+```bash
+# Test these manually on your live URL:
+```
+
+| Test | Expected | How to Test |
+|------|----------|-------------|
+| Home page loads | Shows content, no blank white screen | Visit root URL |
+| Direct route access | `/dashboard` doesn't 404 | Paste URL in new tab |
+| API calls work | Data loads from production API | Open Network DevTools |
+| Auth flow | Login → Dashboard → Logout | Complete full flow |
+| Refresh on route | Stay on same page | Navigate then F5 |
+| HTTPS | Lock icon in browser | Check URL bar |
+| Env vars loaded | Correct API URL in Network tab | Check request URLs |
+
+---
+
+## 🐛 Common Deployment Issues & Fixes
+
+### Issue 1: Blank White Page
+```
+Symptom: App deploys but shows blank screen
+
+Causes & Fixes:
+1. Build error → Check Vercel build logs
+2. Wrong base URL → Check vite.config.js base option
+3. JS errors → Open browser console on live site
+4. Missing env vars → Add VITE_* vars in Vercel dashboard
+```
+
+### Issue 2: Routes Return 404
+```
+Symptom: /dashboard → 404 Not Found (only on direct access)
+
+Fix for Vercel: Create vercel.json in project root:
+```
+
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+```
+Fix for Netlify: Create public/_redirects:
+/*    /index.html    200
+```
+
+### Issue 3: API CORS Error
+```
+Symptom: API calls fail in production with CORS error
+
+Fix: Update backend CORS to include your Vercel domain:
+```
+
+```js
+// backend/app.js — Update allowed origins
+app.use(cors({
+  origin: [
+    'http://localhost:5173',                    // Local dev
+    'https://your-app.vercel.app',              // Vercel production
+    'https://your-custom-domain.com',           // Custom domain
+  ],
+}));
+```
+
+---
+
+## 🎓 Course Completion!
+
+ទំហ! អ្នកបានបញ្ចប់ **React Full-Stack Course** ពេញលេញ:
+
+```
+✅ Module 1:  Vite Setup & Component Architecture
+✅ Module 2:  Props, Lists, Conditional Rendering & CRUD
+✅ Module 3:  State, Events & Advanced Form Validation
+✅ Module 4:  useEffect & Side Effects
+✅ Module 5:  Styling & UI Kits
+✅ Module 6:  React Router — Pages, Params, Protected Routes
+✅ Module 7:  Context API & Global State
+✅ Module 8:  Performance — useMemo, useCallback, React.memo
+✅ Module 9:  Data Fetching — fetch, Axios, Loading States
+✅ Module 10: Custom Hooks — useFetch, useLocalStorage, useDebounce
+✅ Module 11: State Management with Zustand
+✅ Module 12: Authentication — JWT, Login, Protected Routes
+✅ Module 13: API Integration — Service Layer, React Query
+✅ Module 14: Testing — Vitest, RTL, Async Tests
+✅ Module 15: Production — Build, Env Vars, Deployment 🚀
+```

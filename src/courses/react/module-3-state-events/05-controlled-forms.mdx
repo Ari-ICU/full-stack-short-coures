@@ -1,10 +1,12 @@
 ---
-title: Controlled Form Inputs & Validation
-description: សិក្សាពីរបៀបគ្រប់គ្រងទម្រង់ Form Inputs តាមរយៈ Controlled Components និងការធ្វើ Client-side Form Validation។
+title: Controlled Form Inputs & Multi-Input Handling
+description: សិក្សាពីរបៀបគ្រប់គ្រងទម្រង់ Form Inputs តាមរយៈ Controlled Components — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា React Two-Way Binding និងពន្យល់មួយជួរៗ។
 objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Form មុនពេលគ្រប់គ្រងដោយ React
   - យល់ពីគំនិត Controlled Component (Single Source of Truth)
-  - ចេះគ្រប់គ្រង Form State ដែលមាន Multiple Inputs
-  - ចេះបង្កើត Validation Logic និង Error Messaging មុនពេល Submit
+  - "ចេះគ្រប់គ្រង Form State ដែលមាន Multiple Inputs ដោយប្រើ Computed Property [name]: value"
+  - ចេះគ្រប់គ្រង Checkbox, Radio, និង Select Dropdown
+  - ចេះទប់ស្កាត់ Page Reload និង Validate មុន Submit
 module: module-3-state-events
 order: 5
 quiz:
@@ -18,7 +20,7 @@ quiz:
     explanation: "Controlled Component គឺជាទម្រង់ input ដែលតម្លៃរបស់វាត្រូវបាន synchronize ជាមួយ React State ជានិច្ច ធ្វើឱ្យ React ជា Single Source of Truth។"
 ---
 
-## 📝 1. Controlled Component Two-Way Data Binding Loop
+## 📝 1. Two-Way Data Binding Loop
 
 ```mermaid
 flowchart TD
@@ -38,19 +40,121 @@ flowchart TD
 
 ---
 
-## 🛠️ 2. កូដគំរូ: Multi-Input Form ជាមួយ Validation
+## 🔤 2. Single Controlled Input
+
+### 🌐 Normal HTML Structure:
+
+```html
+<!-- HTML Input ធម្មតា (DOM គ្រប់គ្រងតម្លៃផ្ទាល់ខ្លួន) -->
+<div class="field">
+  <label for="username">ឈ្មោះអ្នកប្រើប្រាស់:</label>
+  <input type="text" id="username" placeholder="បញ្ចូលឈ្មោះ..." />
+</div>
+```
+
+### 💻 React Controlled Code:
 
 ```jsx
 import { useState } from 'react';
 
-export default function RegistrationForm() {
+export function SingleInput() {
+  // 1. State ជាអ្នកគ្រប់គ្រងតម្លៃ Value
+  const [username, setUsername] = useState('');
+
+  // 2. Event Handler ពេល User វាយអក្សរ
+  const handleInputChange = (e) => {
+    setUsername(e.target.value);
+  };
+
+  return (
+    <div>
+      <label>ឈ្មោះអ្នកប្រើប្រាស់:</label>
+      <input
+        type="text"
+        value={username}           // បញ្ជូន State ទៅឱ្យ Input
+        onChange={handleInputChange} // ស្តាប់ការប្រែប្រួលរាល់ពេលចុច Key
+        placeholder="បញ្ចូលឈ្មោះ..."
+      />
+      <p>អ្នកកំពុងវាយ: <strong>{username}</strong></p>
+    </div>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [username, setUsername] = useState('');`
+   - បង្កើត React State ដើម្បីធ្វើជា **Single Source of Truth**។
+2. `value={username}`
+   - Input លែងគ្រប់គ្រងតម្លៃខ្លួនឯងទៀតហើយ — តម្លៃដែលបង្ហាញលើអេក្រង់គឺយកចេញពី `username` state ជានិច្ច។
+3. `onChange={(e) => setUsername(e.target.value)}`
+   - រាល់ពេល User វាយអក្សរថ្មី `onChange` នឹងបាញ់ Event Object `e` មក។ `e.target.value` គឺជាអក្សរចុងក្រោយដែលត្រូវបានបញ្ជូនទៅ `setUsername` ដើម្បី update state និង re-render UI។
+
+---
+
+## 📋 3. Handling Multiple Inputs with One State Object
+
+ជំនួសឱ្យការបង្កើត `useState` ១០ ដងសម្រាប់ ១០ fields យើងប្រើ Object State តែមួយរួមជាមួយ **Computed Property Name `[name]: value`**៖
+
+### 🌐 Normal HTML Structure:
+
+```html
+<!-- HTML Form មាន Email និង Role Dropdown -->
+<form>
+  <input type="email" name="email" placeholder="Email" />
+  <select name="role">
+    <option value="student">សិស្ស</option>
+    <option value="developer">Developer</option>
+  </select>
+</form>
+```
+
+### 💻 React Multi-Input Code:
+
+```jsx
+const [formData, setFormData] = useState({
+  email: '',
+  role: 'student',
+  agreeTerms: false,
+});
+
+// Handler តែមួយ គ្រប់គ្រងគ្រប់ Inputs ទាំងអស់!
+const handleChange = (e) => {
+  const { name, value, type, checked } = e.target;
+
+  setFormData((prev) => ({
+    ...prev,
+    // បើជា Checkbox យកតម្លៃ checked (true/false) បើជា Input ធម្មតាយក value
+    [name]: type === 'checkbox' ? checked : value,
+  }));
+};
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const { name, value, type, checked } = e.target;`
+   - ទាញយក properties ចេញពី HTML Input ដែលទើបត្រូវបានចុច។
+2. `...prev`
+   - ចម្លង field ផ្សេងៗទៀតទាំងអស់ដែលមិនទាន់កែប្រែ ដើម្បីកុំឱ្យបាត់បង់ទិន្នន័យ (Immutability)។
+3. `[name]: type === 'checkbox' ? checked : value`
+   - ប្រើ JavaScript **Computed Property Name `[name]`**។ ប្រសិនបើ User កំពុងវាយលើ `<input name="email" />` នោះ `[name]` នឹងក្លាយជា `email: value` ដោយស្វ័យប្រវត្តិ។
+
+---
+
+## 🚀 4. Complete Integrated Registration Form
+
+```jsx
+import { useState } from 'react';
+
+export default function ControlledForm() {
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
-    password: '',
+    role: 'developer',
     agreeTerms: false,
   });
 
-  const [errors, setErrors] = useState({});
+  const [submittedData, setSubmittedData] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -60,68 +164,98 @@ export default function RegistrationForm() {
     }));
   };
 
-  const validate = () => {
-    const errs = {};
-    if (!formData.email.includes('@')) errs.email = 'Email មិនត្រឹមត្រូវឡើយ!';
-    if (formData.password.length < 6) errs.password = 'Password ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ!';
-    if (!formData.agreeTerms) errs.agreeTerms = 'សូមយល់ព្រមតាមលក្ខខណ្ឌ!';
-    return errs;
-  };
-
   const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validate();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+    e.preventDefault(); // ការពារកុំឱ្យ Reload ទំព័រ
+
+    if (!formData.agreeTerms) {
+      alert('សូមយល់ព្រមតាមលក្ខខណ្ឌជាមុនសិន!');
       return;
     }
 
-    setErrors({});
-    alert("ចុះឈ្មោះជោគជ័យ! 🎉");
+    setSubmittedData(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 border rounded-2xl max-w-sm mx-auto space-y-4">
-      <div>
-        <label className="block text-sm font-semibold mb-1">Email:</label>
-        <input 
-          type="email" 
-          name="email"
-          value={formData.email} 
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-      </div>
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow">
+      <h2 className="text-xl font-bold mb-4 text-slate-800 dark:text-white">
+        📝 Controlled Registration Form
+      </h2>
 
-      <div>
-        <label className="block text-sm font-semibold mb-1">Password:</label>
-        <input 
-          type="password" 
-          name="password"
-          value={formData.password} 
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded-lg"
-        />
-        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-      </div>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Full Name */}
+        <div>
+          <label className="block text-xs font-semibold mb-1">ឈ្មោះពេញ</label>
+          <input
+            type="text"
+            name="fullName"
+            value={formData.fullName}
+            onChange={handleChange}
+            placeholder="Sok Dara"
+            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+          />
+        </div>
 
-      <div className="flex items-center gap-2">
-        <input 
-          type="checkbox" 
-          name="agreeTerms"
-          checked={formData.agreeTerms} 
-          onChange={handleChange}
-          id="terms"
-        />
-        <label htmlFor="terms" className="text-sm">ខ្ញុំយល់ព្រមតាមលក្ខខណ្ឌ</label>
-      </div>
-      {errors.agreeTerms && <p className="text-red-500 text-xs">{errors.agreeTerms}</p>}
+        {/* Email */}
+        <div>
+          <label className="block text-xs font-semibold mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="dara@example.com"
+            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+          />
+        </div>
 
-      <button type="submit" className="w-full py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700">
-        បង្កើតគណនី
-      </button>
-    </form>
+        {/* Role Select Dropdown */}
+        <div>
+          <label className="block text-xs font-semibold mb-1">តួនាទី (Role)</label>
+          <select
+            name="role"
+            value={formData.role}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+          >
+            <option value="student">🎓 Student</option>
+            <option value="developer">💻 Developer</option>
+            <option value="designer">🎨 Designer</option>
+          </select>
+        </div>
+
+        {/* Checkbox */}
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="agreeTerms"
+            name="agreeTerms"
+            checked={formData.agreeTerms}
+            onChange={handleChange}
+            className="w-4 h-4 rounded"
+          />
+          <label htmlFor="agreeTerms" className="text-xs text-slate-600 dark:text-slate-300">
+            ខ្ញុំយល់ព្រមតាមលក្ខខណ្ឌប្រើប្រាស់
+          </label>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition"
+        >
+          ចុះឈ្មោះ (Submit)
+        </button>
+      </form>
+
+      {/* Submitted Result Preview */}
+      {submittedData && (
+        <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl text-xs space-y-1">
+          <p className="font-bold text-slate-800 dark:text-white">🎉 ទិន្នន័យដែលបាន Submit:</p>
+          <p>ឈ្មោះ: <strong>{submittedData.fullName}</strong></p>
+          <p>Email: <strong>{submittedData.email}</strong></p>
+          <p>Role: <strong>{submittedData.role}</strong></p>
+        </div>
+      )}
+    </div>
   );
 }
 ```

@@ -1,11 +1,11 @@
 ---
 title: Synchronizing with Browser APIs, Storage & Events
-description: សិក្សាពីការប្រើប្រាស់ `useEffect` ដើម្បីធ្វើសមកាលកម្មជាមួយ Browser Storage, Keyboard Shortcuts, Online Status និង Scroll Position។
+description: សិក្សាពីការប្រើប្រាស់ `useEffect` ដើម្បីធ្វើសមកាលកម្មជាមួយ Browser Storage, Keyboard Shortcuts, Online Status និង Scroll Position ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
 objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML & Browser Web APIs
   - ចេះប្រើ `useEffect` ដើម្បី Synchronize State ទៅកាន់ `localStorage`
   - ចេះបង្កើត Global Keyboard Shortcut Listeners ជាមួយ Cleanup
-  - ចេះចាប់ព្រឹត្តិការណ៍ Browser Online/Offline Status
-  - ចេះតាមដាន Scroll Position និង Window Events ក្នុង React
+  - ចេះចាប់ព្រឹត្តិការណ៍ Browser Online/Offline Status (`navigator.onLine`)
 module: module-4-useeffect
 order: 4
 quiz:
@@ -17,19 +17,9 @@ quiz:
       - "ព្រោះ localStorage នឹងលុបទិន្នន័យចោលរាល់ពេល render"
     correctAnswer: 1
     explanation: "`localStorage` គឺជា Side Effect។ លើសពីនេះ ក្នុង Frameworks ដូចជា Next.js, `window` និង `localStorage` មិនមានវត្តមានលើ Server ទេ ដូច្នេះការដាក់ក្នុង `useEffect` ធានាថាកូដដំណើរការតែលើ Browser (Client-side) ប៉ុណ្ណោះ។"
-  - question: "តើហេតុអ្វីបានជាយើងត្រូវដក Event Listener ចេញ (`removeEventListener`) ក្នុង Cleanup នៃ Keyboard Shortcut Effect?"
-    options:
-      - "ដើម្បីការពារកុំឱ្យ Callback ចាស់ៗកកកុញក្នុង Memory និង execute ច្រើនដងរាល់ពេល User ចុច Key ម្តងៗ"
-      - "ដើម្បីឱ្យ Keyboard ដំណើរការលឿនជាងមុន"
-      - "ដើម្បីប្តូរភាសា Keyboard ដោយស្វ័យប្រវត្តិ"
-      - "ដើម្បីឱ្យ CSS Apply បានត្រឹមត្រូវ"
-    correctAnswer: 1
-    explanation: "បើគ្មាន Cleanup ទេ រាល់ពេល Component re-render ឬ unmount, event listener ថ្មីនឹងត្រូវបាន append បន្ថែមលើ window ធ្វើឱ្យ callback execute ស្ទួនៗ និង leak memory។"
 ---
 
-## 🌐 1. Synchronization ជាមួយ Browser `localStorage`
-
-ការរក្សាទុកទិន្នន័យ (Settings, Theme, Draft text) ទៅកាន់ `localStorage` គឺជា Side Effect ដ៏ពេញនិយមមួយ៖
+## 🌐 1. Synchronization Architecture
 
 ```mermaid
 flowchart LR
@@ -43,95 +33,83 @@ flowchart LR
     style D fill:#f0fff4,stroke:#38a169,color:#000
 ```
 
-### កូដគំរូ៖ Persistent Theme Switcher
+---
+
+## 💾 2. Example A: LocalStorage Synchronization
+
+### 🌐 Normal HTML / Vanilla JS:
+
+```html
+<!-- HTML Theme Toggle -->
+<button onclick="localStorage.setItem('theme', 'dark'); document.body.className = 'dark';">
+  Switch to Dark
+</button>
+```
+
+### 💻 React Code (ជាមួយ `useEffect` Sync):
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function ThemeSwitcher() {
+export function StorageSyncDemo() {
   const [theme, setTheme] = useState(() => {
-    // Lazy State Initialization: អានតម្លៃពី localStorage តែម្តងគត់ពេល Mount
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('app-theme') || 'light';
-    }
-    return 'light';
+    return localStorage.getItem('user_theme') || 'light';
   });
 
-  // ✅ Sync theme state ទៅកាន់ localStorage និង DOM
+  // Sync State ទៅ LocalStorage គ្រប់ពេល theme ប្រែប្រួល
   useEffect(() => {
-    localStorage.setItem('app-theme', theme);
-    
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]); // Re-sync រាល់ពេល theme ប្រែប្រួល
+    localStorage.setItem('user_theme', theme);
+  }, [theme]);
 
   return (
-    <button
-      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      className="px-4 py-2 bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-900 rounded-xl font-bold transition shadow"
-    >
-      {theme === 'light' ? '🌙 ប្តូរទៅ Dark Mode' : '☀️ ប្តូរទៅ Light Mode'}
+    <button onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}>
+      ប្តូរ Theme: {theme}
     </button>
   );
 }
 ```
 
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `const [theme, setTheme] = useState(() => ...)`
+   - ប្រើ Lazy Initializer ដើម្បីអានតម្លៃចាស់ពី `localStorage.getItem` តែមួយដងគត់ពេល Mount។
+2. `useEffect(() => { localStorage.setItem('user_theme', theme); }, [theme]);`
+   - រាល់ពេល `theme` ប្រែប្រួល Effect នឹងសរសេរទិន្នន័យថ្មីចូល Storage ដោយស្វ័យប្រវត្តិ។
+
 ---
 
-## ⌨️ 2. Global Keyboard Shortcuts Listener (`Escape`, `Ctrl+K`)
+## ⌨️ 3. Example B: Global Keyboard Shortcut Listener
 
-ការចាប់ Key ចុចលើ Keyboard (ដូចជាចុច `Escape` ដើម្បីបិទ Dialog Modal) ត្រូវប្រើ `useEffect` ជាមួយ `window.addEventListener('keydown')`៖
+### 💻 Code សម្រាប់ Keyboard Shortcut (`Escape` key):
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function ModalWithEscapeKey() {
+export function ModalShortcutDemo() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    // 1. ប្រសិនបើ Modal បិទ មិនបាច់ attach listener ឡើយ
-    if (!isOpen) return;
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        console.log("Escape key pressed -> បិទ Modal");
+    const handleKeyDown = (e) => {
+      // ប្រសិនបើ User ចុច key "Escape" ឱ្យបិទ Modal
+      if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
 
-    // 2. Setup: Add keydown listener
     window.addEventListener('keydown', handleKeyDown);
 
-    // 3. Cleanup: Remove listener ពេល Modal បិទ ឬ Unmount
+    // Cleanup: Remove listener
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen]); // Re-run តែពេល isOpen ប្រែប្រួល
+  }, []);
 
   return (
     <div>
-      <button
-        onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl"
-      >
-        បើកផ្ទាំង Modal
-      </button>
-
+      <button onClick={() => setIsOpen(true)}>Open Modal</button>
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold">ចុច ESC លើ Keyboard ដើម្បីបិទ</h3>
-            <p className="text-sm text-gray-500">ផ្ទាំងនេះនឹងបិទដោយស្វ័យប្រវត្តិតាមរយៈ useEffect Keydown Listener។</p>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-full py-2 bg-gray-200 dark:bg-gray-800 rounded-xl font-bold text-sm"
-            >
-              បិទផ្ទាំង (Close)
-            </button>
-          </div>
+        <div className="modal">
+          <p>ចុចប៊ូតុង [ESC] លើ Keyboard ដើម្បីបិទ Modal នេះ!</p>
         </div>
       )}
     </div>
@@ -139,86 +117,51 @@ export function ModalWithEscapeKey() {
 }
 ```
 
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `window.addEventListener('keydown', handleKeyDown)`
+   - ចុះឈ្មោះចាប់ keyboard event លើ window។
+2. `if (e.key === 'Escape') setIsOpen(false)`
+   - ពិនិត្យ key property នៃ event ដើម្បី trigger modal close។
+3. `return () => window.removeEventListener(...)`
+   - សម្អាត listener ចោលពេល component unmount ការពារ double-listeners។
+
 ---
 
-## 📶 3. Network Online / Offline Detection
+## 📡 4. Example C: Browser Online / Offline Status
 
-យើងអាចប្រើ `useEffect` ដើម្បីតាមដានថាតើ Device របស់ User មាន Internet Connection ឬ Offline៖
+### 💻 Code សម្រាប់ Online Status:
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function NetworkStatusBanner() {
-  const [isOnline, setIsOnline] = useState(
-    typeof navigator !== 'undefined' ? navigator.onLine : true
-  );
+export function OnlineStatus() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const setOnline = () => setIsOnline(true);
+    const setOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', setOnline);
+    window.addEventListener('offline', setOffline);
 
-    // 🧹 Cleanup
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', setOnline);
+      window.removeEventListener('offline', setOffline);
     };
   }, []);
 
-  if (isOnline) return null; // លាក់ Banner បើមាន Internet
-
   return (
-    <div className="bg-amber-500 text-white text-xs font-bold py-2 px-4 text-center">
-      ⚠️ គ្មានការតភ្ជាប់អ៊ីនធឺណិតទេ (Offline Mode)
+    <div className={`p-2 rounded-lg text-xs font-bold ${isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+      {isOnline ? '🟢 Connected (Online)' : '🔴 No Internet (Offline)'}
     </div>
   );
 }
 ```
 
----
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
 
-## 📜 4. Window Scroll Progress Tracking
-
-```jsx
-import { useState, useEffect } from 'react';
-
-export function ScrollProgressBar() {
-  const [scrollProgress, setScrollProgress] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const totalScroll = document.documentElement.scrollTop;
-      const windowHeight =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const scroll = windowHeight > 0 ? (totalScroll / windowHeight) * 100 : 0;
-      setScrollProgress(scroll);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  return (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
-      <div
-        className="h-full bg-blue-600 transition-all duration-75"
-        style={{ width: `${scrollProgress}%` }}
-      />
-    </div>
-  );
-}
-```
-
----
-
-## 🎯 សេចក្តីសង្ខេប (Key Takeaways)
-
-1. **Browser APIs Synchronization:** ប្រើ `useEffect` សម្រាប់ Sync ទៅកាន់ `localStorage`, `window.addEventListener`, និង `document` mutations។
-2. **SSR Safety:** ត្រូវប្រាកដថាប្រើ `typeof window !== 'undefined'` មុននឹង access browser-only globals។
-3. **Always Clean Up Listeners:** រាល់ Global Event Listener ត្រូវតែមាន `removeEventListener` ក្នុង cleanup function ជានិច្ច។
+1. `navigator.onLine`
+   - អាន Network Status ដំបូងពី Web API។
+2. `window.addEventListener('online' / 'offline')`
+   - ចុះឈ្មោះស្ដាប់ពេល Network ដាច់ ឬភ្ជាប់មកវិញភ្លាមៗ។

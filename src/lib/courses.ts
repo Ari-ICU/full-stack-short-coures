@@ -35,47 +35,80 @@ const COURSE_DESCRIPTIONS: Record<string, string> = {
   "deployment": "រៀនពីការដាក់អោយដំណើរការ (Deploy) ទាំង Frontend និង Backend ព្រមទាំងការបង្ហាញគម្រោងចុងក្រោយ។",
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MODULE TITLES
+// Grouped by course in curriculum order. Add new modules at the end of their
+// respective course block. Keys must match the folder name exactly.
+// ─────────────────────────────────────────────────────────────────────────────
 const MODULE_TITLES: Record<string, string> = {
-  "module-1-introduction": "Module 1 — Introduction to Full Stack",
-  "module-1-git": "Module 1 — Git Fundamentals",
-  "module-2-advanced-git": "Module 2 — Advanced Git & Workflows",
-  "module-1-html": "Module 1 — HTML & Semantic Web",
-  "module-1-css": "Module 1 — Modern CSS Layouts",
-  "module-1-bootstrap": "Module 1 — Bootstrap Framework",
-  "module-1-js": "Module 1 — JavaScript Fundamentals",
-  "module-1-fundamentals": "Module 1 — JavaScript Fundamentals",
-  "module-2-functions-data-structures": "Module 2 — Functions & Data Structures",
-  "module-3-modern-features": "Module 3 — Modern JavaScript Features",
-  "module-4-oop": "Module 4 — Object-Oriented Programming",
-  "module-5-dom": "Module 5 — DOM Manipulation & Web APIs",
-  "module-6-async": "Module 6 — Asynchronous JS & API Integration",
-  "module-7-projects": "Module 7 — Hands-on Projects",
-  "module-1-typescript": "Module 1 — TypeScript Fundamentals",
-  "module-2-advanced-typescript": "Module 2 — Advanced TypeScript",
-  "module-3-oop": "Module 3 — Object-Oriented Programming",
-  "module-4-modern-typescript": "Module 4 — Modern TypeScript",
-  "module-1-tooling-architecture": "Module 1 — Modern Tooling & Component Architecture",
-  "module-2-props-lists-conditional": "Module 2 — Props, Lists & Conditional Rendering",
-  "module-3-state-events": "Module 3 — State Management & Event Handling",
-  "module-4-useeffect": "Module 4 — The useEffect Hook",
-  "module-5-styling-ui": "Module 5 — Component Styling & UI Kits",
-  "module-6-routing": "Module 6 — Client-Side Routing",
-  "module-7-global-state": "Module 7 — Global State & Context API",
-  "module-8-performance-patterns": "Module 8 — Performance & Advanced Patterns",
-  "module-1-nodejs-fundamentals": "Module 1 — Node.js Fundamentals",
-  "module-2-expressjs": "Module 2 — Express.js & RESTful APIs",
-  "module-3-postgresql": "Module 3 — PostgreSQL & Database Design",
-  "module-4-orm": "Module 4 — TypeORM & Data Modeling",
-  "module-5-authentication": "Module 5 — Authentication & Authorization (JWT)",
-  "module-6-security": "Module 6 — Backend Security & Best Practices",
-  "module-7-testing": "Module 7 — Automated Testing (Unit & Integration)",
-  "module-8-capstone": "Module 8 — Full-Stack E-Commerce API Capstone",
-  "module-1-rdbms-setup": "Module 1 — RDBMS Architecture & Tooling",
-  "module-2-rdbms-schema": "Module 2 — Schema Design & Database Modeling",
-  "module-3-rdbms-sql": "Module 3 — SQL Queries & CRUD Operations",
-  "module-4-rdbms-advanced": "Module 4 — Transactions & Backend Integration",
-  "module-1-deployment": "Module 1 — App Deployment",
-  "module-2-final-project": "Module 2 — Final Project Demo",
+  // ── Course Overview ─────────────────────────────────────────────────────
+  "module-1-introduction":              "Module 1  — Introduction to Full Stack",
+
+  // ── Git & GitHub ────────────────────────────────────────────────────────
+  "module-1-git":                       "Module 1  — Git Fundamentals",
+  "module-2-advanced-git":              "Module 2  — Advanced Git & Workflows",
+
+  // ── HTML ────────────────────────────────────────────────────────────────
+  "module-1-html":                      "Module 1  — HTML & Semantic Web",
+
+  // ── CSS ─────────────────────────────────────────────────────────────────
+  "module-1-css":                       "Module 1  — Modern CSS Layouts",
+
+  // ── Bootstrap ───────────────────────────────────────────────────────────
+  "module-1-bootstrap":                 "Module 1  — Bootstrap Framework",
+
+  // ── JavaScript ──────────────────────────────────────────────────────────
+  "module-1-js":                        "Module 1  — JavaScript Fundamentals",
+  "module-1-fundamentals":              "Module 1  — JavaScript Fundamentals",
+  "module-2-functions-data-structures": "Module 2  — Functions & Data Structures",
+  "module-3-modern-features":           "Module 3  — Modern JavaScript Features",
+  "module-4-oop":                       "Module 4  — Object-Oriented Programming",
+  "module-5-dom":                       "Module 5  — DOM Manipulation & Web APIs",
+  "module-6-async":                     "Module 6  — Asynchronous JS & API Integration",
+  "module-7-projects":                  "Module 7  — Hands-on Projects",
+
+  // ── TypeScript ───────────────────────────────────────────────────────────
+  "module-1-typescript":                "Module 1  — TypeScript Fundamentals",
+  "module-2-advanced-typescript":       "Module 2  — Advanced TypeScript",
+  "module-3-oop":                       "Module 3  — Object-Oriented Programming",
+  "module-4-modern-typescript":         "Module 4  — Modern TypeScript",
+
+  // ── React ────────────────────────────────────────────────────────────────
+  "module-1-tooling-architecture":      "Module 1  — Modern Tooling & Component Architecture",
+  "module-2-props-lists-conditional":   "Module 2  — Props, Lists & Conditional Rendering",
+  "module-3-state-events":              "Module 3  — State Management & Event Handling",
+  "module-4-useeffect":                 "Module 4  — The useEffect Hook",
+  "module-5-styling-ui":                "Module 5  — Component Styling & UI Kits",
+  "module-6-routing":                   "Module 6  — Client-Side Routing",
+  "module-7-global-state":              "Module 7  — Global State & Context API",
+  "module-8-performance-patterns":      "Module 8  — Performance & Advanced Patterns",
+  "module-9-data-fetching":             "Module 9  — Data Fetching & HTTP",
+  "module-10-custom-hooks":             "Module 10 — Custom Hooks",
+  "module-11-state-management":         "Module 11 — State Management with Zustand",
+  "module-12-authentication":           "Module 12 — Authentication & Protected Routes",
+  "module-13-api-integration":          "Module 13 — API Integration & React Query",
+  "module-14-testing":                  "Module 14 — Testing with Vitest & RTL",
+  "module-15-production":               "Module 15 — Production & Deployment",
+
+  // ── Backend ──────────────────────────────────────────────────────────────
+  "module-1-nodejs-fundamentals":       "Module 1  — Node.js Fundamentals",
+  "module-2-expressjs":                 "Module 2  — Express.js & RESTful APIs",
+  "module-3-postgresql":                "Module 3  — PostgreSQL & Database Design",
+  "module-4-orm":                       "Module 4  — TypeORM & Data Modeling",
+  "module-5-authentication":            "Module 5  — Authentication & Authorization (JWT)",
+  "module-6-security":                  "Module 6  — Backend Security & Best Practices",
+  "module-7-testing":                   "Module 7  — Automated Testing (Unit & Integration)",
+  "module-8-capstone":                  "Module 8  — Full-Stack E-Commerce API Capstone",
+
+  // ── RDBMS ────────────────────────────────────────────────────────────────
+  "module-1-rdbms-setup":               "Module 1  — RDBMS Architecture & Tooling",
+  "module-2-rdbms-schema":              "Module 2  — Schema Design & Database Modeling",
+  "module-3-rdbms-sql":                 "Module 3  — SQL Queries & CRUD Operations",
+  "module-4-rdbms-advanced":            "Module 4  — Transactions & Backend Integration",
+
+  // ── Deployment ───────────────────────────────────────────────────────────
+  "module-1-deployment":                "Module 1  — App Deployment",
+  "module-2-final-project":             "Module 2  — Final Project Demo",
 };
 
 export function getModuleTitle(slug: string): string {

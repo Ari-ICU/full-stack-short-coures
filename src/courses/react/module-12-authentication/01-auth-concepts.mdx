@@ -1,0 +1,97 @@
+---
+title: Authentication Concepts — JWT, Token Storage & Security
+description: ស្វែងយល់ពី Authentication Flow ជាមួយ JWT (JSON Web Token), Token Storage Strategies, Refresh Token Pattern, និង Security Best Practices ដែល Developer គួរតែដឹង។
+objectives:
+  - យល់ពី JWT Structure (Header.Payload.Signature) និងរបៀប Verify
+  - ដឹងពី Token Storage Strategies (Memory vs localStorage vs httpOnly Cookie)
+  - យល់ពី Access Token + Refresh Token Pattern
+  - ស្គាល់ Auth Flow ពេញលេញ (Register → Login → Protected Resources → Logout)
+module: module-12-authentication
+order: 1
+quiz:
+  - question: "Storage Strategy មួយណាដែល Secure ជាងគេសម្រាប់ Auth Token?"
+    options:
+      - "localStorage — ងាយស្រួល Read/Write"
+      - "httpOnly Cookie — Browser ការពារ JavaScript Access ធ្វើឱ្យ XSS Attack មិនអាច Steal Token"
+      - "sessionStorage — Cleared ពេល Tab Close"
+      - "URL Query Parameter — ងាយ Share"
+    correctAnswer: 2
+    explanation: "httpOnly Cookie ត្រូវបាន Set ដោយ Server ហើយ Browser ការពារ JavaScript Code (ទាំង Malicious XSS Scripts) ពីការ Access Cookie ។ localStorage/sessionStorage ដំណើរការបាន ប៉ុន្តែ Vulnerable ប្រឆាំងនឹង XSS Attack ព្រោះ JavaScript អាច Read បាន។"
+---
+
+## 🔐 1. JWT Structure
+
+JWT (JSON Web Token) ជា String បែប `header.payload.signature` ដែលអ្នក Server ចេញ (Sign) ហើយ Client ផ្ញើ Return ក្នុង Request ជា Proof of Identity:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9    ← Header (Base64: algorithm)
+.eyJ1c2VySWQiOiIxMjMiLCJuYW1lIjoiUmF0aGEiLCJleHAiOjE3...  ← Payload (Base64: claims)
+.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c              ← Signature (HMAC-SHA256)
+```
+
+```js
+// Decoded Payload (NOT encrypted, anyone can read!)
+{
+  "userId": "123",
+  "name": "Ratha",
+  "role": "student",
+  "iat": 1709856000,   // Issued At (Unix timestamp)
+  "exp": 1709942400    // Expires At (24 hours later)
+}
+```
+
+> **⚠️ Important:** JWT Payload ត្រូវបាន **Base64 encoded** ប៉ុន្តែ **NOT encrypted** — ដូច្នេះ ហាមដាក់ sensitive data (password, credit card) ក្នុង JWT payload!
+
+---
+
+## 🔄 2. Full Auth Flow
+
+```mermaid
+sequenceDiagram
+    participant Client as React Client
+    participant Server as Node/Express Server
+    participant DB as Database
+
+    Note over Client, DB: REGISTER
+    Client->>Server: POST /auth/register { name, email, password }
+    Server->>DB: Hash password, save user
+    DB-->>Server: User created
+    Server-->>Client: 201 Created { accessToken, refreshToken }
+
+    Note over Client, DB: LOGIN
+    Client->>Server: POST /auth/login { email, password }
+    Server->>DB: Find user, bcrypt.compare(password, hash)
+    DB-->>Server: User found ✅
+    Server-->>Client: 200 OK { accessToken (15min), refreshToken (7days) }
+    Client->>Client: Store accessToken in memory, refreshToken in httpOnly cookie
+
+    Note over Client, DB: PROTECTED REQUEST
+    Client->>Server: GET /api/profile (Authorization: Bearer <accessToken>)
+    Server->>Server: jwt.verify(token, SECRET)
+    Server-->>Client: 200 OK { user data }
+
+    Note over Client, DB: REFRESH
+    Client->>Server: POST /auth/refresh (refreshToken cookie sent automatically)
+    Server->>Server: Verify refreshToken, issue new accessToken
+    Server-->>Client: 200 OK { new accessToken }
+```
+
+---
+
+## 🗄️ 3. Token Storage Strategy Comparison
+
+| Strategy | XSS Safe | CSRF Safe | Notes |
+|----------|----------|-----------|-------|
+| **Memory (JS variable)** | ✅ | ✅ | Lost on page refresh — requires refresh token |
+| **localStorage** | ❌ | ✅ | Easy XSS target — avoid for sensitive apps |
+| **sessionStorage** | ❌ | ✅ | Cleared on tab close |
+| **httpOnly Cookie** | ✅ | ❌ (need CSRF token) | **Best for production** |
+
+**Practical approach for course projects:**
+```js
+// Course-level: localStorage for simplicity (acceptable)
+localStorage.setItem('token', accessToken);
+
+// Production: accessToken in memory + refreshToken in httpOnly cookie
+// Let the server set: res.cookie('refresh_token', token, { httpOnly: true, secure: true })
+```

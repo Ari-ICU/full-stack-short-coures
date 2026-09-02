@@ -1,0 +1,160 @@
+---
+title: Axios Service Layer — Typed API Client Architecture
+description: រៀនបង្កើត Production-grade API Service Layer ដោយបំបែក API Logic ចេញពី UI Components តាមរយៈ Centralized Axios Instance និង Service Modules ជាមួយការពន្យល់មួយជួរៗ។
+objectives:
+  - យល់ពី Service Layer Pattern ក្នុង Frontend Architecture
+  - ចេះបង្កើត Resource Services (ឧ. authService, postService) ដាច់ដោយឡែក
+  - ចេះ Clean Component Code ដោយគ្រាន់តែហៅ Service Methods
+  - យល់ពីអត្ថប្រយោជន៍នៃ Maintainability ពេល API Endpoints ផ្លាស់ប្តូរ
+module: module-13-api-integration
+order: 2
+quiz:
+  - question: "ហេតុអ្វីមិនគួរហៅ `axios.get('https://...')` ដោយផ្ទាល់ក្នុងគ្រប់ Component?"
+    options:
+      - "ព្រោះ Axios មិនអនុញ្ញាត"
+      - "ព្រោះបើ API URL ឬ Auth Header ប្រែប្រួល យើងត្រូវតាមកែប្រែរាប់សិប Component — Service Layer ជួយប្រមូលផ្តុំ API calls នៅកន្លែងតែមួយ (Single Source of Truth)"
+      - "ដើម្បីឱ្យ Code រត់លឿនជាង"
+      - "វាជា TypeScript Bug"
+    correctAnswer: 2
+    explanation: "Service Layer ផ្តល់នូវ Abstraction — UI Components គ្រាន់តែដឹងថា postService.getAll() ផ្តល់ posts មកវិញ ដោយមិនចាំបាច់ខ្វល់ពី URLs, HTTP methods, headers, ឬ tokens ឡើយ។"
+---
+
+## 🏗️ 1. Service Layer Architecture
+
+```mermaid
+graph TD
+    subgraph UIComponents["UI Components (Clean UI Only)"]
+        C1["PostList.jsx"]
+        C2["CreatePostModal.jsx"]
+        C3["UserProfile.jsx"]
+    end
+
+    subgraph ServiceLayer["Service Layer (API Logic)"]
+        S1["post.service.js"]
+        S2["auth.service.js"]
+    end
+
+    subgraph CoreClient["Centralized HTTP Client"]
+        AX["apiClient.js (Axios + Interceptors)"]
+    end
+
+    C1 --> S1
+    C2 --> S1
+    C3 --> S2
+    S1 --> AX
+    S2 --> AX
+```
+
+---
+
+## 💻 2. Building `post.service.js`
+
+### 💻 Code សម្រាប់តែ Post Service Module:
+
+```javascript
+// src/services/post.service.js
+import apiClient from '../api/apiClient';
+
+export const postService = {
+  // 1. GET: ទាញយកបញ្ជី Posts ទាំងអស់
+  getAll: async (params = {}) => {
+    const response = await apiClient.get('/posts', { params });
+    return response.data;
+  },
+
+  // 2. GET: ទាញយក Post មួយតាម ID
+  getById: async (id) => {
+    const response = await apiClient.get(`/posts/${id}`);
+    return response.data;
+  },
+
+  // 3. POST: បង្កើត Post ថ្មី
+  create: async (postData) => {
+    const response = await apiClient.post('/posts', postData);
+    return response.data;
+  },
+
+  // 4. PUT / PATCH: កែប្រែ Post
+  update: async (id, updatedData) => {
+    const response = await apiClient.patch(`/posts/${id}`, updatedData);
+    return response.data;
+  },
+
+  // 5. DELETE: លុប Post
+  delete: async (id) => {
+    const response = await apiClient.delete(`/posts/${id}`);
+    return response.data;
+  },
+};
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `import apiClient from '../api/apiClient';`
+   - Import Base Axios instance ដែលបាន configure headers, timeout, និង interceptors រួចរាល់។
+2. `getAll: async (params = {}) => { ... }`
+   - Function ទទួល `params` (ដូចជា pagination `page=1&limit=10` ឬ filter) រួច return តែ `response.data` ជូន caller។
+3. `create: async (postData) => { ... }`
+   - Encapsulate HTTP `POST` method និង endpoint `/posts`។
+4. `delete: async (id) => { ... }`
+   - Encapsulate HTTP `DELETE` method។
+
+---
+
+## 🛠️ 3. Using Service Layer in UI Component
+
+### 💻 Code សម្រាប់ UI Component:
+
+```jsx
+// src/components/PostList.jsx
+import { useState, useEffect } from 'react';
+import { postService } from '../services/post.service';
+
+export default function PostList() {
+  const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // ហៅ Service យ៉ាងស្អាត ដោយគ្មាន axios syntax ក្នុង Component ឡើយ!
+    postService
+      .getAll({ _limit: 5 })
+      .then((data) => setPosts(data))
+      .catch((err) => console.error(err))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await postService.delete(id);
+      setPosts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert('លុបមិនបានសម្រេច!');
+    }
+  };
+
+  if (isLoading) return <p>⏳ កំពុងផ្ទុក Posts...</p>;
+
+  return (
+    <ul className="space-y-2">
+      {posts.map((post) => (
+        <li key={post.id} className="flex justify-between p-3 border rounded-xl">
+          <span className="font-semibold text-sm">{post.title}</span>
+          <button
+            onClick={() => handleDelete(post.id)}
+            className="text-red-500 text-xs font-bold"
+          >
+            លុប
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `postService.getAll({ _limit: 5 })`
+   - Component មើលទៅសាមញ្ញ និងងាយយល់ — វាគ្រាន់តែស្នើសុំ "Get All Posts" ពី Service។
+2. `await postService.delete(id)`
+   - Delete action ត្រូវធ្វើឡើងតាមរយៈ method របស់ Service។ ប្រសិនបើថ្ងៃក្រោយ Backend ប្តូរ Endpoint ពី `/posts/${id}` ទៅ `/api/v2/articles/${id}` យើងគ្រាន់តែកែតែក្នុង file `post.service.js` មួយគត់ គ្រប់ Components នឹងដំណើរការធម្មតា!

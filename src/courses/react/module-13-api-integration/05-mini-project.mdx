@@ -1,0 +1,199 @@
+---
+title: "Mini Project — Full CRUD Todo App with REST API"
+description: សាងសង់ Full CRUD Todo Application ដែលភ្ជាប់ទៅកាន់ REST API — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា TanStack Query (useQuery, useMutation, Optimistic Updates) ជាមួយការពន្យល់មួយជួរៗ។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Todo Form & List
+  - ចេះ Implement Full CRUD ជាមួយ TanStack Query useQuery + useMutation
+  - ចេះ Handle Optimistic Updates ដើម្បី Instant UI Feedback
+  - ចេះ Invalidate Query Cache ក្រោយ Mutations
+module: module-13-api-integration
+order: 5
+quiz:
+  - question: "Optimistic Update ផ្ដល់អ្វី UX benefit?"
+    options:
+      - "វាធ្វើ API Calls លឿនជាង"
+      - "Optimistic Update Update UI ភ្លាមៗ (មុន API Response) — User ឃើញ Result ដោយ Zero-lag ហើយ Rollback ប្រសិនបើ API Fail — ធ្វើឱ្យ App មើលទៅ Fast ដូច Native App"
+      - "Optimistic Update ណែនាំ Bug"
+      - "Optimistic Update ងាយ Implement ជាង Regular Update"
+    correctAnswer: 2
+    explanation: "Optimistic Update: Update Local Cache ភ្លាម → Show Success UI → If API Fails → Rollback to old data + Show Error Toast។ User ឃើញ Instant Response ដែល Feels Snappy ក្លាយជា Native App Experience ជំនួស Waiting for API Response ជារៀងរហូតដើម្បី Update UI។"
+---
+
+## 📋 1. Normal HTML Todo CRUD Structure
+
+មុននឹងបន្ថែម React Query Logic នេះជារចនាសម្ព័ន្ធ HTML ធម្មតារបស់ Todo CRUD Manager៖
+
+```html
+<!-- HTML Todo CRUD Structure -->
+<div class="todo-app">
+  <h2>📋 Todo Manager</h2>
+
+  <!-- Create Form -->
+  <form class="todo-form">
+    <input type="text" placeholder="បន្ថែម Task ថ្មី..." />
+    <button type="submit">Add Task</button>
+  </form>
+
+  <!-- Todo List -->
+  <ul class="todo-list">
+    <li class="todo-item">
+      <input type="checkbox" />
+      <span>រៀន React Query Fundamentals</span>
+      <button type="button" class="btn-delete">🗑️</button>
+    </li>
+  </ul>
+</div>
+```
+
+---
+
+## ⚡ 2. TanStack Query CRUD Logic
+
+### 💻 Code សម្រាប់ useQuery & useMutation:
+
+```javascript
+const qc = useQueryClient();
+
+// 1. READ: useQuery
+const { data: todos, isLoading } = useQuery({
+  queryKey: ['todos'],
+  queryFn: () => fetch('/api/todos').then((res) => res.json()),
+});
+
+// 2. CREATE: useMutation
+const createMutation = useMutation({
+  mutationFn: (text) =>
+    fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: text, completed: false }),
+    }).then((res) => res.json()),
+
+  onSuccess: () => {
+    // Invalidate Cache ដើម្បីឱ្យ React Query Auto-refetch ទិន្នន័យថ្មី
+    qc.invalidateQueries({ queryKey: ['todos'] });
+  },
+});
+
+// 3. DELETE: useMutation
+const deleteMutation = useMutation({
+  mutationFn: (id) => fetch(`/api/todos/${id}`, { method: 'DELETE' }),
+  onSuccess: () => qc.invalidateQueries({ queryKey: ['todos'] }),
+});
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `useQuery({ queryKey: ['todos'], queryFn: ... })`
+   - ទាញយកទិន្នន័យពី Server ព្រមទាំង Caching ដោយស្វ័យប្រវត្តិកាត់បន្ថយ Network Request។
+2. `qc.invalidateQueries({ queryKey: ['todos'] })`
+   - ក្រោយពេល Add ឬ Delete ជោគជ័យ React Query នឹងទាញយកបញ្ជី Todo ថ្មីបំផុតមក Render ភ្លាមៗ។
+
+---
+
+## 🚀 3. Complete Integrated Todo App
+
+```jsx
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+// Mock API service for demonstration
+const api = {
+  getTodos: async () => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/todos?_limit=5');
+    return res.json();
+  },
+  addTodo: async (title) => {
+    const res = await fetch('https://jsonplaceholder.typicode.com/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, completed: false }),
+    });
+    return res.json();
+  },
+  deleteTodo: async (id) => {
+    await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, { method: 'DELETE' });
+  },
+};
+
+export default function TodoCRUDApp() {
+  const qc = useQueryClient();
+  const [inputText, setInputText] = useState('');
+
+  // 1. READ
+  const { data: todos, isLoading, isError } = useQuery({
+    queryKey: ['todos'],
+    queryFn: api.getTodos,
+  });
+
+  // 2. CREATE
+  const createMutation = useMutation({
+    mutationFn: api.addTodo,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['todos'] });
+      setInputText('');
+    },
+  });
+
+  // 3. DELETE
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteTodo,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['todos'] }),
+  });
+
+  const handleCreate = (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+    createMutation.mutate(inputText.trim());
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow">
+      <h2 className="text-xl font-bold mb-4 text-slate-800 dark:text-white">
+        📋 React Query Todo CRUD
+      </h2>
+
+      {/* CREATE FORM */}
+      <form onSubmit={handleCreate} className="flex gap-2 mb-4">
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="បន្ថែម task ថ្មី..."
+          className="flex-1 px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+        />
+        <button
+          type="submit"
+          disabled={createMutation.isPending}
+          className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold disabled:opacity-50"
+        >
+          {createMutation.isPending ? '...' : 'Add'}
+        </button>
+      </form>
+
+      {/* READ STATES */}
+      {isLoading && <p className="text-sm text-slate-400">⏳ កំពុងទាញយកទិន្នន័យ...</p>}
+      {isError && <p className="text-sm text-red-500">⚠️ មិនអាចទាញយកទិន្នន័យបានទេ</p>}
+
+      <ul className="space-y-2">
+        {todos?.map((todo) => (
+          <li
+            key={todo.id}
+            className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-700 rounded-xl text-sm"
+          >
+            <span className={todo.completed ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}>
+              {todo.title}
+            </span>
+            <button
+              onClick={() => deleteMutation.mutate(todo.id)}
+              className="text-red-500 hover:text-red-700 font-bold ml-2"
+            >
+              🗑️
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```

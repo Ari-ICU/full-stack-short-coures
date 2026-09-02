@@ -1,0 +1,324 @@
+---
+title: Lists & CRUD — Create, Read, Update, Delete with useState
+description: រៀនពីរបៀបគ្រប់គ្រង Array State ដើម្បីអនុវត្ត CRUD Operations (Create, Read, Update, Delete) ដោយចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+objectives:
+  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML នៃផ្នែកនីមួយៗ (Form, List, Checkbox, Delete Button)
+  - ចេះបំប្លែង Normal HTML ទៅជា Dynamic React State
+  - ចេះសរសេរ Create (C) ដោយប្រើ Spread Operator
+  - ចេះសរសេរ Read (R) ដោយប្រើ Array map() និង Empty State
+  - ចេះសរសេរ Update (U) ដោយប្រើ Conditional map()
+  - ចេះសរសេរ Delete (D) ដោយប្រើ Array filter()
+module: module-3-state-events
+order: 7
+quiz:
+  - question: "តើរបៀបណាដែលត្រឹមត្រូវក្នុងការបន្ថែម item ថ្មីទៅក្នុង Array State?"
+    options:
+      - "ហៅ state.push(newItem) ដោយផ្ទាល់"
+      - "ប្រើ setState(prev => [...prev, newItem]) ដើម្បីបង្កើត Array ថ្មី"
+      - "ប្រើ setState(newItem) ជំនួស Array ទាំងមូល"
+      - "ហៅ state.concat(newItem) ដោយប្រើ Mutation"
+    correctAnswer: 2
+    explanation: "React State ត្រូវតែ Immutable។ ការប្រើ Spread Operator (...prev) បង្កើត Array ថ្មីដោយចម្លង items ទាំងអស់ ហើយបន្ថែម item ថ្មី ដោយមិនកែប្រែ State ដើមឡើយ។"
+---
+
+## 🗂️ 1. CRUD Concept Overview
+
+CRUD គឺជាប្រតិបត្តិការស្នូលទាំង ៤ ក្នុង Web Application៖
+- **C - Create:** បញ្ចូលទិន្នន័យថ្មី
+- **R - Read:** បង្ហាញបញ្ជីទិន្នន័យលើ Screen
+- **U - Update:** កែប្រែស្ថានភាព ឬខ្លឹមសារទិន្នន័យ
+- **D - Delete:** លុបទិន្នន័យចេញពីបញ្ជី
+
+---
+
+## ➕ 2. CREATE (ការបន្ថែម Item ថ្មី)
+
+### 🌐 Normal HTML Structure (ទម្រង់ HTML ធម្មតា):
+មុននឹងសរសេរ React យើងត្រូវយល់ពីរចនាសម្ព័ន្ធ HTML សាមញ្ញជាមុនសិន៖
+
+```html
+<!-- ទម្រង់ HTML Form ធម្មតា -->
+<form>
+  <input type="text" placeholder="បញ្ចូល Task ថ្មី..." />
+  <button type="submit">Add Task</button>
+</form>
+```
+
+### 💻 React Code (ការបំប្លែងទៅជា React State & Handler):
+
+```jsx
+// 1. បង្កើត State សម្រាប់គ្រប់គ្រងទិន្នន័យ
+const [todos, setTodos] = useState([]);
+const [inputText, setInputText] = useState('');
+
+// 2. Function បន្ថែម Item ថ្មី
+const handleCreate = (e) => {
+  e.preventDefault(); // ការពារកុំឱ្យ Reload ទំព័រ
+  
+  if (!inputText.trim()) return; // ពិនិត្យបើគ្មានអក្សរ មិនធ្វើអ្វីឡើយ
+
+  const newTodo = {
+    id: Date.now(),          // បង្កើត Unique ID ដោយ timestamp
+    text: inputText.trim(),  // កាត់ space ចេញ
+    done: false,             // កំណត់ status ដំបូង
+  };
+
+  // បន្ថែម newTodo ចូលក្នុង Array State
+  setTodos((prev) => [...prev, newTodo]);
+  
+  // សម្អាត Input ឱ្យទទេវិញ
+  setInputText('');
+};
+
+// 3. JSX Render
+return (
+  <form onSubmit={handleCreate}>
+    <input
+      type="text"
+      value={inputText}
+      onChange={(e) => setInputText(e.target.value)}
+      placeholder="បញ្ចូល Task ថ្មី..."
+    />
+    <button type="submit">Add Task</button>
+  </form>
+);
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `e.preventDefault();`
+   - ទប់ស្កាត់លំនាំដើមរបស់ Browser មិនឱ្យ Refresh/Reload ទំព័រទាំងមូលនៅពេល Submit Form។
+2. `if (!inputText.trim()) return;`
+   - លុប White-space ចេញ។ បើ User មិនបានវាយអ្វីសោះ វានឹងឈប់ភ្លាមមិនបង្កើត Todo ទទេឡើយ។
+3. `const newTodo = { id: Date.now(), text: inputText.trim(), done: false };`
+   - បង្កើត Object ថ្មីដែលមាន `id` (លេខសម្គាល់តែមួយគត់), `text` (ខ្លឹមសារ), និង `done` (ស្ថានភាពមិនទាន់ធ្វើ)។
+4. `setTodos((prev) => [...prev, newTodo]);`
+   - ប្រើ `...prev` ដើម្បីចម្លង items ចាស់ៗទាំងអស់មកដាក់ក្នុង Array ថ្មី រួចបន្ថែម `newTodo` នៅចុងបញ្ចប់ (គោរពគោលការណ៍ Immutability)។
+5. `setInputText('');`
+   - Reset Input field ឱ្យទទេវិញ ដើម្បីត្រៀមឱ្យ User វាយពាក្យបន្ទាប់។
+
+---
+
+## 👁️ 3. READ (ការទាញទិន្នន័យមកបង្ហាញ)
+
+### 🌐 Normal HTML Structure (ទម្រង់ HTML ធម្មតា):
+
+```html
+<!-- បញ្ជី HTML List ធម្មតា -->
+<ul>
+  <li>
+    <span>រៀន React Fundamentals</span>
+  </li>
+  <li>
+    <span>អនុវត្ត CRUD Operations</span>
+  </li>
+</ul>
+```
+
+### 💻 React Code (ការបំប្លែងទៅជា Dynamic List & Empty State):
+
+```jsx
+// 1. ករណីគ្មានទិន្នន័យ (Empty State)
+{todos.length === 0 ? (
+  <div className="empty-box">
+    <p>📭 មិនទាន់មាន Task ណាមួយនៅឡើយទេ!</p>
+  </div>
+) : (
+  // 2. ករណីមានទិន្នន័យ — ប្រើ .map() ដើម្បី Render
+  <ul className="todo-list">
+    {todos.map((todo) => (
+      <li key={todo.id} className={todo.done ? 'completed' : ''}>
+        <span>{todo.text}</span>
+      </li>
+    ))}
+  </ul>
+)}
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `todos.length === 0 ? (...) : (...)`
+   - ប្រើ Ternary Operator ដើម្បីឆែក៖ បើ Array ទទេ បង្ហាញ Empty State UI, បើមានទិន្នន័យ បង្ហាញបញ្ជី `<ul>`។
+2. `todos.map((todo) => (...))`
+   - បំប្លែង Object ទិន្នន័យនីមួយៗក្នុង Array ឱ្យក្លាយជា JSX Element `<li>` ដោយស្វ័យប្រវត្តិ។
+3. `key={todo.id}`
+   - **កាតព្វកិច្ច:** ដាក់ `key` ជា Unique ID ដើម្បីឱ្យ React ដឹងថា item ណាខ្លះត្រូវបន្ថែម កែប្រែ ឬលុបចេញពី DOM។
+4. `className={todo.done ? 'completed' : ''}`
+   - ដាក់ Class តាមលក្ខខណ្ឌ (Dynamic Styling)។
+
+---
+
+## ✏️ 4. UPDATE (ការកែប្រែទិន្នន័យ)
+
+### 🌐 Normal HTML Structure (ទម្រង់ HTML ធម្មតា):
+
+```html
+<!-- HTML Checkbox សម្រាប់ Toggle ស្ថានភាព -->
+<li>
+  <input type="checkbox" checked />
+  <span>រៀន React Fundamentals</span>
+</li>
+```
+
+### 💻 React Code (ការបំប្លែងទៅជា Toggle Handler):
+
+```jsx
+// 1. Handler សម្រាប់ Toggle ស្ថានភាព done (true <-> false)
+const handleToggle = (id) => {
+  setTodos((prev) =>
+    prev.map((todo) =>
+      todo.id === id ? { ...todo, done: !todo.done } : todo
+    )
+  );
+};
+
+// 2. JSX Render
+<input
+  type="checkbox"
+  checked={todo.done}
+  onChange={() => handleToggle(todo.id)}
+/>
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `prev.map((todo) => ...)`
+   - រត់ឆ្លងកាត់រាល់ item ទាំងអស់ក្នុង Array ហើយបង្កើត Array ថ្មីមួយ។
+2. `todo.id === id ? { ...todo, done: !todo.done } : todo`
+   - **បើត្រូវ ID:** ចម្លង property ទាំងអស់ `{ ...todo }` ហើយប្តូរតម្លៃ `done` ទៅជាតម្លៃផ្ទុយ `!todo.done` (true ទៅ false, false ទៅ true)។
+   - **បើមិនត្រូវ ID:** រក្សាទុក `todo` ដើមដដែលមិនប៉ះពាល់ឡើយ។
+
+---
+
+## 🗑️ 5. DELETE (ការលុបទិន្នន័យ)
+
+### 🌐 Normal HTML Structure (ទម្រង់ HTML ធម្មតា):
+
+```html
+<!-- HTML Delete Button ធម្មតា -->
+<li>
+  <span>រៀន React</span>
+  <button type="button" class="btn-delete">✕</button>
+</li>
+```
+
+### 💻 React Code (ការបំប្លែងទៅជា Delete Handler):
+
+```jsx
+// 1. Handler សម្រាប់លុប Todo តាម ID
+const handleDelete = (id) => {
+  setTodos((prev) => prev.filter((todo) => todo.id !== id));
+};
+
+// 2. JSX Render
+<button onClick={() => handleDelete(todo.id)}>
+  ✕
+</button>
+```
+
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+
+1. `prev.filter((todo) => todo.id !== id)`
+   - ប្រើ Array Method `.filter()` ដើម្បីជ្រើសរើសយកតែ item ណាដែល **មិនស្មើ** នឹង `id` ដែលត្រូវលុប។
+2. Item ណាដែលមាន `id === id` នឹងត្រូវច្រោះចេញពី Array ថ្មីភ្លាមៗ។
+
+---
+
+## 🚀 6. Complete Integrated Application
+
+ខាងក្រោមនេះជារូបភាពពេញលេញនៃការផ្គុំ Normal HTML ទាំង ៤ ផ្នែកខាងលើ ទៅជា React CRUD Component ពេញលេញ៖
+
+```jsx
+import { useState } from 'react';
+
+export default function TodoApp() {
+  const [todos, setTodos] = useState([
+    { id: 1, text: 'រៀន React Fundamentals', done: true },
+    { id: 2, text: 'អនុវត្ត CRUD Operations', done: false },
+  ]);
+  const [inputText, setInputText] = useState('');
+
+  // ── CREATE ──
+  const handleCreate = (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+    setTodos((prev) => [
+      ...prev,
+      { id: Date.now(), text: inputText.trim(), done: false },
+    ]);
+    setInputText('');
+  };
+
+  // ── UPDATE (Toggle) ──
+  const handleToggle = (id) => {
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+    );
+  };
+
+  // ── DELETE ──
+  const handleDelete = (id) => {
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-md">
+      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
+        📝 Todo CRUD Manager
+      </h2>
+
+      {/* CREATE FORM */}
+      <form onSubmit={handleCreate} className="flex gap-2 mb-4">
+        <input
+          type="text"
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder="បញ្ចូល Task ថ្មី..."
+          className="flex-1 px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white"
+        />
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold"
+        >
+          Add
+        </button>
+      </form>
+
+      {/* READ & EMPTY STATE */}
+      {todos.length === 0 ? (
+        <p className="text-center text-slate-400 py-6">គ្មាន Task នៅឡើយទេ!</p>
+      ) : (
+        <ul className="space-y-2">
+          {todos.map((item) => (
+            <li
+              key={item.id}
+              className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl"
+            >
+              {/* UPDATE TOGGLE */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={() => handleToggle(item.id)}
+                  className="w-4 h-4"
+                />
+                <span className={item.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-white'}>
+                  {item.text}
+                </span>
+              </div>
+
+              {/* DELETE BUTTON */}
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="text-red-500 hover:text-red-700 font-bold text-sm"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+```

@@ -1,0 +1,154 @@
+---
+title: Deployment — Vercel, Netlify & CI/CD Basics
+description: រៀនបញ្ចេញ (Deploy) React App ទៅ Production ដោយ Vercel ឬ Netlify — Automatic Deploy from Git, Environment Variables ក្នុង Production, Custom Domains, Preview Deployments, និង CI/CD Pipeline Basics។
+objectives:
+  - ចេះ Deploy React App ទៅ Vercel ជាមួយ Git Integration
+  - ចេះ Configure Production Environment Variables ក្នុង Vercel/Netlify Dashboard
+  - ចេះ Setup Preview Deployments ដើម្បី Test Pull Requests
+  - ចេះ Configure SPA Routing (History API) ក្នុង Netlify
+module: module-15-production
+order: 3
+quiz:
+  - question: "ហេតុអ្វី React SPA ត្រូវ Configure Special Redirect Rules ក្នុង Netlify?"
+    options:
+      - "ដើម្បីសន្សំ Bandwidth"
+      - "React Router ប្រើ Browser History API សម្រាប់ Routes (/dashboard, /profile)។ Server ព្យាយាម Serve Files ដោយ /dashboard Path ប៉ុន្តែ File នោះ មិន Exist — ត្រូវ Redirect /dashboard → index.html ហើយ Let React Router Handle"
+      - "ព្រោះ Netlify ការពារ JavaScript"
+      - "ព្រោះ React Router API ផ្លាស់ប្ដូរ"
+    correctAnswer: 2
+    explanation: "Static hosting ចង় Serve Files ដោយ Path — /about → about.html (File must exist!)។ React SPA មាន index.html ១ ប៉ុណ្ណោះ ហើយ React Router Handle All Routes Client-side។ ដូច្នេះ /* → index.html Redirect ចំបាច់ ដើម្បី All URLs Return index.html ហើយ React Router ​ Handle Route ។"
+---
+
+## 🚀 1. Deploying to Vercel (Recommended)
+
+### Method 1: Vercel CLI
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy from project root
+vercel
+
+# Follow prompts:
+# ? Set up and deploy? Yes
+# ? Which scope? your-username
+# ? Link to existing project? No
+# ? Project name: my-react-app
+# ? Directory: ./
+# ✓ Deployed to https://my-react-app.vercel.app
+```
+
+### Method 2: GitHub Integration (Best for CI/CD)
+
+1. Push your project to GitHub
+2. Go to [vercel.com](https://vercel.com) → **New Project**
+3. Import your GitHub repository
+4. Vercel auto-detects Vite → Click **Deploy**
+5. Every `git push main` → Auto-deploys to Production ✅
+6. Every Pull Request → Creates Preview URL ✅
+
+---
+
+## ⚙️ 2. Production Environment Variables
+
+```
+Vercel Dashboard → Project → Settings → Environment Variables
+
+Add:
+VITE_API_URL = https://api.myapp.com
+VITE_APP_NAME = MyApp
+
+Select environments: ✅ Production  ✅ Preview  ✅ Development
+```
+
+```
+Netlify Dashboard → Site → Site Configuration → Environment Variables
+
+Same process — add VITE_* variables
+```
+
+> **🔴 Never** commit secrets to `.env.production` in your repo. Always set them via the hosting platform's dashboard/secrets.
+
+---
+
+## 🌐 3. Netlify Deployment
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Build and deploy
+npm run build
+netlify deploy --prod --dir=dist
+```
+
+**SPA Routing Fix** — Create `public/_redirects`:
+```
+/*    /index.html    200
+```
+
+Or in `netlify.toml`:
+```toml
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+---
+
+## 🔄 4. CI/CD Pipeline Overview
+
+```mermaid
+graph LR
+    subgraph Developer
+        D1["git push origin main"]
+    end
+
+    subgraph GitHub
+        G1["GitHub repository\nreceives push"]
+    end
+
+    subgraph Vercel["Vercel CI/CD"]
+        V1["Trigger Build"] --> V2["npm run build"]
+        V2 --> V3{Build OK?}
+        V3 -->|Yes| V4["Deploy to Production\nhttps://app.vercel.app ✅"]
+        V3 -->|No| V5["Build Failed\nEmail notification ❌"]
+    end
+
+    D1 --> G1 --> V1
+    style V4 fill:#f0fff4,stroke:#38a169,color:#000
+    style V5 fill:#fff5f5,stroke:#e53e3e,color:#000
+```
+
+---
+
+## ✅ 5. Pre-Deploy Checklist
+
+```bash
+# Run BEFORE every deployment:
+npm run build         # No TypeScript/JSX errors
+npm test -- --run     # All tests pass
+npm run preview       # Check production build locally
+
+# Verify:
+# [ ] All VITE_* env vars set in hosting dashboard
+# [ ] API CORS allows production domain
+# [ ] No hardcoded localhost URLs in code
+# [ ] /public/_redirects or netlify.toml for SPA routing
+# [ ] Custom domain configured (optional)
+```
+
+---
+
+## 📌 6. Deployment Comparison
+
+| Feature | Vercel | Netlify |
+|---------|--------|---------|
+| Vite Auto-detect | ✅ | ✅ |
+| Preview Deployments | ✅ | ✅ |
+| Serverless Functions | ✅ | ✅ |
+| SPA Redirect | ✅ Auto | ⚠️ Need `_redirects` |
+| Free Tier | Generous | Generous |
+| Best for | React/Next.js | Static Sites/SPA |
