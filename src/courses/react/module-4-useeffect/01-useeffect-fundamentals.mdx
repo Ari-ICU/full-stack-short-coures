@@ -1,86 +1,212 @@
 ---
 title: Understanding Side Effects & The useEffect Mental Model
-description: ស្វែងយល់ពី Side Effects ក្នុង React, ភាពខុសគ្នារវាង Pure Rendering និង Effects, និងយន្តការដំណើរការរបស់ Hook `useEffect` ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+description: រៀនយល់ពី Side Effects ក្នុង React ឱ្យច្បាស់ ១០០% — ហេតុអ្វីត្រូវមាន useEffect, ភាពខុសគ្នារវាង Render Phase និង Effect Phase, និងច្បាប់មាសនៃ Dependency Array (គ្មាន [], [] ទទេ, និង [dependencies])។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML & Browser DOM APIs (document.title)
-  - យល់ពីនិយមន័យនៃ Side Effects (DOM Manipulation, Timers, Listeners)
-  - ដឹងពីមូលហេតុដែលមិនអាចដាក់ Side Effects ក្នុង Render Phase
-  - ចេះសរសេរ Syntax មូលដ្ឋាននៃ `useEffect(setup, dependencies)`
+  - យល់ពីនិយមន័យនៃ Side Effects តាមរយៈឧទាហរណ៍ជីវិតពិត (ចុងភៅក្នុងភោជនីយដ្ឋាន)
+  - ដឹងពីមូលហេតុដែលមិនអាចដាក់ Side Effects ក្នុង Render Phase ផ្ទាល់ (ការពារ Infinite Loop Crash)
+  - យល់ច្បាស់ពីលំដាប់លំហូរការងារ៖ Render Phase ➔ Paint UI ➔ Run useEffect
+  - ស្គាល់ភាពខុសគ្នាដាច់ស្រឡះរវាងទម្រង់ទាំង ៣ នៃ Dependency Array (គ្មាន [], [] ទទេ, និង [dependencies])
+  - ចេះប្រើ useEffect ដើម្បីធ្វើសមកាលកម្មទិន្នន័យ (Sync) ជាមួយ Browser APIs (document.title)
 module: module-4-useeffect
 order: 1
 quiz:
-  - question: "ហេតុអ្វីបានជាយើងមិនគួរដាក់ Side Effects (ដូចជាការកែប្រែ document.title) នៅខាងក្នុង Function Body ផ្ទាល់ (Render Phase)?"
+  - question: "តើអ្វីទៅជា 'Side Effect' នៅក្នុង React?"
     options:
-      - "ព្រោះ Render Phase ត្រូវតែជា Pure Function ដែលគ្មាន Side Effect ដើម្បីកុំឱ្យមាន Infinite Re-renders ឬ Bugs"
-      - "ព្រោះ JavaScript មិនអនុញ្ញាត"
-      - "ព្រោះវានឹងបិទដំណើរការ CSS"
-      - "ព្រោះ React នឹងលុប Component ចោល"
-    correctAnswer: 1
-    explanation: "React Render Phase ត្រូវតែ Pure (គ្មាន Side Effects)។ ការដាក់ Effects ក្នុង Render នឹងបណ្តាលឱ្យ Side Effects ដំណើរការរាល់ពេលមាន Render ដែលបង្កជា Bugs ឬ Infinite Loops។"
+      - "ជាកំហុស Bug ដែលធ្វើឱ្យកម្មវិធីគាំង"
+      - "ជាប្រតិបត្តិការណាមួយដែលទាក់ទង ឬប៉ះពាល់ពិភពខាងក្រៅ Component (ដូចជា API Call, DOM modification, Timers, LocalStorage) ក្រៅពីការ Return JSX"
+      - "ជាការផ្លាស់ប្តូរពណ៌ CSS ក្នុង Component"
+      - "ជា Function ដែលរត់មុនគេបង្អស់ក្នុង Browser"
+    correctAnswer: 2
+    explanation: "ភារកិច្ចចម្បងរបស់ React Component គឺ Return JSX សម្រាប់បង្ហាញ UI។ រាល់ការងារផ្សេងទៀតដែលទាក់ទងនឹងប្រព័ន្ធខាងក្រៅ (Fetch Data, document.title, setInterval) ត្រូវបានចាត់ទុកជា Side Effects។"
+
+  - question: "ចុះប្រសិនបើអ្នកសរសេរ `useEffect(callback, [])` (Dependency Array ទទេ) តើ Effect នឹងដំណើរការនៅពេលណា?"
+    options:
+      - "រត់ឡើងវិញរាល់ពេល Component Re-render"
+      - "មិនដែលរត់ទាល់តែសោះ"
+      - "រត់តែ ១ ដងគត់ បន្ទាប់ពី Component បានបង្ហាញខ្លួនលើអេក្រង់ដំបូង (Mounting Phase)"
+      - "រត់តែពេលណាដែល User ចុច Mouse"
+    correctAnswer: 3
+    explanation: "Dependency Array ទទេ `[]` ប្រាប់ React ថា Callback នេះគ្មានអ្វីដែលត្រូវតាមដានឡើយ ដូច្នេះវាដំណើរការតែមួយលើកគត់ពេល Component ទើបតែ Mount (Load ដំបូង)។"
+
+  - question: "តើមានអ្វីកើតឡើងបើអ្នកដាក់កូដ Fetch Data និង setState នៅខាងក្នុង Component Body ផ្ទាល់ដោយគ្មាន useEffect?"
+    options:
+      - "កូដនឹងដំណើរការលឿនជាងមុន"
+      - "វានឹងបង្កជា Infinite Re-render Loop ធ្វើឱ្យកម្មវិធីគាំង Browser ព្រោះ setState នឹងកេះ Render រួចហៅ Fetch ម្តងទៀតឥតឈប់ឈរ"
+      - "វានឹងដំណើរការធម្មតា គ្មានបញ្ហាអ្វីឡើយ"
+      - "React នឹងប្តូរឈ្មោះ Component ដោយស្វ័យប្រវត្តិ"
+    correctAnswer: 2
+    explanation: "នៅក្នុង Render Phase កូដក្នុង Function Body នឹងរត់ឡើងវិញរាល់ពេល Render។ ការហៅ fetch និង setState នៅទីនោះនឹងបង្កើតជារង្វង់មិនចេះចប់ (Fetch ➔ setState ➔ Re-render ➔ Fetch ➔ ...) បណ្តាលឱ្យ Browser គាំង។"
 ---
 
-## 🧭 1. Mental Model: Pure Rendering vs Side Effects
+## 🌟 ១. តើ Side Effects ជាអ្វី? (ឧទាហរណ៍ចុងភៅក្នុងភោជនីយដ្ឋាន 👨‍🍳)
+
+ដើម្បីយល់ពី `useEffect` ឱ្យបានងាយស្រួលបំផុត សូមស្រមៃមើល **ចុងភៅក្នុងភោជនីយដ្ឋាន** មួយ៖
 
 ```mermaid
 flowchart LR
-    subgraph PureComponent["Pure Component (Predictable)"]
+    subgraph MainJob["ភារកិច្ចចម្បង (Pure Rendering)"]
         direction TB
-        Props["Props & State"] --> Comp["Component Function"]
-        Comp --> JSX["JSX (UI Output)"]
+        Ing["គ្រឿងផ្សំ (Props/State)"] --> Cook["ចម្អិនម្ហូប (Component)"]
+        Cook --> Dish["ម្ហូបលើចាន (JSX UI)"]
     end
 
-    subgraph SideEffects["Client Side Effects (External Sync)"]
+    subgraph SideJobs["ភារកិច្ចបន្ទាប់បន្សំ (Side Effects)"]
         direction TB
-        E1["📄 Modifying document.title"]
-        E2["⏱️ Timers (setInterval / setTimeout)"]
-        E3["🖱️ Window Event Listeners"]
-        E4["💾 LocalStorage Sync"]
+        S1["📞 ទូរស័ព្ទហៅ Delivery"]
+        S2["💡 បើក/បិទភ្លើងក្នុងហាង"]
+        S3["📋 កត់ត្រាក្តារខៀនខាងក្រៅ"]
     end
 
-    Comp -.->|Managed by useEffect| SideEffects
+    Cook -.->|គ្រប់គ្រងដោយ useEffect| SideJobs
+
+    style MainJob fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style SideJobs fill:#fefcbf,stroke:#d69e2e,stroke-width:2px
 ```
+
+1. **ភារកិច្ចចម្បង (Pure Rendering):** គឺយកគ្រឿងផ្សំ (Props & State) មកចម្អិនចេញជាម្ហូបលើចានជូនភ្ញៀវ (Return JSX ដើម្បីបង្ហាញលើអេក្រង់)។ នេះជាការងារសុទ្ធស្អាត (Pure Function)។
+2. **ភារកិច្ចបន្ទាប់បន្សំ (Side Effects):** គឺការងារដែលប៉ះពាល់ដល់ **ពិភពខាងក្រៅផ្ទះបាយ** ដូចជា៖
+   - ទូរស័ព្ទហៅអ្នកដឹកជញ្ជូន ➔ *ដូចជាការហៅ API (`fetch` / Axios)*
+   - កត់ត្រាចំនួនភ្ញៀវលើក្តារខៀនខាងមុខហាង ➔ *ដូចជាការកែប្រែ `document.title`*
+   - កំណត់ម៉ោងរោទិ៍ចម្អិន ➔ *ដូចជា `setInterval` / `setTimeout`*
+   - រក្សាទុកទិន្នន័យក្នុងទូរដែក ➔ *ដូចជា `localStorage`*
+
+> [!IMPORTANT]
+> នៅក្នុង React: **រាល់ប្រតិបត្តិការណាដែលទាក់ទងនឹងប្រព័ន្ធខាងក្រៅក្រៅពីការ Return JSX ត្រូវបានហៅថា «Side Effects»!**
 
 ---
 
-## 📄 2. Example: Synchronizing Document Title
+## ⚠️ ២. ហេតុអ្វីមិនអាចសរសេរ Side Effects ក្នុង Function Body ផ្ទាល់?
 
-### 🌐 Normal HTML / JavaScript (របៀបធម្មតា):
+នេះជាកំហុសដ៏ធំបំផុតដែលអ្នកទើបរៀន React តែងតែជួបប្រទះ៖
 
-```html
-<!-- HTML Document Title & Button ធម្មតា -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>My Website</title>
-  </head>
-  <body>
-    <button onclick="document.title = '🔔 Notification (1)'">
-      Send Notification
-    </button>
-  </body>
-</html>
+```jsx
+// ❌ កូដខុសធ្ងន់ធ្ងរ — បង្កជា INFINITE LOOP CRASH!
+function UserProfile() {
+  const [userData, setUserData] = useState(null);
+
+  // ⚠️ ដាក់ Fetch ក្នុង Body ផ្ទាល់:
+  fetch('https://api.example.com/user')
+    .then(res => res.json())
+    .then(data => setUserData(data)); // 👈 setUserData នឹងកេះឱ្យ Component Re-render ឡើងវិញ!
+
+  return <div>{userData?.name}</div>;
+}
 ```
 
-### 💻 React Code (ជាមួយ `useEffect`):
+### 💣 មហន្តរាយដែលកើតឡើង៖
+1. Component រត់លើកទី ១ ➔ ជួប `fetch` ➔ ទទួលបានទិន្នន័យ ➔ ហៅ `setUserData`
+2. `setUserData` បញ្ជាឱ្យ React **Re-render Component ឡើងវិញ**
+3. Component រត់លើកទី ២ ➔ ជួប `fetch` ម្តងទៀត ➔ ហៅ `setUserData` ម្តងទៀត
+4. ... **រង្វង់ Luop មិនចេះចប់ (Infinite Loop)** ➔ កម្មវិធីគាំង Browser ភ្លាម!
+
+👉 **ដំណោះស្រាយ៖** ត្រូវប្រើ Hook **`useEffect`** ដើម្បីប្រាប់ React ថា៖ *«សូមបង្ហាញ UI ជូន User សិន រួចចាំដំណើរការកូដនេះនៅពេលក្រោយ!»*
+
+---
+
+## 🎮 ៣. Interactive Simulator — សាកល្បងដោយផ្ទាល់
+
+ខាងក្រោមនេះជា Simulator អន្តរកម្ម។ អ្នកអាចសាកល្បងប្តូររវាង **ទម្រង់ទាំង ៣ នៃ Dependency Array** រួចចុចប៊ូតុង State ដើម្បីមើលថាពេលណាខ្លះដែល `useEffect` ដំណើរការ និងពេលណាខ្លះដែលវាត្រូវបានរំលង (Skipped)៖
+
+```reactdiagram
+UseEffect
+```
+
+> [!TIP]
+> **សាកល្បងពិសោធន៍:**
+> 1. ជ្រើសរើស **«1. គ្មាន [] (No Array)»** ➔ ចុចប៊ូតុងទាំងពីរ ➔ សង្កេតមើលថា Effect Run គ្រប់ដងរាល់ពេល Re-render!
+> 2. ជ្រើសរើស **«2. ទទេ [] (Empty Array)»** ➔ ចុចប៊ូតុងទាំងពីរ ➔ Effect **មិន Run ទៀតទេ** (រក្សានៅត្រឹម ១ ដងដដែល)!
+> 3. ជ្រើសរើស **«3. មាន [count] (With Deps)»** ➔ ចុច "ប្តូរ Count" (Effect Run ✅) រួចសាកចុច "ប្តូរ Text" (Effect រំលងចោល ⏭️ ព្រោះ count មិនបានប្រែប្រួល)!
+
+---
+
+## 🔄 ៤. លំដាប់លំហូរការងារទាំង ៣ ដំណាក់កាល (Execution Lifecycle)
+
+`useEffect` មិនដំណើរការភ្លាមៗក្នុងពេល Render ឡើយ។ React បែងចែកការងារជា ៣ ជំហានច្បាស់លាស់៖
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as អ្នកប្រើប្រាស់ (User)
+    participant React as React Engine
+    participant DOM as Browser DOM (UI)
+    participant Effect as useEffect Callback
+
+    User->>React: បើកទំព័រ ឬ Trigger State Change
+    Note over React: ដំណាក់កាលទី ១: Render Phase<br/>ហៅ Component Function & គណនា JSX
+    React->>DOM: ដំណាក់កាលទី ២: Paint Phase<br/>គូស UI លើអេក្រង់ឱ្យ User ឃើញភ្លាមៗ
+    Note over User,DOM: ✨ User ឃើញផ្ទាំង UI រួចរាល់ (Screen មិនគាំង)
+    React->>Effect: ដំណាក់កាលទី ៣: Effect Phase<br/>ដំណើរការកូដ useEffect ក្រោយគេបង្អស់!
+```
+
+> [!NOTE]
+> **ហេតុអ្វី React ធ្វើបែបនេះ?**  
+> ដើម្បីឱ្យ User មើលឃើញទំព័រភ្លាមៗ (Fast UI Paint) ដោយមិនបាច់រង់ចាំ Side Effects ដែលស៊ីពេល (ដូចជា Network Request ឬ Timers) នោះឡើយ!
+
+---
+
+## 🎯 ៥. ច្បាប់មាសទាំង ៣ នៃ Dependency Array (៣ ទម្រង់ដែលត្រូវចងចាំ)
+
+Syntax របស់ `useEffect` គឺ៖ `useEffect(setupFunction, dependenciesArray)`
+
+| ទម្រង់ Dependency | កូដសរសេរ | ពេលណាទើប Effect ដំណើរការ? | ករណីប្រើប្រាស់ទូទៅ |
+| :--- | :--- | :--- | :--- |
+| **១. គ្មាន Array សោះ** | `useEffect(() => { ... })` | **រាល់ពេល Render** (លើកដំបូង + រាល់ពេល State ណាមួយប្តូរ) | កម្រប្រើខ្លាំងណាស់ (ប្រយ័ត្នបញ្ហា Performance) |
+| **២. Array ទទេ `[]`** | `useEffect(() => { ... }, [])` | **តែ ១ ដងគត់** ពេល Component ទើបបង្ហាញដំបូង (Mount) | Fetch Data លើកដំបូង, Event Listeners (`window.addEventListener`) |
+| **៣. មាន Dependency `[prop, state]`** | `useEffect(() => { ... }, [count])` | **ពេល Mount + ពេលតម្លៃក្នុង Array ផ្លាស់ប្តូរ** | Sync Document Title, Fetch Data ពេល ID ផ្លាស់ប្តូរ |
+
+---
+
+## 📄 ៦. ឧទាហរណ៍ជាក់ស្តែង ៖ ធ្វើសមកាលកម្ម Browser Tab Title
+
+ចូរក្រឡេកមើលកូដជាក់ស្តែងនៃការ Sync ចំនួនសារមិនទាន់អាន ទៅលើ Browser Tab Title (`document.title`)៖
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function TitleSyncDemo() {
+export default function DocumentTitleSync() {
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // 1. ដំណើរការ Side Effect ក្រោយ Paint UI
+  // ដំណើរការ Side Effect ក្រោយពេល UI បង្ហាញរួចរាល់
   useEffect(() => {
-    // កែប្រែ Title លើ Browser Tab
-    document.title = unreadCount > 0 
-      ? `(${unreadCount}) សារថ្មី - My App` 
-      : 'My App';
-  }, [unreadCount]); // 2. រត់តែពេល unreadCount ផ្លាស់ប្តូរ
+    // កែប្រែ Title លើ Browser Tab ខាងក្រៅ React
+    if (unreadCount > 0) {
+      document.title = `🔔 (${unreadCount}) សារថ្មី | MyApp`;
+    } else {
+      document.title = 'MyApp - ទំព័រដើម';
+    }
+
+    console.log("Effect បាន run ព្រោះ unreadCount =", unreadCount);
+  }, [unreadCount]); // 👈 ដំណើរការឡើងវិញ តែពេល unreadCount ប្រែប្រួលប៉ុណ្ណោះ!
 
   return (
-    <button onClick={() => setUnreadCount((c) => c + 1)}>
-      📩 ផ្ញើសារ ({unreadCount})
-    </button>
+    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border text-center">
+      <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">
+        📄 Browser Tab Title Sync
+      </h3>
+      <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+        សង្កេតមើលចំណងជើង Tab លើ Browser របស់អ្នកពេលចុចប៊ូតុង៖
+      </p>
+
+      <div className="flex justify-center items-center gap-3">
+        <button
+          onClick={() => setUnreadCount((c) => Math.max(0, c - 1))}
+          className="px-3.5 py-2 bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl font-bold text-sm hover:bg-slate-200 transition"
+        >
+          − ដកសារ
+        </button>
+
+        <span className="font-black text-2xl text-blue-600 dark:text-blue-400 w-10">
+          {unreadCount}
+        </span>
+
+        <button
+          onClick={() => setUnreadCount((c) => c + 1)}
+          className="px-3.5 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition shadow"
+        >
+          + ផ្ញើសារថ្មី
+        </button>
+      </div>
+    </div>
   );
 }
 ```
@@ -88,51 +214,20 @@ export function TitleSyncDemo() {
 ### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
 
 1. `useEffect(() => { ... }, [unreadCount]);`
-   - ចុះឈ្មោះ Side Effect ជាមួយ React។ React នឹងរង់ចាំឱ្យ Browser បង្ហាញ UI រួចរាល់សិន ទើបមកដំណើរការកូដក្នុង Callback នេះ។
+   - ចុះឈ្មោះ Side Effect ជាមួយ React ដោយប្រាប់ថា៖ *«សូមចាំមើលតម្លៃ `unreadCount`។ ឱ្យតែវាប្រែប្រួល ចូររត់កូដក្នុងនេះ!»*
 2. `document.title = ...`
-   - កែប្រែ Browser Tab Title ខាងក្រៅ React Component (Side Effect) ទៅតាមចំនួន `unreadCount`។
-3. `[unreadCount]` (Dependency Array)
-   - ប្រាប់ React ថា: "ដំណើរការ Effect នេះតែនៅពេលណាដែលតម្លៃ `unreadCount` ប្រែប្រួលប៉ុណ្ណោះ"។ បើ `unreadCount` នៅដដែល វាមិន run ឥតប្រយោជន៍ឡើយ។
+   - កែប្រែ DOM របស់ Browser Window ផ្ទាល់។ នេះគឺជា Side Effect ព្រោះវានៅក្រៅ React Component។
+3. `[unreadCount]` (Dependency Array):
+   - ប្រសិនបើ Component Re-render ដោយសារ State ផ្សេងទៀត (ឧ. dark mode toggle) តែ `unreadCount` នៅដដែល នោះ React នឹង **រំលងកូដក្នុង `useEffect` នេះចោល** មិនឱ្យខាត Performance ឡើយ!
 
 ---
 
-## 🚀 3. Complete Integrated Component
+## 🧠 ៧. សង្ខេប Mental Model ងាយចាំ (Quick Cheat Sheet)
 
-```jsx
-import { useState, useEffect } from 'react';
-
-export default function DocumentTitleSync() {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    document.title = count > 0 ? `(${count}) សារថ្មី | EduApp` : 'EduApp';
-  }, [count]);
-
-  return (
-    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow border text-center">
-      <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">
-        📄 Browser Tab Title Sync
-      </h3>
-      <p className="text-xs text-slate-400 mb-4">
-        មើលចំណងជើង Browser Tab របស់អ្នកពេលចុចប៊ូតុងខាងក្រោម៖
-      </p>
-
-      <div className="flex justify-center items-center gap-3">
-        <button
-          onClick={() => setCount((c) => Math.max(0, c - 1))}
-          className="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm"
-        >
-          −
-        </button>
-        <span className="font-black text-xl text-blue-600 dark:text-blue-400 w-8">{count}</span>
-        <button
-          onClick={() => setCount((c) => c + 1)}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded-xl font-bold text-sm"
-        >
-          +
-        </button>
-      </div>
-    </div>
-  );
-}
-```
+| សំណួរគន្លឹះ | ចម្លើយខ្លីខ្លឹម |
+| :--- | :--- |
+| **តើអ្វីជា Side Effect?** | ការងារដែលទាក់ទងនឹងប្រព័ន្ធខាងក្រៅក្រៅពី JSX (API, DOM, Timers) |
+| **តើ useEffect រត់ពេលណា?** | **ក្រោយពេល Paint UI រួចរាល់** (Screen មិនកកស្ទះ) |
+| **`useEffect(fn)`** | រត់រាល់ពេល Render ទាំងអស់ ⚠️ |
+| **`useEffect(fn, [])`** | រត់តែម្តងគត់ពេល Mount ដំបូង ✅ |
+| **`useEffect(fn, [x])`** | រត់ពេល Mount + ពេលតម្លៃ `x` ប្រែប្រួល ✅ |
