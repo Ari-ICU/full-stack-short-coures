@@ -1,185 +1,273 @@
 ---
-title: Advanced Form Validation & Submit Handling
-description: រៀនបច្ចេកទេស Form Validation ជាន់ខ្ពស់ — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Form សិន រួចបំប្លែងទៅជា React Validation, Touched State, និង Submit State Machine ជាមួយការពន្យល់មួយជួរៗ។
+title: Form Validation & Submission Masterclass
+description: រៀនយល់ច្បាស់ពី Form Validation ក្នុង React ចាប់ពីមូលដ្ឋានគ្រឹះ UX — ហេតុអ្វីត្រូវមាន Touched State, របៀបគណនា Errors (Derived State), និង State Machine សម្រាប់ Submit ដោយមិនឱ្យ Double-Click។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Form ជាមួយ Labels, Inputs, Error Spans, និង Submit Button
-  - ចេះបង្កើត Pure Validation Function សម្រាប់ផ្ទៀងផ្ទាត់ទិន្នន័យ (Email, Password, Confirm Password)
-  - យល់ដឹងពី Touched State Pattern ដើម្បីកុំឱ្យ Error លោតឡើងមុនពេល User ប៉ះ Field
-  - ចេះគ្រប់គ្រង Submit State Machine (idle → loading → success → error)
+  - យល់ដឹងពីបញ្ហា UX ពេលធ្វើ Form Validation (Aggressive vs Gentle UX)
+  - ចេះបង្កើត Pure Validation Function សម្រាប់ផ្ទៀងផ្ទាត់ទិន្នន័យ (Email Regex, Password, Confirm Password)
+  - យល់ច្បាស់ពី Touched State Pattern និងព្រឹត្តិការណ៍ onBlur (កុំស្រែកគំហកដាក់ User មុនពេលគេវាយចប់)
+  - យល់ដឹងពីមូលហេតុដែល Errors គួរតែជា Derived State (មិនបាច់បង្កើត useState ថ្មី)
+  - ចេះគ្រប់គ្រង Submit State Machine (idle → loading → success → error) ការពារ Double-submit
 module: module-3-state-events
 order: 6
 quiz:
-  - question: "តើ Submit State Management មានប្រយោជន៍ដូចម្តេច?"
+  - question: "ហេតុអ្វីបានជាយើងត្រូវមាន Touched State ជំនួសឱ្យការបង្ហាញ Error ភ្លាមៗ?"
     options:
-      - "វាធ្វើឱ្យ Form ស្អាតជាង"
-      - "ការតាមដាន idle/loading/success/error states ការពារ Double-submit, បង្ហាញ Loading Spinner, និង Success/Error messages ឱ្យ User ដឹង"
-      - "វាចាំបាច់សម្រាប់ CSS ប៉ុណ្ណោះ"
-      - "វាមិនសំខាន់ទេ"
+      - "ដើម្បីធ្វើឱ្យ CSS ដំណើរការលឿនជាងមុន"
+      - "ដើម្បីកុំឱ្យ Error ក្រហមលោតឡើងគំហកដាក់ User តាំងពីទំព័រទើបតែ Load ឬពេលទើបតែចាប់ផ្តើមវាយអក្សរដំបូង (Good UX)"
+      - "ព្រោះ React តម្រូវឱ្យមាន Touched State ជាកាតព្វកិច្ចជានិច្ច"
+      - "ដើម្បីលាក់កូដ validation ពី browser"
     correctAnswer: 2
-    explanation: "Submit State Management ការពារ User ចុចប៊ូតុង Submit ច្រើនដង (Double-submit), ផ្តល់ Feedback ត្រឹមត្រូវ (Loading Spinner, Success Message, Error), និងធ្វើឱ្យ UX ល្អប្រសើរ។"
+    explanation: "Touched State ជួយតាមដានថា តើ User បានចុចចូលហើយដើរចេញ (onBlur) ពី Field នោះឬនៅ។ វាជួយកុំឱ្យ Error ក្រហមលោតឡើងរំខាន User មុនពេលគេមានឱកាសបំពេញចប់។"
+
+  - question: "តើហេតុអ្វីបានជា Errors គួរតែជា Derived State ជាជាងការបង្កើត useState ដាច់ដោយឡែក?"
+    options:
+      - "ព្រោះ useState មិនអាចផ្ទុក Object បានទេ"
+      - "ព្រោះការគណនា Errors ចេញពី formData ដោយផ្ទាល់ក្នុងពេល Render ធានាថា Errors គឺ Fresh និងស៊ីចង្វាក់ជាមួយ Input ជានិច្ច គ្មានបញ្ហា State Desynchronization"
+      - "ដើម្បីឱ្យ Form ដំណើរការតែពេលគ្មាន Internet"
+      - "ព្រោះ Derived State មិនស៊ី Memory ទាល់តែសោះ"
+    correctAnswer: 2
+    explanation: "នៅពេល formData ប្រែប្រួល Component នឹង re-render ហើយ Errors នឹងត្រូវគណនាឡើងវិញដោយស្វ័យប្រវត្តិ។ យើងមិនចាំបាច់សរសេរ useEffect ឬ setErrors តាមក្រោយដែលងាយនឹងបង្ក Bugs នោះទេ។"
+
+  - question: "តើការតាមដាន Submit State (idle → loading → success) មានសារៈសំខាន់បំផុតចំពោះរឿងអ្វី?"
+    options:
+      - "សម្រាប់ដំឡើង React Version ថ្មី"
+      - "ការពារ User ចុច Submit ផ្ទួនៗ (Double-submit), បង្ហាញ Loading Spinner, និងផ្តល់ Feedback ច្បាស់លាស់ដល់ User"
+      - "ដើម្បីប្តូរទំហំ Font អក្សរ"
+      - "ដើម្បីឱ្យ Form អាច Save ចូល LocalStorage ស្វ័យប្រវត្តិ"
+    correctAnswer: 2
+    explanation: "Submit State Machine អនុញ្ញាតឱ្យយើង Disable ប៊ូតុង Submit អំឡុងពេល Loading ការពារកុំឱ្យ User ចុចច្រំដែល (ឧ. ចុចកាត់លុយច្រើនដង) និងបង្ហាញផ្ទាំងជោគជ័យពេល Server ឆ្លើយតបចប់។"
 ---
 
-## 🔄 1. Submit State Flow
+## 🌟 ១. ហេតុអ្វីបានជា Form Validation ពិបាកយល់? (The 3 Core Pillars)
+
+ស្រមៃមើលស្ថានភាពពិតមួយ៖ អ្នកដើរចូលធនាគារដើម្បីបំពេញទម្រង់បើកគណនី។ អ្នកទើបតែចាប់ប៊ិចដាក់លើក្រដាសមិនទាន់បានសរសេរអក្សរមួយតួផង ស្រាប់តែបុគ្គលិកធនាគារស្រែកដាក់អ្នកថា៖  
+> **«⚠️ ឈ្មោះមិនអាចទទេបានទេ! អ៊ីម៉ែលខុសទម្រង់! ពាក្យសម្ងាត់ខ្វះតួ!»**
+
+តើអ្នកមានអារម្មណ៍យ៉ាងណា? ប្រាកដជាតានតឹង និងធុញទ្រាន់ខ្លាំង!  
+នោះហើយជាអ្វីដែលកើតឡើងចំពោះ Website ភាគច្រើនដែល **ធ្វើ Form Validation មិនត្រឹមត្រូវ** — Error ក្រហមលោតព្រោងព្រាតតាំងពីទំព័រទើបបើកមក!
+
+ដើម្បីធ្វើ Form Validation ឱ្យមានប្រសិទ្ធភាព និងមាន UX ល្អបំផុត គ្រប់ React Developer ត្រូវយល់ពី **សសរទ្រូងទាំង ៣ (The 3 Pillars)** នេះ៖
 
 ```mermaid
-stateDiagram-v2
-    [*] --> idle : Form Loads
-    idle --> loading : User clicks Submit (valid form)
-    idle --> idle : Validation Fails (show errors)
-    loading --> success : Submission OK (200)
-    loading --> error : Submission Failed
-    success --> idle : Reset / Submit Another
-    error --> idle : User modifies form
+flowchart TD
+    P1["1. Validation Logic<br/>(ផ្ទៀងផ្ទាត់ទិន្នន័យត្រឹមត្រូវ)"] --> App["React Form Validation"]
+    P2["2. Touched Pattern<br/>(បង្ហាញ Error ត្រូវពេលវេលា)"] --> App
+    P3["3. Submit State Flow<br/>(ការពារ Double-Submit)"] --> App
+
+    style P1 fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style P2 fill:#fefcbf,stroke:#d69e2e,stroke-width:2px
+    style P3 fill:#feebc8,stroke:#dd6b20,stroke-width:2px
+    style App fill:#edf2f7,stroke:#4a5568,stroke-width:3px
 ```
 
 ---
 
-## 📝 2. Normal HTML Form Structure (ទម្រង់ HTML ធម្មតា)
+## 🎮 ២. Interactive Simulator — សាកល្បងដោយផ្ទាល់
 
-មុននឹងបន្ថែម React Validation Logic នេះជារចនាសម្ព័ន្ធ HTML ស្តង់ដារនៃ Form ចុះឈ្មោះ៖
+ខាងក្រោមនេះជា Simulator អន្តរកម្ម។ អ្នកអាចសាកល្បងបំពេញទិន្នន័យផ្ទាល់ និងប្តូររវាង **UX Mode ទាំងពីរ** ដើម្បីមើលភាពខុសគ្នានៃការបង្ហាញ Error និងការប្រែប្រួល React State ក្នុងពេលដំណាលគ្នា៖
 
-```html
-<!-- HTML Registration Form Structure -->
-<form class="register-form">
-  <!-- Email Group -->
-  <div class="form-group">
-    <label for="email">អ៊ីម៉ែល</label>
-    <input type="email" id="email" name="email" placeholder="name@example.com" />
-    <span class="error-text">⚠️ ទម្រង់ Email មិនត្រឹមត្រូវ!</span>
-  </div>
-
-  <!-- Password Group -->
-  <div class="form-group">
-    <label for="password">ពាក្យសម្ងាត់</label>
-    <input type="password" id="password" name="password" placeholder="យ៉ាងតិច ៨ តួអក្សរ" />
-    <span class="error-text">⚠️ Password ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ!</span>
-  </div>
-
-  <!-- Confirm Password Group -->
-  <div class="form-group">
-    <label for="confirm">ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់</label>
-    <input type="password" id="confirm" name="confirmPassword" placeholder="ផ្ទៀងផ្ទាត់ Password" />
-    <span class="error-text">⚠️ Password ផ្ទៀងផ្ទាត់មិនដូចគ្នា!</span>
-  </div>
-
-  <!-- Submit Button -->
-  <button type="submit">ចុះឈ្មោះ</button>
-</form>
+```reactdiagram
+FormValidation
 ```
+
+> [!TIP]
+> **សាកល្បងពិសោធន៍:**
+> 1. ចុចជ្រើសរើស **«❌ គ្មាន Touched (Aggressive UX)»** ➔ សង្កេតមើលថា Error លោតឡើងតាំងពីអ្នកមិនទាន់វាយអក្សរ!
+> 2. ចុចជ្រើសរើស **«✅ ប្រើ Touched Pattern (UX ល្អ)»** ➔ សាកល្បងចុចចូលក្នុង Email Input រួចចុចចេញក្រៅ (Blur) ➔ Error នឹងបង្ហាញ **តែបន្ទាប់ពី** អ្នកចាកចេញពីប្រអប់នោះប៉ុណ្ណោះ!
+> 3. មើលផ្ទាំង **React State Inspector** ខាងស្តាំ ដើម្បីឃើញថា `formData`, `touched`, `errors`, និង `submitState` ប្រែប្រួលយ៉ាងណា។
 
 ---
 
-## 🛡️ 3. Validation Logic (Pure JavaScript Function)
+## 🛡️ ៣. ជំហានទី ១ — បង្កើត Pure Validation Function
 
-### 💻 Code សម្រាប់តែ Validation Function:
+ក្បួនច្បាប់ដំបូងគេ៖ **កុំច្របល់កូដផ្ទៀងផ្ទាត់ (Validation) ជាមួយ UI JSX ឡើយ!**  
+យើងគួរបង្កើត **Pure JavaScript Function** មួយនៅក្រៅ Component ដែលទទួល `values` ហើយ Return ត្រឡប់មកវិញនូវ `errors` Object៖
 
 ```javascript
-function validateField(name, value, allValues) {
-  switch (name) {
-    case 'email':
-      if (!value.trim()) return 'Email មិនអាចទទេបានឡើយ!';
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'ទម្រង់ Email មិនត្រឹមត្រូវ!';
-      return '';
+// Pure Function — មិនពឹងផ្អែកលើ React ឬ UI អ្វីទាំងអស់
+function validate(values) {
+  const errors = {};
 
-    case 'password':
-      if (!value) return 'Password មិនអាចទទេបានឡើយ!';
-      if (value.length < 8) return 'Password ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ!';
-      return '';
-
-    case 'confirmPassword':
-      if (!value) return 'សូមផ្ទៀងផ្ទាត់ Password ម្តងទៀត!';
-      if (value !== allValues.password) return 'Password ផ្ទៀងផ្ទាត់មិនដូចគ្នា!';
-      return '';
-
-    default:
-      return '';
+  // 1. ផ្ទៀងផ្ទាត់ Email
+  if (!values.email.trim()) {
+    errors.email = 'Email មិនអាចទទេបានឡើយ!';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = 'ទម្រង់ Email មិនត្រឹមត្រូវ (ឧ. name@example.com)!';
   }
+
+  // 2. ផ្ទៀងផ្ទាត់ Password
+  if (!values.password) {
+    errors.password = 'Password មិនអាចទទេបានឡើយ!';
+  } else if (values.password.length < 8) {
+    errors.password = 'Password ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ!';
+  }
+
+  // 3. ផ្ទៀងផ្ទាត់ Confirm Password
+  if (!values.confirmPassword) {
+    errors.confirmPassword = 'សូមផ្ទៀងផ្ទាត់ Password ម្តងទៀត!';
+  } else if (values.confirmPassword !== values.password) {
+    errors.confirmPassword = 'Password ផ្ទៀងផ្ទាត់មិនដូចគ្នាឡើយ!';
+  }
+
+  return errors;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line):
 
-1. `function validateField(name, value, allValues)`
-   - ទទួល parameter ចំនួន ៣៖ `name` (ឈ្មោះ field), `value` (តម្លៃដែល user វាយ), និង `allValues` (object form ទាំងមូល)។
-2. `if (!value.trim()) return '...';`
-   - ពិនិត្យមើលថាតើតម្លៃទទេ ឬមានតែ space ដែរឬទេ។
-3. `!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)`
-   - ប្រើ Regular Expression (Regex) ដើម្បី verify ទម្រង់ email ស្តង់ដារ (មាន `@` និង domain `.com`, `.net`, etc.)។
-4. `value !== allValues.password`
-   - ប្រៀបធៀបតម្លៃ `confirmPassword` ទៅនឹង `allValues.password` ដើម្បីធានាថា password ទាំងពីរដូចគ្នា ១០០%។
+| បន្ទាត់កូដ | តួនាទី និងអត្ថន័យ |
+| :--- | :--- |
+| `function validate(values)` | ជា Pure Function ទទួល `values` (ឧ. `{ email, password, confirmPassword }`) |
+| `!values.email.trim()` | កាត់ចោល space ខាងដើម និងខាងចុង។ ប្រសិនបើ User វាយតែ space សុទ្ធ ក៏រាប់ថាទទេដែរ |
+| `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | Regular Expression (Regex) ពិនិត្យថាមានអក្សរ + សញ្ញា `@` + domain name + `.com` |
+| `values.password.length < 8` | ពិនិត្យប្រវែង Password ដើម្បីធានាសុវត្ថិភាពយ៉ាងតិច ៨ តួអក្សរ |
+| `values.confirmPassword !== values.password` | ប្រៀបធៀប Password ទាំងពីរ ដើម្បីឱ្យប្រាកដថា User វាយត្រូវគ្នា ១០០% |
+| `return errors;` | Return object ដែលមានកំហុស។ បើគ្មាន Error ទាល់តែសោះ វានឹង return `{}` (object ទទេ) |
 
 ---
 
-## 👆 4. Touched State Pattern & React Input Binding
+## 👆 ៤. ជំហានទី ២ — Touched Pattern & ព្រឹត្តិការណ៍ `onBlur`
 
-### 🌐 Normal HTML vs 💻 React Binding:
+នេះជាចំណុចដែល **មនុស្សជាច្រើនយល់ច្រឡំបំផុត**!
+
+### ❓ សំណួរ៖ ហេតុអ្វីបានជាយើងមិនសរសេរ `{errors.email && <span>{errors.email}</span>}` ដោយផ្ទាល់?
+👉 **ចម្លើយ៖** ប្រសិនបើអ្នកសរសេរដូច្នេះ នៅពេល User បើកទំព័រមកភ្លាម `errors.email` គឺស្មើនឹង `'Email មិនអាចទទេបានឡើយ!'` (ព្រោះ form ទទេ)។ ជាលទ្ធផល អក្សរក្រហមនឹងលោតឡើងភ្លាមៗ ទាំងដែល User មិនទាន់បានប៉ះ keyboard ផង!
+
+### 💡 ដំណោះស្រាយ៖ Touched State
+យើងបង្កើត State មួយឈ្មោះថា `touched` ដើម្បីកត់ត្រាថា៖ **«តើ User បានចុចចូល ហើយដើរចេញពី Input នោះហើយឬនៅ?»**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as អ្នកប្រើប្រាស់ (User)
+    participant Input as ប្រអប់ Input (DOM)
+    participant State as React State
+
+    User->>Input: ចុច Focus ចូលប្រអប់ Email
+    User->>Input: វាយអក្សរ (onChange ➔ formData.email កើន)
+    User->>Input: ចុចចាកចេញក្រៅ (onBlur Event)
+    Input->>State: handleBlur() ➔ setTouched({ email: true })
+    Note over State: touched.email === true && errors.email<br/>👉 ពេលនេះទើបបង្ហាញ Error ក្រហម!
+```
+
+### 💻 កូដអនុវត្តន៍ជាក់ស្តែង៖
 
 ```jsx
-// 1. React State គ្រប់គ្រង Inputs និង Touched Fields
-const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
+// ១. បង្កើត State សម្រាប់ Touched
 const [touched, setTouched] = useState({});
 
-// 2. Change & Blur Handlers
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({ ...prev, [name]: value }));
-};
-
+// ២. Handler ពេល User ចុចចាកចេញពី Input (onBlur)
 const handleBlur = (e) => {
   const { name } = e.target;
+  // កំណត់ថា field នេះត្រូវបាន "ប៉ះពាល់ (touched)" រួចរាល់ហើយ
   setTouched((prev) => ({ ...prev, [name]: true }));
 };
 
-// 3. JSX Field Rendering (បង្ហាញ error តែពេល user បាន blur ចេញ)
-<div>
-  <label>Email</label>
-  <input
-    type="email"
-    name="email"
-    value={formData.email}
-    onChange={handleChange}
-    onBlur={handleBlur}
-    placeholder="name@example.com"
-  />
-  {touched.email && errors.email && (
-    <span className="text-red-500 text-xs">⚠️ {errors.email}</span>
-  )}
-</div>
+// ៣. បង្ហាញ Error លុះត្រាតែបាន Touched រួចរាល់
+return (
+  <div>
+    <label>Email</label>
+    <input
+      type="email"
+      name="email"
+      value={formData.email}
+      onChange={handleChange}
+      onBlur={handleBlur} // 👈 ភ្ជាប់ជាមួយ onBlur
+    />
+
+    {/* ✨ រូបមន្តមាស: បង្ហាញ Error តែពេល Touched === true ប៉ុណ្ណោះ */}
+    {touched.email && errors.email && (
+      <span className="error-text">⚠️ {errors.email}</span>
+    )}
+  </div>
+);
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `onBlur={handleBlur}`
-   - ព្រឹត្តិការណ៍ `onBlur` កើតឡើងនៅពេល Focus ចាកចេញពី input field (User ចុចចេញ)។
-2. `setTouched((prev) => ({ ...prev, [name]: true }));`
-   - Mark field នោះថា `true` (User បានឆ្លងកាត់ field នេះរួច)។
-3. `{touched.email && errors.email && (...) }`
-   - **Good UX:** មិនបង្ហាញ Error ក្រហមភ្លាមៗពេលទំព័រទើបបើកមកឡើយ — បង្ហាញតែពេល User បានវាយ ឬចាកចេញពី field ប៉ុណ្ណោះ។
+> [!NOTE]
+> **ព្រឹត្តិការណ៍ `onBlur` ជាអ្វី?**  
+> នៅក្នុង JavaScript, `onBlur` គឺជា Event ដែលកេះឡើង (fire) នៅពេលដែល cursor ចាកចេញពី Input នោះ (Focus lost)។ ឧទាហរណ៍៖ User វាយ Email រួចចុច Tab ឬចុច Mouse ទៅកាន់ប្រអប់ Password ➔ នោះប្រអប់ Email នឹងបញ្ចេញព្រឹត្តិការណ៍ `blur`។
 
 ---
 
-## ⏳ 5. Submit State Machine & Prevention of Double-Submit
+## 💡 ៥. ជំហានទី ៣ — ហេតុអ្វី Errors គួរតែជា Derived State?
 
-### 💻 Code សម្រាប់តែ handleSubmit:
+នេះជាកំហុសដ៏ធំបំផុតមួយដែលអ្នករៀនថ្មីៗតែងតែជួបប្រទះ៖
 
-```jsx
+### ❌ កំហុសទូទៅ (Anti-pattern):
+```javascript
+// ❌ កុំធ្វើបែបនេះ! បង្កើត useState សម្រាប់ errors នាំឱ្យមានបញ្ហា Desynchronization
+const [formData, setFormData] = useState({ email: '', password: '' });
+const [errors, setErrors] = useState({});
+
+const handleChange = (e) => {
+  setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ត្រូវហៅ setErrors តាមក្រោយ... ងាយភ្លេច និង delay 1 render!
+};
+```
+
+### ✅ វិធីត្រឹមត្រូវ (Derived State):
+```javascript
+// ✅ ត្រឹមត្រូវបំផុត: គណនា Errors ផ្ទាល់ចេញពី formData ក្នុងពេល Render!
+const [formData, setFormData] = useState({ email: '', password: '' });
+
+// គណនាភ្លាមៗរាល់ពេល Component Re-render
+const errors = validate(formData);
+const isFormValid = Object.keys(errors).length === 0;
+```
+
+**ហេតុអ្វីវិធីនេះល្អជាងដាច់?**
+1. **Always in Sync:** រាល់ពេលដែល User វាយអក្សរ (`formData` ប្រែប្រួល) Component នឹង Re-render ហើយ `errors` នឹងត្រូវគណនាឡើងវិញភ្លាមៗដោយស្វ័យប្រវត្តិ។
+2. **គ្មាន Bugs:** មិនបាច់សរសេរ `useEffect` ស្មុគស្មាញដើម្បីចាំ update errors ឡើយ។
+3. **`isFormValid` ងាយស្រួលដឹង:** បើ `errors` ជា object ទទេ (`{}`) មានន័យថា Form ត្រឹមត្រូវ ១០០%!
+
+---
+
+## ⏳ ៦. ជំហានទី ៤ — Submit State Machine & ការពារ Double-Click
+
+ស្រមៃមើលថាអ្នកកំពុងទិញទំនិញតម្លៃ $500។ នៅពេលអ្នកចុចប៊ូតុង **«ទូទាត់ប្រាក់»** ប្រព័ន្ធអ៊ីនធឺណិតដើរយឺតបន្តិច។ ប្រសិនបើប៊ូតុងមិន Disable ទេ អ្នកប្រហែលជាចុចប៊ូតុងនោះ ៣ ទៅ ៤ ដងជាប់ៗគ្នា — ជាលទ្ធផល លុយរបស់អ្នកអាចនឹងត្រូវកាត់ $2,000!
+
+ដើម្បីដោះស្រាយបញ្ហានេះ យើងប្រើ **Submit State Flow**:
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle : Form Loads (ត្រៀមរួចរាល់)
+    idle --> idle : Submit បរាជ័យ (បង្ហាញ Error)
+    idle --> loading : Form ត្រឹមត្រូវ (Disable Button)
+    loading --> success : Server ឆ្លើយតប 200 OK
+    loading --> error : Network Error
+    success --> idle : Reset Form
+    error --> idle : កែប្រែទិន្នន័យ
+```
+
+### 💻 កូដ `handleSubmit` ដ៏រឹងមាំ៖
+
+```javascript
 const [submitState, setSubmitState] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
 
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // 1. Mark fields ទាំងអស់ថា touched ដើម្បីបង្ហាញ Error ទាំងអស់បើមិនទាន់បំពេញ
-  setTouched({ email: true, password: true, confirmPassword: true });
+  // 1. បើក Touched លើគ្រប់ Field ទាំងអស់!
+  // (បើ User មិនទាន់បំពេញអ្វីសោះហើយចុច Submit នោះ Error ទាំងអស់នឹងលោតព្រមគ្នា)
+  setTouched({
+    email: true,
+    password: true,
+    confirmPassword: true,
+  });
 
-  // 2. ប្រសិនបើមាន Error សូម្បីតែមួយ កុំអនុញ្ញាតឱ្យ Submit
-  if (!isFormValid) return;
+  // 2. បើ Form នៅមាន Error មិនអនុញ្ញាតឱ្យ Submit ឡើយ!
+  if (!isFormValid) {
+    return;
+  }
 
-  // 3. ប្តូរស្ថានភាពទៅជា loading
+  // 3. ប្តូរទៅ Loading ➔ ប៊ូតុងនឹង Disable ភ្លាម ការពារ Double-click
   setSubmitState('loading');
 
   try {
-    // ក្លែងធ្វើការផ្ញើទិន្នន័យទៅ Server (Network Request 1.2s)
-    await new Promise((resolve) => setTimeout(resolve, 1200));
+    // ក្លែងធ្វើការផ្ញើទិន្នន័យទៅកាន់ API Server (រង់ចាំ 1.5 វិនាទី)
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // 4. ជោគជ័យ!
     setSubmitState('success');
   } catch (err) {
     setSubmitState('error');
@@ -187,86 +275,106 @@ const handleSubmit = async (e) => {
 };
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `setSubmitState('loading');`
-   - ប្តូរ State ទៅ `loading` — ធ្វើឱ្យប៊ូតុង Submit ក្លាយជា Disable (ចុចលែងកើត) និងបង្ហាញ Spinner ការពារ Double-submit។
-2. `await new Promise(...)`
-   - ក្លែងធ្វើ asynchronous API call រយៈពេល 1.2 វិនាទី។
-3. `setSubmitState('success');`
-   - ប្តូរទៅកាន់ Success Screen ឬបង្ហាញសារអបអរសាទរ។
-
 ---
 
-## 🚀 6. Complete Integrated Registration Form
+## 🚀 ៧. កូដពេញលេញ (Complete Working Implementation)
+
+នេះជា Component ពេញលេញដែលរួមបញ្ចូលគ្នានូវគោលការណ៍ទាំង ៤ ខាងលើ៖
 
 ```jsx
 import { useState } from 'react';
 
-function validateField(name, value, allValues) {
-  switch (name) {
-    case 'email':
-      if (!value.trim()) return 'Email មិនអាចទទេបានឡើយ!';
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'ទម្រង់ Email មិនត្រឹមត្រូវ!';
-      return '';
-    case 'password':
-      if (!value) return 'Password មិនអាចទទេបានឡើយ!';
-      if (value.length < 8) return 'Password ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ!';
-      return '';
-    case 'confirmPassword':
-      if (!value) return 'សូមផ្ទៀងផ្ទាត់ Password!';
-      if (value !== allValues.password) return 'Password ផ្ទៀងផ្ទាត់មិនដូចគ្នា!';
-      return '';
-    default:
-      return '';
+// ==========================================
+// ១. PURE VALIDATION FUNCTION (នៅក្រៅ Component)
+// ==========================================
+function validate(values) {
+  const errors = {};
+
+  if (!values.email.trim()) {
+    errors.email = 'Email មិនអាចទទេបានឡើយ!';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = 'ទម្រង់ Email មិនត្រឹមត្រូវ!';
   }
+
+  if (!values.password) {
+    errors.password = 'Password មិនអាចទទេបានឡើយ!';
+  } else if (values.password.length < 8) {
+    errors.password = 'Password ត្រូវមានយ៉ាងតិច ៨ តួអក្សរ!';
+  }
+
+  if (!values.confirmPassword) {
+    errors.confirmPassword = 'សូមផ្ទៀងផ្ទាត់ Password ម្តងទៀត!';
+  } else if (values.confirmPassword !== values.password) {
+    errors.confirmPassword = 'Password ផ្ទៀងផ្ទាត់មិនដូចគ្នាឡើយ!';
+  }
+
+  return errors;
 }
 
+// ==========================================
+// ២. REACT COMPONENT
+// ==========================================
 export default function RegistrationForm() {
-  const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
+  // State ទី ១: ផ្ទុកទិន្នន័យដែល User វាយ
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  // State ទី ២: កត់ត្រាប្រអប់ដែល User បានចុចចូលហើយចាកចេញ (onBlur)
   const [touched, setTouched] = useState({});
+
+  // State ទី ៣: តាមដានដំណាក់កាល Submit ('idle' | 'loading' | 'success' | 'error')
   const [submitState, setSubmitState] = useState('idle');
 
-  const errors = {
-    email: validateField('email', formData.email, formData),
-    password: validateField('password', formData.password, formData),
-    confirmPassword: validateField('confirmPassword', formData.confirmPassword, formData),
-  };
+  // DERIVED STATE: គណនា Errors ដោយស្វ័យប្រវត្តិចេញពី formData
+  const errors = validate(formData);
+  const isFormValid = Object.keys(errors).length === 0;
 
-  const isFormValid = !errors.email && !errors.password && !errors.confirmPassword;
-
+  // Handler ពេល User វាយអក្សរ
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handler ពេល User ចាកចេញពី Input
   const handleBlur = (e) => {
-    setTouched((prev) => ({ ...prev, [e.target.name]: true }));
+    const { name } = e.target;
+    setTouched((prev) => ({ ...prev, [name]: true }));
   };
 
+  // Handler ពេល User ចុច Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // បង្ហាញ Error គ្រប់ field ទាំងអស់បើ user ចុច Submit ទាំងមិនទាន់បំពេញ
     setTouched({ email: true, password: true, confirmPassword: true });
+
     if (!isFormValid) return;
 
     setSubmitState('loading');
-    await new Promise((r) => setTimeout(r, 1200));
+    // ក្លែងធ្វើការហៅ Network API រយៈពេល 1.2 វិនាទី
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     setSubmitState('success');
   };
 
+  // បើ Submit ជោគជ័យ បង្ហាញផ្ទាំង Success Screen
   if (submitState === 'success') {
     return (
-      <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl text-center shadow-md">
-        <span className="text-4xl">🎉</span>
-        <h3 className="text-lg font-bold text-slate-800 dark:text-white mt-2">ចុះឈ្មោះជោគជ័យ!</h3>
-        <p className="text-sm text-slate-500 mt-1">គណនីរបស់អ្នកត្រូវបានបង្កើតដោយជោគជ័យ។</p>
+      <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl text-center shadow-lg border border-slate-200 dark:border-slate-700">
+        <span className="text-5xl block mb-2">🎉</span>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-white">ចុះឈ្មោះជោគជ័យ!</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
+          ទិន្នន័យរបស់អ្នកត្រូវបានផ្ទៀងផ្ទាត់ និងបញ្ជូនទៅ Server ដោយជោគជ័យ។
+        </p>
         <button
           onClick={() => {
             setFormData({ email: '', password: '', confirmPassword: '' });
             setTouched({});
             setSubmitState('idle');
           }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold"
+          className="mt-5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition shadow-md"
         >
           ចុះឈ្មោះម្តងទៀត
         </button>
@@ -275,15 +383,17 @@ export default function RegistrationForm() {
   }
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-md">
-      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
-        🔐 Form Validation ជាន់ខ្ពស់
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-5">
+        🔐 ចុះឈ្មោះគណនីថ្មី
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Field */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Email
+          </label>
           <input
             type="email"
             name="email"
@@ -291,57 +401,82 @@ export default function RegistrationForm() {
             onChange={handleChange}
             onBlur={handleBlur}
             placeholder="name@example.com"
-            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white"
+            className="w-full px-3.5 py-2 text-sm border rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           {touched.email && errors.email && (
-            <p className="text-xs text-red-500 mt-1">⚠️ {errors.email}</p>
+            <p className="text-xs text-red-500 font-medium mt-1">⚠️ {errors.email}</p>
           )}
         </div>
 
         {/* Password Field */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Password (យ៉ាងតិច ៨ តួ)
+          </label>
           <input
             type="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="យ៉ាងតិច ៨ តួអក្សរ"
-            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white"
+            placeholder="••••••••"
+            className="w-full px-3.5 py-2 text-sm border rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           {touched.password && errors.password && (
-            <p className="text-xs text-red-500 mt-1">⚠️ {errors.password}</p>
+            <p className="text-xs text-red-500 font-medium mt-1">⚠️ {errors.password}</p>
           )}
         </div>
 
         {/* Confirm Password Field */}
         <div>
-          <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Confirm Password</label>
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            Confirm Password
+          </label>
           <input
             type="password"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
             onBlur={handleBlur}
-            placeholder="ផ្ទៀងផ្ទាត់ Password"
-            className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white"
+            placeholder="••••••••"
+            className="w-full px-3.5 py-2 text-sm border rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
           {touched.confirmPassword && errors.confirmPassword && (
-            <p className="text-xs text-red-500 mt-1">⚠️ {errors.confirmPassword}</p>
+            <p className="text-xs text-red-500 font-medium mt-1">⚠️ {errors.confirmPassword}</p>
           )}
         </div>
 
-        {/* Submit Button */}
+        {/* Submit Button with Loading State */}
         <button
           type="submit"
           disabled={submitState === 'loading'}
-          className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl transition"
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2"
         >
-          {submitState === 'loading' ? 'កំពុងផ្ញើ...' : 'Submit Form'}
+          {submitState === 'loading' ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span>កំពុងបង្កើតគណនី...</span>
+            </>
+          ) : (
+            <span>ចុះឈ្មោះឥឡូវនេះ</span>
+          )}
         </button>
       </form>
     </div>
   );
 }
 ```
+
+---
+
+## 🧠 ៨. តារាងសង្ខេប Mental Model (Cheat Sheet)
+
+ចងចាំរូបមន្តខ្លីៗទាំង ៤ នេះ អ្នកនឹងអាចដោះស្រាយគ្រប់បញ្ហា Form ក្នុង React ដោយទំនុកចិត្ត៖
+
+| ព្រឹត្តិការណ៍ / គំនិត | តួនាទីជាក់ស្តែង | កូដគំរូ |
+| :--- | :--- | :--- |
+| **`onChange`** | ធ្វើបច្ចុប្បន្នភាពទិន្នន័យអក្សរក្នុង `formData` | `setFormData(prev => ({...prev, [name]: value}))` |
+| **`onBlur`** | កត់ត្រាថា User បានប៉ះពាល់ field នោះរួចរាល់ | `setTouched(prev => ({...prev, [name]: true}))` |
+| **`errors` (Derived)** | គណនា Error ភ្លាមៗចេញពី State ដោយមិនបាច់ `useState` | `const errors = validate(formData);` |
+| **បង្ហាញ Error លើ UI** | បង្ហាញ Error លុះត្រាតែបាន Touched និងមាន Error ពិតប្រាកដ | `{touched.email && errors.email && <span>...</span>}` |
+| **`onSubmit`** | បើក Touched ទាំងអស់ ➔ ឆែក `isFormValid` ➔ ប្តូរទៅ `loading` | `if (!isFormValid) return; setSubmitState('loading');` |
