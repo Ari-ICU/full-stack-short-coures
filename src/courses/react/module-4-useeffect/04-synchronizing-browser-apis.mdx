@@ -102,6 +102,12 @@ export function ThemeSyncDemo() {
 2. `localStorage.setItem('app_theme', theme)`:
    - សរសេរតម្លៃថ្មីចូល Browser Storage ដោយស្វ័យប្រវត្តិតាមរយៈ `[theme]` dependency។
 
+> [!NOTE]
+> **បំបែកអត្ថន័យ ៖ `if (typeof window !== 'undefined') return localStorage.getItem('app_theme') || 'light';`**
+> - **`typeof window !== 'undefined'` :** ពិនិត្យថា *«តើកូដនេះកំពុងរត់លើ Browser មែនទេ?»* ដើម្បីការពារកុំឱ្យ Crash លើ Server (SSR/Next.js) ដែលគ្មាន object `window`។
+> - **`localStorage.getItem('app_theme')` :** សួរ Browser ថា *«តើ User ធ្លាប់បាន Save ពណ៌ Theme ទុកពីមុនដែរឬទេ?»*
+> - **`|| 'light'` :** Fallback Default — ប្រសិនបើ User ទើបចូលដំបូង (ទិន្នន័យជា `null`) វានឹងយកពណ៌ `'light'` ជាតម្លៃដើមដោយស្វ័យប្រវត្តិ!
+
 ---
 
 ## ⌨️ ៣. ករណីទី ២ ៖ Global Keyboard Shortcuts (ចុច ESC បិទ Modal)
