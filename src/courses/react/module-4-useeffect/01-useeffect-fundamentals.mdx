@@ -1,12 +1,11 @@
 ---
-title: Understanding Side Effects & The useEffect Mental Model
-description: រៀនយល់ពី Side Effects ក្នុង React ឱ្យច្បាស់ ១០០% — ហេតុអ្វីត្រូវមាន useEffect, ភាពខុសគ្នារវាង Render Phase និង Effect Phase, និងច្បាប់មាសនៃ Dependency Array (គ្មាន [], [] ទទេ, និង [dependencies])។
+title: useEffect & Side Effects Fundamentals
+description: រៀនយល់ពី Side Effects ក្នុង React ឱ្យច្បាស់ ១០០% — ហេតុអ្វីត្រូវមាន useEffect, ភាពខុសគ្នារវាង Render Phase និង Effect Phase, និងលំដាប់ដំណើរការ Render ➔ Paint ➔ Effect។
 objectives:
   - យល់ពីនិយមន័យនៃ Side Effects តាមរយៈឧទាហរណ៍ជីវិតពិត (ចុងភៅក្នុងភោជនីយដ្ឋាន)
   - ដឹងពីមូលហេតុដែលមិនអាចដាក់ Side Effects ក្នុង Render Phase ផ្ទាល់ (ការពារ Infinite Loop Crash)
-  - យល់ច្បាស់ពីលំដាប់លំហូរការងារ៖ Render Phase ➔ Paint UI ➔ Run useEffect
-  - ស្គាល់ភាពខុសគ្នាដាច់ស្រឡះរវាងទម្រង់ទាំង ៣ នៃ Dependency Array (គ្មាន [], [] ទទេ, និង [dependencies])
-  - ចេះប្រើ useEffect ដើម្បីធ្វើសមកាលកម្មទិន្នន័យ (Sync) ជាមួយ Browser APIs (document.title)
+  - យល់ច្បាស់ពីលំដាប់លំហូរការងារទាំង ៣ ដំណាក់កាល៖ Render Phase ➔ Paint UI ➔ Run useEffect
+  - ស្គាល់ Syntax មូលដ្ឋាននៃ useEffect(callback) និងរបៀបធ្វើសមកាលកម្មជាមួយ Browser DOM (document.title)
 module: module-4-useeffect
 order: 1
 quiz:
@@ -19,14 +18,14 @@ quiz:
     correctAnswer: 2
     explanation: "ភារកិច្ចចម្បងរបស់ React Component គឺ Return JSX សម្រាប់បង្ហាញ UI។ រាល់ការងារផ្សេងទៀតដែលទាក់ទងនឹងប្រព័ន្ធខាងក្រៅ (Fetch Data, document.title, setInterval) ត្រូវបានចាត់ទុកជា Side Effects។"
 
-  - question: "ចុះប្រសិនបើអ្នកសរសេរ `useEffect(callback, [])` (Dependency Array ទទេ) តើ Effect នឹងដំណើរការនៅពេលណា?"
+  - question: "តើ `useEffect` ដំណើរការនៅពេលណាធៀបនឹងការបង្ហាញរូបរាង UI លើអេក្រង់?"
     options:
-      - "រត់ឡើងវិញរាល់ពេល Component Re-render"
-      - "មិនដែលរត់ទាល់តែសោះ"
-      - "រត់តែ ១ ដងគត់ បន្ទាប់ពី Component បានបង្ហាញខ្លួនលើអេក្រង់ដំបូង (Mounting Phase)"
-      - "រត់តែពេលណាដែល User ចុច Mouse"
-    correctAnswer: 3
-    explanation: "Dependency Array ទទេ `[]` ប្រាប់ React ថា Callback នេះគ្មានអ្វីដែលត្រូវតាមដានឡើយ ដូច្នេះវាដំណើរការតែមួយលើកគត់ពេល Component ទើបតែ Mount (Load ដំបូង)។"
+      - "ដំណើរការមុនពេល Render JSX"
+      - "ដំណើរការក្រោយពេល Browser បាន Paint (គូរ) UI លើអេក្រង់រួចរាល់ ដើម្បីកុំឱ្យកកស្ទះអេក្រង់របស់ User"
+      - "ដំណើរការតែពេល User បិទ Browser ប៉ុណ្ណោះ"
+      - "ដំណើរការតែពេលមាន JavaScript Syntax Error"
+    correctAnswer: 2
+    explanation: "React ដំណើរការ useEffect ក្រោយពេល Browser Paint UI រួចរាល់។ នេះធានាថា User មើលឃើញផ្ទាំង UI ភ្លាមៗ (Fast Paint) ដោយមិនចាំបាច់រង់ចាំ Side Effects ឡើយ។"
 
   - question: "តើមានអ្វីកើតឡើងបើអ្នកដាក់កូដ Fetch Data និង setState នៅខាងក្នុង Component Body ផ្ទាល់ដោយគ្មាន useEffect?"
     options:
@@ -38,7 +37,7 @@ quiz:
     explanation: "នៅក្នុង Render Phase កូដក្នុង Function Body នឹងរត់ឡើងវិញរាល់ពេល Render។ ការហៅ fetch និង setState នៅទីនោះនឹងបង្កើតជារង្វង់មិនចេះចប់ (Fetch ➔ setState ➔ Re-render ➔ Fetch ➔ ...) បណ្តាលឱ្យ Browser គាំង។"
 ---
 
-## 🌟 ១. តើ Side Effects ជាអ្វី? (ឧទាហរណ៍ចុងភៅក្នុងភោជនីយដ្ឋាន 👨‍🍳)
+## 🌟 ១. Side Effects ជាអ្វី? (ឧទាហរណ៍ចុងភៅ 👨‍🍳)
 
 ដើម្បីយល់ពី `useEffect` ឱ្យបានងាយស្រួលបំផុត សូមស្រមៃមើល **ចុងភៅក្នុងភោជនីយដ្ឋាន** មួយ៖
 
@@ -75,7 +74,7 @@ flowchart LR
 
 ---
 
-## ⚠️ ២. ហេតុអ្វីមិនអាចសរសេរ Side Effects ក្នុង Function Body ផ្ទាល់?
+## ⚠️ ២. ហេតុអ្វីមិនសរសេរក្នុង Body ផ្ទាល់? (បញ្ហា Infinite Loop)
 
 នេះជាកំហុសដ៏ធំបំផុតដែលអ្នកទើបរៀន React តែងតែជួបប្រទះ៖
 
@@ -97,29 +96,29 @@ function UserProfile() {
 1. Component រត់លើកទី ១ ➔ ជួប `fetch` ➔ ទទួលបានទិន្នន័យ ➔ ហៅ `setUserData`
 2. `setUserData` បញ្ជាឱ្យ React **Re-render Component ឡើងវិញ**
 3. Component រត់លើកទី ២ ➔ ជួប `fetch` ម្តងទៀត ➔ ហៅ `setUserData` ម្តងទៀត
-4. ... **រង្វង់ Luop មិនចេះចប់ (Infinite Loop)** ➔ កម្មវិធីគាំង Browser ភ្លាម!
+4. ... **រង្វង់ Loop មិនចេះចប់ (Infinite Loop)** ➔ កម្មវិធីគាំង Browser ភ្លាម!
 
 👉 **ដំណោះស្រាយ៖** ត្រូវប្រើ Hook **`useEffect`** ដើម្បីប្រាប់ React ថា៖ *«សូមបង្ហាញ UI ជូន User សិន រួចចាំដំណើរការកូដនេះនៅពេលក្រោយ!»*
 
 ---
 
-## 🎮 ៣. Interactive Simulator — សាកល្បងដោយផ្ទាល់
+## 🎮 ៣. Interactive Simulator — សាកល្បង Execution Pipeline
 
-ខាងក្រោមនេះជា Simulator អន្តរកម្ម។ អ្នកអាចសាកល្បងប្តូររវាង **ទម្រង់ទាំង ៣ នៃ Dependency Array** រួចចុចប៊ូតុង State ដើម្បីមើលថាពេលណាខ្លះដែល `useEffect` ដំណើរការ និងពេលណាខ្លះដែលវាត្រូវបានរំលង (Skipped)៖
+ខាងក្រោមនេះជា Simulator បង្ហាញពីដំណើរការជាក់ស្តែងនៃ React Pipeline។ សាកល្បងចុចប៊ូតុង **"ផ្ញើសារថ្មី (+1)"** ដើម្បីមើលលំដាប់លំហូរពី **Render Phase ➔ Paint Phase ➔ Effect Phase** មួយជំហានម្តងៗ៖
 
 ```reactdiagram
-UseEffect
+EffectTiming
 ```
 
 > [!TIP]
-> **សាកល្បងពិសោធន៍:**
-> 1. ជ្រើសរើស **«1. គ្មាន [] (No Array)»** ➔ ចុចប៊ូតុងទាំងពីរ ➔ សង្កេតមើលថា Effect Run គ្រប់ដងរាល់ពេល Re-render!
-> 2. ជ្រើសរើស **«2. ទទេ [] (Empty Array)»** ➔ ចុចប៊ូតុងទាំងពីរ ➔ Effect **មិន Run ទៀតទេ** (រក្សានៅត្រឹម ១ ដងដដែល)!
-> 3. ជ្រើសរើស **«3. មាន [count] (With Deps)»** ➔ ចុច "ប្តូរ Count" (Effect Run ✅) រួចសាកចុច "ប្តូរ Text" (Effect រំលងចោល ⏭️ ព្រោះ count មិនបានប្រែប្រួល)!
+> **សង្កេតមើលលំដាប់លំហូរ:**
+> 1. **ជំហានទី ១ (Render):** React ហៅ Component គណនាចំនួនសារថ្មី។
+> 2. **ជំហានទី ២ (Paint):** Browser បង្ហាញលេខសារលើអេក្រង់ឱ្យ User ឃើញភ្លាមៗ (UI មិនកកស្ទះ)!
+> 3. **ជំហានទី ៣ (Effect):** ក្រោយពេល User ឃើញ UI រួចរាល់ ទើប `useEffect` ចាប់ផ្តើមរត់ដើម្បីកែប្រែចំណងជើងលើ Browser Tab (`document.title`)!
 
 ---
 
-## 🔄 ៤. លំដាប់លំហូរការងារទាំង ៣ ដំណាក់កាល (Execution Lifecycle)
+## 🔄 ៤. លំដាប់ដំណើរការ ៣ ជំហាន (Render ➔ Paint ➔ Effect)
 
 `useEffect` មិនដំណើរការភ្លាមៗក្នុងពេល Render ឡើយ។ React បែងចែកការងារជា ៣ ជំហានច្បាស់លាស់៖
 
@@ -144,19 +143,7 @@ sequenceDiagram
 
 ---
 
-## 🎯 ៥. ច្បាប់មាសទាំង ៣ នៃ Dependency Array (៣ ទម្រង់ដែលត្រូវចងចាំ)
-
-Syntax របស់ `useEffect` គឺ៖ `useEffect(setupFunction, dependenciesArray)`
-
-| ទម្រង់ Dependency | កូដសរសេរ | ពេលណាទើប Effect ដំណើរការ? | ករណីប្រើប្រាស់ទូទៅ |
-| :--- | :--- | :--- | :--- |
-| **១. គ្មាន Array សោះ** | `useEffect(() => { ... })` | **រាល់ពេល Render** (លើកដំបូង + រាល់ពេល State ណាមួយប្តូរ) | កម្រប្រើខ្លាំងណាស់ (ប្រយ័ត្នបញ្ហា Performance) |
-| **២. Array ទទេ `[]`** | `useEffect(() => { ... }, [])` | **តែ ១ ដងគត់** ពេល Component ទើបបង្ហាញដំបូង (Mount) | Fetch Data លើកដំបូង, Event Listeners (`window.addEventListener`) |
-| **៣. មាន Dependency `[prop, state]`** | `useEffect(() => { ... }, [count])` | **ពេល Mount + ពេលតម្លៃក្នុង Array ផ្លាស់ប្តូរ** | Sync Document Title, Fetch Data ពេល ID ផ្លាស់ប្តូរ |
-
----
-
-## 📄 ៦. ឧទាហរណ៍ជាក់ស្តែង ៖ ធ្វើសមកាលកម្ម Browser Tab Title
+## 📄 ៥. ឧទាហរណ៍ជាក់ស្តែង ៖ ប្តូរចំណងជើង Tab (document.title)
 
 ចូរក្រឡេកមើលកូដជាក់ស្តែងនៃការ Sync ចំនួនសារមិនទាន់អាន ទៅលើ Browser Tab Title (`document.title`)៖
 
@@ -168,23 +155,23 @@ export default function DocumentTitleSync() {
 
   // ដំណើរការ Side Effect ក្រោយពេល UI បង្ហាញរួចរាល់
   useEffect(() => {
-    // កែប្រែ Title លើ Browser Tab ខាងក្រៅ React
+    // កែប្រែចំណងជើង Tab លើ Browser (Side Effect)
     if (unreadCount > 0) {
-      document.title = `🔔 (${unreadCount}) សារថ្មី | MyApp`;
+      document.title = `(${unreadCount}) សារថ្មី`;
     } else {
-      document.title = 'MyApp - ទំព័រដើម';
+      document.title = 'ទំព័រដើម';
     }
 
     console.log("Effect បាន run ព្រោះ unreadCount =", unreadCount);
   }, [unreadCount]); // 👈 ដំណើរការឡើងវិញ តែពេល unreadCount ប្រែប្រួលប៉ុណ្ណោះ!
 
   return (
-    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border text-center">
+    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 text-center">
       <h3 className="font-bold text-lg text-slate-800 dark:text-white mb-2">
-        📄 Browser Tab Title Sync
+        ប្តូរចំណងជើង Browser Tab
       </h3>
       <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-        សង្កេតមើលចំណងជើង Tab លើ Browser របស់អ្នកពេលចុចប៊ូតុង៖
+        មើលចំណងជើង Tab លើ Browser របស់អ្នកពេលចុចប៊ូតុង៖
       </p>
 
       <div className="flex justify-center items-center gap-3">
@@ -218,16 +205,14 @@ export default function DocumentTitleSync() {
 2. `document.title = ...`
    - កែប្រែ DOM របស់ Browser Window ផ្ទាល់។ នេះគឺជា Side Effect ព្រោះវានៅក្រៅ React Component។
 3. `[unreadCount]` (Dependency Array):
-   - ប្រសិនបើ Component Re-render ដោយសារ State ផ្សេងទៀត (ឧ. dark mode toggle) តែ `unreadCount` នៅដដែល នោះ React នឹង **រំលងកូដក្នុង `useEffect` នេះចោល** មិនឱ្យខាត Performance ឡើយ!
+   - ប្រសិនបើ Component Re-render ដោយសារ State ផ្សេងទៀត តែ `unreadCount` នៅដដែល នោះ React នឹង **រំលងកូដក្នុង `useEffect` នេះចោល** មិនឱ្យខាត Performance ឡើយ!
 
 ---
 
-## 🧠 ៧. សង្ខេប Mental Model ងាយចាំ (Quick Cheat Sheet)
+## ⏭️ ជំហានបន្ទាប់ ៖ សិក្សាលម្អិតពី Dependency Array
 
-| សំណួរគន្លឹះ | ចម្លើយខ្លីខ្លឹម |
-| :--- | :--- |
-| **តើអ្វីជា Side Effect?** | ការងារដែលទាក់ទងនឹងប្រព័ន្ធខាងក្រៅក្រៅពី JSX (API, DOM, Timers) |
-| **តើ useEffect រត់ពេលណា?** | **ក្រោយពេល Paint UI រួចរាល់** (Screen មិនកកស្ទះ) |
-| **`useEffect(fn)`** | រត់រាល់ពេល Render ទាំងអស់ ⚠️ |
-| **`useEffect(fn, [])`** | រត់តែម្តងគត់ពេល Mount ដំបូង ✅ |
-| **`useEffect(fn, [x])`** | រត់ពេល Mount + ពេលតម្លៃ `x` ប្រែប្រួល ✅ |
+នៅក្នុងមេរៀនបន្ទាប់ (**[Lesson 02 — Mastering the Dependency Array](file:///Users/thoeurnratha/Documents/web-development/data-science/full-stack-course/src/courses/react/module-4-useeffect/02-dependency-array-rules.mdx)**) យើងនឹងសិក្សាស៊ីជម្រៅពី៖
+- ភាពខុសគ្នារវាង `គ្មាន Array`, `[] ទទេ`, និង `[dependencies]` តាមរយៈ Simulator អន្តរកម្ម
+- របៀបដែល React ប្រៀបធៀប dependencies តាមរយៈ `Object.is`
+- អន្ទាក់ **Object & Function Reference Trap** និងក្បួនដោះស្រាយ!
+
