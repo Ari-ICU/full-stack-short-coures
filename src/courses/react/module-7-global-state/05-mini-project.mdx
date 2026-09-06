@@ -1,11 +1,11 @@
 ---
-title: "Hands-on Mini Project: Global E-Commerce & Notification System"
-description: អនុវត្តបង្កើត Global E-Commerce Cart & Toast Notification System ដោយប្រើ Context API និង Custom Providers ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+title: "Mini Project: Multi-Context Shop & Toasts"
+description: អនុវត្តបង្កើត Global E-Commerce Cart & Floating Toast Notification System ដោយប្រើ Multi-Context Architecture (CartContext + ToastContext) ឱ្យមានភាពស៊ីសង្វាក់ និងងាយយល់។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Shop & Toast Layout
-  - បង្កើត Multi-Context Architecture (`CartContext` + `ToastContext`)
-  - ចេះបញ្ជូន Actions (Add to Cart, Trigger Toast) ឆ្លងកាត់ Components
+  - បង្កើត Multi-Context Architecture (CartContext + ToastContext) ដាច់ដោយឡែកពីគ្នា
+  - ចេះបញ្ជូន Actions (Add to Cart, Trigger Toast) ឆ្លងកាត់ Components ដោយគ្មាន Prop Drilling
   - អនុវត្ត Toast Auto-dismiss Timer ក្នុង Context Provider
+  - យល់ពីអត្ថប្រយោជន៍នៃ Separation of Contexts (កាត់បន្ថយ Unnecessary Re-renders)
 module: module-7-global-state
 order: 5
 quiz:
@@ -16,63 +16,65 @@ quiz:
       - "ព្រោះ React មិនអនុញ្ញាតឱ្យ Context ផ្ទុកលើសពី ១ State"
       - "ដើម្បីលុប useState ចោល"
     correctAnswer: 1
-    explanation: "Multiple Focused Contexts (Separation of Concerns) កាត់បន្ថយ Unnecessary Re-renders — Cart updates នឹងមិនធ្វើឱ្យ Notification components ត្រូវ Re-render ឡើយ។"
+    explanation: "Multiple Focused Contexts (Separation of Concerns) កាត់បន្ថយ Unnecessary Re-renders — ការ Update ទំនិញក្នុង Cart នឹងមិនធ្វើឱ្យ Notification components ត្រូវ Re-render ឡើយ។"
 ---
 
-## 🏗️ 1. Multi-Context Architecture
+## 🏗️ ១. ស្ថាបត្យកម្ម Multi-Context (CartContext + ToastContext)
+
+នៅក្នុង App ខ្នាតធំ យើងមិនគួរញាត់ State ទាំងអស់ចូលក្នុង Context តែមួយឡើយ។ យើងបែងចែកវាជា **២ Contexts ដាច់ដោយឡែកពីគ្នា** ៖
 
 ```mermaid
 graph TD
-    Root["<App>"] --> CP["<CartProvider>"]
-    CP --> TP["<ToastProvider>"]
+    Root["<App>"] --> CP["<CartProvider> (គ្រប់គ្រងទំនិញក្នុងកន្ត្រក)"]
+    CP --> TP["<ToastProvider> (គ្រប់គ្រងផ្ទាំង Notification)"]
     TP --> Layout["<ShopLayout>"]
-    Layout --> Grid["<ProductGrid> (Dispatches addToCart + showToast)"]
-    Layout --> Toast["<ToastContainer> (Consumes ToastContext)"]
+    Layout --> Grid["<ProductGrid> (ហៅ addToCart + showToast) 🛍️"]
+    Layout --> Toast["<ToastContainer> (បង្ហាញផ្ទាំង Toast ស្វ័យប្រវត្តិ) 🔔"]
+
+    style Root fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
+    style CP fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style TP fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style Grid fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Toast fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
 ```
 
 ---
 
-## 🎨 2. Normal HTML Shop & Toast Layout
-
-```html
-<!-- HTML Shop Structure with Floating Toast -->
-<div class="shop-app">
-  <header>
-    <span>🛒 Cart (0)</span>
-  </header>
-  <main>
-    <div class="product">
-      <h4>Course Name</h4>
-      <button>Add to Cart</button>
-    </div>
-  </main>
-  <!-- Toast Alert -->
-  <div class="toast-alert">✅ Added to Cart!</div>
-</div>
-```
-
----
-
-## 🚀 3. Complete Multi-Context E-Commerce Demo
+## 💻 ២. កូដពេញលេញនៃគម្រោង E-Commerce Demo
 
 ```jsx
 import { createContext, useContext, useState } from 'react';
 
-// ── 1. CART CONTEXT ──
+// ==========================================
+// ១. CART CONTEXT
+// ==========================================
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
-  const addToCart = (product) => setItems((p) => [...p, product]);
+
+  const addToCart = (product) => {
+    setItems((prev) => [...prev, product]);
+  };
+
+  const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart }}>
+    <CartContext.Provider value={{ items, addToCart, totalAmount, count: items.length }}>
       {children}
     </CartContext.Provider>
   );
 }
 
-// ── 2. TOAST CONTEXT ──
+export function useCart() {
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart must be used within CartProvider');
+  return context;
+}
+
+// ==========================================
+// ២. TOAST CONTEXT
+// ==========================================
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
@@ -80,61 +82,108 @@ export function ToastProvider({ children }) {
 
   const showToast = (message) => {
     setToast(message);
-    setTimeout(() => setToast(null), 2500);
+    // បិទ Toast ស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី
+    setTimeout(() => {
+      setToast(null);
+    }, 2500);
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {toast && (
-        <div className="fixed bottom-4 right-4 bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xl animate-bounce">
-          {toast}
+        <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-slate-700 animate-bounce flex items-center gap-2 z-50">
+          <span>🔔</span>
+          <span>{toast}</span>
         </div>
       )}
     </ToastContext.Provider>
   );
 }
 
-// ── 3. PRODUCT ITEM COMPONENT ──
+export function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within ToastProvider');
+  return context;
+}
+
+// ==========================================
+// ៣. PRODUCT CARD COMPONENT
+// ==========================================
 function ProductCard({ product }) {
-  const { addToCart } = useContext(CartContext);
-  const { showToast } = useContext(ToastContext);
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
 
   const handleBuy = () => {
     addToCart(product);
-    showToast(`✅ Added ${product.title} to cart!`);
+    showToast(`បានបន្ថែម "${product.title}" ចូលកន្ត្រកជោគជ័យ!`);
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border flex justify-between items-center">
+    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-100 dark:border-slate-700 flex justify-between items-center">
       <div>
         <h4 className="font-bold text-sm text-slate-800 dark:text-white">{product.title}</h4>
-        <p className="text-xs text-blue-600 font-black">${product.price}</p>
+        <p className="text-xs text-blue-600 dark:text-blue-400 font-black mt-0.5">${product.price}</p>
       </div>
       <button
         onClick={handleBuy}
-        className="px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow"
       >
-        + Add
+        + Add to Cart
       </button>
     </div>
   );
 }
 
-// ── 4. ROOT APP ──
+// ==========================================
+// ៤. ROOT APP COMPONENT
+// ==========================================
 export default function ContextMiniProject() {
   return (
     <CartProvider>
       <ToastProvider>
-        <div className="max-w-md mx-auto p-6 space-y-4">
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white">
-            🛍️ Multi-Context Shop Demo
-          </h2>
-          <ProductCard product={{ id: 1, title: 'React Mastery', price: 49 }} />
-          <ProductCard product={{ id: 2, title: 'Next.js 15 Fullstack', price: 69 }} />
-        </div>
+        <ShopContent />
       </ToastProvider>
     </CartProvider>
   );
 }
+
+function ShopContent() {
+  const { count, totalAmount } = useCart();
+
+  return (
+    <div className="max-w-md mx-auto p-6 space-y-4">
+      {/* Header Cart Badge */}
+      <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl shadow border">
+        <h2 className="text-base font-bold text-slate-800 dark:text-white">🛍️ Web Dev Shop</h2>
+        <div className="text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-3 py-1.5 rounded-full">
+          🛒 {count} items (${totalAmount})
+        </div>
+      </div>
+
+      {/* Product List */}
+      <ProductCard product={{ id: 1, title: 'React Mastery Masterclass', price: 49 }} />
+      <ProductCard product={{ id: 2, title: 'Next.js 15 Full-Stack Course', price: 69 }} />
+      <ProductCard product={{ id: 3, title: 'TypeScript Pro Architecture', price: 39 }} />
+    </div>
+  );
+}
 ```
+
+---
+
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃកូដ
+
+1. **ហេតុអ្វីបានជាបំបែក CartContext និង ToastContext?**  
+   ប្រសិនបើដាក់បញ្ចូលគ្នាក្នុង Context តែមួយ រាល់ពេលអ្នកចុច "Add to Cart" នោះ Notification Component ក៏ត្រូវ Re-render ដែរ។ ការបំបែកជាពីរធ្វើឱ្យកូដ Re-render តែ Component ណាដែលចាំបាច់ប៉ុណ្ណោះ (Performance Optimization)។
+2. **Auto-dismiss Toast ដំណើរការយ៉ាងណា?**  
+   ក្នុង `ToastProvider` យើងប្រើ `setTimeout(() => setToast(null), 2500)` ដើម្បីបិទ Notification ដោយស្វ័យប្រវត្តិ។
+
+---
+
+## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
+
+- [x] Cart State ត្រូវបានចែករំលែកឆ្លងកាត់ Components ដោយគ្មាន Prop Drilling
+- [x] ចុច Add to Cart បង្ហាញ Toast Alert បណ្តែតនៅជ្រុងខាងស្តាំស្វ័យប្រវត្តិ
+- [x] Toast បាត់ទៅវិញដោយស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី
+- [x] តម្លៃសរុប និងចំនួនទំនិញ Update ភ្លាមៗនៅលើ Header

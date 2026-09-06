@@ -6,6 +6,7 @@ import { ReactContextDiagram } from "./ReactContextDiagram";
 import { ReactFormValidationDiagram } from "./ReactFormValidationDiagram";
 import { ReactUseEffectDiagram } from "./ReactUseEffectDiagram";
 import { ReactEffectTimingDiagram } from "./ReactEffectTimingDiagram";
+import { ReactPitfallsDiagram } from "./ReactPitfallsDiagram";
 
 export function ReactDiagram({ name }: { name: string }) {
   switch (name) {
@@ -25,6 +26,8 @@ export function ReactDiagram({ name }: { name: string }) {
       return <ReactUseEffectDiagram />;
     case "EffectTiming":
       return <ReactEffectTimingDiagram />;
+    case "Pitfalls":
+      return <ReactPitfallsDiagram />;
     default:
       return <div className="p-4 border border-red-500 bg-red-50 text-red-700">Unknown React diagram: {name}</div>;
   }

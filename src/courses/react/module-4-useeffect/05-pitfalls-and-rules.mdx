@@ -38,17 +38,21 @@ quiz:
     explanation: "ការផ្តល់ `key` ថ្មី (ដូចជា `key={userId}`) ប្រាប់ React ថាវាជា Component ថ្មីទាំងស្រុង។ React នឹងបំផ្លាញ State ចាស់ចោល ហើយបង្កើត State ដើមឡើងវិញដោយស្វ័យប្រវត្តិ មិនចាំបាច់សរសេរ useEffect សូម្បីមួយបន្ទាត់!"
 ---
 
-## 🧭 ១. ទស្សនវិជ្ជា "You Might Not Need an Effect"
+## 🧭 ១. សំណួរធំបំផុត ៖ ពេលណាគួរប្រើ ហើយពេលណាដែលមិនគួរប្រើ?
 
-យោងតាមឯកសារផ្លូវការរបស់ React Team៖  
-> **«`useEffect` គឺជាច្រកចេញ (Escape Hatch) សម្រាប់ធ្វើការជាមួយប្រព័ន្ធខាងក្រៅ។ កុំប្រើវាសម្រាប់រៀបចំ Data Flow ធម្មតាក្នុង React ឱ្យសោះ!»**
+មនុស្សជាច្រើនបន្ទាប់ពីរៀន `useEffect` ចប់ តែងតែយកវាទៅប្រើលើ **គ្រប់រឿងទាំងអស់** — នេះជាកំហុសដ៏ធំបំផុត!
+
+> 💡 **ច្បាប់សាមញ្ញក្នុងការចងចាំ (Mental Model)៖**  
+> `useEffect` ប្រៀបដូចជា **«ការទូរស័ព្ទទៅក្រៅផ្ទះ»** 📞
+> - បើអ្នកចង់និយាយជាមួយមនុស្សក្នុងផ្ទះ (គណនាទិន្នន័យក្នុង React, បូកអក្សរ, Filter បញ្ជី) ➔ **មិនបាច់តេទូរស័ព្ទទេ!** និយាយផ្ទាល់តែម្តងទៅ!
+> - បើអ្នកចង់ទាក់ទងមនុស្សខាងក្រៅ (Server API, Browser Title, Timer, LocalStorage) ➔ **ទើបត្រូវប្រើ `useEffect`!**
 
 ```mermaid
 flowchart TD
-    Q{"តើការងារនេះបង្កឡើងដោយអ្វី?"}
+    Q{"តើការងារនេះជាអ្វី?"}
     
     Q -->|"User ចុច Mouse / Submit"| Action["👉 ដាក់ក្នុង Event Handler<br/>(onClick, onSubmit)"]
-    Q -->|"គណនាចេញពី Props/State"| Derived["👉 គណនាផ្ទាល់ក្នុង Render<br/>(Derived State)"]
+    Q -->|"គណនាចេញពី Props ឬ State"| Derived["👉 គណនាផ្ទាល់ក្នុង Render<br/>(Derived State)"]
     Q -->|"Sync ជាមួយប្រព័ន្ធក្រៅ<br/>(API, Window, Timer, Storage)"| Effect["👉 ប្រើ useEffect ✅"]
 
     style Action fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
@@ -58,16 +62,33 @@ flowchart TD
 
 ---
 
-## 🧮 ២. កំហុសទី ១ ៖ ប្រើ useEffect សម្រាប់គណនាទិន្នន័យ (Derived State)
+## 🎮 ២. Interactive Simulator — សាកល្បងភាពខុសគ្នាផ្ទាល់
 
-### ❌ កូដអាក្រក់ (Anti-pattern ធ្វើឱ្យ Re-render ២ ដង):
+សាកល្បងចុចតេស្ត **Simulator ខាងក្រោម** ដើម្បីឃើញផ្ទាល់ភ្នែកថា ហេតុអ្វីបានជាការមិនប្រើ `useEffect` ក្នុងករណីខ្លះ ល្អជាង និងលឿនជាងរហូតដល់ ២ ដង៖
+
+```reactdiagram
+Pitfalls
+```
+
+> [!TIP]
+> **សាកល្បងពិសោធន៍:**
+> 1. ក្នុង **ករណីទី ១ (Derived State) ៖** សាកល្បងវាយប្តូរឈ្មោះ ➔ សង្កេតមើលថា របៀបខុសដែលប្រើ `useEffect` បណ្តាលឱ្យ Component ត្រូវ **Re-render ២ ដង** ខណៈដែលរបៀបត្រូវ (Derived State) Render តែ **១ ដងគត់** និងលឿនបំផុត!
+> 2. ក្នុង **ករណីទី ២ (Button Click) ៖** ចុចប៊ូតុងទាំងពីរ ដើម្បីមើលភាពខុសគ្នារវាងការហៅ API ក្នុង Event Handler ផ្ទាល់ ធៀបនឹងការប្រើ useEffect។
+
+---
+
+## 🧮 ៣. កំហុសទី ១ ៖ ប្រើ useEffect ដើម្បីបូកទិន្នន័យ (Derived State Trap)
+
+ស្រមៃថាអ្នកមាន `firstName` និង `lastName` ហើយចង់បាន `fullName`៖
+
+### ❌ របៀបខុស (Anti-pattern ធ្វើឱ្យ Re-render ២ ដង):
 ```jsx
 function UserProfile() {
   const [firstName, setFirstName] = useState('Sok');
   const [lastName, setLastName] = useState('Dara');
-  const [fullName, setFullName] = useState(''); // ❌ បង្កើត State ឥតប្រយោជន៍
+  const [fullName, setFullName] = useState(''); // ❌ បង្កើត State ស្ទួនឥតប្រយោជន៍!
 
-  // ⚠️ អាក្រក់ណាស់! Component ត្រូវ Render លើកទី ១ រួចទើប Effect រត់ ➔ បង្កជា Render លើកទី ២!
+  // ⚠️ អាក្រក់ណាស់: Component ត្រូវ Render លើកទី ១ រួចទើប Effect រត់ ➔ ហៅ setFullName ➔ Re-render លើកទី ២!
   useEffect(() => {
     setFullName(`${firstName} ${lastName}`);
   }, [firstName, lastName]);
@@ -76,13 +97,13 @@ function UserProfile() {
 }
 ```
 
-### ✅ កូដល្អឥតខ្ចោះ (Derived State):
+### ✅ របៀបត្រូវ (Derived State — គណនាផ្ទាល់):
 ```jsx
 function UserProfile() {
   const [firstName, setFirstName] = useState('Sok');
   const [lastName, setLastName] = useState('Dara');
 
-  // ✨ គណនាផ្ទាល់ភ្លាមៗក្នុងពេល Render គ្មាន Re-render បន្ថែម ស៊ីពេលត្រឹម 0.001ms!
+  // ✨ គណនាផ្ទាល់ភ្លាមៗក្នុងពេល Render គ្មាន Re-render លើកទី ២ ស៊ីពេលត្រឹម 0.001ms!
   const fullName = `${firstName} ${lastName}`;
 
   return <h1>{fullName}</h1>;
@@ -91,9 +112,9 @@ function UserProfile() {
 
 ---
 
-## 🔍 ៣. កំហុសទី ២ ៖ Filter បញ្ជីទិន្នន័យតាម Search Query
+## 🔍 ៤. កំហុសទី ២ ៖ Filter បញ្ជីទិន្នន័យពេល User Search
 
-### ❌ កូដអាក្រក់:
+### ❌ របៀបខុស:
 ```jsx
 function ProductList({ products }) {
   const [query, setQuery] = useState('');
@@ -105,39 +126,39 @@ function ProductList({ products }) {
     );
   }, [products, query]);
 
-  return (/* ... */);
+  return (/* បង្ហាញ filteredProducts */);
 }
 ```
 
-### ✅ កូដល្អឥតខ្ចោះ:
+### ✅ របៀបត្រូវ:
 ```jsx
 function ProductList({ products }) {
   const [query, setQuery] = useState('');
 
-  // ✨ គណនាផ្ទាល់! បើ list ធំខ្លាំង (រាប់ម៉ឺន rows) អាចរុំជាមួយ useMemo
+  // ✨ គណនាផ្ទាល់តែម្តង! បើទិន្នន័យច្រើនរាប់ម៉ឺន rows អាចរុំជាមួយ useMemo
   const filteredProducts = products.filter((p) =>
     p.name.toLowerCase().includes(query.toLowerCase())
   );
 
-  return (/* ... */);
+  return (/* បង្ហាញ filteredProducts */);
 }
 ```
 
 ---
 
-## 🛒 ៤. កំហុសទី ៣ ៖ ដាក់កូដ User Actions ចូលក្នុង `useEffect`
+## 🛒 ៥. កំហុសទី ៣ ៖ ដាក់កូដ User Actions ចូលក្នុង `useEffect`
 
-ស្រមៃថាអ្នកកំពុងធ្វើប៊ូតុង "Buy Now":
+ស្រមៃថា User ចុចប៊ូតុង **«ទិញឥឡូវនេះ (Buy Now)»**៖
 
-### ❌ កូដខុសរបៀប:
+### ❌ របៀបខុស:
 ```jsx
-function Cart() {
+function Checkout() {
   const [isBuying, setIsBuying] = useState(false);
 
-  // ❌ កុំធ្វើបែបនេះ! ការទិញទំនិញជា Action របស់ User មិនមែនជា Synchronization ទេ
+  // ❌ ខុស! ការទិញទំនិញជា Action របស់ User មិនមែនជាការធ្វើសមកាលកម្មទេ
   useEffect(() => {
     if (isBuying) {
-      buyProduct();
+      sendPaymentToServer();
     }
   }, [isBuying]);
 
@@ -145,12 +166,12 @@ function Cart() {
 }
 ```
 
-### ✅ កូដត្រឹមត្រូវ:
+### ✅ របៀបត្រូវ:
 ```jsx
-function Cart() {
-  // ✅ ដាក់ក្នុង Event Handler ផ្ទាល់តែម្តង ច្បាស់លាស់ និងគ្មាន Bug!
+function Checkout() {
+  // ✅ ដាក់ក្នុង Event Handler ផ្ទាល់តែម្តង ងាយយល់ និងគ្មាន Bug!
   const handleBuyClick = () => {
-    buyProduct();
+    sendPaymentToServer();
   };
 
   return <button onClick={handleBuyClick}>ទិញឥឡូវនេះ</button>;
@@ -159,16 +180,16 @@ function Cart() {
 
 ---
 
-## 🔄 ៥. កំហុសទី ៤ ៖ Reset State តាមរយៈ `useEffect`
+## 🔄 ៦. កំហុសទី ៤ ៖ Reset Form State តាមរយៈ `useEffect`
 
 ចុះបើអ្នកចង់ Reset ប្រអប់ Comment ឱ្យទទេស្អាត នៅពេល User ប្តូរទៅមើល Profile របស់មនុស្សម្នាក់ទៀត (`userId` ប្រែប្រួល)?
 
-### ❌ កូដស្មុគស្មាញ និងយឺត:
+### ❌ របៀបស្មុគស្មាញ:
 ```jsx
 function CommentBox({ userId }) {
   const [comment, setComment] = useState('');
 
-  // ⚠️ Component ត្រូវ Render ជាមួយ comment ចាស់សិន រួចទើប Effect reset comment ជាក្រោយ
+  // ⚠️ ត្រូវ Render comment ចាស់សិន រួចទើប Effect reset comment តាមក្រោយ
   useEffect(() => {
     setComment('');
   }, [userId]);
@@ -177,21 +198,21 @@ function CommentBox({ userId }) {
 }
 ```
 
-### ✅ ដំណោះស្រាយដ៏អស្ចារ្យ ៖ ប្រើ `key` prop!
+### ✅ ដំណោះស្រាយដ៏ឆ្លាតវៃ ៖ ប្រើ `key` prop!
 ```jsx
 // នៅក្នុង Component មេ:
 export default function App() {
   const [selectedUserId, setSelectedUserId] = useState(1);
 
   // ✨ គ្រាន់តែដាក់ key={selectedUserId}
-  // React នឹងដឹងថាជា Component ថ្មី ➔ លុប state ចាស់ចោល ហើយបង្កើត state ដើមឡើងវិញភ្លាម!
+  // React នឹងដឹងថាជា Component ថ្មី ➔ លុប state ចាស់ចោល ហើយបង្កើត state ដើមឡើងវិញដោយស្វ័យប្រវត្តិ!
   return <CommentBox key={selectedUserId} userId={selectedUserId} />;
 }
 ```
 
 ---
 
-## 🛑 ៦. កំហុសទី ៥ ៖ Infinite Re-render Loop
+## 🛑 ៧. កំហុសទី ៥ ៖ Infinite Re-render Loop
 
 ```jsx
 // ❌ គ្រោះថ្នាក់បំផុត
@@ -211,7 +232,7 @@ function InfiniteCounter() {
 
 ---
 
-## 🧠 ៧. តារាងវិនិច្ឆ័យ "តើខ្ញុំគួរប្រើ useEffect ដែរឬទេ?"
+## 🧠 ៨. តារាងវិនិច្ឆ័យ "តើខ្ញុំគួរប្រើ useEffect ដែរឬទេ?"
 
 | ស្ថានភាព / ការងារ | ដំណោះស្រាយត្រឹមត្រូវ | ហេតុផល |
 | :--- | :--- | :--- |

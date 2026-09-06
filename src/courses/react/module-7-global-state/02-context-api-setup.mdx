@@ -1,51 +1,77 @@
 ---
-title: "Context API Setup & The Provider-Consumer Pattern"
-description: សិក្សាពីការបង្កើត Context ជាមួយ `createContext`, `Provider`, និង `useContext` — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា Shared Global State និងពន្យល់មួយជួរៗ។
+title: "Context API: Provider & Consumer Pattern"
+description: សិក្សាពីការបង្កើត Context ជាមួយ createContext, Provider Component, និង useContext Hook — ស្វែងយល់ពីរបៀបរៀបចំ Global State ឱ្យស្អាត និងងាយស្រួលប្រើប្រាស់។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Navigation & Settings
-  - ចេះបង្កើត Context Object ដោយប្រើ `createContext(defaultValue)`
-  - ចេះ Wrap Component Tree ជាមួយ `<ThemeContext.Provider value={...}>`
-  - ចេះ Consume Global State ក្នុង Deeply Nested Components ដោយ `useContext()`
+  - យល់ពីគោលការណ៍ Provider & Consumer ក្នុង React
+  - ចេះបង្កើត Context Object ដោយប្រើ createContext(null)
+  - ចេះបង្កើត Provider Component ដើម្បីចែករំលែក State ទៅកាន់ Children
+  - ចេះទាញយក Global State តាមរយៈ useContext ឬ Custom Hook
 module: module-7-global-state
 order: 2
 quiz:
   - question: "តើ ៣ ជំហានគ្រឹះក្នុងការប្រើប្រាស់ React Context API មានអ្វីខ្លះ?"
     options:
-      - "1. createContext() -> 2. Wrap ជាមួយ <Context.Provider value={...}> -> 3. Consume ដោយ useContext(Context)"
+      - "1. createContext() -> 2. Wrap ជាមួយ <Context.Provider value={...}> -> 3. ទាញយកតាម useContext(Context)"
       - "1. useState() -> 2. useEffect() -> 3. return"
       - "1. fetch() -> 2. parse() -> 3. save()"
       - "1. HTML -> 2. CSS -> 3. JS"
     correctAnswer: 1
     explanation: "Context API ដំណើរការតាម Provider-Consumer Pattern៖ 1. បង្កើត Context, 2. បញ្ជូនតម្លៃតាមរយៈ Provider Component នៅ Top-level, 3. ទាញយកតម្លៃតាម useContext() ក្នុង Child Components។"
+
+  - question: "តើអ្វីទៅជាតួនាទីរបស់ `<Context.Provider value={...}>`?"
+    options:
+      - "ជា Component មេដែលបញ្ជូនទិន្នន័យ (value) ចុះទៅឱ្យគ្រប់ Components កូនៗទាំងអស់ដែលស្ថិតនៅខាងក្នុងវា"
+      - "ជាកន្លែងសម្រាប់សរសេរ CSS"
+      - "ជា function សម្រាប់ load web page"
+      - "ជា database table"
+    correctAnswer: 1
+    explanation: "Provider ដើរតួជាអ្នកផ្គត់ផ្គង់ទិន្នន័យ។ រាល់ Component ណាដែលរុំព័ទ្ធដោយ Provider អាចអាន ឬ update តម្លៃក្នុង `value` prop បានដោយផ្ទាល់។"
 ---
 
-## 🌐 1. Provider-Consumer Mental Model
+## 🌐 ១. គោលការណ៍ Provider & Consumer (Mental Model)
+
+ដើម្បីយល់ពី Context API សូមស្រមៃមើល **«ប៉មផ្សាយសញ្ញា Wi-Fi»** 📶៖
+- **Provider (ប៉មបញ្ជូនសញ្ញា):** ដាក់នៅកណ្តាលផ្ទះ ហើយផ្សាយសញ្ញា Wi-Fi (State) ចេញមកក្រៅ។
+- **Consumer (ទូរស័ព្ទ/កុំព្យូទ័រ):** គ្រប់ឧបករណ៍ណាដែលនៅក្នុងផ្ទះនោះ អាចភ្ជាប់យក Wi-Fi (useContext) មកប្រើប្រាស់បានគ្រប់ពេល ដោយមិនបាច់តខ្សែឆ្លងកាត់បន្ទប់ឡើយ!
 
 ```mermaid
 graph TD
-    Provider["<ThemeContext.Provider value={{ theme, toggleTheme }}>"]
+    Provider["<ThemeContext.Provider value={{ theme, toggleTheme }}> (ប៉មបញ្ជូន Wi-Fi) 📶"]
     Provider --> CompA["Header Component"]
     Provider --> CompB["Sidebar Component"]
-    CompB --> DeepChild["ThemeToggleSwitch (Calls useContext!) 🎯"]
+    CompB --> DeepChild["ThemeToggleSwitch (ប្រើ useContext ចាប់យកផ្ទាល់!) 🎯"]
 
-    style Provider fill:#ebf8ff,stroke:#3182ce,color:#000
-    style DeepChild fill:#f0fff4,stroke:#38a169,color:#000
+    style Provider fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style DeepChild fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 💻 2. ThemeContext Setup Step by Step
+## 🛠️ ២. ជំហានទាំង ៣ ក្នុងការបង្កើត Context (The 3 Steps)
 
-### 💻 Code សម្រាប់បង្កើត `ThemeContext.jsx`:
+```
+[ជំហាន ១: createContext] ➔ [ជំហាន ២: Provider Wrap] ➔ [ជំហាន ៣: useContext]
+    (បង្កើតបំពង់បង្ហូរ)           (បញ្ជូនទិន្នន័យ)              (ទាញយកមកប្រើ)
+```
+
+1. **`createContext()` :** បង្កើត Context Container ថ្មីមួយ។
+2. **`<Context.Provider value={...}>` :** រុំព័ទ្ធ Component Tree ហើយបញ្ជូន State តាមរយៈ `value` prop។
+3. **`useContext(Context)` :** Component កូនទាញយកទិន្នន័យពី Context មកប្រើផ្ទាល់។
+
+---
+
+## 💻 ៣. កូដជាក់ស្តែង ៖ បង្កើត `ThemeContext.jsx`
+
+រៀបចំ Context ឱ្យស្អាតក្នុង file ដាច់ដោយឡែក (ឧ. `src/context/ThemeContext.jsx`)៖
 
 ```jsx
 // src/context/ThemeContext.jsx
 import { createContext, useContext, useState } from 'react';
 
-// 1. បង្កើត Context
+// ១. បង្កើត Context
 export const ThemeContext = createContext(null);
 
-// 2. បង្កើត Custom Provider Component
+// ២. បង្កើត Provider Component
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('light');
 
@@ -60,28 +86,19 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// 3. Custom Hook ងាយស្រួល Consume
+// ៣. បង្កើត Custom Hook ងាយស្រួលហៅប្រើ
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useTheme ត្រូវតែប្រើនៅក្នុង <ThemeProvider>');
   }
   return context;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `createContext(null)`
-   - បង្កើត Context Container ថ្មីមួយ។
-2. `<ThemeContext.Provider value={{ theme, toggleTheme }}>`
-   - បញ្ជូន Object `{ theme, toggleTheme }` ទៅគ្រប់ Components ទាំងអស់ដែលស្ថិតក្រោម `{children}`។
-3. `export function useTheme()`
-   - បង្កើត Hook ជួយឱ្យ Child Components មិនបាច់សរសេរ `useContext(ThemeContext)` ដដែលៗឡើយ។
-
 ---
 
-## 🚀 3. Complete Integrated Theme Switcher App
+## 🚀 ៤. កូដពេញលេញ ៖ Theme Switcher App
 
 ```jsx
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -94,21 +111,29 @@ function Header() {
       <h1 className="font-bold text-sm">🌐 Global Theme Context</h1>
       <button
         onClick={toggleTheme}
-        className="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold"
+        className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow"
       >
-        Toggle: {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+        ប្តូរពណ៌: {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
       </button>
     </header>
   );
 }
 
-function Content() {
+function MainContent() {
   const { theme } = useTheme();
 
   return (
-    <div className={`p-6 rounded-2xl m-4 text-center ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-800'}`}>
-      <h3 className="font-black text-lg">Current Theme: {theme}</h3>
-      <p className="text-xs opacity-75 mt-1">Component នេះអាន Theme ពី Context ដោយផ្ទាល់ 0 Prop Drilling!</p>
+    <div
+      className={`p-8 rounded-2xl m-4 text-center transition-colors ${
+        theme === 'dark'
+          ? 'bg-slate-900 text-white border border-slate-700'
+          : 'bg-slate-100 text-slate-800 border border-slate-200'
+      }`}
+    >
+      <h3 className="font-black text-xl">Current Theme: {theme.toUpperCase()}</h3>
+      <p className="text-xs opacity-75 mt-2">
+        Component នេះអាន Theme ពី Context ដោយផ្ទាល់ មិនបាច់ឆ្លងកាត់ Props ឡើយ!
+      </p>
     </div>
   );
 }
@@ -116,11 +141,22 @@ function Content() {
 export default function App() {
   return (
     <ThemeProvider>
-      <div className="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow border overflow-hidden">
+      <div className="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <Header />
-        <Content />
+        <MainContent />
       </div>
     </ThemeProvider>
   );
 }
 ```
+
+---
+
+## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+
+| មុខងារ | កូដសរសេរ | តួនាទីជាក់ស្តែង |
+| :--- | :--- | :--- |
+| **បង្កើត Context** | `createContext(null)` | បង្កើតបំពង់បង្ហូរទិន្នន័យ |
+| **បញ្ជូនទិន្នន័យ** | `<Context.Provider value={{...}}>` | រុំព័ទ្ធ Component Tree ហើយបញ្ជូនតម្លៃ |
+| **ទាញយកទិន្នន័យ** | `useContext(Context)` | អានទិន្នន័យពី Provider ខាងលើ |
+| **Custom Hook** | `export function useTheme() { ... }` | ផ្តល់ភាពងាយស្រួល និងសុវត្ថិភាពខ្ពស់ |
