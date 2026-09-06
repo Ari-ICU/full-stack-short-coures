@@ -1,86 +1,110 @@
 ---
 title: Synchronizing with Browser APIs, Storage & Events
-description: សិក្សាពីការប្រើប្រាស់ `useEffect` ដើម្បីធ្វើសមកាលកម្មជាមួយ Browser Storage, Keyboard Shortcuts, Online Status និង Scroll Position ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+description: សិក្សាពីការប្រើប្រាស់ useEffect ដើម្បីធ្វើសមកាលកម្មជាមួយ Browser Web APIs — LocalStorage, Keyboard Shortcuts, Online/Offline Status, និង Window Scroll Position ដោយមានការពន្យល់មួយជួរៗយ៉ាងលម្អិត។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML & Browser Web APIs
-  - ចេះប្រើ `useEffect` ដើម្បី Synchronize State ទៅកាន់ `localStorage`
-  - ចេះបង្កើត Global Keyboard Shortcut Listeners ជាមួយ Cleanup
-  - ចេះចាប់ព្រឹត្តិការណ៍ Browser Online/Offline Status (`navigator.onLine`)
+  - យល់ដឹងពីមូលហេតុដែល Browser Web APIs ត្រូវតែស្ថិតក្នុង useEffect (Client-side Execution & SSR Safety)
+  - ចេះប្រើ useEffect ដើម្បី Synchronize React State ជាមួយ localStorage (រួមជាមួយ Lazy Initialization)
+  - ចេះបង្កើត Global Keyboard Shortcut Listeners (ឧ. ចុច ESC បិទ Modal) ជាមួយ Cleanup ត្រឹមត្រូវ
+  - ចេះចាប់ព្រឹត្តិការណ៍ Browser Online/Offline Status (navigator.onLine)
+  - ចេះបង្កើត Scroll Position Tracker សម្រាប់ប៊ូតុង "Back to Top"
 module: module-4-useeffect
 order: 4
 quiz:
   - question: "ហេតុអ្វីបានជាយើងគួរអាន ឬសរសេរទៅកាន់ `localStorage` ខាងក្នុង `useEffect` ជាជាងដាក់ក្នុង Render Phase ផ្ទាល់?"
     options:
-      - "ព្រោះ localStorage ជា Browser API (Side Effect) ដែលមិនមានវត្តមានក្នុង Server-Side Rendering (SSR) ហើយការ access វាអាច block render phase"
-      - "ព្រោះ localStorage ផ្ទុកបានតែ 5MB"
-      - "ព្រោះ JavaScript មិនអាច access localStorage ក្រៅពី useEffect"
+      - "ព្រោះ localStorage ជា Browser Web API (Side Effect) ដែលមិនមានវត្តមានក្នុង Server-Side Rendering (SSR) ហើយការហៅវាដោយផ្ទាល់ក្នុង Render អាចបង្កឱ្យមាន Hydration Error ឬ Block UI"
+      - "ព្រោះ localStorage ផ្ទុកបានតែ 5MB ប៉ុណ្ណោះ"
+      - "ព្រោះ JavaScript មិនអនុញ្ញាតឱ្យហៅ localStorage ក្រៅពី useEffect"
       - "ព្រោះ localStorage នឹងលុបទិន្នន័យចោលរាល់ពេល render"
     correctAnswer: 1
     explanation: "`localStorage` គឺជា Side Effect។ លើសពីនេះ ក្នុង Frameworks ដូចជា Next.js, `window` និង `localStorage` មិនមានវត្តមានលើ Server ទេ ដូច្នេះការដាក់ក្នុង `useEffect` ធានាថាកូដដំណើរការតែលើ Browser (Client-side) ប៉ុណ្ណោះ។"
+
+  - question: "តើអ្វីទៅជា 'Lazy State Initialization' ជាមួយ `useState(() => ...)`?"
+    options:
+      - "ជាការរង់ចាំ ១០ វិនាទីមុននឹងបង្កើត State"
+      - "ជាការបញ្ជូន Function ទៅកាន់ useState ដើម្បីឱ្យកូដអាន localStorage.getItem ដំណើរការតែមួយដងគត់ពេល Initial Mount មិនរត់ឡើងវិញរាល់ Render"
+      - "ជាការបិទដំណើរការ State ក្នុង Component"
+      - "ជាការលុប State ចោលពេលមិនប្រើ"
+    correctAnswer: 2
+    explanation: "ការសរសេរ `useState(() => localStorage.getItem(...))` ជួយឱ្យ Browser ដំណើរការប្រតិបត្តិការអាន Disk តែលើកដំបូងប៉ុណ្ណោះ ជៀសវាងការអាន localStorage សារជាថ្មីរាល់ពេល Re-render ដែលធ្វើឱ្យ App ដើរយឺត។"
+
+  - question: "ពេលណាដែលអ្នកគួរតែ Return Cleanup Function សម្រាប់ Window Event Listeners?"
+    options:
+      - "តែងតែធ្វើជានិច្ច (Always) គ្រប់ពេលដែលអ្នកប្រើ `window.addEventListener` ក្នុង `useEffect` ដើម្បីការពារ Memory Leak"
+      - "កុំធ្វើឱ្យសោះ ព្រោះវានឹងបិទ Browser"
+      - "ធ្វើតែពេលណាដែលមាន Error"
+      - "ធ្វើតែពេលទំព័រលោតដល់ 1000px"
+    correctAnswer: 1
+    explanation: "គ្រប់ពេលដែលអ្នកចុះឈ្មោះ Event Listener លើ `window` ឬ `document` អ្នកត្រូវតែ remove វាវិញក្នុង Cleanup Function ជានិច្ច ដើម្បីកុំឱ្យ Listener បន្តកើនឡើងរាល់ពេល Component Re-mount។"
 ---
 
-## 🌐 1. Synchronization Architecture
+## 🌐 ១. ហេតុអ្វីបានជា Web APIs ត្រូវការ `useEffect`?
+
+React ដំណើរការលើគំនិត **Declarative UI** (អ្នកគ្រាន់តែប្រាប់ថា UI គួរមានរូបរាងបែបណា)។  
+ប៉ុន្តែ Browser Web APIs (ដូចជា `localStorage`, `window`, `document`, `navigator`) គឺជា **Imperative APIs** (ប្រព័ន្ធខាងក្រៅដែលទាមទារការបញ្ជាផ្ទាល់)៖
 
 ```mermaid
 flowchart LR
-    A["React State: <code>theme = 'dark'</code>"] -->|1. User Changes State| B["2. Component Re-renders"]
-    B -->|3. useEffect Runs| C["4. Write to localStorage<br><code>localStorage.setItem('theme', theme)</code>"]
-    C -->|5. DOM Mutation| D["document.documentElement.classList.add('dark') 🌙"]
+    A["React State<br/><code>theme = 'dark'</code>"] -->|1. State Changes| B["Component Re-renders"]
+    B -->|2. UI Painted| C["useEffect Runs"]
+    C -->|3. Imperative Sync| D["localStorage.setItem('theme', 'dark') 💾"]
+    C -->|4. DOM Update| E["document.body.classList.add('dark') 🌙"]
 
-    style A fill:#ebf8ff,stroke:#3182ce,color:#000
-    style B fill:#f8f9fa,stroke:#4a5568,color:#000
-    style C fill:#fffaf0,stroke:#dd6b20,color:#000
-    style D fill:#f0fff4,stroke:#38a169,color:#000
+    style A fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style B fill:#f8f9fa,stroke:#4a5568,stroke-width:2px
+    style C fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style D fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style E fill:#fefcbf,stroke:#d69e2e,stroke-width:2px
 ```
+
+> [!NOTE]
+> **សុវត្ថិភាពសម្រាប់ SSR (Next.js):**  
+> នៅលើ Server កូដគ្មាន `window` ឬ `localStorage` ឡើយ។ ប្រសិនបើអ្នកសរសេរ `localStorage.getItem()` ក្នុង Render Phase ផ្ទាល់ កម្មវិធីនឹង crash ភ្លាម (`ReferenceError: window is not defined`)។  
+> ការដាក់ក្នុង **`useEffect` ធានា ១០០% ថាកូដនឹងដំណើរការតែនៅលើ Browser ប៉ុណ្ណោះ!**
 
 ---
 
-## 💾 2. Example A: LocalStorage Synchronization
+## 💾 ២. ករណីទី ១ ៖ LocalStorage Sync & Lazy Initialization
 
-### 🌐 Normal HTML / Vanilla JS:
-
-```html
-<!-- HTML Theme Toggle -->
-<button onclick="localStorage.setItem('theme', 'dark'); document.body.className = 'dark';">
-  Switch to Dark
-</button>
-```
-
-### 💻 React Code (ជាមួយ `useEffect` Sync):
+ដើម្បីរក្សាទុកការកំណត់របស់អ្នកប្រើប្រាស់ (ដូចជា Theme Dark/Light Mode) ទោះបីគេ Refresh ទំព័រក៏មិនបាត់បង់៖
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function StorageSyncDemo() {
+export function ThemeSyncDemo() {
+  // ១. LAZY INITIALIZATION: អាន localStorage តែ ១ ដងគត់ពេល Mount
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('user_theme') || 'light';
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('app_theme') || 'light';
+    }
+    return 'light';
   });
 
-  // Sync State ទៅ LocalStorage គ្រប់ពេល theme ប្រែប្រួល
+  // ២. SYNC EFFECT: រាល់ពេល theme ប្រែប្រួល ➔ រក្សាទុកចូល localStorage ភ្លាម
   useEffect(() => {
-    localStorage.setItem('user_theme', theme);
-  }, [theme]);
+    localStorage.setItem('app_theme', theme);
+  }, [theme]); // 👈 រត់ឡើងវិញតែពេល theme ប្តូរ
 
   return (
-    <button onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}>
-      ប្តូរ Theme: {theme}
+    <button
+      onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+      className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold"
+    >
+      ប្តូរ Theme: {theme === 'light' ? '☀️ Light' : '🌙 Dark'}
     </button>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const [theme, setTheme] = useState(() => ...)`
-   - ប្រើ Lazy Initializer ដើម្បីអានតម្លៃចាស់ពី `localStorage.getItem` តែមួយដងគត់ពេល Mount។
-2. `useEffect(() => { localStorage.setItem('user_theme', theme); }, [theme]);`
-   - រាល់ពេល `theme` ប្រែប្រួល Effect នឹងសរសេរទិន្នន័យថ្មីចូល Storage ដោយស្វ័យប្រវត្តិ។
+### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line):
+1. `useState(() => { ... })`:
+   - ហៅថា **Lazy State Initializer**។ ប្រសិនបើយើងសរសេរ `useState(localStorage.getItem('...'))` ធម្មតា វានឹងដំណើរការអាន Disk រាល់ពេល Re-render ទាំងអស់! ការប្រើ Function `() => ...` ជួយឱ្យវាអានតែលើកទី ១ ប៉ុណ្ណោះ។
+2. `localStorage.setItem('app_theme', theme)`:
+   - សរសេរតម្លៃថ្មីចូល Browser Storage ដោយស្វ័យប្រវត្តិតាមរយៈ `[theme]` dependency។
 
 ---
 
-## ⌨️ 3. Example B: Global Keyboard Shortcut Listener
-
-### 💻 Code សម្រាប់ Keyboard Shortcut (`Escape` key):
+## ⌨️ ៣. ករណីទី ២ ៖ Global Keyboard Shortcuts (ចុច ESC បិទ Modal)
 
 ```jsx
 import { useState, useEffect } from 'react';
@@ -89,27 +113,48 @@ export function ModalShortcutDemo() {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    // បើ Modal មិនបានបើកទេ មិនបាច់ចុះឈ្មោះ Listener ឡើយ
+    if (!isOpen) return;
+
     const handleKeyDown = (e) => {
-      // ប្រសិនបើ User ចុច key "Escape" ឱ្យបិទ Modal
       if (e.key === 'Escape') {
+        console.log("User ចុចប៊ូតុង ESC ➔ បិទ Modal");
         setIsOpen(false);
       }
     };
 
+    // SETUP: ចុះឈ្មោះស្ដាប់ Keyboard លើ Window
     window.addEventListener('keydown', handleKeyDown);
 
-    // Cleanup: Remove listener
+    // CLEANUP: ដកឈ្មោះចេញវិញជានិច្ចពេល Modal បិទ ឬ Unmount!
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [isOpen]); // 👈 តាមដាន isOpen
 
   return (
     <div>
-      <button onClick={() => setIsOpen(true)}>Open Modal</button>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm"
+      >
+        បើក Modal
+      </button>
+
       {isOpen && (
-        <div className="modal">
-          <p>ចុចប៊ូតុង [ESC] លើ Keyboard ដើម្បីបិទ Modal នេះ!</p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-sm w-full text-center shadow-2xl">
+            <h4 className="font-bold text-lg text-slate-800 dark:text-white">ផ្ទាំង Modal</h4>
+            <p className="text-xs text-slate-500 mt-2">
+              សាកល្បងចុចប៊ូតុង <strong>[ESC]</strong> លើ Keyboard របស់អ្នកដើម្បីបិទផ្ទាំងនេះ!
+            </p>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="mt-4 px-4 py-1.5 bg-slate-200 dark:bg-slate-700 text-xs font-bold rounded-lg"
+            >
+              បិទដោយចុច Mouse
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -117,51 +162,96 @@ export function ModalShortcutDemo() {
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `window.addEventListener('keydown', handleKeyDown)`
-   - ចុះឈ្មោះចាប់ keyboard event លើ window។
-2. `if (e.key === 'Escape') setIsOpen(false)`
-   - ពិនិត្យ key property នៃ event ដើម្បី trigger modal close។
-3. `return () => window.removeEventListener(...)`
-   - សម្អាត listener ចោលពេល component unmount ការពារ double-listeners។
-
 ---
 
-## 📡 4. Example C: Browser Online / Offline Status
+## 📡 ៤. ករណីទី ៣ ៖ Browser Online / Offline Indicator
 
-### 💻 Code សម្រាប់ Online Status:
+ចាប់ព្រឹត្តិការណ៍ពេល Internet ដាច់ ឬភ្ជាប់ឡើងវិញ៖
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export function OnlineStatus() {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+export function NetworkStatusIndicator() {
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
 
   useEffect(() => {
-    const setOnline = () => setIsOnline(true);
-    const setOffline = () => setIsOnline(false);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', setOnline);
-    window.addEventListener('offline', setOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
+    // CLEANUP: លុប Event Listeners ពេលចាកចេញ
     return () => {
-      window.removeEventListener('online', setOnline);
-      window.removeEventListener('offline', setOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, []); // [] = ចុះឈ្មោះម្តងគត់ពេល Mount
+
+  if (isOnline) return null; // បើមាន Internet ធម្មតា មិនបាច់បង្ហាញ Banner រំខានទេ
 
   return (
-    <div className={`p-2 rounded-lg text-xs font-bold ${isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-      {isOnline ? '🟢 Connected (Online)' : '🔴 No Internet (Offline)'}
+    <div className="bg-rose-500 text-white text-xs font-bold py-2 px-4 text-center">
+      ⚠️ បាត់បង់ការភ្ជាប់អ៊ីនធឺណិត (Offline Mode) — សូមពិនិត្យមើល Network របស់អ្នក!
     </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `navigator.onLine`
-   - អាន Network Status ដំបូងពី Web API។
-2. `window.addEventListener('online' / 'offline')`
-   - ចុះឈ្មោះស្ដាប់ពេល Network ដាច់ ឬភ្ជាប់មកវិញភ្លាមៗ។
+## 📜 ៥. ករណីទី ៤ ៖ Scroll Position & ប៊ូតុង "Back to Top"
+
+```jsx
+import { useState, useEffect } from 'react';
+
+export function BackToTopButton() {
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // បើ Scroll ចុះក្រោមលើសពី 300px ➔ បង្ហាញប៊ូតុង
+      if (window.scrollY > 300) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (!showButton) return null;
+
+  return (
+    <button
+      onClick={scrollToTop}
+      className="fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition"
+      title="ត្រឡប់ទៅលើវិញ"
+    >
+      ⬆️
+    </button>
+  );
+}
+```
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ (Cheat Sheet)
+
+| Browser Web API | របៀបប្រើក្នុង React | ចំណុចត្រូវប្រុងប្រយ័ត្ន |
+| :--- | :--- | :--- |
+| **`localStorage`** | អានតាម `useState(() => ...)` ហើយ Save តាម `useEffect(..., [val])` | ពិនិត្យ `typeof window !== 'undefined'` សម្រាប់ SSR |
+| **`window.addEventListener`** | ចុះឈ្មោះក្នុង `useEffect(..., [])` | **ត្រូវតែមាន Cleanup** `removeEventListener` ជានិច្ច |
+| **`navigator.onLine`** | ចាប់ `online` និង `offline` events | ផ្តល់ Visual Banner ជូន User ពេលដាច់ Internet |
+| **`window.scrollY`** | ចាប់ `scroll` event ដើម្បីបង្ហាញ Back-to-Top | ជៀសវាងការគណនាធ្ងន់ៗក្នុង scroll handler |

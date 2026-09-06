@@ -1,12 +1,12 @@
 ---
 title: "Hands-on Mini Project: Focus & Productivity Studio"
-description: អនុវត្តបង្កើត Focus & Productivity Studio ដែលរួមបញ្ចូលរាល់ទម្រង់នៃការប្រើប្រាស់ `useEffect` (Keyboard Shortcuts, Timers, Window Listeners, Document Title, និង LocalStorage) ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+description: អនុវត្តបង្កើត Focus & Productivity Studio ដោយរួមបញ្ចូលគ្នានូវគ្រប់គោលការណ៍នៃ useEffect — Timers ជាមួយ Cleanup, Global Keyboard Shortcuts, Browser Tab Sync, និង LocalStorage Persistence។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML សម្រាប់ Timer Studio Dashboard
-  - អនុវត្ត `useEffect` ក្នុងការចាប់ Keyboard Shortcuts លើ Window ជាមួយ Cleanup
-  - អនុវត្ត Precision Interval Timer ជាមួយ Start/Pause/Reset Toggle និង Memory Cleanup
-  - អនុវត្ត Browser Document Title Synchronization តាម State បច្ចុប្បន្ន
-  - អនុវត្ត LocalStorage Persistence ក្នុង React
+  - ស្គាល់រចនាសម្ព័ន្ធ Architecture នៃការបំបែក useEffect ច្រើនតាមមុខងារ (Separation of Concerns)
+  - អនុវត្ត Precision Interval Timer ជាមួយ Start/Pause/Reset និង Memory Cleanup
+  - ចេះបង្កើត Global Keyboard Shortcuts (Spacebar & R) លើ Window
+  - ធ្វើសមកាលកម្មពេលវេលារាប់ថយក្រោយជាមួយ Browser Tab Title ផ្ទាល់
+  - រក្សាទុកទិន្នន័យវគ្គហ្វឹកហាត់ (Completed Sessions) ចូលក្នុង LocalStorage
 module: module-4-useeffect
 order: 6
 quiz:
@@ -18,182 +18,204 @@ quiz:
       - "ព្រោះ JavaScript មិនអាចដំណើរការលើសពី 50 បន្ទាត់ក្នុង function"
     correctAnswer: 1
     explanation: "ការបែងចែក Multiple useEffect តាមមុខងារ (Separation of Concerns) ជួយឱ្យកូដមានភាពច្បាស់លាស់ ងាយស្រួល Maintain ហើយ Effect នីមួយៗ Re-run តែនៅពេល Dependency ផ្ទាល់ខ្លួនរបស់វាប្រែប្រួលប៉ុណ្ណោះ។"
+
+  - question: "នៅក្នុងគម្រោង Timer នេះ ហេតុអ្វីបានជា Keyboard Shortcut Effect ត្រូវការ Dependency Array ទទេ `[]`?"
+    options:
+      - "ព្រោះយើងចង់ឱ្យ Event Listener ចុះឈ្មោះស្ដាប់តែមួយដងគត់ពេល Component បើកដំបូង ហើយមិនបាច់ចុះឈ្មោះឡើងវិញរាល់វិនាទីដែល Timer ដើរឡើយ"
+      - "ព្រោះ Spacebar មិនដំណើរការជាមួយ State"
+      - "ដើម្បីឱ្យ Keyboard ដើរលឿនជាងមុន"
+      - "ព្រោះ React តម្រូវឱ្យ Keyboard Listener ប្រើតែ [] ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "Listener លើ `window` គ្រាន់តែរង់ចាំ Keydown ប៉ុណ្ណោះ។ ការកំណត់ `[]` ធានាថាវាមិនចុះឈ្មោះឡើងវិញរាល់វិនាទីពេល `timeLeft` ប្រែប្រួល ដែលជួយសន្សំសំចៃ Memory យ៉ាងច្រើន។"
 ---
 
-## 🎯 1. Separation of Concerns Architecture
+## 🎯 ១. ស្ថាបត្យកម្មគម្រោង (Separation of Concerns)
+
+នៅក្នុងកម្មវិធីជាក់ស្តែង យើងមិនត្រូវញាត់កូដ Side Effects ទាំងអស់ចូលក្នុង `useEffect` តែមួយឡើយ។ យើងបែងចែកវាជា **៤ Effects តូចៗ** ដាច់ដោយឡែកពីគ្នា៖
 
 ```mermaid
 flowchart TD
-    subgraph Component["FocusStudio Component (Multi-Effect Architecture)"]
+    subgraph Studio["FocusStudio Component"]
         direction TB
-        E1["useEffect #1: Precision Timer (setInterval + clearInterval) ⏱️"]
-        E2["useEffect #2: Global Keyboard Shortcuts (Space, R) ⌨️"]
-        E3["useEffect #3: Document Title Sync (Sync countdown to tab) 📄"]
-        E4["useEffect #4: LocalStorage Persistence (Auto-save mode) 💾"]
+        E1["Effect 1: Timer Interval<br/>(ដើរម៉ោងរៀងរាល់ ១ វិនាទី + clearInterval) ⏱️"]
+        E2["Effect 2: Keyboard Shortcuts<br/>(ស្ដាប់ Space bar & R key + removeEventListener) ⌨️"]
+        E3["Effect 3: Browser Tab Sync<br/>(បង្ហាញ 24:59 លើ Browser Tab) 📄"]
+        E4["Effect 4: LocalStorage Save<br/>(រក្សាទុកចំនួន Sessions ដែលបញ្ចប់ជោគជ័យ) 💾"]
     end
 
-    style Component fill:#f8f9fa,stroke:#ced4da,color:#000
-    style E1 fill:#ebf8ff,stroke:#3182ce,color:#000
-    style E2 fill:#fffaf0,stroke:#dd6b20,color:#000
-    style E3 fill:#faf5ff,stroke:#805ad5,color:#000
-    style E4 fill:#f0fff4,stroke:#38a169,color:#000
+    style Studio fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
+    style E1 fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style E2 fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style E3 fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style E4 fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 🎨 2. Normal HTML Studio Dashboard Layout
-
-មុននឹងបន្ថែម React Hooks នេះជារចនាសម្ព័ន្ធ HTML សាមញ្ញរបស់ Timer Dashboard៖
-
-```html
-<!-- HTML Timer Dashboard Structure -->
-<div class="studio-card">
-  <h2>⏱️ Focus Timer</h2>
-  <div class="timer-display">25:00</div>
-
-  <div class="controls">
-    <button type="button">▶️ Start (Space)</button>
-    <button type="button">🔄 Reset (R)</button>
-  </div>
-
-  <p class="hint">Keyboard Shortcuts: [Space] Pause/Play | [R] Reset</p>
-</div>
-```
-
----
-
-## 💻 3. Isolated React Effects
-
-### ⏱️ Effect 1: Precision Timer with Cleanup
-```javascript
-useEffect(() => {
-  if (!isActive) return;
-
-  const timer = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 1) {
-        setIsActive(false);
-        return 0;
-      }
-      return prev - 1;
-    });
-  }, 1000);
-
-  return () => clearInterval(timer);
-}, [isActive]);
-```
-
-### ⌨️ Effect 2: Global Keyboard Shortcut Listener
-```javascript
-useEffect(() => {
-  const handleKeyDown = (e) => {
-    if (e.code === 'Space') {
-      e.preventDefault();
-      setIsActive((prev) => !prev); // Toggle Start/Pause
-    } else if (e.key === 'r' || e.key === 'R') {
-      setIsActive(false);
-      setTimeLeft(25 * 60); // Reset
-    }
-  };
-
-  window.addEventListener('keydown', handleKeyDown);
-  return () => window.removeEventListener('keydown', handleKeyDown);
-}, []);
-```
-
-### 📄 Effect 3: Browser Tab Title Sync
-```javascript
-useEffect(() => {
-  const mins = Math.floor(timeLeft / 60);
-  const secs = timeLeft % 60;
-  const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-  document.title = isActive ? `⏳ (${formatted}) Focus Time!` : 'Focus Studio';
-}, [timeLeft, isActive]);
-```
-
----
-
-## 🚀 4. Complete Integrated Focus Studio Project
+## 💻 ២. កូដពេញលេញនៃគម្រោង Focus Studio
 
 ```jsx
 import { useState, useEffect } from 'react';
 
 export default function FocusStudio() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60);
+  const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 នាទី (គិតជាវិនាទី)
   const [isActive, setIsActive] = useState(false);
+  const [sessions, setSessions] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return Number(localStorage.getItem('focus_sessions')) || 0;
+    }
+    return 0;
+  });
 
-  // 1. TIMER EFFECT
+  // ==========================================
+  // EFFECT 1: គ្រប់គ្រងដំណើរការ TIMER (setInterval)
+  // ==========================================
   useEffect(() => {
+    // បើមិនទាន់ចុច Start ទេ មិនបាច់ចាប់ផ្តើម Timer ឡើយ
     if (!isActive) return;
-    const interval = setInterval(() => {
-      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+
+    const timerId = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // ពេលដល់ 0 វិនាទី ➔ បញ្ឈប់ Timer និងកត់ត្រា Session
+          setIsActive(false);
+          setSessions((s) => s + 1);
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
-    return () => clearInterval(interval);
+
+    // CLEANUP: បញ្ឈប់ Timer ពេល User ចុច Pause ឬ Unmount
+    return () => {
+      clearInterval(timerId);
+    };
   }, [isActive]);
 
-  // 2. SHORTCUTS EFFECT
+  // ==========================================
+  // EFFECT 2: GLOBAL KEYBOARD SHORTCUTS
+  // ==========================================
   useEffect(() => {
-    const handleKey = (e) => {
+    const handleKeyDown = (e) => {
       if (e.code === 'Space') {
-        e.preventDefault();
-        setIsActive((a) => !a);
-      } else if (e.key.toLowerCase() === 'r') {
+        e.preventDefault(); // ទប់ស្កាត់ការ Scroll ទំព័រចុះក្រោម
+        setIsActive((prev) => !prev); // Toggle Play/Pause
+      } else if (e.key === 'r' || e.key === 'R') {
         setIsActive(false);
-        setTimeLeft(25 * 60);
+        setTimeLeft(25 * 60); // Reset ទៅ 25 នាទី
       }
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, []);
 
-  // 3. TITLE SYNC EFFECT
+    window.addEventListener('keydown', handleKeyDown);
+
+    // CLEANUP: ដក listener ចេញពេល component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []); // [] = ចុះឈ្មោះម្តងគត់
+
+  // ==========================================
+  // EFFECT 3: BROWSER TAB TITLE SYNC
+  // ==========================================
   useEffect(() => {
-    const m = Math.floor(timeLeft / 60);
-    const s = timeLeft % 60;
-    const timeStr = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    document.title = isActive ? `(${timeStr}) Focus Studio` : 'Focus Studio';
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds
+      .toString()
+      .padStart(2, '0')}`;
+
+    if (isActive) {
+      document.title = `⏳ (${timeFormatted}) កំពុង Focus!`;
+    } else {
+      document.title = '🎯 Focus Studio';
+    }
   }, [timeLeft, isActive]);
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  // ==========================================
+  // EFFECT 4: LOCALSTORAGE AUTO-SAVE
+  // ==========================================
+  useEffect(() => {
+    localStorage.setItem('focus_sessions', String(sessions));
+  }, [sessions]);
+
+  // គណនា Formatted Time ក្នុង Render Phase (Derived State)
+  const displayMinutes = Math.floor(timeLeft / 60);
+  const displaySeconds = timeLeft % 60;
+  const timeString = `${displayMinutes.toString().padStart(2, '0')}:${displaySeconds
+    .toString()
+    .padStart(2, '0')}`;
 
   return (
-    <div className="max-w-md mx-auto p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border text-center">
-      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6">
+    <div className="max-w-md mx-auto p-8 bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 text-center">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Pomodoro Productivity
+        </span>
+        <span className="text-xs px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-bold rounded-full">
+          🏆 {sessions} Sessions
+        </span>
+      </div>
+
+      <h2 className="text-2xl font-bold text-slate-800 dark:text-white">
         🎯 Focus Studio
       </h2>
 
-      {/* TIMER DISPLAY */}
-      <div className="text-6xl font-mono font-black text-blue-600 dark:text-blue-400 py-6 tracking-wider">
-        {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
+      {/* CLOCK DISPLAY */}
+      <div className="text-6xl font-mono font-black text-blue-600 dark:text-blue-400 py-8 tracking-wider">
+        {timeString}
       </div>
 
       {/* CONTROLS */}
-      <div className="flex justify-center gap-3 mt-4">
+      <div className="flex justify-center gap-3">
         <button
-          onClick={() => setIsActive((a) => !a)}
-          className={`px-6 py-2.5 rounded-xl font-bold text-sm text-white transition ${
-            isActive ? 'bg-amber-500 hover:bg-amber-600' : 'bg-blue-600 hover:bg-blue-700'
+          onClick={() => setIsActive((prev) => !prev)}
+          className={`px-6 py-3 rounded-xl font-bold text-sm text-white transition shadow-md ${
+            isActive
+              ? 'bg-amber-500 hover:bg-amber-600'
+              : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isActive ? '⏸️ Pause' : '▶️ Start'}
+          {isActive ? '⏸️ Pause (Space)' : '▶️ Start (Space)'}
         </button>
+
         <button
           onClick={() => {
             setIsActive(false);
             setTimeLeft(25 * 60);
           }}
-          className="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm"
+          className="px-5 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-xl font-bold text-sm transition"
         >
-          🔄 Reset
+          🔄 Reset (R)
         </button>
       </div>
 
-      <p className="text-xs text-slate-400 mt-6">
-        💡 Shortcuts: ចុច <code>[Space]</code> ដើម្បី Play/Pause | ចុច <code>[R]</code> ដើម្បី Reset
-      </p>
+      {/* FOOTER SHORTCUTS */}
+      <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-700 text-xs text-slate-400 space-y-1">
+        <p>💡 ចុចប៊ូតុង <strong>[Spacebar]</strong> ដើម្បី Play / Pause</p>
+        <p>💡 ចុចប៊ូតុង <strong>[R]</strong> ដើម្បី Reset មក ២៥ នាទីវិញ</p>
+      </div>
     </div>
   );
 }
 ```
+
+---
+
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃកូដ
+
+1. **ហេតុអ្វីបានជា Timer ប្រើ `[isActive]`?**  
+   ប្រសិនបើ User ចុច Pause យើងមិនត្រូវឱ្យ Timer បន្តរត់ទៀតឡើយ។ នៅពេល `isActive` ប្តូរមក `false` Cleanup នឹងហៅ `clearInterval` ភ្លាម។
+2. **ហេតុអ្វីបានជា Keyboard Listener ប្រើ `[]`?**  
+   យើងចង់ចុះឈ្មោះស្តាប់ Keyboard តែ **ម្តងគត់** នៅពេល Component Mount។ ដោយសារ `setIsActive((prev) => !prev)` ប្រើ Functional State Update វាមិនពឹងផ្អែកលើតម្លៃ `isActive` ខាងក្រៅឡើយ ធ្វើឱ្យវាមានសុវត្ថិភាពខ្ពស់ គ្មានបញ្ហា Stale Closure។
+3. **ហេតុអ្វីបានជា Time String មិនដាក់ក្នុង `useState`?**  
+   ព្រោះ `displayMinutes` និង `displaySeconds` អាចគណនាដោយផ្ទាល់ពី `timeLeft` ក្នុង Render Phase (Derived State)។ នេះជាការអនុវត្តតាមក្បួន *You Might Not Need an Effect*!
+
+---
+
+## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
+
+- [x] Timer ដើររលូន ១ វិនាទីម្តង
+- [x] Memory Leak ត្រូវបានការពារដោយ `clearInterval` ពេល Pause ឬ Unmount
+- [x] ចុច Spacebar ដំណើរការ Play/Pause លើ Keyboard ផ្ទាល់
+- [x] ចំណងជើង Tab លើ Browser បង្ហាញលេខរាប់ថយក្រោយតាមពេលវេលាជាក់ស្តែង
+- [x] ចំនួន Session ត្រូវបានកត់ត្រាទុកក្នុង LocalStorage មិនបាត់ពេល Refresh

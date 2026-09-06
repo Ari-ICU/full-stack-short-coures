@@ -1,162 +1,263 @@
 ---
 title: Mastering the Dependency Array & Execution Modes
-description: សិក្សាពី Dependency Array ទាំង ៣ ទម្រង់ក្នុង `useEffect`, របៀបដែល React ប្រៀបធៀប Dependencies (Object.is), និងក្បួនដោះស្រាយ Object/Function dependencies ដោយចាប់ផ្តើមពី Normal HTML សិន រួចបំប្លែងទៅជា React Code និងពន្យល់មួយជួរៗ។
+description: សិក្សាពី Dependency Array ទាំង ៣ ទម្រង់ក្នុង useEffect, របៀបដែល React ប្រៀបធៀប Dependencies (Object.is), អន្ទាក់ Object/Function Reference, និងក្បួនមិនកុហក React (Exhaustive-deps)។
 objectives:
-  - យល់ច្បាស់ពីទម្រង់ទាំង ៣ នៃ Dependency Array (No deps, `[]`, និង `[depA, depB]`)
-  - យល់ពី Shallow Comparison ជាមួយ `Object.is` និង Object / Array Reference Trap
+  - យល់ច្បាស់ពីទម្រង់ទាំង ៣ នៃ Dependency Array (គ្មាន Array, `[]` ទទេ, និង `[depA, depB]`)
+  - យល់ពី Shallow Comparison ជាមួយ `Object.is` និង Object/Array Reference Trap
   - ចេះដោះស្រាយ Dependencies ដោយប្រើ Primitives ឬ Functional Updates
-  - យល់ពីសារៈសំខាន់នៃ ESLint `react-hooks/exhaustive-deps` rule
+  - យល់ពីសារៈសំខាន់នៃ ESLint `react-hooks/exhaustive-deps` និងបញ្ហា Stale Closure
 module: module-4-useeffect
 order: 2
 quiz:
-  - question: "តើអ្វីជាភាពខុសគ្នារវាង `useEffect(fn)` (គ្មាន dependency array) និង `useEffect(fn, [])` (empty array)?"
+  - question: "តើអ្វីជាភាពខុសគ្នារវាង `useEffect(fn)` (គ្មាន array) និង `useEffect(fn, [])` (empty array)?"
     options:
-      - "គ្មាន dependency array ដំណើរការរាល់ពេល render ទាំងអស់; empty array `[]` ដំណើរការតែម្តងគត់បន្ទាប់ពី initial mount"
-      - "គ្មាន dependency array ដំណើរការតែម្តង; empty array ដំណើរការគ្រប់ render"
+      - "គ្មាន array ដំណើរការរាល់ពេល Render និង Re-render ទាំងអស់; ចំណែក `[]` (empty array) ដំណើរការតែម្តងគត់ពេល Initial Mount"
+      - "គ្មាន array ដំណើរការតែម្តង; empty array ដំណើរការគ្រប់ render"
       - "ទាំងពីរដំណើរការដូចគ្នាគ្មានអ្វីខុសគ្នាឡើយ"
       - "empty array ធ្វើឱ្យ React ឈប់ render component"
     correctAnswer: 1
-    explanation: "បើគ្មាន Dependency Array ទេ Effect នឹង execute គ្រប់ Render ទាំងអស់។ ចំណែក `[]` (Empty Array) បង្ហាញថាគ្មាន dependencies ណាប្រែប្រួលឡើយ ដូច្នេះវា execute តែលើកដំបូង (Mount) ប៉ុណ្ណោះ។"
+    explanation: "បើគ្មាន Dependency Array ទេ Effect នឹង execute គ្រប់ Render ទាំងអស់។ ចំណែក `[]` (Empty Array) បញ្ជាក់ថាគ្មាន dependencies ណាប្រែប្រួលឡើយ ដូច្នេះវា execute តែលើកដំបូង (Mount) ប៉ុណ្ណោះ។"
+
+  - question: "ហេតុអ្វីបានជាការដាក់ Object ថ្មីក្នុង Dependency Array (ឧ. `[ { theme: 'dark' } ]`) អាចបង្កជា Infinite Loop?"
+    options:
+      - "ព្រោះ JavaScript មិនស្គាល់ Object"
+      - "ព្រោះរាល់ពេល Component Re-render, Object ថ្មីត្រូវបានបង្កើតឡើងក្នុង Memory ជាមួយ Reference ថ្មី (Object.is ឃើញថាខុសគ្នា) នាំឱ្យ Effect ដំណើរការឡើងវិញរាល់ដង"
+      - "ព្រោះ React តម្រូវឱ្យប្រើតែ String ប៉ុណ្ណោះ"
+      - "ព្រោះ Object ស៊ី Memory ច្រើនពេក"
+    correctAnswer: 2
+    explanation: "React ប្រើ `Object.is` ដើម្បីប្រៀបធៀប Dependencies។ ដោយសារ Object ថ្មីមាន Memory Address (Reference) ផ្សេងពីចាស់ React យល់ថាវាបានផ្លាស់ប្តូរ ទើបកេះ Effect ដំណើរការរាល់ពេល Re-render។"
+
+  - question: "តើធ្វើដូចម្តេចដើម្បី Update State ក្នុង `useEffect` ដោយមិនបាច់ដាក់ State នោះក្នុង Dependency Array?"
+    options:
+      - "លុប useState ចោល"
+      - "ប្រើ Functional State Update ដូចជា `setCount(prev => prev + 1)` ជំនួសឱ្យ `setCount(count + 1)`"
+      - "បិទ JavaScript ក្នុង Browser"
+      - "ប្រើ setTimeout ១០ វិនាទី"
+    correctAnswer: 2
+    explanation: "ការប្រើ Functional Update `setCount(prev => prev + 1)` មិនត្រូវការអានតម្លៃ `count` ដោយផ្ទាល់ឡើយ ដូច្នេះយើងអាចដក `count` ចេញពី Dependency Array ដោយសុវត្ថិភាព គ្មានបញ្ហា Stale Closure។"
 ---
 
-## 🎯 1. The 3 Dependency Modes
+## 🎯 ១. ទម្រង់ទាំង ៣ នៃ Dependency Array
+
+នៅក្នុង `useEffect(setupFunction, dependencies)` តម្លៃ **Dependency Array (អាគុយម៉ង់ទី ២)** ជាអ្នកកំណត់ថា៖ **«តើពេលណាទើប Effect គួររត់ឡើងវិញ?»**
 
 ```mermaid
 flowchart TD
-    subgraph Mode1["1. គ្មាន Dependency Array"]
+    subgraph Mode1["១. គ្មាន Array សោះ"]
         direction TB
-        M1A["useEffect(() => { ... })"] --> M1B["រត់រាល់ពេល Render និង Re-render ទាំងអស់ 🔄"]
+        M1A["useEffect(fn)"] --> M1B["រត់រាល់ Render ទាំងអស់ 🔄"]
     end
 
-    subgraph Mode2["2. Empty Array []"]
+    subgraph Mode2["២. Array ទទេ []"]
         direction TB
-        M2A["useEffect(() => { ... }, [])"] --> M2B["រត់តែម្តងគត់ពេល Initial Mount 🚀"]
+        M2A["useEffect(fn, [])"] --> M2B["រត់តែម្តងពេល Mount 🚀"]
     end
 
-    subgraph Mode3["3. With Dependencies [dep]"]
+    subgraph Mode3["៣. មាន Dependencies [x]"]
         direction TB
-        M3A["useEffect(() => { ... }, [count])"] --> M3B["រត់ពេល Mount និងពេល count ប្រែប្រួល 🎯"]
+        M3A["useEffect(fn, [count])"] --> M3B["រត់តែពេល count ប្តូរ 🎯"]
     end
 
-    style Mode1 fill:#fff5f5,stroke:#e53e3e,color:#000
-    style Mode2 fill:#ebf8ff,stroke:#3182ce,color:#000
-    style Mode3 fill:#f0fff4,stroke:#38a169,color:#000
+    style Mode1 fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
+    style Mode2 fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style Mode3 fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 🔬 2. Comparing the 3 Modes in Code
+## 🎮 ២. Interactive Simulator — សាកល្បងដោយផ្ទាល់
 
-### 🌐 Normal HTML / User Interaction Model:
+ខាងក្រោមនេះជា Simulator អន្តរកម្ម។ ចុចសាកល្បង **ប្តូររវាង Mode ទាំង ៣** រួចចុចប៊ូតុង State ដើម្បីតាមដានថាតើពេលណាខ្លះដែល Effect ដំណើរការ ឬត្រូវបានរំលង៖
 
-```html
-<!-- HTML Controls: Counter Button & Search Input -->
-<div class="interactive-panel">
-  <button id="btn-count">Count: 0</button>
-  <input type="text" id="txt-search" placeholder="Type query..." />
-</div>
+```reactdiagram
+UseEffect
 ```
 
-### 💻 React Code (បំបែកតាម Mode នីមួយៗ):
+> [!TIP]
+> **សាកល្បងពិសោធន៍:**
+> 1. ជ្រើសរើស **«1. គ្មាន [] (No Array)»** ➔ ចុចប្តូរ Count ឬ Text ➔ Effect នឹងរត់គ្រប់ដងទាំងអស់ ព្រោះ Component បាន Re-render!
+> 2. ជ្រើសរើស **«2. ទទេ [] (Empty Array)»** ➔ ចុចប៊ូតុងទាំងពីរ ➔ Effect មិនរត់ទៀតឡើយ (Run Count នៅត្រឹម ១ ដដែល)!
+> 3. ជ្រើសរើស **«3. មាន [count] (With Deps)»** ➔ ចុចប្តូរ Count ➔ Effect រត់។ ចុចប្តូរ Text ➔ Effect ត្រូវបានរំលង (Skip) ព្រោះ `count` នៅដដែល!
+
+---
+
+## 🔬 ៣. របៀបដែល React ប្រៀបធៀប Dependencies (`Object.is`)
+
+តើ React ដឹងដោយរបៀបណាថា Dependency បានប្រែប្រួល ឬនៅដដែល?  
+React ប្រើក្បួន **`Object.is(oldValue, newValue)`** ដើម្បីធ្វើ **Shallow Comparison** (ប្រៀបធៀបកម្រិតស្រទាប់ក្រៅ)៖
+
+### ក. Primitive Values (Number, String, Boolean, null, undefined):
+```javascript
+Object.is(5, 5);             // true  ➔ តម្លៃដដែល ➔ Skip Effect ✅
+Object.is("hello", "hello"); // true  ➔ តម្លៃដដែល ➔ Skip Effect ✅
+Object.is(0, 1);             // false ➔ តម្លៃប្រែប្រួល ➔ Run Effect ⚡
+```
+សម្រាប់ Primitive values គឺគ្មានបញ្ហាអ្វីឡើយ ព្រោះវាប្រៀបធៀបតម្លៃផ្ទាល់!
+
+### ខ. Reference Values (Object, Array, Function):
+```javascript
+const obj1 = { theme: 'dark' };
+const obj2 = { theme: 'dark' };
+
+Object.is(obj1, obj2); // ❌ false! ទោះបីទិន្នន័យខាងក្នុងដូចគ្នា ក៏ Memory Address ខុសគ្នាដែរ!
+```
+នេះហើយជាប្រភពនៃ **«អន្ទាក់ធំបំផុតក្នុង React»** ដែលយើងនឹងមើលនៅជំហានបន្ទាប់!
+
+---
+
+## 🪤 ៤. The Object & Function Reference Trap (អន្ទាក់ដ៏គ្រោះថ្នាក់)
+
+### ⚠️ មើលឧទាហរណ៍អន្ទាក់នេះ៖
 
 ```jsx
-import { useState, useEffect } from 'react';
-
-export function DependencyDemo() {
+function BadComponent() {
   const [count, setCount] = useState(0);
-  const [query, setQuery] = useState('');
 
-  // 🔴 Mode 1: No Dependency Array
+  // ❌ គ្រោះថ្នាក់: Object នេះត្រូវបានបង្កើតថ្មី (New Reference) រាល់ពេល Render!
+  const options = { theme: 'dark' };
+
   useEffect(() => {
-    console.log('Mode 1: រត់គ្រប់ Render ទាំងអស់ (ទោះ count ឬ query ប្តូរ)');
-  });
+    console.log("Effect កំពុងរត់...");
+  }, [options]); // 💥 ជួបបញ្ហា: options លើកនេះ !== options លើកមុន ➔ Effect រត់រាល់ពេល Render!
 
-  // 🔵 Mode 2: Empty Dependency Array []
-  useEffect(() => {
-    console.log('Mode 2: រត់តែម្តងគត់ ពេល Component ទើបបង្ហាញដំបូង (Mount)');
-  }, []);
-
-  // 🟢 Mode 3: Specific Dependency [count]
-  useEffect(() => {
-    console.log(`Mode 3: រត់តែពេល count ប្រែប្រួល (បច្ចុប្បន្ន = ${count})`);
-  }, [count]);
-
-  return (
-    <div>
-      <button onClick={() => setCount((c) => c + 1)}>Increment Count ({count})</button>
-      <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Type query..." />
-    </div>
-  );
+  return <button onClick={() => setCount(c => c + 1)}>Count: {count}</button>;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+### 💡 ៣ វិធីដោះស្រាយដ៏ត្រឹមត្រូវ៖
 
-1. `useEffect(() => { ... })` *(No Array)*
-   - គ្មាន Array ខាងចុង $\rightarrow$ React នឹង run Effect នេះរាល់ពេល Component Re-render មិនថា State ណាមួយប្រែប្រួលក៏ដោយ។
-2. `useEffect(() => { ... }, [])` *(Empty Array)*
-   - មាន `[]` ទទេ $\rightarrow$ ប្រាប់ React ថា "គ្មាន Dependencies ណាដែលត្រូវតាមដានទេ" ដូច្នេះវា run តែលើកទី ១ (Mount) ប៉ុណ្ណោះ។ ស័ក្តិសមសម្រាប់ Initial Data Fetching ឬ Event Listener Setup។
-3. `useEffect(() => { ... }, [count])` *(With Dependency)*
-   - React នឹងប្រៀបធៀបតម្លៃចាស់ និងថ្មីនៃ `count` ដោយប្រើ `Object.is(oldVal, newVal)`។ បើ `count` ផ្លាស់ប្តូរ ទើប Effect ត្រូវបាន execute។
+#### វិធីទី ១ ៖ បញ្ជូន Primitive Value ជំនួសវិញ (វិធីងាយស្រួលបំផុត)
+```jsx
+// ✅ ជំនួសឱ្យការតាមដាន Object ទាំងមូល យើងតាមដានតែ string 'dark' ប៉ុណ្ណោះ
+useEffect(() => {
+  console.log("Effect កំពុងរត់...");
+}, [options.theme]); // options.theme ជា String "dark" (Primitive) ➔ មិន Re-run ឥតប្រយោជន៍!
+```
+
+#### វិធីទី ២ ៖ រើ Object ចូលទៅក្នុង `useEffect` តែម្តង
+```jsx
+// ✅ បើ Object នោះប្រើតែក្នុង Effect រើវាចូលក្នុង Effect ផ្ទាល់
+useEffect(() => {
+  const options = { theme: 'dark' };
+  // ប្រើប្រាស់ options នៅទីនេះ...
+}, []); // មិនបាច់មាន options ជា dependency ទៀតទេ!
+```
+
+#### វិធីទី ៣ ៖ ប្រើ `useMemo` ឬ `useCallback`
+```jsx
+// ✅ រក្សា Reference ដដែលតាមរយៈ useMemo
+const options = useMemo(() => ({ theme: 'dark' }), []);
+
+useEffect(() => {
+  console.log("Effect កំពុងរត់...");
+}, [options]);
+```
 
 ---
 
-## 🚀 3. Complete Interactive Dependency Inspector
+## 🛑 ៥. ក្បួនមិនកុហក React (The Exhaustive-deps Rule)
+
+តើអ្នកធ្លាប់ជួប Warning ពណ៌លឿងពី ESLint ដែរឬទេ?  
+> `React Hook useEffect has a missing dependency: 'count'`
+
+### ❓ ហេតុអ្វីបានជាយើងមិនគួរ "កុហក" React ដោយដក Variable ចោល?
+សាកមើលកូដនេះ៖
+```jsx
+// ❌ កូដកុហក React (បាត់ count ក្នុង dependency)
+useEffect(() => {
+  const timer = setInterval(() => {
+    // ⚠️ Stale Closure: count នៅក្នុងនេះនឹងជាប់គាំងនៅតម្លៃ 0 រហូត!
+    setCount(count + 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []); // កុហកថាគ្មាន dependency
+```
+**លទ្ធផលខូច៖** ក្រោយពេល ១ វិនាទី `count` ឡើងដល់ ១។ ប៉ុន្តែវិនាទីបន្ទាប់វានៅតែឡើងដល់ ១ ដដែល ព្រោះវាជាប់គាំងតម្លៃ `count = 0` ចាស់ពីពេលដំបូង (Stale Closure)!
+
+### ✨ ដំណោះស្រាយដ៏ឆ្លាតវៃ៖ Functional State Update
+```jsx
+// ✅ ដំណោះស្រាយត្រឹមត្រូវ ១០០%
+useEffect(() => {
+  const timer = setInterval(() => {
+    // ប្រើ callback (prev => prev + 1) ➔ React យកតម្លៃចុងក្រោយបង្អស់ដោយស្វ័យប្រវត្តិ
+    setCount((prev) => prev + 1);
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []); // ពេលនេះមិនបាច់ដាក់ count ក្នុង dependency ទេ ហើយកូដដើរយ៉ាងត្រឹមត្រូវ!
+```
+
+---
+
+## 🚀 ៦. Complete Working Code (កូដពេញលេញ)
 
 ```jsx
 import { useState, useEffect } from 'react';
 
-export default function DependencyInspector() {
+export default function DependencyMastery() {
   const [count, setCount] = useState(0);
-  const [text, setText] = useState('');
+  const [search, setSearch] = useState('');
   const [logs, setLogs] = useState([]);
 
-  const addLog = (msg) => {
-    setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev.slice(0, 4)]);
+  const addLog = (text) => {
+    setLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${text}`, ...prev.slice(0, 3)]);
   };
 
-  // Mode 2: Mount only
+  // 1. Empty Array: រត់តែម្តងគត់ពេល Mount
   useEffect(() => {
-    addLog('🚀 Component Mounted (Mode 2: [])');
+    addLog('🚀 Component Mount ដំបូង (Empty [])');
   }, []);
 
-  // Mode 3: Specific count change
+  // 2. Specific Dependency: រត់តែពេល count ប្តូរ
   useEffect(() => {
     if (count > 0) {
-      addLog(`🎯 Count changed to ${count} (Mode 3: [count])`);
+      addLog(`🎯 Count បានផ្លាស់ប្តូរទៅជា: ${count} ([count])`);
     }
   }, [count]);
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow border space-y-4">
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 space-y-4">
       <h3 className="font-bold text-lg text-slate-800 dark:text-white">
-        🔬 Dependency Inspector
+        🔬 ការអនុវត្ត Dependency Array ជាក់ស្តែង
       </h3>
 
       <div className="flex gap-2">
         <button
           onClick={() => setCount((c) => c + 1)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-xl font-bold text-sm"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition"
         >
           Count: {count}
         </button>
+
         <input
           type="text"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="វាយអក្សរទីនេះ..."
-          className="flex-1 px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="វាយអក្សរ (Re-render)..."
+          className="flex-1 px-3 py-2 border rounded-xl dark:bg-slate-900 dark:border-slate-700 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      {/* Execution Log */}
-      <div className="bg-slate-900 text-green-400 p-3 rounded-xl font-mono text-xs space-y-1">
-        <p className="text-slate-400 font-sans font-bold mb-1">📋 Effect Execution Logs:</p>
-        {logs.map((log, i) => (
-          <p key={i}>{log}</p>
+      <div className="bg-slate-900 text-emerald-400 p-3.5 rounded-xl font-mono text-xs space-y-1">
+        <div className="text-slate-400 font-sans font-bold mb-1">📋 កំណត់ហេតុ Effect:</div>
+        {logs.map((log, idx) => (
+          <div key={idx}>{log}</div>
         ))}
       </div>
     </div>
   );
 }
 ```
+
+---
+
+## 🧠 ៧. សង្ខេបច្បាប់មាសងាយចាំ (Summary Cheat Sheet)
+
+| ច្បាប់ | ការណែនាំ |
+| :--- | :--- |
+| **គ្មាន Array** | `useEffect(fn)` ➔ រត់គ្រប់ Render (ប្រយ័ត្នបញ្ហា Performance) |
+| **Array ទទេ `[]`** | `useEffect(fn, [])` ➔ រត់តែ ១ ដងគត់ពេល Mount (Initial API Fetch) |
+| **មាន Dependency `[a, b]`** | `useEffect(fn, [a, b])` ➔ រត់តែពេល `a` ឬ `b` ប្រែប្រួល |
+| **កុំដាក់ Object ថ្មីក្នុង Array** | ជំនួសដោយ Primitive value (ឧ. `[user.id]`) ឬប្រើ `useMemo` |
+| **ប្រើ Functional Update** | ប្រើ `setVal(prev => prev + 1)` ដើម្បីកុំឱ្យជាប់គាំង Stale Closures |
