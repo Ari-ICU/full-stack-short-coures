@@ -1,79 +1,150 @@
 ---
-title: "Hands-on Mini Project: Optimized Searchable Data Grid"
-description: អនុវត្តបង្កើត High-Performance Searchable Data Grid ជាមួយ 1,000+ Items ដោយប្រើប្រាស់ `useMemo`, `useCallback`, និង `React.memo` ដើម្បីការពារ Re-render Lag។
+title: "Mini Project — High-Performance Searchable & Sortable Data Grid"
+description: អនុវត្តបង្កើត High-Performance Data Grid ដែលមានទិន្នន័យ 1,000+ Records ដោយរួមបញ្ចូល `useMemo`, `useCallback`, `React.memo`, និង `useRef` ដើម្បីទប់ស្កាត់ Render Lag និងផ្តល់នូវបទពិសោធន៍ User Experience ល្បឿនលឿនកម្រិត Enterprise។
 objectives:
-  - អនុវត្ត `useMemo` សម្រាប់ Search & Sort លើ 1,000+ Rows
-  - អនុវត្ត `React.memo` លើ Row Components ដើម្បីការពារ Re-render
-  - អនុវត្ត `useRef` សម្រាប់ Instant Search Focus Shortcut (`Ctrl + K` / `Cmd + K`)
+  - អនុវត្ត `useMemo` សម្រាប់ Real-time Search និង Multi-Column Sorting លើ 1,000+ Records
+  - អនុវត្ត `React.memo` លើ Row Component ដើម្បីកុំឱ្យ Rows ទាំងអស់ត្រូវ Re-render ពេល User Select Row តែមួយ
+  - អនុវត្ត `useCallback` សម្រាប់ Row Selection & Bulk Actions ដើម្បីរក្សា Function Identity
+  - អនុវត្ត `useRef` សម្រាប់ Global Keyboard Shortcut (`Cmd+K` / `Ctrl+K`) Auto-focus
+  - យល់ពីវិធីវាស់ស្ទង់ Render Performance និង Best Practices ក្នុង Production
 module: module-8-performance-patterns
 order: 4
 quiz:
-  - question: "ហេតុអ្វីបានជាការ Memoize Row Component (ជាមួយ React.memo) មានសារៈសំខាន់ក្នុង Data Grid ដែលមានរាប់ពាន់ Rows?"
+  - question: "ហេតុអ្វីបានជាការ Memoize Row Component (ជាមួយ `React.memo`) មានសារៈសំខាន់បំផុតក្នុង Data Grid ដែលមាន 1,000+ Rows?"
     options:
-      - "ដើម្បីការពារកុំឱ្យគ្រប់ 1,000 rows ទាំងអស់ត្រូវ Re-render ឡើងវិញ នៅពេល User គ្រាន់តែ toggle checkbox លើ Row តែមួយ"
-      - "ដើម្បីលុបបំបាត់ HTML tags"
-      - "ដើម្បី save ទៅ server"
-      - "ដើម្បី run លើ browser ចាស់"
+      - "ដើម្បីធានាថានៅពេល User គ្រាន់តែចុច Checkbox លើ Row តែមួយ គឺមានតែ Row នោះមួយគត់ដែល Re-render ចំណែក 999 Rows ផ្សេងទៀតនឹង Skip Render ទាំងស្រុង ជៀសវាង UI Lag"
+      - "ដើម្បីឱ្យ Data Grid បម្លែងទៅជា File Excel ដោយស្វ័យប្រវត្តិ"
+      - "ដើម្បីឱ្យ Table អាចបង្ហាញរូបភាព 3D"
+      - "ដើម្បីលុបបំបាត់ការសរសេរ HTML <table>"
     correctAnswer: 1
-    explanation: "`React.memo` ធានាថានៅពេល state របស់ row មួយផ្លាស់ប្តូរ គឺមានតែ row នោះមួយគត់ដែល re-render ចំណែក 999 rows ផ្សេងទៀតនឹង skip render ទាំងស្រុង។"
+    explanation: "បើគ្មាន `React.memo` ទេ រាល់ពេល State ក្នុង Grid Update (ដូចជា Select ID) នោះ 1,000 Rows ទាំងអស់នឹងត្រូវ Render ឡើងវិញ ដែលចំណាយពេលរាប់រយមីលីវិនាទី (UI Frame Drop)។ `React.memo` ជួយសន្សំ CPU ធ្វើឱ្យ UI រលូនកម្រិត 60 FPS!"
+
+  - question: "នៅក្នុង Data Grid នេះ ប្រសិនបើ `onToggleSelect` handler មិនត្រូវបានរុំដោយ `useCallback` តើនឹងមានបញ្ហាអ្វីកើតឡើង?"
+    options:
+      - "`React.memo` លើ `GridRow` នឹងក្លាយជាគ្មានប្រសិទ្ធភាព (Useless) ព្រោះរាល់ Render Parent បង្កើត Function Reference ថ្មី ដែលបង្ខំឱ្យគ្រប់ 1,000 Rows Re-render ដដែល"
+      - "Browser នឹងឈប់ដំណើរការ JavaScript"
+      - "ទិន្នន័យក្នុង Table នឹងត្រូវបាត់បង់"
+      - "Checkbox មិនអាចចុចបាន"
+    correctAnswer: 1
+    explanation: "`React.memo` ផ្អែកលើ Shallow Comparison នៃ Props។ ប្រសិនបើយើង pass inline function ឬ non-memoized handler នោះ reference របស់ prop នឹងប្រែប្រួលរាល់ពេល parent update ធ្វើឱ្យ `React.memo` ត្រូវ Render គ្រប់ rows ដដែល។"
 ---
 
-## 🎯 គោលដៅ Mini Project
+## 🏗️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Performance Architecture)
 
-យើងនឹងបង្កើត **High-Performance Data Grid** ដែលមានសមត្ថភាព៖
-1. Filtering & Sorting លើ 1,000 ទិន្នន័យដោយគ្មាន Lag
-2. Memoized Rows (`React.memo`)
-3. Global Keyboard Shortcut (`Cmd+K` / `Ctrl+K`) ដើម្បី Auto-focus Search Box ដោយប្រើ `useRef`
+ក្នុងគម្រោងនេះ យើងនឹងបង្កើត Data Grid ខ្នាតធំមួយដែលមាន **1,000 ទិន្នន័យ**។ ដើម្បីកុំឱ្យមានការទាក់ (Lag) យើងផ្គុំបច្ចេកទេស Optimization ទាំងអស់ចូលគ្នា ៖
+
+```mermaid
+graph TD
+    Root["<OptimizedDataGrid> (State: query, sortKey, selectedIds)"]
+    Root --> MemoCalc["⚡ useMemo: Search + Sort Filter (1,000 items)"]
+    Root --> Callback["⚡ useCallback: handleToggleSelect (Stable Ref)"]
+    Root --> Shortcut["⚡ useRef: Cmd+K Global Shortcut Focus"]
+    
+    MemoCalc --> Table["<DataTable> (1,000 Rows)"]
+    Table --> Row1["<GridRow 1> (React.memo) ✅ Skip Render"]
+    Table --> Row2["<GridRow 2> (React.memo) 🔄 Re-renders (Selected)"]
+    Table --> RowN["<GridRow 1000> (React.memo) ✅ Skip Render"]
+
+    style Root fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
+    style MemoCalc fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style Callback fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style Shortcut fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style Row1 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Row2 fill:#fef3c7,stroke:#d97706,stroke-width:2px
+    style RowN fill:#f0fff4,stroke:#38a169,stroke-width:2px
+```
 
 ---
 
-## 🛠️ កូដពេញលេញនៃគម្រោង (`src/App.jsx`)
+## 💻 ២. កូដពេញលេញនៃគម្រោង (`src/OptimizedDataGrid.jsx`)
 
 ```jsx
+// src/OptimizedDataGrid.jsx
 import { useState, useMemo, useCallback, useRef, useEffect, memo } from 'react';
 
-// Generate 1,000 Fake Data Records
-const BIG_DATA = Array.from({ length: 1000 }, (_, i) => ({
-  id: `USR-${i + 1}`,
-  name: `User ${i + 1}`,
-  email: `user${i + 1}@enterprise.com`,
-  role: i % 3 === 0 ? 'Admin' : i % 2 === 0 ? 'Editor' : 'Viewer',
-  score: Math.floor(Math.random() * 100),
-}));
+// ── ១. បង្កើតទិន្នន័យគំរូ ១,០០០ RECORDS ──
+const GENERATED_DATA = Array.from({ length: 1000 }, (_, index) => {
+  const id = index + 1;
+  const roles = ['Frontend Lead', 'Backend Engineer', 'DevOps Architect', 'UI/UX Designer', 'Product Owner'];
+  return {
+    id: `DEV-${String(id).padStart(4, '0')}`,
+    name: `វិស្វករកម្មវិធី #${id}`,
+    email: `engineer.${id}@enterprise-tech.com`,
+    role: roles[index % roles.length],
+    score: Math.floor(Math.random() * 40) + 60, // 60 - 100
+    status: index % 4 === 0 ? 'Inactive' : 'Active',
+  };
+});
 
-// 1. MEMOIZED ROW COMPONENT
-const GridRow = memo(function GridRow({ item, isSelected, onSelect }) {
+// ── ២. MEMOIZED ROW COMPONENT ──
+// ✅ រុំដោយ React.memo: Re-render លុះត្រាតែ isSelected ឬ item ផ្លាស់ប្តូរ!
+const GridRow = memo(function GridRow({ item, isSelected, onToggle }) {
+  // Console log ដើម្បីមើល Render ជាក់ស្តែងក្នុង DevTools
+  // console.log(`Rendering Row: ${item.id}`);
+
   return (
-    <tr className={`border-b border-slate-100 hover:bg-blue-50/50 transition ${isSelected ? 'bg-blue-50' : ''}`}>
-      <td className="p-3">
+    <tr
+      className={`border-b border-slate-100 dark:border-slate-800 transition-colors text-xs ${
+        isSelected
+          ? 'bg-indigo-50/80 dark:bg-indigo-950/40'
+          : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/40'
+      }`}
+    >
+      <td className="p-3.5 text-center">
         <input
           type="checkbox"
           checked={isSelected}
-          onChange={() => onSelect(item.id)}
-          className="rounded text-blue-600 cursor-pointer"
+          onChange={() => onToggle(item.id)}
+          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
         />
       </td>
-      <td className="p-3 font-mono text-xs text-slate-500">{item.id}</td>
-      <td className="p-3 font-bold text-slate-800 text-sm">{item.name}</td>
-      <td className="p-3 text-slate-600 text-sm">{item.email}</td>
-      <td className="p-3">
-        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
-          item.role === 'Admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
-        }`}>
+      <td className="p-3.5 font-mono text-slate-500">{item.id}</td>
+      <td className="p-3.5 font-bold text-slate-800 dark:text-slate-200">
+        {item.name}
+      </td>
+      <td className="p-3.5 text-slate-600 dark:text-slate-400 font-mono">
+        {item.email}
+      </td>
+      <td className="p-3.5">
+        <span
+          className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+            item.role.includes('Lead')
+              ? 'bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300'
+              : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+          }`}
+        >
           {item.role}
         </span>
       </td>
-      <td className="p-3 font-bold text-slate-700">{item.score}</td>
+      <td className="p-3.5 font-black text-indigo-600 dark:text-indigo-400">
+        {item.score} pts
+      </td>
+      <td className="p-3.5">
+        <span
+          className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${
+            item.status === 'Active'
+              ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-300'
+              : 'text-slate-500 bg-slate-100 dark:bg-slate-800'
+          }`}
+        >
+          <span className={`w-1.5 h-1.5 rounded-full ${item.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+          {item.status}
+        </span>
+      </td>
     </tr>
   );
 });
 
+// ── ៣. MAIN DATA GRID COMPONENT ──
 export default function OptimizedDataGrid() {
-  const [query, setQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState('id'); // 'id' | 'name' | 'score'
+  const [sortOrder, setSortOrder] = useState('asc'); // 'asc' | 'desc'
   const [selectedIds, setSelectedIds] = useState(new Set());
+  
   const searchInputRef = useRef(null);
 
-  // 2. KEYBOARD SHORTCUT (Cmd+K / Ctrl+K) FOCUS VIA useRef
+  // ── ៤. KEYBOARD SHORTCUT (Cmd+K / Ctrl+K) ──
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -85,80 +156,163 @@ export default function OptimizedDataGrid() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // 3. useMemo FOR HEAVY FILTERING
-  const filteredRows = useMemo(() => {
-    if (!query) return BIG_DATA;
-    return BIG_DATA.filter((row) =>
-      row.name.toLowerCase().includes(query.toLowerCase()) ||
-      row.email.toLowerCase().includes(query.toLowerCase()) ||
-      row.role.toLowerCase().includes(query.toLowerCase())
-    );
-  }, [query]);
+  // ── ៥. useMemo: FILTER & SORT HEAVY OPERATION ──
+  const processedRows = useMemo(() => {
+    console.log('⚡ ដំណើរការ Filter & Sort លើ 1,000 items...');
 
-  // 4. useCallback FOR STABLE SELECTION HANDLER
+    let result = GENERATED_DATA;
+
+    // Filter តាម Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (row) =>
+          row.name.toLowerCase().includes(q) ||
+          row.email.toLowerCase().includes(q) ||
+          row.role.toLowerCase().includes(q) ||
+          row.id.toLowerCase().includes(q)
+      );
+    }
+
+    // Sort តាម Column
+    return [...result].sort((a, b) => {
+      let valA = a[sortField];
+      let valB = b[sortField];
+
+      if (typeof valA === 'string') {
+        return sortOrder === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
+
+      return sortOrder === 'asc' ? valA - valB : valB - valA;
+    });
+  }, [searchQuery, sortField, sortOrder]);
+
+  // ── ៦. useCallback: STABLE SELECTION HANDLER ──
   const handleToggleSelect = useCallback((id) => {
     setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+      const updated = new Set(prev);
+      if (updated.has(id)) {
+        updated.delete(id);
+      } else {
+        updated.add(id);
+      }
+      return updated;
     });
   }, []);
 
+  // Toggle Select All
+  const handleSelectAll = () => {
+    if (selectedIds.size === processedRows.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(processedRows.map((r) => r.id)));
+    }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 p-8 max-w-5xl mx-auto">
-      <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 p-4 sm:p-8">
+      <div className="max-w-5xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-6 space-y-6">
         
-        {/* Header & Search Bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        {/* HEADER SECTION */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-black text-slate-800">⚡ High-Performance Data Grid</h1>
-            <p className="text-slate-500 text-sm mt-1">បង្ហាញ 1,000 Rows ជាមួយ Memoization &amp; No Render Lag</p>
+            <h1 className="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2">
+              <span>⚡</span> High-Performance Data Grid (1,000 Records)
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              បង្កើនល្បឿន Render ដោយប្រើ React.memo, useMemo, useCallback & useRef
+            </p>
           </div>
 
-          <div className="relative w-full sm:w-72">
+          {/* SEARCH BOX WITH CMD+K */}
+          <div className="relative w-full sm:w-80">
             <input
               ref={searchInputRef}
               type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="ស្វែងរក... (ចុច Ctrl+K)"
-              className="w-full pl-4 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ស្វែងរក ID, ឈ្មោះ, ឬ Role... (Cmd+K)"
+              className="w-full pl-3.5 pr-14 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            <kbd className="absolute right-3 top-2.5 bg-slate-200 text-slate-600 text-xs px-1.5 py-0.5 rounded font-mono">
+            <kbd className="absolute right-2.5 top-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] px-2 py-0.5 rounded font-mono font-bold">
               ⌘K
             </kbd>
           </div>
         </div>
 
-        {/* Selection Stats */}
-        <div className="flex justify-between items-center bg-slate-50 px-4 py-2 rounded-xl mb-4 text-xs font-bold text-slate-600">
-          <span>បង្ហាញ៖ {filteredRows.length} ជួរ</span>
-          <span>បានជ្រើសរើស៖ {selectedIds.size} នាក់</span>
+        {/* METRICS & ACTION BAR */}
+        <div className="flex flex-wrap justify-between items-center bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl text-xs gap-3">
+          <div className="flex items-center gap-4 font-semibold text-slate-600 dark:text-slate-300">
+            <span>📊 បង្ហាញ៖ <b className="text-slate-900 dark:text-white">{processedRows.length}</b> ជួរ</span>
+            <span>✅ ជ្រើសរើស៖ <b className="text-indigo-600 dark:text-indigo-400">{selectedIds.size}</b> នាក់</span>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleSelectAll}
+              className="px-3 py-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-bold rounded-lg text-xs transition"
+            >
+              {selectedIds.size === processedRows.length ? 'ដកការជ្រើសរើស' : 'ជ្រើសទាំងអស់'}
+            </button>
+          </div>
         </div>
 
-        {/* Data Table */}
-        <div className="overflow-x-auto max-h-96 border border-slate-100 rounded-2xl">
-          <table className="w-full text-left">
-            <thead className="bg-slate-100/80 sticky top-0 backdrop-blur text-xs uppercase text-slate-500">
+        {/* TABLE CONTAINER */}
+        <div className="overflow-x-auto max-h-[460px] border border-slate-200 dark:border-slate-800 rounded-2xl">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 sticky top-0 backdrop-blur text-[11px] uppercase font-bold text-slate-500 tracking-wider z-10 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="p-3 w-10">Select</th>
-                <th className="p-3">ID</th>
-                <th className="p-3">ឈ្មោះ</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Role</th>
-                <th className="p-3">Score</th>
+                <th className="p-3.5 w-12 text-center">
+                  <input
+                    type="checkbox"
+                    checked={processedRows.length > 0 && selectedIds.size === processedRows.length}
+                    onChange={handleSelectAll}
+                    className="w-4 h-4 rounded text-indigo-600"
+                  />
+                </th>
+                <th onClick={() => handleSort('id')} className="p-3.5 cursor-pointer hover:text-indigo-600">
+                  ID {sortField === 'id' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </th>
+                <th onClick={() => handleSort('name')} className="p-3.5 cursor-pointer hover:text-indigo-600">
+                  ឈ្មោះ {sortField === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </th>
+                <th className="p-3.5">Email</th>
+                <th className="p-3.5">តួនាទី</th>
+                <th onClick={() => handleSort('score')} className="p-3.5 cursor-pointer hover:text-indigo-600">
+                  ពិន្ទុ {sortField === 'score' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                </th>
+                <th className="p-3.5">ស្ថានភាព</th>
               </tr>
             </thead>
+
             <tbody>
-              {filteredRows.slice(0, 100).map((row) => (
-                <GridRow
-                  key={row.id}
-                  item={row}
-                  isSelected={selectedIds.has(row.id)}
-                  onSelect={handleToggleSelect}
-                />
-              ))}
+              {processedRows.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="py-12 text-center text-xs text-slate-400">
+                    រកមិនឃើញទិន្នន័យដែលត្រូវនឹងពាក្យស្វែងរកឡើយ!
+                  </td>
+                </tr>
+              ) : (
+                processedRows.map((row) => (
+                  <GridRow
+                    key={row.id}
+                    item={row}
+                    isSelected={selectedIds.has(row.id)}
+                    onToggle={handleToggleSelect}
+                  />
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -168,3 +322,23 @@ export default function OptimizedDataGrid() {
   );
 }
 ```
+
+---
+
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃ Performance
+
+1. **ហេតុអ្វីបានជាប្រើ `new Set()` សម្រាប់ Selected IDs?**  
+   `selectedIds.has(id)` មានល្បឿន **O(1) Constant Time** ខណៈពេលដែល Array `.includes()` មានល្បឿន O(N)។ ក្នុងទិន្នន័យ ១,០០០ ជួរ ការប្រើ `Set` ធ្វើឱ្យការឆែក Checkbox លឿនដូចផ្លេកបន្ទោរ!
+2. **ហេតុអ្វី `handleToggleSelect` ប្រើ Functional State Update?**  
+   យើងប្រើ `setSelectedIds((prev) => ...)` ជំនួសឱ្យការដាក់ `[selectedIds]` ក្នុង `useCallback` dependencies។ វិធីនេះធ្វើឱ្យ `handleToggleSelect` **មិនដែលផ្លាស់ប្តូរ Reference ឡើយ (`[]` empty deps)** ដែលជួយឱ្យ `React.memo` លើ `GridRow` ដំណើរការបានល្អឥតខ្ចោះ!
+3. **ការគ្រប់គ្រង Memory:**  
+   ទិន្នន័យ 1,000 Records ត្រូវបាន Cache ក្នុង Memory ហើយ Sort ដោយមិនចាំបាច់ Fetch ឡើងវិញរាល់ពេលប្តូរលំដាប់តម្រៀប។
+
+---
+
+## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
+
+- [x] ស្វែងរក (Search) និងតម្រៀប (Sort) លើ 1,000 Rows ដំណើរការលឿនដោយគ្មាន Lag ជាមួយ `useMemo`
+- [x] ចុច Checkbox លើ Row មួយ គឺ Re-render តែ Row នោះមួយគត់ដោយប្រើ `React.memo` + `useCallback`
+- [x] ចុចផ្លូវកាត់ `Cmd+K` / `Ctrl+K` ធ្វើការ Focus ទៅលើ Search Box ភ្លាមៗតាមរយៈ `useRef`
+- [x] គាំទ្រការ Select All និងដកការជ្រើសរើសទាំងអស់ដោយប្រើ `Set` Data Structure

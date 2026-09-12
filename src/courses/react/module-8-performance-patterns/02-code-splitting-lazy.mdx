@@ -1,64 +1,114 @@
 ---
 title: "Code Splitting & Lazy Loading with React.lazy & Suspense"
-description: "សិក្សាពីការបំបែក JavaScript Bundle ខ្នាតធំទៅជា Chunks តូចៗ (Code Splitting) ដោយប្រើ React.lazy() និង Suspense។"
+description: សិក្សាស៊ីជម្រៅពីការកាត់បន្ថយទំហំ JavaScript Bundle ដោយបំបែកកូដជា Chunks តូចៗ (Code Splitting) — អនុវត្ត React.lazy(), Suspense Fallback UI, Route-based Splitting, និង On-demand Component Loading។
 objectives:
-  - "យល់ពីផលប៉ះពាល់នៃ Huge JavaScript Bundle ទៅលើ Initial Page Load Speed"
-  - "ចេះប្រើ React.lazy() សម្រាប់ On-Demand Route & Component Loading"
-  - "ចេះកំណត់ Fallback UI ជាមួយ Suspense fallback"
+  - យល់ពីផលប៉ះពាល់នៃ Monolithic JavaScript Bundle ទៅលើ First Contentful Paint (FCP) និង Core Web Vitals
+  - យល់ច្បាស់ពីដំណើរការ Dynamic `import()` និងការបំបែក Chunks ក្នុង Bundler (Vite/Webpack)
+  - ចេះប្រើ `React.lazy()` រួមជាមួយ `<Suspense fallback={...}>` សម្រាប់ Route-based Code Splitting
+  - ចេះអនុវត្ត Component-level Lazy Loading (Modal, Heavy Rich Text Editor, Charts)
+  - ចេះរៀបចំ Error Boundary សម្រាប់ Handle Network Failure ពេល Lazy Chunk ទាញយកមិនជោគជ័យ
 module: module-8-performance-patterns
 order: 2
 quiz:
-  - question: "តើអ្វីជាតួនាទីរបស់ `<Suspense fallback={...}>` ពេលប្រើជាមួយ `React.lazy()`?"
+  - question: "តើអ្វីទៅជាគោលបំណងចម្បងនៃ 'Code Splitting' ក្នុងកម្មវិធី React?"
     options:
-      - "វាបិទដំណើរការ Browser"
-      - "វាបង្ហាញ Fallback UI (ដូចជា Loading Spinner ឬ Skeleton) ខណៈពេលដែល Browser កំពុងទាញយក chunk JS file ពី Network"
-      - "វាលុប Bundle file ចោល"
-      - "វា run លើ Database"
-    correctAnswer: 2
-    explanation: "`<Suspense>` ផ្តល់នូវ Fallback UI ដើម្បីបង្ហាញជូន User កំឡុងពេល asynchronous chunk របស់ lazy component កំពុង download ពី Internet។"
+      - "បំបែកឯកសារ JavaScript ធំតែមួយ (Monolithic Bundle) ទៅជា Chunks តូចៗជាច្រើន ដើម្បីឱ្យ Browser ទាញយកតែកូដនៃទំព័រដែល User កំពុងបើកមើលប៉ុណ្ណោះ ជួយឱ្យ Web បើកឡើងលឿនបំផុត"
+      - "បំប្លែង JavaScript ឱ្យទៅជា CSS ទាំងអស់"
+      - "លុបបំបាត់ការសរសេរ React Components"
+      - "ការពារកុំឱ្យ Browser អាចមើលឃើញ Source Code"
+    correctAnswer: 1
+    explanation: "បើគ្មាន Code Splitting ទេ Browser ត្រូវទាញយកកូដទាំងអស់របស់ App (Home, Admin, Analytics, Settings) ក្នុងពេលតែមួយ។ Code Splitting ជួយកាត់បន្ថយ Initial Load Time និងបង្កើនពិន្ទុ Core Web Vitals (FCP, LCP) យ៉ាងខ្លាំង។"
+
+  - question: "តើ `<Suspense fallback={<LoadingSpinner />}>` មានតួនាទីអ្វីនៅពេលប្រើជាមួយ `React.lazy()`?"
+    options:
+      - "វាផ្តល់នូវ Temporary UI (ដូចជា Skeleton ឬ Spinner) សម្រាប់បង្ហាញជូន User ខណៈពេលដែល Browser កំពុង Download Asynchronous JavaScript Chunk តាម Network"
+      - "វាបញ្ឈប់ការទាញយកទំព័រ"
+      - "វាបិទ Error ទាំងអស់ក្នុង JavaScript"
+      - "វាដំណើរការតែនៅពេល User បិទ Browser"
+    correctAnswer: 1
+    explanation: "ដោយសារ Lazy Component ត្រូវទាញយកតាម Network ជា Asynchronous ដូច្នេះ `<Suspense>` ដើរតួជាអ្នករង់ចាំ និងបង្ហាញ `fallback` UI រហូតដល់ File Chunk នោះ Download ចប់សព្វគ្រប់ ទើប Render Component ពិតប្រាកដ។"
+
+  - question: "តើអ្វីជាលក្ខខណ្ឌចម្បងដែល Component មួយអាចប្រើប្រាស់ជាមួយ `React.lazy()` បាន?"
+    options:
+      - "Component នោះត្រូវតែ Export ជា `export default` ក្នុងឯកសាររបស់វា"
+      - "Component នោះត្រូវតែជា Class Component"
+      - "Component នោះត្រូវតែគ្មាន Props"
+      - "Component នោះត្រូវតែសរសេរជា TypeScript ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "`React.lazy(() => import('./MyComponent'))` តម្រូវឱ្យ Module ដែលត្រូវ Import នោះមាន **Default Export** (`export default function MyComponent() { ... }`)។"
 ---
 
-## ✂️ 1. Monolithic Bundle vs Code Splitting
+## ✂️ ១. Monolithic Bundle vs Code Splitting Architecture
+
+នៅក្នុងកម្មវិធី React បែបប្រពៃណី ឧបករណ៍ Bundler (ដូចជា Vite ឬ Webpack) នឹងប្រមូលផ្តុំកូដទាំងអស់ចូលក្នុងឯកសារ JavaScript តែមួយ (Monolithic `bundle.js`) ដែលអាចមានទំហំរហូតដល់ 3MB ទៅ 5MB+!
 
 ```mermaid
 flowchart TD
-    subgraph Monolithic["❌ Without Code Splitting: Huge 5MB Initial Bundle"]
+    subgraph Monolithic["❌ Without Code Splitting: Huge 4MB Initial Bundle"]
         direction TB
-        B1["User visits Homepage ('/')"] --> B2["Browser downloads entire 5MB bundle<br>(Home + Admin + Checkout + Analytics) ⏳"]
-        B2 --> B3["Slow Initial Page Load &amp; Higher Bounce Rate!"]
+        B1["User visits Homepage ('/')"] --> B2["Browser ទាញយក 4MB JS ទាំងមូល<br>(Home + Admin + Analytics + PDF Viewer) ⏳"]
+        B2 --> B3["White Screen យូរ! អតិថិជនរង់ចាំមិនបានក៏ចាកចេញ (High Bounce Rate)"]
     end
 
-    subgraph Splitting["✅ With Route-Based Code Splitting &amp; Suspense"]
+    subgraph Splitting["✅ With Route-Based Code Splitting & Suspense"]
         direction TB
-        S1["User visits Homepage ('/')"] --> S2["Browser downloads ONLY 200KB chunk ⚡"]
-        S2 --> S3["User clicks '/admin'"]
-        S3 --> S4["&lt;Suspense fallback={&lt;Spinner /&gt;}&gt;"]
-        S4 --> S5["Lazy loads 150KB admin chunk on-demand 🚀"]
+        S1["User visits Homepage ('/')"] --> S2["Browser ទាញយកតែ 150KB Home Chunk ប៉ុណ្ណោះ ⚡"]
+        S2 --> S3["User ចុចចូលមើល '/analytics'"]
+        S3 --> S4["&lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;"]
+        S4 --> S5["Lazy Download 200KB Analytics Chunk On-Demand 🚀"]
     end
 
-    style Monolithic fill:#fff5f5,stroke:#e53e3e,color:#000
-    style Splitting fill:#f0fff4,stroke:#38a169,color:#000
-    style S2 fill:#c6f6d5,stroke:#38a169,color:#000
-    style S5 fill:#c6f6d5,stroke:#38a169,color:#000
+    style Monolithic fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
+    style Splitting fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style S2 fill:#c6f6d5,stroke:#38a169,stroke-width:2px
+    style S5 fill:#c6f6d5,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 🛠️ 2. កូដអនុវត្តជាក់ស្តែង
+## 🛠️ ២. គូស្នេហ៍ដ៏មានឥទ្ធិពល ៖ `React.lazy` + `Suspense`
 
 ```jsx
+// Dynamic Import ជាមួយ React.lazy
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+
+// ប្រើប្រាស់ជាមួយ Suspense
+<Suspense fallback={<LoadingSkeleton />}>
+  <HeavyComponent />
+</Suspense>
+```
+
+### ដំណើរការ ៤ ដំណាក់កាល ៖
+1. **Initial Load:** Bundle ដំបូងមិនផ្ទុកកូដរបស់ `HeavyComponent` ឡើយ។
+2. **User Trigger:** នៅពេលដែល Component ត្រូវបង្ហាញលើ Screen នោះ `React.lazy` នឹងហៅ Dynamic `import()` ដើម្បីទាញយក `.js` chunk ពី Server។
+3. **Suspense State:** ក្នុងអំឡុងពេល Network កំពុងទាញយក React នឹង Render ផ្ទាំង `fallback` UI។
+4. **Resolved State:** ពេល Download ចប់ React នឹងប្តូរពី fallback មកបង្ហាញ UI របស់ `HeavyComponent` ភ្លាមៗ។
+
+---
+
+## 💻 ៣. ការអនុវត្តជាក់ស្តែង ៖ Route-Based Code Splitting
+
+ខាងក្រោមនេះជារចនាសម្ព័ន្ធស្តង់ដារនៃការរៀបចំ Router ជាមួយ Code Splitting៖
+
+```jsx
+// src/App.jsx
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
-// 1. Dynamic Imports ជាមួយ React.lazy
+// ── ១. LAZY LOADED ROUTE COMPONENTS (ត្រូវតែជា Default Export) ──
 const HomePage = lazy(() => import('./pages/HomePage'));
-const AnalyticsDashboard = lazy(() => import('./pages/AnalyticsDashboard'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 
-function LoadingFallback() {
+// ── ២. BEAUTIFUL LOADING FALLBACK UI ──
+function PageLoader() {
   return (
-    <div className="flex items-center justify-center p-12 text-blue-600 font-bold">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
-      កំពុងទាញយកទិន្នន័យទំព័រ...
+    <div className="flex flex-col items-center justify-center p-16 space-y-3">
+      <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p className="text-xs font-bold text-slate-500 animate-pulse">
+        កំពុងទាញយកទំព័រពី Server...
+      </p>
     </div>
   );
 }
@@ -66,19 +116,132 @@ function LoadingFallback() {
 export default function App() {
   return (
     <BrowserRouter>
-      <nav className="p-4 bg-slate-900 text-white flex gap-4">
-        <Link to="/">ទំព័រដើម</Link>
-        <Link to="/analytics">Analytics (Lazy)</Link>
-      </nav>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+        {/* TOP NAVIGATION BAR */}
+        <nav className="p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center sticky top-0 z-40">
+          <div className="font-bold text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+            <span>⚡</span>
+            <span>FastApp Pro</span>
+          </div>
 
-      {/* 2. រុំ Routes ដោយ Suspense */}
-      <Suspense fallback={<LoadingFallback />}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/analytics" element={<AnalyticsDashboard />} />
-        </Routes>
-      </Suspense>
+          <div className="flex gap-4 text-xs font-semibold">
+            <Link to="/" className="hover:text-indigo-600 transition">ទំព័រដើម</Link>
+            <Link to="/products" className="hover:text-indigo-600 transition">ទំនិញ</Link>
+            <Link to="/admin" className="hover:text-indigo-600 transition">Admin Panel (Lazy)</Link>
+            <Link to="/analytics" className="hover:text-indigo-600 transition">Analytics (Lazy)</Link>
+          </div>
+        </nav>
+
+        {/* ── ៣. SUSPENSE BOUNDARY AROUND ROUTES ── */}
+        <main className="max-w-4xl mx-auto p-6">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+            </Routes>
+          </Suspense>
+        </main>
+      </div>
     </BrowserRouter>
   );
 }
 ```
+
+---
+
+## 🎯 ៤. Component-Level Lazy Loading (On-Demand Modals & Editors)
+
+ក្រៅពី Route យើងក៏អាចប្រើ `React.lazy` សម្រាប់ Component ធ្ងន់ៗដែលមិនចាំបាច់បង្ហាញតាំងពីដំបូង ដូចជា **Rich Text Editor**, **PDF Viewer**, ឬ **Payment Modal** ៖
+
+```jsx
+import { useState, lazy, Suspense } from 'react';
+
+// ⏳ ទាញយកកូដ RichTextEditor តែនៅពេល User ចុចបើក Modal ប៉ុណ្ណោះ!
+const RichTextEditor = lazy(() => import('./components/RichTextEditor'));
+
+export function PostEditorModal() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold"
+      >
+        ✍️ បង្កើតអត្ថបទថ្មី (Open Heavy Editor)
+      </button>
+
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl max-w-lg w-full shadow-2xl border">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-sm">Rich Text Editor</h3>
+              <button onClick={() => setIsOpen(false)} className="text-slate-400 font-bold">✕</button>
+            </div>
+
+            {/* Suspense សម្រាប់តែ Editor ខាងក្នុង Modal */}
+            <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">កំពុងផ្ទុក Editor Engine...</div>}>
+              <RichTextEditor onSave={() => setIsOpen(false)} />
+            </Suspense>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 🛡️ ៥. Error Handling ពេល Network ដាច់ (Error Boundaries)
+
+> [!WARNING]
+> **បញ្ហា Network Failure ៖**  
+> ប្រសិនបើ User កំពុងប្រើប្រាស់ App ហើយស្រាប់តែដាច់ Internet ពេលកំពុងចុចប្តូរ Route នោះ `import()` នឹង Fail ហើយបង្កជា Uncaught Promise Rejection!
+
+### ✅ ដំណោះស្រាយជាមួយ Error Boundary:
+
+```jsx
+import React from 'react';
+
+export class LazyErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-6 text-center bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl">
+          <p className="text-xs font-bold text-rose-600">
+            ⚠️ មិនអាចទាញយកទំព័រនេះបានទេ (សូមពិនិត្យមើលសេវា Internet របស់អ្នក)
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-3 px-3.5 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-bold"
+          >
+            🔄 ព្យាយាមម្តងទៀត
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ
+
+| លក្ខណៈពិសេស | កូដអនុវត្ត | អត្ថប្រយោជន៍ចម្បង |
+| :--- | :--- | :--- |
+| **Dynamic Import** | `import('./Module')` | បង្កើត Chunk ដាច់ដោយឡែកក្នុង Bundler |
+| **Lazy Wrapper** | `lazy(() => import(...))` | បំប្លែង Promise ទៅជា Lazy React Component |
+| **Suspense Boundary** | `<Suspense fallback={...}>` | បង្ហាញ Loading Skeleton អំឡុងពេលទាញយកតាម Network |
+| **Error Boundary** | `<LazyErrorBoundary>` | ការពារ App កុំឱ្យ Crash ពេល Download បរាជ័យ |
