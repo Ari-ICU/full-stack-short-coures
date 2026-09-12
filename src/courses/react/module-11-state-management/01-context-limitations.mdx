@@ -1,102 +1,156 @@
 ---
-title: Context API Limitations & Why We Need External State
-description: ស្វែងយល់ពីបញ្ហា Unnecessary Re-renders របស់ React Context API ពេល Scale ធំ, ហេតុអ្វីយើងត្រូវការ External State Manager ដូចជា Zustand ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Context API Limitations & The Need for Modern External State Managers"
+description: ស្វែងយល់ពីដែនកំណត់នៃ React Context API ក្នុងកម្មវិធីខ្នាតធំ — បញ្ហា Unnecessary Re-render Waterfall ដោយសារគ្មាន Selective Subscription, Provider Hell, និងមូលហេតុដែលយើងត្រូវប្រើប្រាស់ External State Manager ដូចជា Zustand។
 objectives:
-  - យល់ពី Context Re-render Problem ក្នុងការចែករំលែក Global State
-  - ដឹងពីមូលហេតុដែល Context API គ្មាន Selective Subscription
-  - ស្គាល់ Use Cases ណាដែល Context API ស័ក្តិសម vs ពេលណាត្រូវប្រើ Zustand
+  - "យល់ច្បាស់ពី Context Re-render Problem ក្នុងការចែករំលែក Global State ដែលមានការផ្លាស់ប្តូរញឹកញាប់"
+  - "ដឹងពីមូលហេតុដែល Context API មិនគាំទ្រ Selective Subscription តាមលំនាំដើម"
+  - "ស្គាល់ពីបញ្ហា 'Provider Hell' និងភាពស្មុគស្មាញនៃ Boilerplate Code ក្នុង Context API"
+  - "យល់ច្បាស់ពី State Management Decision Matrix (ពេលណាត្រូវប្រើ useState, Context API, Zustand, ឬ TanStack Query)"
 module: module-11-state-management
 order: 1
 quiz:
-  - question: "បញ្ហាអ្វីជា Context API Re-render Problem?"
+  - question: "តើអ្វីទៅជា 'Context Re-render Problem' នៅក្នុង React នៅពេល App រីកធំឡើង?"
     options:
-      - "Context ដំណើរការបានតែ Server-side"
-      - "ពេល Context value ផ្លាស់ប្ដូរ, React Components ទាំងអស់ដែល useContext() នឹង Re-render ដោយស្វ័យប្រវត្តិ ទោះបី Component ហ្នឹងប្រើ portion តូចតាចដែលមិនបានផ្លាស់ប្តូរក៏ដោយ"
-      - "Context ធ្វើអោយ Code ពិបាកយល់"
-      - "Context ការពារ Data ពី Components"
-    correctAnswer: 2
-    explanation: "Context API មិនមាន Selective Subscription — បើ Context Object ផ្លាស់ប្ដូរ field តែ ១ (ឧ. cart), Component ទាំងអស់ (ដូចជា 100 Components) ដែលហៅ useContext() នឹង Re-render ទាំងអស់ ទោះបីជា component នោះប្រើតែ user profile ក៏ដោយ។"
+      - "នៅពេលដែល Field តែមួយក្នុង Context Object ផ្លាស់ប្តូរ (ឧ. Cart Items) នោះគ្រប់ Components ទាំងអស់ដែលហៅ `useContext` នឹងត្រូវ Re-render ឡើងវិញទាំងអស់ ទោះបីជា Component នោះប្រើប្រាស់តែ User Profile ឬ Theme ក៏ដោយ"
+      - "Context API ដំណើរការបានតែនៅលើ Server-side ប៉ុណ្ណោះ"
+      - "Context API បណ្តាលឱ្យកូដ JavaScript បាត់បង់ Type Safety"
+      - "Context API មិនអាចផ្ទុក Objects ឬ Arrays បានទេ"
+    correctAnswer: 1
+    explanation: "React Context API មិនមានយន្តការ Selective Subscription ឡើយ។ នៅពេល `value` ក្នុង Provider ទទួលបាន Object Reference ថ្មី រាល់ Consumer ទាំងអស់ដែល Subscribe លើ Context នោះនឹងត្រូវបង្ខំឱ្យ Re-render ទាំងអស់ ដែលនាំឱ្យ UI ទាក់ (Lag) ក្នុង Large-scale Applications។"
+
+  - question: "តើ Zustand ជួយដោះស្រាយបញ្ហា Re-render របស់ Context API តាមរបៀបណា?"
+    options:
+      - "Zustand ប្រើប្រាស់ 'Granular Selectors' (ឧ. `useStore(state => state.user)`) ដែលធានាថា Component នឹង Re-render លុះត្រាតែ Field ជាក់លាក់ដែលវាបានជ្រើសរើសមានការផ្លាស់ប្តូរប៉ុណ្ណោះ"
+      - "Zustand លុបចោល React Virtual DOM ទាំងស្រុង"
+      - "Zustand បង្ខំឱ្យ Component ទាំងអស់ក្លាយជា Static HTML"
+      - "Zustand ដំណើរការតែលើ Mobile App ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "Zustand ដំណើរការក្រៅ React Component Tree (External Store) និងគាំទ្រ Granular Selectors។ ប្រសិនបើ Cart ផ្លាស់ប្តូរ មានតែ Cart Component ប៉ុណ្ណោះដែល Re-render ចំណែក User Profile និង Navbar នឹងមិន Re-render ឡើយ។"
+
+  - question: "តើក្នុងករណីណាដែល React Context API នៅតែជាជម្រើសដ៏ល្អបំផុត?"
+    options:
+      - "សម្រាប់ Low-Frequency State (ទិន្នន័យដែលកម្រផ្លាស់ប្តូរ) ដូចជា Theme Mode (Light/Dark), Multi-Language (km/en), ឬ Current Authenticated User"
+      - "សម្រាប់ Real-time Chat Apps ដែលមានសាររាប់ពាន់ចូលមកក្នុង ១ វិនាទី"
+      - "សម្រាប់ Animation លើ Canvas"
+      - "សម្រាប់ Server Data Caching"
+    correctAnswer: 1
+    explanation: "Context API ត្រូវបានរចនាឡើងយ៉ាងល្អឥតខ្ចោះសម្រាប់ Static ឬ Low-frequency State (Theme, Locale, Auth Session)។ ចំណែកឯ High-frequency State (Form State, Cart, Real-time Feeds) គួរតែប្រើ Zustand ឬ TanStack Query។"
 ---
 
-## 💥 1. The Context Re-render Problem
+## 💥 ១. The Context Re-render Problem (បញ្ហាដែលត្រូវដោះស្រាយ)
+
+React Context API គឺជាឧបករណ៍ដ៏អស្ចារ្យសម្រាប់ចៀសវាង Prop Drilling។ ក៏ប៉ុន្តែ នៅពេលដែល Application របស់អ្នករីកធំឡើង Context API មានដែនកំណត់ធំមួយ ៖  
+**«Context API មិនមានយន្តការ Selective Subscription ឡើយ!»**
+
+ប្រសិនបើអ្នកបង្កើត Context ធំមួយ `{ user, theme, cart, notifications }` ៖  
+រាល់ពេលដែល User ចុច *Add to Cart* ➔ តម្លៃ `cart` ផ្លាស់ប្តូរ ➔ **គ្រប់ Components ទាំងអស់ដែលអាន Context នេះ (រួមទាំង UserProfile, Sidebar, ThemeToggle) នឹងត្រូវ Re-render ទាំងអស់!**
 
 ```mermaid
 graph TD
-    subgraph ContextProblem["Context API Re-render Cascade ❌"]
-        CTX["GlobalContext\n{ user, theme, cart }"]
-        CTX --> C1["Header (uses: user) — Re-renders! 💥"]
-        CTX --> C2["Sidebar (uses: theme) — Re-renders! 💥"]
-        CTX --> C3["CartBadge (uses: cart) — Re-renders! ✅"]
+    subgraph ContextProblem["❌ Context API: Re-render Cascade (ខ្ជះខ្ជាយ CPU)"]
+        direction TB
+        CTX["<GlobalContext.Provider value={{ user, theme, cart }}>"]
+        CTX --> C1["<UserProfile> (ប្រើតែ user) 💥 Re-renders!"]
+        CTX --> C2["<Sidebar> (ប្រើតែ theme) 💥 Re-renders!"]
+        CTX --> C3["<CartBadge> (ប្រើតែ cart) ✅ Re-renders!"]
     end
 
-    style ContextProblem fill:#fff5f5,stroke:#e53e3e,color:#000
+    subgraph ZustandSolution["✅ Zustand: Granular Selective Subscriptions"]
+        direction TB
+        Store[("External Zustand Store\n{ user, theme, cart }")]
+        Store -.->|"useStore(s => s.user)"| Z1["<UserProfile> ⚡ (Skip Render)"]
+        Store -.->|"useStore(s => s.theme)"| Z2["<Sidebar> ⚡ (Skip Render)"]
+        Store ==>|"useStore(s => s.cart)"| Z3["<CartBadge> 🔄 (Re-renders alone!)"]
+    end
+
+    style ContextProblem fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
+    style ZustandSolution fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Z1 fill:#c6f6d5,stroke:#38a169,stroke-width:2px
+    style Z2 fill:#c6f6d5,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 💻 2. Demonstrating the Problem in Code
+## 💻 ២. ការបង្ហាញបញ្ហាក្នុងកូដជាក់ស្តែង (Proof in Code)
 
-### 💻 Code បង្ហាញពី Re-render Problem ក្នុង Context:
+### ❌ បញ្ហាក្នុង Context API:
 
 ```jsx
-// AppContext.jsx
-const AppContext = createContext();
+// 1. GlobalContext.jsx
+const GlobalContext = createContext(null);
 
-export function AppProvider({ children }) {
-  const [user, setUser] = useState({ name: 'Dara' });
+export function GlobalProvider({ children }) {
+  const [user] = useState({ name: 'Sok Dara', role: 'Admin' });
   const [cart, setCart] = useState([]);
 
-  // ⚠️ រាល់ពេល cart ប្រែប្រួល object ថ្មីត្រូវបានបង្កើតក្នុង value
+  const addToCart = (item) => setCart((prev) => [...prev, item]);
+
   return (
-    <AppContext.Provider value={{ user, cart, setCart }}>
+    <GlobalContext.Provider value={{ user, cart, addToCart }}>
       {children}
-    </AppContext.Provider>
+    </GlobalContext.Provider>
   );
 }
 
-// UserProfile.jsx (Component នេះប្រើតែ 'user' មិនប៉ះ 'cart' ឡើយ)
+// 2. UserProfile.jsx — Component នេះប្រើតែ 'user' មិនដែលប៉ះពាល់ 'cart' ឡើយ!
 function UserProfile() {
-  const { user } = useContext(AppContext);
-  console.log('UserProfile Rendered!'); // ⚠️ Re-render រាល់ពេល User Add to Cart!
-  return <div>👤 {user.name}</div>;
+  const { user } = useContext(GlobalContext);
+  
+  // ⚠️ នឹង Console.log រាល់ពេល User ចុច Add to Cart!
+  console.log('🔴 UserProfile Re-rendered!'); 
+
+  return <div>👤 {user.name} ({user.role})</div>;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `value={{ user, cart, setCart }}`
-   - នៅពេល `setCart` ត្រូវបានហៅ `AppProvider` នឹង re-render ហើយបង្កើត Object reference ថ្មីសម្រាប់ `value`។
-2. `const { user } = useContext(AppContext);`
-   - ដោយសារ `AppContext` ទទួលបាន Object reference ថ្មី React នឹងបង្ខំឱ្យ Component ណាដែលប្រើ `useContext(AppContext)` Re-render ទាំងអស់។
-3. `console.log('UserProfile Rendered!')`
-   - `UserProfile` នឹង Re-render ឥតប្រយោជន៍រាល់ពេល Cart Update ទោះបីទិន្នន័យ `user` មិនបានប្រែប្រួលសូម្បីតែបន្តិចក៏ដោយ!
+### 💣 ហេតុអ្វីបានជា `UserProfile` Re-render?
+1. ពេល `addToCart` ដំណើរការ `setCart` ធ្វើឱ្យ `GlobalProvider` Re-render។
+2. Object ក្នុង `value={{ user, cart, addToCart }}` ទទួលបាន New Reference ក្នុង Memory។
+3. React ពិនិត្យឃើញ `value` ប្រែប្រួល ទើបបញ្ជាឱ្យ **គ្រប់ Component ណាដែលហៅ `useContext(GlobalContext)` ត្រូវ Re-render ទាំងអស់** ដោយគ្មានការលើកលែង!
 
 ---
 
-## ⚡ 3. The Solution: Selective Subscription ជាមួយ Zustand
+## ⚡ ៣. ដំណោះស្រាយដ៏មានឥទ្ធិពល ៖ Zustand Granular Selectors
+
+នៅក្នុង Zustand យើងអាចជ្រើសរើសអានតែ Field ណាដែល Component ពិតជាត្រូវការ (Selective Subscription) ៖
 
 ```javascript
-// Zustand Store គាំទ្រ Selective Subscription!
-const useStore = create((set) => ({
-  user: { name: 'Dara' },
+// 1. បង្កើត Zustand Store ក្រៅ React Tree
+import { create } from 'zustand';
+
+export const useStore = create((set) => ({
+  user: { name: 'Sok Dara', role: 'Admin' },
   cart: [],
   addToCart: (item) => set((s) => ({ cart: [...s.cart, item] })),
 }));
+```
 
-// UserProfile គ្រាន់តែ subscribe លើ state.user ប៉ុណ្ណោះ
+```jsx
+// 2. UserProfile គ្រាន់តែ Subscribe លើ 'state.user' ប៉ុណ្ណោះ
 function UserProfile() {
-  const user = useStore((state) => state.user); // ✅ នឹងមិន Re-render ពេល cart ប្រែប្រួលឡើយ!
+  const user = useStore((state) => state.user);
+
+  // ✅ នឹងមិន Re-render ឡើយនៅពេល cart ផ្លាស់ប្តូរ!
+  console.log('🟢 UserProfile Rendered');
+
   return <div>👤 {user.name}</div>;
 }
 ```
 
 ---
 
-## 🎯 4. State Management Decision Matrix
+## 🎯 ៤. State Management Decision Matrix (យុទ្ធសាស្ត្រជ្រើសរើស Tool)
 
-| ប្រភេទ State (State Type) | ឧបករណ៍ដែលត្រូវប្រើ (Recommended Tool) |
-|--------------------------|-------------------------------------|
-| **Simple Static State** (Theme, Language) | ✅ React Context API |
-| **Complex Client State** (Cart, Modals, Filters) | ✅ Zustand |
-| **Server Cache State** (API Data, Caching) | ✅ TanStack Query (React Query) |
-| **Local Component State** (Input form, toggles) | ✅ `useState` / `useReducer` |
+| ប្រភេទ State (State Category) | ឧបករណ៍ដែលស័ក្តិសមបំផុត | ឧទាហរណ៍ជាក់ស្តែង |
+| :--- | :--- | :--- |
+| **Local Component State** | `useState` / `useReducer` | Form Input, Accordion Open/Close, Modal Toggle |
+| **Low-Frequency Global State** | **React Context API** | Theme (Dark/Light), Language (km/en), Auth User Session |
+| **High-Frequency Complex Client State** | **Zustand** | E-Commerce Cart, Canvas Editor, Music Player, Multi-step Wizard |
+| **Server Cache State (Async API)** | **TanStack Query (React Query)** | Fetching API Lists, Auto-polling, Mutation, Pagination Caching |
+
+---
+
+## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+
+- **Context API** មិនមែនជា State Manager ទេ តែជា **Dependency Injection / Transport Mechanism** សម្រាប់បញ្ជូន Props ពីលើចុះក្រោមដោយគ្មាន Prop Drilling។
+- **Zustand** គឺជា **True Central State Manager** ដែលមាន Selective Subscriptions, គ្មាន Provider Wrapper, និងមាន Performance ខ្ពស់បំផុត។

@@ -1,146 +1,173 @@
 ---
-title: Login & Register Forms with API Integration
-description: រៀនបង្កើត Login និង Register Forms ដែលភ្ជាប់ទៅកាន់ Auth API — ចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML សិន រួចបំប្លែងទៅជា React Form Validation, Loading State, និង Error Handling ជាមួយការពន្យល់មួយជួរៗ។
+title: "Building Login & Register Forms with Real-time Validation & API Integration"
+description: រៀនបង្កើត Login និង Register Forms ប្រកបដោយស្តង់ដារ Production — ស្វែងយល់ពី Form State Management, Real-time Validation (Regex & Length), Loading/Disabled States, Server Error Handling, Show/Hide Password, និង Auto-Redirect ជាមួយការពន្យល់លម្អិតមួយជួរៗ។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Login & Register Form
-  - ចេះបំប្លែង Form ទៅជា Controlled Inputs ក្នុង React
-  - ចេះផ្ញើ POST Request ទៅ Auth API និងរក្សាទុក Auth Token
-  - ចេះបង្ហាញ Server Error Messages និង Auto-redirect ក្រោយ Login ជោគជ័យ
+  - "យល់ពីយន្តការ Controlled Components សម្រាប់គ្រប់គ្រង Form State ក្នុង React"
+  - "ចេះបង្កើត Validation Logic សម្រាប់ Email (Regex), Password (Length & Complexity), និង Confirm Password"
+  - "ចេះ Handle Loading States និង Disabled Buttons ដើម្បីការពារ Double Form Submissions"
+  - "ចេះផ្ញើ POST Request ទៅកាន់ Auth API និងដោះស្រាយ Server Error Responses (400/401)"
+  - "ចេះ Redirect Authenticated Users ចេញពី Login Page ដោយស្វ័យប្រវត្តិ"
 module: module-12-authentication
 order: 2
 quiz:
-  - question: "ហេតុអ្វី Login Page គួរ Redirect User ដែល Authenticated ចេញភ្លាម?"
+  - question: "ហេតុអ្វីបានជាយើងត្រូវបិទដំណើរការ (Disable) Submit Button និងបង្ហាញ Loading Spinner ក្នុងអំឡុងពេល Form កំពុងផ្ញើទិន្នន័យ (Submitting)?"
     options:
-      - "ដើម្បីធ្វើ URL ស្អាត"
-      - "User ដែល Login រួច មិនគួរមើល Login Form ទៀត — Redirect ទៅ Dashboard ជា UX ល្អ ហើយការពារ Login Again ពីរដង"
-      - "ព្រោះ React Router Error"
-      - "ព្រោះ Server Request Limit"
-    correctAnswer: 2
-    explanation: "ប្រសិនបើ Authenticated User Navigate ទៅ /login, Auth-aware Login Page ត្រូវ Detect via useAuth() ហើយ Redirect ទៅ /dashboard ភ្លាម។ នេះការពារ Confusion (Seeing Login form after already logged in) និង Accidental Re-login ។"
+      - "ដើម្បីការពារមិនឱ្យ User ចុច Submit ច្រើនដងជាប់ៗគ្នា (Double Submission) ដែលអាចបង្កឱ្យបាញ់ Request ស្ទួនទៅ Server និងកាត់បន្ថយ Network Spam"
+      - "ដើម្បីឱ្យ Form ដំណើរការបានលឿនជាងមុននៅលើ Browser ចាស់ៗ"
+      - "ដើម្បីប្តូរពណ៌ Button តាមរយៈ CSS តែប៉ុណ្ណោះ"
+      - "វាជាលក្ខខណ្ឌកំហិតរបស់ HTML5"
+    correctAnswer: 1
+    explanation: "ពេល User ចុច Submit ប្រព័ន្ធត្រូវចំណាយពេល Network Roundtrip (1-2s)។ បើមិន Disable Button ទេ User អាចចុច Click 3-4 ដង ដែលធ្វើឱ្យ Server ទទួល Duplicate Requests បង្កើត Account ស្ទួន ឬ Error។"
+
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃការពិនិត្យ Form Validation នៅ Client-Side មុននឹងបាញ់ Request ទៅ Server?"
+    options:
+      - "ផ្តល់ Immediate Feedback ជូន User ភ្លាមៗ (ឧ. Email ខុសទម្រង់, Password ខ្លីពេក) ដោយមិនចាំបាច់រង់ចាំ Network Roundtrip ជួយសន្សំ Server Resources និងផ្តល់ UX ល្អឥតខ្ចោះ"
+      - "វាជំនួស Server-Side Validation បាន ១០០% ដោយមិនចាំបាច់មានការឆែកនៅលើ Server ទៀតឡើយ"
+      - "ដើម្បីធ្វើឱ្យកូដ JavaScript កាន់តែវែង និងស្មុគស្មាញ"
+      - "ដើម្បីលាក់ Password ពី Browser Console"
+    correctAnswer: 1
+    explanation: "Client-side validation ជួយឱ្យ User ដឹងកំហុសភ្លាមៗ (Instant UX)។ ទោះជាយ៉ាងណា Server-side validation នៅតែជាកាតព្វកិច្ចដាច់ខាតសម្រាប់ Security ព្រោះ Hacker អាច Bypass Client Validation បាន។"
+
+  - question: "ហេតុអ្វី Login Page គួរ Detect និង Redirect User ដែល Authenticated រួចហើយទៅកាន់ Dashboard ភ្លាមៗ?"
+    options:
+      - "ព្រោះ User ដែល Login រួចរាល់ហើយ មិនចាំបាច់ត្រូវមើល Form Login សារជាថ្មីទៀតទេ — ការ Redirect ភ្លាមៗជួយការពារ Confusion និងការ Re-login ស្ទួន"
+      - "ដើម្បីធ្វើ URL ឱ្យមើលទៅស្អាត"
+      - "ព្រោះ React Router មិនអនុញ្ញាតឱ្យ Render Form ពេលមាន User State"
+      - "ដើម្បីកាត់បន្ថយទំហំ Bundle របស់ React"
+    correctAnswer: 1
+    explanation: "ប្រសិនបើ User ដែលបាន Login រួចហើយ ព្យាយាមបើក URL `/login` ដោយផ្ទាល់ Component គួរប្រើ `<Navigate to=\"/dashboard\" replace />` ដើម្បីនាំគាត់ទៅកាន់ទំព័រ Dashboard ភ្លាមៗ។"
 ---
 
-## 📝 1. Normal HTML Auth Form Structure (ទម្រង់ HTML ធម្មតា)
+## 🗺️ ១. ស្ថាបត្យកម្ម Form Submission & Validation Lifecycle
 
-មុននឹងបន្ថែម React State & API Calls នេះជារចនាសម្ព័ន្ធ HTML ធម្មតាសម្រាប់ទំព័រ Login៖
-
-```html
-<!-- HTML Login Form Structure -->
-<div class="login-card">
-  <h2>ចូលប្រើប្រាស់ (Login)</h2>
-
-  <!-- Server Error Box -->
-  <div class="alert-error">⚠️ អ៊ីម៉ែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ!</div>
-
-  <form action="/api/login" method="POST">
-    <!-- Email Field -->
-    <div class="field-group">
-      <label for="email">អ៊ីម៉ែល</label>
-      <input type="email" id="email" name="email" required placeholder="your@email.com" />
-    </div>
-
-    <!-- Password Field -->
-    <div class="field-group">
-      <label for="password">ពាក្យសម្ងាត់</label>
-      <input type="password" id="password" name="password" required placeholder="••••••••" />
-    </div>
-
-    <!-- Submit Button -->
-    <button type="submit">ចូលគណនី</button>
-  </form>
-</div>
+```mermaid
+flowchart TD
+    A["User បញ្ចូលទិន្នន័យក្នុង Input Fields"] --> B["onChange Event ធ្វើបច្ចុប្បន្នភាព React State"]
+    B --> C["User ចុច Submit Button"]
+    C --> D{"Client-Side Validation ត្រឹមត្រូវឬទេ?"}
+    D -- "❌ មានកំហុស (Errors)" --> E["បង្ហាញ Validation Errors ក្រហមលើ UI"]
+    D -- "✅ ត្រឹមត្រូវ (Valid)" --> F["កំណត់ isSubmitting = true (Disable Button & Show Spinner)"]
+    F --> G["ផ្ញើ POST Request ទៅ Auth API endpoint"]
+    G --> H{"Server ឆ្លើយតប status 200 OK?"}
+    H -- "❌ បរាជ័យ (401/400)" --> I["បង្ហាញ Server Error Message + Re-enable Button"]
+    H -- "✅ ជោគជ័យ (200 OK)" --> J["រក្សាទុក Token ក្នុង Context/Storage"]
+    J --> K["Navigate ទៅកាន់ /dashboard (replace: true)"]
 ```
 
 ---
 
-## 💻 2. React Login Handler & API Submission
+## 📝 ២. Form State & Validation Logic
 
-### 💻 Code សម្រាប់តែ handleSubmit Function:
+ដើម្បីបង្កើត Form ដែលមានគុណភាពកម្រិត Production យើងត្រូវគ្រប់គ្រង States យ៉ាងហោចណាស់ ៤ យ៉ាង៖
+1. **`formData`**: ផ្ទុកតម្លៃអក្សរដែល User កំពុងវាយបញ្ចូល (`email`, `password`, `name`)។
+2. **`errors`**: ផ្ទុកសារកំហុសសម្រាប់ Field នីមួយៗ (Client-side validation)។
+3. **`isSubmitting`**: Boolean បញ្ជាក់ពីស្ថានភាពកំពុងផ្ញើ Request (Loading state)។
+4. **`serverError`**: សារកំហុសដែលឆ្លើយតបត្រឡប់មកពី Server (ឧ. «អ៊ីម៉ែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ!»)។
 
-```javascript
-const [formData, setFormData] = useState({ email: '', password: '' });
-const [isLoading, setIsLoading] = useState(false);
-const [serverError, setServerError] = useState('');
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setServerError('');
-
-  try {
-    // 1. បាញ់ POST request ទៅ Server
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await response.json();
-
-    // 2. ពិនិត្យ Response
-    if (!response.ok) {
-      throw new Error(data.message || 'អ៊ីម៉ែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ!');
-    }
-
-    // 3. Login ជោគជ័យ: រក្សាទុក Token និង User ទិន្នន័យ
-    login(data.user, data.token);
-    navigate('/dashboard', { replace: true });
-  } catch (err) {
-    setServerError(err.message);
-  } finally {
-    setIsLoading(false);
-  }
-};
-```
-
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `e.preventDefault();`
-   - ទប់ស្កាត់ការ Refresh ទំព័ររបស់ HTML Form។
-2. `fetch('/api/auth/login', { method: 'POST', ... })`
-   - បញ្ជូន Credentials ទៅកាន់ Backend ក្នុងទម្រង់ JSON body។
-3. `if (!response.ok) throw new Error(...)`
-   - ប្រសិនបើ Server ឆ្លើយតប status 400 ឬ 401 វានឹងបោះ Error ទៅ block `catch`។
-4. `login(data.user, data.token)`
-   - ហៅ Action ពី AuthContext ដើម្បី Save token ចូល LocalStorage និង Update Global State។
-5. `navigate('/dashboard', { replace: true })`
-   - នាំ User ទៅកាន់ Dashboard ភ្លាមៗ។
+### 🔍 ក្បួន Validation Rules (Regex & Logic):
+- **Email Regex:** `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
+- **Password Length:** យ៉ាងហោចណាស់ ៦ ទៅ ៨ តួអក្សរ
+- **Confirm Password:** ត្រូវតែដូចគ្នា ១០០% ទៅនឹង Password
 
 ---
 
-## 🚀 3. Complete Integrated LoginPage Component
+## 💻 ៣. Complete Integrated LoginForm Component
+
+ខាងក្រោមនេះជា Component ពេញលេញសម្រាប់ Login Form ដែលមាន Show/Hide Password, Client Validation, Loading Spinner, Server Error Box, និង Auto-redirect៖
 
 ```jsx
-import { useState } from 'react';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+// src/pages/LoginPage.jsx
+import React, { useState } from 'react';
+import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const { isAuthenticated, login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // ១. Form Fields State
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  // ២. UI & Error States
+  const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // ប្រសិនបើ User បាន Login រួចហើយ មិនឱ្យមើល Login Page ទៀតទេ
+  // ៣. ប្រសិនបើ User បាន Login រួចហើយ មិនឱ្យមើល Login Page ទៀតទេ
+  const from = location.state?.from?.pathname || '/dashboard';
   if (!authLoading && isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
+  // ៤. Client-Side Validation Function
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'សូមបញ្ចូលអ៊ីម៉ែលរបស់អ្នក!';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'ទម្រង់អ៊ីម៉ែលមិនត្រឹមត្រូវឡើយ (ឧ. user@example.com)!';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'សូមបញ្ចូលពាក្យសម្ងាត់!';
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'ពាក្យសម្ងាត់ត្រូវមានយ៉ាងតិច ៦ តួអក្សរ!';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // ៥. Form Change Handler
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // សម្អាត Error នៃ Field នោះចោលភ្លាមពេល User កំពុងកែតម្រូវ
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+    if (serverError) setServerError('');
+  };
+
+  // ៦. Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ឆែក Client validation សិន
+    if (!validateForm()) return;
+
     setIsSubmitting(true);
     setServerError('');
 
     try {
-      // Demo authentication simulation
-      await new Promise((r) => setTimeout(r, 1000));
+      // ឧទាហរណ៍ជាក់ស្តែង: const res = await fetch('/api/auth/login', { method: 'POST', body: JSON.stringify(formData) });
+      // ក្លែងធ្វើ Network Request Delay ១ វិនាទី
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
+      // Mock Credential Check
       if (formData.email === 'admin@test.com' && formData.password === 'password123') {
-        login({ id: '1', name: 'Admin User', email: formData.email, role: 'admin' }, 'mock-jwt-token');
-        navigate('/dashboard', { replace: true });
+        const mockUser = {
+          id: 'usr_01',
+          name: 'Sok Dara',
+          email: formData.email,
+          role: 'admin',
+        };
+        const mockToken = 'mock-jwt-token-xyz-123456';
+
+        // Update Global Auth State
+        login(mockUser, mockToken);
+
+        // Navigate ទៅកាន់ទំព័រដើម ឬ Dashboard
+        navigate(from, { replace: true });
       } else {
-        throw new Error('Email: admin@test.com | Password: password123');
+        throw new Error('អ៊ីម៉ែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវឡើយ! (សាកល្បង: admin@test.com / password123)');
       }
     } catch (err) {
       setServerError(err.message);
@@ -150,61 +177,150 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-4">
-      <div className="w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-6 border border-slate-100 dark:border-slate-700">
-        <h2 className="text-2xl font-black text-center text-slate-800 dark:text-white mb-2">
-          🔐 ចូលប្រើប្រាស់
-        </h2>
-        <p className="text-xs text-slate-400 text-center mb-6">បញ្ចូលគណនីរបស់អ្នកដើម្បីបន្ត</p>
+    <div className="min-h-screen bg-slate-100 dark:bg-slate-950 flex items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-8">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 text-2xl font-black mb-3">
+            🔐
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">ចូលគណនី</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+            សូមបញ្ចូល Email និង Password របស់អ្នកដើម្បីបន្ត
+          </p>
+        </div>
 
+        {/* Server Error Alert */}
         {serverError && (
-          <div className="mb-4 p-3 bg-red-50 text-red-600 text-xs rounded-xl border border-red-200">
-            ⚠️ {serverError}
+          <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-start gap-3 text-rose-600 dark:text-rose-400 text-sm">
+            <span className="text-lg">⚠️</span>
+            <p className="leading-relaxed font-medium">{serverError}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form Elements */}
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
+          {/* Email Field */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Email</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+              អ៊ីម៉ែល (Email Address)
+            </label>
             <input
               type="email"
-              required
+              name="email"
               value={formData.email}
-              onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+              onChange={handleChange}
               placeholder="admin@test.com"
-              className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
+              disabled={isSubmitting}
+              className={`w-full px-4 py-3 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
+                errors.email
+                  ? 'border-rose-500 bg-rose-500/5 focus:ring-rose-400'
+                  : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-blue-500'
+              } text-slate-900 dark:text-white`}
             />
+            {errors.email && (
+              <p className="mt-1.5 text-xs text-rose-500 font-medium">❌ {errors.email}</p>
+            )}
           </div>
 
+          {/* Password Field */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={formData.password}
-              onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
-              placeholder="••••••••"
-              className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm"
-            />
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                ពាក្យសម្ងាត់ (Password)
+              </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+              >
+                ភ្លេចពាក្យសម្ងាត់?
+              </Link>
+            </div>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                disabled={isSubmitting}
+                className={`w-full px-4 py-3 pr-11 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
+                  errors.password
+                    ? 'border-rose-500 bg-rose-500/5 focus:ring-rose-400'
+                    : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-blue-500'
+                } text-slate-900 dark:text-white`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs font-bold"
+              >
+                {showPassword ? '🙈 Hide' : '👁️ Show'}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="mt-1.5 text-xs text-rose-500 font-medium">❌ {errors.password}</p>
+            )}
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition"
+            className="w-full py-3.5 px-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
           >
-            {isSubmitting ? 'កំពុងផ្ទៀងផ្ទាត់...' : 'ចូលគណនី →'}
+            {isSubmitting ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>កំពុងផ្ទៀងផ្ទាត់...</span>
+              </>
+            ) : (
+              <span>ចូលគណនី →</span>
+            )}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-500 mt-4">
-          មិនទាន់មានគណនី?{' '}
-          <Link to="/register" className="text-blue-600 font-bold hover:underline">
-            ចុះឈ្មោះទីនេះ
-          </Link>
-        </p>
+        {/* Footer Link */}
+        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-center">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            មិនទាន់មានគណនីនៅឡើយ?{' '}
+            <Link
+              to="/register"
+              className="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+            >
+              ចុះឈ្មោះគណនីថ្មី
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 ```
+
+---
+
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `const [formData, setFormData] = useState({ email: '', password: '' });`
+   - ផ្ទុកតម្លៃអក្សរនៃ Input នីមួយៗជា Object តែមួយ ដែលងាយស្រួលគ្រប់គ្រង និងពង្រីកបន្ថែម។
+2. `if (!authLoading && isAuthenticated) return <Navigate to={from} replace />;`
+   - ប្រសិនបើ User បាន Login រួចរាល់ យើង Redirect គាត់ចេញពី Login Page ភ្លាមៗទៅកាន់ `from` (URL ដើមដែលគាត់ចង់ចូល) ឬ `/dashboard`។
+3. `const validateForm = () => { ... }`
+   - ត្រួតពិនិត្យភាពត្រឹមត្រូវនៃ Email និង Password ដោយប្រើ Regex និង Length Check មុននឹងអនុញ្ញាតឱ្យបញ្ជូន Request ទៅ Server។
+4. `handleChange = (e) => { ... }`
+   - ប្រើ Computed Property `[e.target.name]: e.target.value` ដើម្បី Update State នៃ Input ណាដែលកំពុងត្រូវបានវាយ និងលុបបំបាត់ Error របស់ Field នោះចេញភ្លាម។
+5. `login(mockUser, mockToken);`
+   - ហៅ Action ពី `useAuth()` ដើម្បី Save User Data និង Token ចូល Global State + Storage ដំណាលគ្នា។
+6. `disabled={isSubmitting}`
+   - បិទមិនឱ្យ User កែប្រែ Input ឬចុច Button ស្ទួនក្នុងអំឡុងពេល Request កំពុងដំណើរការ។
+
+---
+
+## 💡 ៥. Best Practices & Security Reminders
+
+> [!TIP]
+> 1. **Trim White Spaces:** ប្រើ `.trim()` លើ Field អ៊ីម៉ែលជានិច្ច ដើម្បីកុំឱ្យមានចន្លោះ Space ដោយអចេតនានៅខាងមុខ ឬខាងក្រោយ។
+> 2. **Never Log Passwords:** ហាមសរសេរ `console.log(formData.password)` ក្នុងកូដ Production។
+> 3. **Accessible Labels:** ប្រើ Tag `<label>` ត្រឹមត្រូវជានិច្ចសម្រាប់ Screen Readers និងការចុច Focus លើ Input។
+> 4. **Disable Native HTML Tooltips (`noValidate`):** ដាក់ `noValidate` លើ Tag `<form>` ប្រសិនបើអ្នកចង់ប្រើប្រាស់ Custom Error Messages ផ្ទាល់ខ្លួនរបស់ React។

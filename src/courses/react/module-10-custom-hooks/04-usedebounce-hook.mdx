@@ -1,127 +1,178 @@
 ---
-title: Building useDebounce — Delay-Based Value Hook
-description: រៀនសាងសង់ useDebounce(value, delay) Custom Hook ដែលពន្យារការ Update Value រហូតដល់ User ឈប់វាយ Input ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗយ៉ាងក្បោះក្បាយ។
+title: "Building useDebounce — Timing, Throttling & Search Optimization"
+description: សាងសង់ Custom Hook useDebounce(value, delay) ពីដំបូង — ស្វែងយល់ពីភាពខុសគ្នារវាង Debounce និង Throttle, ការគ្រប់គ្រង Timer Cleanup ក្នុង useEffect, ការទប់ស្កាត់ UI Frame Drop, និងការកាត់បន្ថយបន្ទុក Server លើ Live Search។
 objectives:
-  - យល់ពីគោលការណ៍ Debouncing ក្នុងការកាត់បន្ថយ CPU / Network Workload
-  - ចេះសាងសង់ useDebounce Hook ដោយប្រើ useState និង useEffect cleanup
-  - ចេះយក useDebounce មកផ្សំជាមួយ useFetch ដើម្បីបង្កើត Live Search
-  - យល់ពីភាពខុសគ្នារវាង Debounce និង Throttle
+  - "យល់ច្បាស់ពី Mental Model នៃ Debouncing ធៀបនឹង Throttling"
+  - "ចេះសាងសង់ `useDebounce` Hook ដោយប្រើ `useState` និង `useEffect` cleanup"
+  - "ចេះសាងសង់ `useThrottle` Hook សម្រាប់ Scroll និង Resize Events"
+  - "ចេះយក `useDebounce` ទៅប្រើប្រាស់ជាមួយ Live API Search ដើម្បីសន្សំ Bandwidth ដល់ ៩០%"
 module: module-10-custom-hooks
 order: 4
 quiz:
-  - question: "តើ Debounce ខុស Throttle ដូចម្តេច?"
+  - question: "តើ 'Debounce' និង 'Throttle' មានភាពខុសគ្នាជាយុទ្ធសាស្ត្រដូចម្តេច?"
     options:
-      - "ពួកវាដូចគ្នា ១០០%"
-      - "Debounce ពន្យារ Execution រហូតដល់ Activity ឈប់ (ល្អសម្រាប់ Search) ចំណែក Throttle ធានា Execution ច្រើនបំផុតម្ដង ក្នុង X ms (ល្អសម្រាប់ Scroll/Resize Events)"
-      - "Throttle ប្រើ localStorage ចំណែក Debounce ប្រើ sessionStorage"
-      - "Debounce ដំណើរការតែ Server-side"
-    correctAnswer: 2
-    explanation: "Debounce: 'ហៅ function បន្ទាប់ X ms ក្រោយ Last Event' — Search Box (ចង់ fetch ពេល User ឈប់វាយ)។ Throttle: 'ហៅ function ច្រើនបំផុត ម្ដង ក្នុង X ms' — Scroll Handler, Window Resize (ចង់ rate-limit ការ update)។"
+      - "Debounce ពន្យារការ Execute រហូតដល់ User ឈប់ធ្វើសកម្មភាព (ល្អសម្រាប់ Search Box) ចំណែក Throttle ធានាថានឹង Execute ច្រើនបំផុត ១ ដងក្នុងរយៈពេល X ms (ល្អសម្រាប់ Scroll, Window Resize)"
+      - "ពួកវាទាំងពីរដំណើរការដូចគ្នាទាំងស្រុង"
+      - "Debounce ដំណើរការលើ Server រីឯ Throttle ដំណើរការលើ Database"
+      - "Throttle សម្រាប់ CSS រីឯ Debounce សម្រាប់ HTML"
+    correctAnswer: 1
+    explanation: "Debounce: រង់ចាំ X ms បន្ទាប់ពី Key ទីចុងក្រោយ (User ឈប់វាយទើប Fetch)។ Throttle: កម្រិតចំនួនដងនៃការ Execute មិនឱ្យលើសពី ១ ដងរៀងរាល់ X ms (ឧ. ពេល User កំពុង Scroll ទំព័រ)។"
+
+  - question: "នៅក្នុង `useDebounce` ហេតុអ្វីបានជាត្រូវសរសេរ `return () => clearTimeout(timer);` ក្នុង `useEffect`?"
+    options:
+      - "ដើម្បីលុប Timer ចាស់ចោលរាល់ពេល User វាយអក្សរបន្ថែម ធានាថា Timer នឹងរាប់ 400ms ឡើងវិញពីចំណុចសូន្យ"
+      - "ដើម្បីបិទ Browser Tab"
+      - "ដើម្បីបង្កើនល្បឿន Internet"
+      - "ដើម្បីបម្លែងអក្សរទៅជាលេខ"
+    correctAnswer: 1
+    explanation: "នេះជាចំណុចស្នូលនៃ Debounce! នៅពេល `value` ប្រែប្រួល មុននឹង `setTimeout` ចាស់ដាច់ម៉ោង React នឹងរត់ Cleanup function ដើម្បី `clearTimeout` ចោលភ្លាមៗ។ ដូច្នេះ Function នឹងបាញ់ចេញតែមួយដងគត់នៅពេល User ឈប់វាយអក្សរ។"
 ---
 
-## ⏱️ 1. Mental Model: Debounce Concept
+## ⏱️ ១. Mental Model: Debounce vs Throttle
 
 ```
-User types "R"     --> (Timer 400ms started)
-User types "Re"    --> (Timer 400ms restarted!)
-User types "Rea"   --> (Timer 400ms restarted!)
-User types "React" --> (Timer 400ms restarted!)
-... (User pauses for 400ms) ...
-===> Timer completes! Trigger Network Search for "React" ✅
+─── DEBOUNCE (រង់ចាំឈប់សកម្មភាពទើបដំណើរការ) ───
+User types:  [R] -> [e] -> [a] -> [c] -> [t]
+Timer:       (400ms restarted 5 times...) ───(User ឈប់វាយ 400ms)───> [🔥 EXECUTE FETCH 'React']
+
+─── THROTTLE (ដំណើរការទៀងទាត់តាមចន្លោះពេលថេរ) ───
+User scrolls: [~~~~~~~~~~ Scrolling Non-stop 2000ms ~~~~~~~~~~]
+Execution:    [🔥 Execute at 0ms] ──(500ms)──> [🔥 Execute at 500ms] ──(500ms)──> [🔥 Execute at 1000ms]
 ```
 
 ---
 
-## 💻 2. Building `useDebounce` Hook
-
-### 💻 Code សម្រាប់តែ `useDebounce` Hook:
+## 💻 ២. កូដពេញលេញនៃ `src/hooks/useDebounce.js`
 
 ```javascript
 // src/hooks/useDebounce.js
 import { useState, useEffect } from 'react';
 
 export function useDebounce(value, delay = 400) {
-  // 1. State សម្រាប់ផ្ទុក debounced value
+  // ១. State រក្សាទុកតម្លៃដែលបានពន្យារពេលរួច
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    // 2. បង្កើត timer ដើម្បី update តម្លៃក្រោយ delay ms
-    const handler = setTimeout(() => {
+    // ២. បង្កើត Timer ដើម្បី Update តម្លៃក្រោយ delay ms
+    const timer = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
 
-    // 3. Cleanup: លុប timer ចាស់ចោល ប្រសិនបើ value ឬ delay ប្រែប្រួលមុនពេលចប់
+    // ៣. 🧹 CLEANUP: លុប Timer ចាស់ចោល ប្រសិនបើ value ផ្លាស់ប្តូរមុនពេល 400ms ចប់
     return () => {
-      clearTimeout(handler);
+      clearTimeout(timer);
     };
   }, [value, delay]);
 
-  // 4. Return តម្លៃដែលបាន debounce រួច
   return debouncedValue;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `export function useDebounce(value, delay = 400)`
-   - ទទួល parameter `value` (តម្លៃ input ដើម) និង `delay` (ចំនួន milliseconds ត្រូវរង់ចាំ លំនាំដើមគឺ 400ms)។
-2. `const [debouncedValue, setDebouncedValue] = useState(value);`
-   - រក្សាទុកតម្លៃដែលពន្យារពេលរួច។ វានឹងមិន update ភ្លាមៗរាល់ពេលចុច keyboard ឡើយ។
-3. `const handler = setTimeout(() => { setDebouncedValue(value); }, delay);`
-   - កំណត់ម៉ោងរង់ចាំ — បើគ្មានការវាយអក្សរបន្ថែមទេ វានឹង update `debouncedValue = value`។
-4. `return () => clearTimeout(handler);`
-   - **ចំណុចស្នូលនៃ Debounce:** ប្រសិនបើ User វាយអក្សរថ្មីមុនពេល 400ms ផុតកំណត់ React នឹង run cleanup function នេះភ្លាមដើម្បីលុប Timer ចាស់ចោល។ ដូច្នេះ `setDebouncedValue` នឹងមិនត្រូវបានហៅឡើយ រហូតទាល់តែ User ឈប់វាយ។
-5. `return debouncedValue;`
-   - បញ្ជូនតម្លៃ Debounced ទៅឱ្យ Component យកទៅប្រើក្នុងការ Fetch API ឬ Filter List។
+## ⚡ ៣. បន្ថែម ៖ កូដនៃ `src/hooks/useThrottle.js` (សម្រាប់ Scroll/Resize)
+
+```javascript
+// src/hooks/useThrottle.js
+import { useState, useEffect, useRef } from 'react';
+
+export function useThrottle(value, interval = 500) {
+  const [throttledValue, setThrottledValue] = useState(value);
+  const lastExecuted = useRef(Date.now());
+
+  useEffect(() => {
+    if (Date.now() >= lastExecuted.current + interval) {
+      lastExecuted.current = Date.now();
+      setThrottledValue(value);
+    } else {
+      const timer = setTimeout(() => {
+        lastExecuted.current = Date.now();
+        setThrottledValue(value);
+      }, interval);
+
+      return () => clearTimeout(timer);
+    }
+  }, [value, interval]);
+
+  return throttledValue;
+}
+```
 
 ---
 
-## 🛠️ 3. Using `useDebounce` with Live Search
-
-### 💻 Code សម្រាប់ Component:
+## 🚀 ៤. ការអនុវត្តជាក់ស្តែង ៖ Live Search Performance Benchmark
 
 ```jsx
+// src/components/LiveSearchBenchmark.jsx
 import { useState, useEffect } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 
-export default function SearchUsers() {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  // ប្រើ Hook ដើម្បីពន្យារការ update searchTerm 400ms
-  const debouncedSearch = useDebounce(searchTerm, 400);
+export default function LiveSearchBenchmark() {
+  const [keystrokes, setKeystrokes] = useState('');
+  const debouncedSearch = useDebounce(keystrokes, 400);
+
+  const [rawKeyCount, setRawKeyCount] = useState(0);
+  const [networkCalls, setNetworkCalls] = useState(0);
+
+  const handleTyping = (e) => {
+    setKeystrokes(e.target.value);
+    setRawKeyCount((c) => c + 1);
+  };
 
   useEffect(() => {
-    // Effect នេះនឹង Trigger តែពេល debouncedSearch ប្រែប្រួលប៉ុណ្ណោះ!
-    if (debouncedSearch) {
-      console.log('Fetching API for:', debouncedSearch);
-      // fetch(`/api/search?q=${debouncedSearch}`) ...
+    if (debouncedSearch.trim()) {
+      // ក្លែងធ្វើការបាញ់ HTTP Request
+      setNetworkCalls((c) => c + 1);
     }
   }, [debouncedSearch]);
 
+  const savings =
+    rawKeyCount > 0
+      ? Math.round(((rawKeyCount - networkCalls) / rawKeyCount) * 100)
+      : 0;
+
   return (
-    <div className="max-w-md mx-auto p-4">
-      <label className="block text-sm font-bold mb-2">🔎 Live Search</label>
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-5">
+      <div>
+        <h3 className="font-bold text-base text-slate-800 dark:text-white flex items-center gap-2">
+          <span>⚡</span> Live Search Debounce Benchmark
+        </h3>
+        <p className="text-xs text-slate-500">សង្កេតមើលការកាត់បន្ថយ Network Requests ផ្ទាល់ភ្នែក</p>
+      </div>
+
       <input
         type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="វាយពាក្យស្វែងរកនៅទីនេះ..."
-        className="w-full px-3 py-2 border rounded-xl"
+        value={keystrokes}
+        onChange={handleTyping}
+        placeholder="សាកល្បងវាយអក្សរឱ្យលឿននៅទីនេះ..."
+        className="w-full px-4 py-2.5 border rounded-2xl text-xs dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
-      <div className="mt-3 text-xs text-slate-500">
-        <p>Immediate Value: <strong>{searchTerm}</strong></p>
-        <p>Debounced Value (API Target): <strong className="text-blue-600">{debouncedSearch}</strong></p>
+
+      {/* BENCHMARK STATS */}
+      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <span className="block text-[10px] text-slate-400 font-bold uppercase">ចុច Keyboard</span>
+          <span className="font-black text-sm text-slate-800 dark:text-white">{rawKeyCount} ដង</span>
+        </div>
+        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <span className="block text-[10px] text-slate-400 font-bold uppercase">បាញ់ API</span>
+          <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">{networkCalls} ដង</span>
+        </div>
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-100 dark:border-emerald-900">
+          <span className="block text-[10px] text-emerald-600 font-bold uppercase">សន្សំបាន</span>
+          <span className="font-black text-sm text-emerald-600">{savings}%</span>
+        </div>
       </div>
     </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `const [searchTerm, setSearchTerm] = useState('');`
-   - Input Box ឆ្លើយតបលឿនភ្លាមៗជាមួយ `searchTerm` ធ្វើឱ្យ UX វាយអក្សររលូន (គ្មាន lag)។
-2. `const debouncedSearch = useDebounce(searchTerm, 400);`
-   - បំប្លែង `searchTerm` ទៅជា `debouncedSearch` ដែល update តែពេល user ឈប់វាយ។
-3. `useEffect(() => { ... }, [debouncedSearch]);`
-   - Network Request នឹងហៅត្រឹមតែ ១ ដងគត់ ជំនួសឱ្យការហៅគ្រប់អក្សរនីមួយៗ (សន្សំ Server Bandwidth រាប់រយដង)។
+## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+
+| បច្ចេកទេស | ដំណើរការ | ករណីប្រើប្រាស់ល្អបំផុត |
+| :--- | :--- | :--- |
+| **`useDebounce`** | រង់ចាំ User ឈប់សកម្មភាព X ms | Search Input, Form Auto-save, Window Resize Stop |
+| **`useThrottle`** | ដំណើរការទៀងទាត់រៀងរាល់ X ms | Infinite Scroll, Scroll Spy, Canvas Drawing |

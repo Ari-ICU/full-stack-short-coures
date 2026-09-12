@@ -1,144 +1,97 @@
 ---
-title: "Mini Project — GitHub User Search"
-description: សាកល្បងអនុវត្ត Data Fetching ពេញលេញ ដោយចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Card សិន រួចបំប្លែងទៅជា React GitHub User Search App ដែលមាន Debounce, Abort, Loading Skeleton, Error State, និង Empty State។
+title: "Mini Project — Building an Enterprise GitHub Explorer & Repo Inspector"
+description: អនុវត្តបង្កើតប្រព័ន្ធ GitHub Explorer ពេញលេញមួយដោយរួមបញ្ចូល Data Fetching Architecture, Custom useDebounce Hook, AbortController Cancellation, GitHub REST API, និង Tri-State UI (Loading Skeleton, Rate Limit Alert, Success Grid)។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML Profile Card
-  - អនុវត្ត fetch + AbortController + Debounce Pattern រួមគ្នា
-  - ចេះបង្ហាញ GitHub User Profile Card ជាមួយ Real Data
-  - ចេះគ្រប់គ្រង Tri-State UI (loading / error / success) ពេញលេញ
+  - "អនុវត្ត Data Fetching Architecture ពេញលេញលើ GitHub Public REST API"
+  - "រួមបញ្ចូល `useDebounce` (500ms) ជាមួយ `AbortController` ដើម្បីទប់ស្កាត់ Rate Limiting និង Race Conditions"
+  - "ចេះដោះស្រាយ HTTP Errors ជាក់ស្តែង (404 Not Found និង 403 API Rate Limit Exceeded)"
+  - "បង្កើត UI ស្អាតកម្រិត Professional ជាមួយ Profile Stats, Repository Star Badges, និង Skeleton Loaders"
 module: module-9-data-fetching
 order: 4
 quiz:
-  - question: "ក្នុង GitHub Search, ហេតុអ្វីយើងប្រើ Debounce 500ms ជំនួសនឹង fetch ភ្លាមៗ?"
+  - question: "នៅក្នុង GitHub Explorer នេះ ហេតុអ្វីបានជាយើងកំណត់ Debounce 500ms ជំនួសឱ្យការ Fetch ភ្លាមៗរាល់ពេល User ចុចក្តារចុច?"
     options:
-      - "GitHub API ដំណើរការបានតែ 300ms ក្នុងម្ដង"
-      - "ការ Debounce ការពារ API Rate Limiting (GitHub ៦០ requests/hour) និងកាត់បន្ថយ Network calls ដោយ fetch តែពេល User ឈប់វាយ"
-      - "ដើម្បីធ្វើឱ្យ Animation មើលទៅស្អាត"
-      - "Debounce ធ្វើឱ្យ TypeScript Error ថយចុះ"
-    correctAnswer: 2
-    explanation: "GitHub Public API មាន Rate Limit ៦០ request/hour សម្រាប់ Unauthenticated calls។ Debounce ការពារ Rate Limiting ដោយ Wait រហូតដល់ User ឈប់វាយ ហើយបន្ទាប់មកទើប fetch ម្ដង។"
+      - "ព្រោះ GitHub Public API កំណត់ Rate Limit ត្រឹមតែ ៦០ Requests ក្នុង ១ ម៉ោងប៉ុណ្ណោះសម្រាប់ Unauthenticated Users។ ការ Debounce ធានាថានឹងបាញ់ Request តែពេល User ឈប់វាយអក្សរប៉ុណ្ណោះ"
+      - "ដើម្បីឱ្យរូប Avatar បង្ហាញច្បាស់ជាងមុន"
+      - "ដើម្បីបម្លែងកូដទៅជា TypeScript ដោយស្វ័យប្រវត្តិ"
+      - "ព្រោះ GitHub API មិនអនុញ្ញាតឱ្យប្រើ async/await ឡើយ"
+    correctAnswer: 1
+    explanation: "GitHub Public API មានកម្រិតតឹងរ៉ឹង (Rate Limit 60 calls/hr)។ ប្រសិនបើគ្មាន Debounce ការវាយ Username តែ ៦ ពាក្យអាចស៊ីអស់ ៦០ requests ធ្វើឱ្យជាប់ Error 403 Forbidden ភ្លាមៗ!"
+
+  - question: "តើអ្វីជាតួនាទីរបស់ `Promise.all([fetchUser, fetchRepos])` ក្នុងការទាញយកទិន្នន័យពី GitHub?"
+    options:
+      - "ទាញយកទាំង Profile User និងបញ្ជី Repositories ក្នុងពេលដំណាលគ្នាជា Parallel ដើម្បីកាត់បន្ថយពេលវេលារង់ចាំ (Latency)"
+      - "ដើម្បីលុប Repositories ចាស់ៗចោល"
+      - "ដើម្បីការពារមិនឱ្យ Browser បិទទំព័រ"
+      - "ដើម្បីឱ្យ GitHub ផ្ញើ Email ទៅកាន់ User"
+    correctAnswer: 1
+    explanation: "`Promise.all()` អនុញ្ញាតឱ្យ HTTP Requests ទាំងពីរដំណើរការទន្ទឹមគ្នា (Parallel) ជំនួសឱ្យការរង់ចាំមួយចប់ទើបមួយទៀតដំណើរការ (Sequential Waterfall) ដែលជួយឱ្យ UI បង្ហាញទិន្នន័យលឿនជាងមុនទ្វេដង។"
 ---
 
-## 🎨 1. Normal HTML Profile Card Structure
+## 🐙 ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Architecture Blueprint)
 
-មុននឹងសរសេរ React State & Fetch Logic នេះជារចនាសម្ព័ន្ធ HTML ធម្មតារបស់ User Profile Card៖
+នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **GitHub Explorer & Repo Inspector** ដែលមានសមត្ថភាពទាញយក Profile និង Top Repositories ពី GitHub Public API ៖
 
-```html
-<!-- HTML GitHub User Profile Card -->
-<div class="user-card">
-  <!-- Search Box -->
-  <div class="search-bar">
-    <input type="text" placeholder="ស្វែងរក GitHub username..." />
-  </div>
+```mermaid
+graph TD
+    Input["Search Input (Username)"] --> Debounce["⚡ useDebounce (500ms Delay)"]
+    Debounce --> Effect["useEffect (Fetch Trigger + AbortController)"]
+    
+    subgraph ParallelFetch["Parallel API Requests (Promise.all)"]
+        direction TB
+        F1["GET https://api.github.com/users/{username}"]
+        F2["GET https://api.github.com/users/{username}/repos?sort=updated"]
+    end
 
-  <!-- Profile Content -->
-  <div class="profile-body">
-    <img src="https://avatars.githubusercontent.com/u/1" alt="Avatar" class="avatar" />
-    <h3 class="name">Dara Sok</h3>
-    <p class="username">@darasok</p>
-    <p class="bio">Full-stack Web Developer passionate about React & Node.js</p>
+    Effect --> ParallelFetch
+    ParallelFetch --> State["Tri-State UI Management"]
+    
+    State --> Skeleton["⏳ Loading Skeleton (Profile + Repos)"]
+    State --> ErrorUI["⚠️ Error Banner (404 Not Found / 403 Rate Limit)"]
+    State --> SuccessUI["🎉 Profile Card + Top Repositories Grid"]
 
-    <div class="stats-row">
-      <div class="stat-item">
-        <span class="label">Repos</span>
-        <span class="value">24</span>
-      </div>
-      <div class="stat-item">
-        <span class="label">Followers</span>
-        <span class="value">142</span>
-      </div>
-    </div>
-  </div>
-</div>
+    style Input fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
+    style Debounce fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style ParallelFetch fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style SuccessUI fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style ErrorUI fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
 ```
 
 ---
 
-## 💻 2. React Data Fetching Logic (with Debounce & Abort)
-
-### 💻 Code សម្រាប់តែ Fetch Handler:
-
-```javascript
-const [username, setUsername] = useState('');
-const debouncedUsername = useDebounce(username, 500);
-
-const [user, setUser] = useState(null);
-const [isLoading, setIsLoading] = useState(false);
-const [error, setError] = useState(null);
-
-useEffect(() => {
-  if (!debouncedUsername.trim()) {
-    setUser(null);
-    return;
-  }
-
-  const controller = new AbortController();
-  setIsLoading(true);
-  setError(null);
-
-  fetch(`https://api.github.com/users/${debouncedUsername}`, {
-    signal: controller.signal,
-  })
-    .then((res) => {
-      if (res.status === 404) throw new Error('រកមិនឃើញ User នេះទេ!');
-      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-      return res.json();
-    })
-    .then((data) => {
-      setUser(data);
-    })
-    .catch((err) => {
-      if (err.name !== 'AbortError') {
-        setError(err.message);
-        setUser(null);
-      }
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
-
-  return () => controller.abort();
-}, [debouncedUsername]);
-```
-
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const debouncedUsername = useDebounce(username, 500);`
-   - រង់ចាំ 500ms ក្រោយពេល User ឈប់វាយអក្សរ ទើបដំណើរការ Search (សន្សំ GitHub API Rate Limit)។
-2. `const controller = new AbortController();`
-   - បង្កើត Controller សម្រាប់ cancel request មុនៗ ប្រសិនបើ User វាយអក្សរបន្ថែមទៀត។
-3. `if (res.status === 404) throw new Error('រកមិនឃើញ User នេះទេ!');`
-   - ឆែក status 404 ដោយផ្ទាល់ដើម្បីផ្តល់សារ Error ច្បាស់លាស់។
-4. `return () => controller.abort();`
-   - Cleanup in-flight request ពេល Component Unmount ឬ keyword ផ្លាស់ប្តូរ។
-
----
-
-## 🚀 3. Complete Integrated GitHub Search App
+## 💻 ២. កូដពេញលេញនៃគម្រោង (`src/GitHubExplorer.jsx`)
 
 ```jsx
+// src/GitHubExplorer.jsx
 import { useState, useEffect } from 'react';
 
+// ── ១. CUSTOM HOOK: useDebounce ──
 function useDebounce(value, delay = 500) {
-  const [debounced, setDebounced] = useState(value);
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
   useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
+    const timer = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(timer);
   }, [value, delay]);
-  return debounced;
+
+  return debouncedValue;
 }
 
-export default function GitHubSearchApp() {
-  const [username, setUsername] = useState('torvalds');
-  const debouncedUser = useDebounce(username, 500);
+// ── ២. MAIN GITHUB EXPLORER COMPONENT ──
+export default function GitHubExplorer() {
+  const [username, setUsername] = useState('torvalds'); // Default: Linus Torvalds
+  const debouncedUser = useDebounce(username.trim(), 500);
 
   const [profile, setProfile] = useState(null);
+  const [repos, setRepos] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!debouncedUser.trim()) {
+    if (!debouncedUser) {
       setProfile(null);
+      setRepos([]);
+      setIsLoading(false);
       return;
     }
 
@@ -146,84 +99,216 @@ export default function GitHubSearchApp() {
     setIsLoading(true);
     setError(null);
 
-    fetch(`https://api.github.com/users/${debouncedUser}`, {
-      signal: controller.signal,
-    })
-      .then((res) => {
-        if (res.status === 404) throw new Error('រកមិនឃើញ GitHub User នេះទេ!');
-        if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-        return res.json();
-      })
-      .then((data) => setProfile(data))
-      .catch((err) => {
-        if (err.name !== 'AbortError') {
-          setError(err.message);
-          setProfile(null);
-        }
-      })
-      .finally(() => setIsLoading(false));
+    const fetchGitHubData = async () => {
+      try {
+        // 🚀 Parallel Fetch ទាំង Profile និង Repos ក្នុងពេលតែមួយ
+        const [userRes, reposRes] = await Promise.all([
+          fetch(`https://api.github.com/users/${debouncedUser}`, {
+            signal: controller.signal,
+          }),
+          fetch(
+            `https://api.github.com/users/${debouncedUser}/repos?sort=updated&per_page=4`,
+            { signal: controller.signal }
+          ),
+        ]);
 
-    return () => controller.abort();
+        // 🛡️ ឆែក Error Status កូដ
+        if (userRes.status === 404) {
+          throw new Error(`រកមិនឃើញគណនី GitHub "${debouncedUser}" ឡើយ!`);
+        }
+        if (userRes.status === 403) {
+          throw new Error('⚠️ អស់សិទ្ធិទាញយក (GitHub API Rate Limit Exceeded)! សូមរង់ចាំបន្តិច។');
+        }
+        if (!userRes.ok) {
+          throw new Error(`HTTP Error Status: ${userRes.status}`);
+        }
+
+        const userData = await userRes.json();
+        const reposData = reposRes.ok ? await reposRes.json() : [];
+
+        setProfile(userData);
+        setRepos(reposData);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'មានបញ្ហាមិនអាចទាញយកទិន្នន័យបានទេ');
+          setProfile(null);
+          setRepos([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGitHubData();
+
+    // Cleanup: Cancel request ពេល username ផ្លាស់ប្តូរ
+    return () => {
+      controller.abort();
+    };
   }, [debouncedUser]);
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-800 rounded-2xl shadow-lg">
-      <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
-        🐙 GitHub User Search
-      </h2>
-
-      {/* SEARCH INPUT */}
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="បញ្ចូល GitHub username..."
-        className="w-full px-3 py-2 border rounded-xl dark:bg-slate-700 dark:text-white text-sm mb-4"
-      />
-
-      {/* LOADING SKELETON */}
-      {isLoading && (
-        <div className="animate-pulse space-y-3 p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
-          <div className="w-16 h-16 bg-slate-300 dark:bg-slate-600 rounded-full mx-auto" />
-          <div className="h-4 bg-slate-300 dark:bg-slate-600 rounded w-1/2 mx-auto" />
-          <div className="h-3 bg-slate-300 dark:bg-slate-600 rounded w-3/4 mx-auto" />
+    <div className="max-w-xl mx-auto p-4 sm:p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl space-y-6">
+      
+      {/* HEADER & SEARCH */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+            <span>🐙</span> GitHub Enterprise Explorer
+          </h2>
+          <span className="text-[11px] font-bold text-slate-400">Live API</span>
         </div>
-      )}
 
-      {/* ERROR STATE */}
-      {error && !isLoading && (
-        <div className="p-4 bg-red-50 text-red-600 rounded-xl text-center text-sm">
-          ⚠️ {error}
-        </div>
-      )}
-
-      {/* SUCCESS PROFILE CARD */}
-      {profile && !isLoading && !error && (
-        <div className="p-4 bg-slate-50 dark:bg-slate-700 rounded-xl text-center">
-          <img
-            src={profile.avatar_url}
-            alt={profile.name}
-            className="w-20 h-20 rounded-full mx-auto shadow-md border-2 border-white dark:border-slate-600"
+        <div className="relative">
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="បញ្ចូល GitHub username (ឧ. gaearon, vercel, antfu)..."
+            className="w-full pl-4 pr-10 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-          <h3 className="font-bold text-lg text-slate-800 dark:text-white mt-2">
-            {profile.name || profile.login}
-          </h3>
-          <p className="text-xs text-blue-500 font-mono">@{profile.login}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-300 mt-2">{profile.bio || 'គ្មាន Bio'}</p>
+          {isLoading && (
+            <div className="absolute right-3.5 top-3 w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+          )}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-2 gap-2 mt-4 pt-3 border-t dark:border-slate-600">
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
-              <span className="block text-xs text-slate-400">Public Repos</span>
-              <span className="font-bold text-slate-800 dark:text-white">{profile.public_repos}</span>
+      {/* ── ១. LOADING SKELETON ── */}
+      {isLoading && (
+        <div className="space-y-4 animate-pulse">
+          <div className="p-6 bg-slate-50 dark:bg-slate-800/40 rounded-2xl flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3" />
+              <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
             </div>
-            <div className="p-2 bg-white dark:bg-slate-800 rounded-lg">
-              <span className="block text-xs text-slate-400">Followers</span>
-              <span className="font-bold text-slate-800 dark:text-white">{profile.followers}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2].map((n) => (
+              <div key={n} className="h-24 bg-slate-50 dark:bg-slate-800/40 rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── ២. ERROR BANNER ── */}
+      {error && !isLoading && (
+        <div className="p-6 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-2xl text-center space-y-2">
+          <span className="text-2xl">⚠️</span>
+          <p className="text-xs font-bold text-rose-600 dark:text-rose-300">{error}</p>
+        </div>
+      )}
+
+      {/* ── ៣. SUCCESS PROFILE & REPOSITORIES ── */}
+      {profile && !isLoading && !error && (
+        <div className="space-y-5">
+          {/* PROFILE CARD */}
+          <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-4">
+            <div className="flex items-start gap-4">
+              <img
+                src={profile.avatar_url}
+                alt={profile.name}
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-white dark:border-slate-700 shadow-md"
+              />
+              <div className="flex-1">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                      {profile.name || profile.login}
+                    </h3>
+                    <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400">
+                      @{profile.login}
+                    </p>
+                  </div>
+                  <a
+                    href={profile.html_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-[11px] font-bold transition"
+                  >
+                    View on GitHub ↗
+                  </a>
+                </div>
+
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2">
+                  {profile.bio || 'គណនីនេះមិនទាន់មានការពិពណ៌នា Bio នៅឡើយទេ។'}
+                </p>
+              </div>
+            </div>
+
+            {/* STATS BADGES */}
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-200 dark:border-slate-700 text-center">
+              <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="block text-[10px] text-slate-400 font-bold uppercase">Repos</span>
+                <span className="font-black text-xs text-slate-800 dark:text-white">{profile.public_repos}</span>
+              </div>
+              <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="block text-[10px] text-slate-400 font-bold uppercase">Followers</span>
+                <span className="font-black text-xs text-slate-800 dark:text-white">{profile.followers}</span>
+              </div>
+              <div className="p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+                <span className="block text-[10px] text-slate-400 font-bold uppercase">Following</span>
+                <span className="font-black text-xs text-slate-800 dark:text-white">{profile.following}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* REPOSITORIES SECTION */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              📦 Repositories ថ្មីៗ ({repos.length})
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {repos.map((repo) => (
+                <a
+                  key={repo.id}
+                  href={repo.html_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-3.5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-500 transition flex flex-col justify-between space-y-2 group shadow-sm"
+                >
+                  <div>
+                    <h5 className="font-bold text-xs text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 transition truncate">
+                      {repo.name}
+                    </h5>
+                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">
+                      {repo.description || 'គ្មានការពិពណ៌នា'}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 pt-1 font-bold">
+                    <span>{repo.language || 'Markdown'}</span>
+                    <span>⭐ {repo.stargazers_count}</span>
+                  </div>
+                </a>
+              ))}
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
 ```
+
+---
+
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃស្ថាបត្យកម្ម
+
+1. **Parallel Fetching ជាមួយ `Promise.all`:**  
+   ការហៅ `fetch` ទាំងពីរព្រមគ្នាជួយសន្សំពេលវេលា Network ដល់ទៅ 50% ធៀបនឹងការរង់ចាំ Profile ចប់ទើប Fetch Repositories តាមក្រោយ។
+2. **ការគ្រប់គ្រង Rate Limit 403:**  
+   GitHub API នឹងបោះកូដ 403 ពេលអស់កូតា។ ការឆែក `userRes.status === 403` ផ្តល់សារព្រមានច្បាស់លាស់ដល់ User ជំនួសឱ្យការធ្លាក់ចូល generic error។
+3. **Debounce (500ms) + AbortController:**  
+   រាល់ពេល User វាយអក្សរ វានឹងរង់ចាំ 500ms មុននឹងបាញ់ request ហើយប្រសិនបើ user វាយបន្តទៀត វានឹងកាត់ផ្តាច់ request ចាស់ចោលភ្លាមៗ។
+
+---
+
+## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
+
+- [x] Search Input ដំណើរការជាមួយ `useDebounce(500ms)` និង `AbortController`
+- [x] Profile និង Repositories ត្រូវបានទាញយកជា Parallel តាម `Promise.all`
+- [x] គ្រប់គ្រង Tri-State UI ពេញលេញ (Skeleton Loading, 404/403 Errors, Success View)
+- [x] បង្ហាញ Stats Badges, Repos Stars, និងតំណភ្ជាប់ Link ទៅកាន់ GitHub ផ្ទាល់

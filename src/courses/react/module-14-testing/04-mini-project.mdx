@@ -1,125 +1,425 @@
 ---
-title: "Mini Project — Write Tests for Login Form & Data Component"
-description: អនុវត្ត Testing Skills ដោយ Write Test Suite ពេញលេញ ក្នុង Login Form Component ជាមួយ Validation Tests, Submit Tests, Loading State Tests, និង Data-Fetching Component Tests ជាមួយ Mocked fetch()។
+title: "Mini Project — Enterprise Test Suite for Checkout & Order Flow"
+description: អនុវត្តការសរសេរ Enterprise Test Suite ពេញលេញសម្រាប់ Checkout Form — រួមបញ្ចូល Rendering Tests, Form Validations (Email & Phone), Coupon Calculation Tests, Async API Payment Mocking, Loading & Disabled States, និង Server Error Handling ជាមួយ Vitest & React Testing Library។
 objectives:
-  - ចេះ Write Complete Test Suite ដោយ Cover Happy Path + Error Cases
-  - ចេះ Test Form Validation Logic ជាមួយ userEvent.type + submit
-  - ចេះ Test Async Data Components ជាមួយ Mocked fetch + waitFor
-  - ចេះ Achieve High Test Coverage ដោយ Cover ​ Edge Cases
+  - "ចេះបង្កើត Test Suite ពេញលេញដែលគ្របដណ្តប់ទាំង Happy Path, Validation Errors, និង Server Failures"
+  - "ចេះ Test Form Validation Logic (Regex Email, Phone) ដោយប្រើ userEvent.type() និង userEvent.click()"
+  - "ចេះ Test Dynamic Math Calculations (Voucher Code Discount) លើ UI"
+  - "ចេះ Mock Async API Submission ជាមួយ Mock Resolved & Rejected Promises"
+  - "ចេះ Run Test Coverage Report ដើម្បីស្វែងរកកូដដែលមិនទាន់បាន Test"
 module: module-14-testing
 order: 4
 quiz:
-  - question: "Test Coverage 100% មានន័យថា Code Correct ១០០% ឬ?"
+  - question: "តើ Test Coverage 100% មានន័យថា Code គ្មាន Bugs សោះ (100% Bug-Free) មែនឬទេ?"
     options:
-      - "Yes — 100% Coverage = No Bugs"
-      - "No — Coverage ប្រាប់ Lines of Code ដែលត្រូវ Execute ក្នុង Tests ប៉ុណ្ណោះ — Tests False Positives (ត្រូវ Test ដោយ Assert ​ Wrong Expectations) ឬ Missing Edge Cases ក៏អាចផ្ដល់ 100% Coverage ហើយ Still Bug"
-      - "100% Coverage ខ្ពស់ពេកបង្ករ Problems"
-      - "Coverage Report ជំនួស Code Review"
-    correctAnswer: 2
-    explanation: "Coverage = Code Execution, NOT Correctness। 100% Coverage ប្រាប់ All Code Lines Execute ក្នុង Tests — ប៉ុន្តែ Tests អាច Execute Wrong Assertions ឬ Miss Edge Cases។ Good Tests = Right Assertions + Edge Cases Coverage + Meaningful Test Names > Coverage Number។"
+      - "មិនមែនទេ — Test Coverage គ្រាន់តែបញ្ជាក់ពីចំនួនបន្ទាត់កូដ (Lines of Code) ដែលត្រូវបានដំណើរការក្នុងអំឡុងពេល Test ប៉ុណ្ណោះ។ ប្រសិនបើ Tests ធ្វើការ Assertion ខុស ឬភ្លេចគិតពី Edge Cases នោះ Bug នៅតែកើតមានដដែល"
+      - "ពិតប្រាកដណាស់ — 100% Coverage ធានាថា App គ្មាន Bug ១០០%"
+      - "Coverage ខ្ពស់ពេកធ្វើឱ្យ App ដំណើរការយឺត"
+      - "Coverage ប្រើសម្រាប់តែភាសា Java ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "Code Coverage គឺជា Metric ជំនួយដ៏ល្អ ប៉ុន្តែអ្វីដែលសំខាន់ជាង Coverage Number គឺគុណភាពនៃការសរសេរ Assertions និងការគ្របដណ្តប់លើ Business Edge Cases ពិតប្រាកដ។"
+
+  - question: "ក្នុងការ Test Async Form Submission ហេតុអ្វីបានជាយើងត្រូវប្រើ `await waitFor(() => expect(mockFn).toHaveBeenCalledWith(...))`?"
+    options:
+      - "ដើម្បីរង់ចាំ (Poll) រហូតដល់ React State Update និង Async Promise បានដោះស្រាយរួចរាល់ មុននឹងធ្វើការ Assert លើ Parameter នៃ Mock Function"
+      - "ដើម្បីឱ្យ CSS ដំណើរការ Animation"
+      - "ដើម្បីការពារកុំឱ្យ Browser បិទ"
+      - "ដើម្បីពន្យារពេល Test ឱ្យដំណើរការយឺត"
+    correctAnswer: 1
+    explanation: "`waitFor()` នឹងដំណើរការ callback function ខាងក្នុងសារចុះសារឡើង រហូតដល់ Assertion ឆ្លងកាត់ដោយជោគជ័យ ឬ timeout (default 1000ms)។"
 ---
 
-## 🧪 Project: Complete Test Suite
+## 🏛️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ Checkout & Test Boundaries
 
-### File Structure
+```mermaid
+flowchart TD
+    subgraph UI_Component["<CheckoutForm /> Component"]
+        F1["Inputs: Name, Email, Phone, Coupon"]
+        F2["Calculations: Subtotal - Discount = Total"]
+        F3["UI States: Idle, Loading, Error Alert, Success Toast"]
+    end
+
+    subgraph Test_Suite["CheckoutForm.test.jsx Suite"]
+        T1["១. Rendering Tests (Default Inputs & Price)"]
+        T2["២. Validation Tests (Empty Fields, Bad Email/Phone)"]
+        T3["៣. Coupon Tests (DISCOUNT20 -> -20% Price Update)"]
+        T4["៤. Async Submit Tests (Loading Spinner & Button Disable)"]
+        T5["៥. Error Tests (Server 500 Failure Alert)"]
+        T6["៦. Success Tests (onSubmit Payload Verification)"]
+    end
+
+    Test_Suite -->|Render & Simulate User| UI_Component
+```
+
+---
+
+## 📁 ២. រចនាសម្ព័ន្ធ Folder នៃគម្រោង (Project Structure)
+
 ```
 src/
 ├── components/
-│   ├── LoginForm.jsx
-│   ├── LoginForm.test.jsx   ← We write this
-│   ├── UserCard.jsx
-│   └── UserCard.test.jsx    ← We write this
+│   ├── CheckoutForm.jsx          # Source Component
+│   └── CheckoutForm.test.jsx     # Comprehensive Test Suite (We write this!)
+├── utils/
+│   └── cart.js                   # Pure Math & Validation Utilities
+└── test/
+    └── setup.js                  # Jest-DOM Matchers Setup
 ```
 
 ---
 
-### LoginForm.test.jsx
+## 💻 ៣. កូដនៃ Source Component (`CheckoutForm.jsx`)
 
 ```jsx
+// src/components/CheckoutForm.jsx
+import React, { useState } from 'react';
+
+export default function CheckoutForm({ initialSubtotal = 100, onSubmitOrder }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    coupon: '',
+  });
+
+  const [errors, setErrors] = useState({});
+  const [discount, setDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
+
+  // ១. ផ្ទៀងផ្ទាត់ Form Validation
+  const validate = () => {
+    const errs = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^(0\d{8,9}|\+855\d{8,9})$/;
+
+    if (!formData.name.trim()) errs.name = 'សូមបញ្ចូលឈ្មោះរបស់អ្នក!';
+    if (!formData.email.trim()) {
+      errs.email = 'សូមបញ្ចូលអ៊ីម៉ែល!';
+    } else if (!emailRegex.test(formData.email)) {
+      errs.email = 'ទម្រង់អ៊ីម៉ែលមិនត្រឹមត្រូវ!';
+    }
+
+    if (!formData.phone.trim()) {
+      errs.phone = 'សូមបញ្ចូលលេខទូរស័ព្ទ!';
+    } else if (!phoneRegex.test(formData.phone)) {
+      errs.phone = 'លេខទូរស័ព្ទកម្ពុជាមិនត្រឹមត្រូវ (ឧ. 012345678)!';
+    }
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  // ២. Apply Coupon Logic
+  const handleApplyCoupon = () => {
+    if (formData.coupon.trim().toUpperCase() === 'DISCOUNT20') {
+      setDiscount(20);
+      setCouponApplied(true);
+      setServerError('');
+    } else {
+      setServerError('កូដគូប៉ុងមិនត្រឹមត្រូវឡើយ!');
+      setDiscount(0);
+      setCouponApplied(false);
+    }
+  };
+
+  // ៣. Submit Order Logic
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    setServerError('');
+
+    const finalTotal = initialSubtotal - (initialSubtotal * discount) / 100;
+
+    try {
+      await onSubmitOrder({
+        ...formData,
+        subtotal: initialSubtotal,
+        discountPercent: discount,
+        total: finalTotal,
+      });
+    } catch (err) {
+      setServerError(err.message || 'ការបញ្ជាទិញបរាជ័យ!');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const finalTotal = initialSubtotal - (initialSubtotal * discount) / 100;
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+      <h2 className="text-xl font-black text-slate-900 dark:text-white mb-4">
+        🛒 បង់ប្រាក់ និងបញ្ជាក់ការទិញ
+      </h2>
+
+      {/* Server Error Alert */}
+      {serverError && (
+        <div role="alert" className="mb-4 p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600">
+          ⚠️ {serverError}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {/* Name Field */}
+        <div>
+          <label htmlFor="name" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            ឈ្មោះពេញ
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+          />
+          {errors.name && <p className="text-xs text-rose-500 mt-1">{errors.name}</p>}
+        </div>
+
+        {/* Email Field */}
+        <div>
+          <label htmlFor="email" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            អ៊ីម៉ែល
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+          />
+          {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email}</p>}
+        </div>
+
+        {/* Phone Field */}
+        <div>
+          <label htmlFor="phone" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            លេខទូរស័ព្ទ
+          </label>
+          <input
+            id="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+          />
+          {errors.phone && <p className="text-xs text-rose-500 mt-1">{errors.phone}</p>}
+        </div>
+
+        {/* Coupon Code Field */}
+        <div>
+          <label htmlFor="coupon" className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            កូដបញ្ចុះតម្លៃ (Coupon Code)
+          </label>
+          <div className="flex gap-2">
+            <input
+              id="coupon"
+              type="text"
+              placeholder="DISCOUNT20"
+              value={formData.coupon}
+              onChange={(e) => setFormData((p) => ({ ...p, coupon: e.target.value }))}
+              className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+            />
+            <button
+              type="button"
+              onClick={handleApplyCoupon}
+              className="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-white rounded-xl text-xs font-bold transition"
+            >
+              អនុវត្ត
+            </button>
+          </div>
+          {couponApplied && (
+            <p className="text-xs text-emerald-600 font-bold mt-1">🎉 បញ្ចុះតម្លៃ ២០% ត្រូវបានអនុវត្ត!</p>
+          )}
+        </div>
+
+        {/* Price Breakdown */}
+        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl space-y-1.5 text-xs">
+          <div className="flex justify-between text-slate-500">
+            <span>តម្លៃដើម (Subtotal)</span>
+            <span>${initialSubtotal}</span>
+          </div>
+          {discount > 0 && (
+            <div className="flex justify-between text-emerald-600 font-bold">
+              <span>បញ្ចុះតម្លៃ ({discount}%)</span>
+              <span>-${(initialSubtotal * discount) / 100}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-base font-black text-slate-900 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-700">
+            <span>តម្លៃសរុប (Total)</span>
+            <span aria-label="total-amount">${finalTotal}</span>
+          </div>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>កំពុងបញ្ជាទិញ...</span>
+            </>
+          ) : (
+            <span>បញ្ជាក់ការទិញ (${finalTotal}) →</span>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+---
+
+## 🧪 ៤. Complete Test Suite (`CheckoutForm.test.jsx`)
+
+ខាងក្រោមនេះជា Test Suite ពេញលេញដែលគ្របដណ្តប់គ្រប់ Scenarios៖
+
+```jsx
+// src/components/CheckoutForm.test.jsx
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import LoginForm from './LoginForm';
+import CheckoutForm from './CheckoutForm';
 
-// Helper: Fill and submit the form
-async function fillAndSubmit(email, password) {
-  const emailInput = screen.getByLabelText(/email/i);
-  const passwordInput = screen.getByLabelText(/password/i);
-  const submitBtn = screen.getByRole('button', { name: /login/i });
+describe('CheckoutForm Component Test Suite', () => {
+  let user;
 
-  if (email) await userEvent.type(emailInput, email);
-  if (password) await userEvent.type(passwordInput, password);
-  await userEvent.click(submitBtn);
-}
+  beforeEach(() => {
+    user = userEvent.setup();
+    vi.restoreAllMocks();
+  });
 
-describe('LoginForm', () => {
-  // ── Rendering Tests ──────────────────────────────────────
-  describe('Rendering', () => {
-    it('renders all form elements', () => {
-      render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
-    });
+  // ── 1. RENDERING TESTS ───────────────────────────────────────────
+  describe('Initial Rendering', () => {
+    it('renders all form inputs and initial total price correctly', () => {
+      render(<CheckoutForm initialSubtotal={150} onSubmitOrder={vi.fn()} />);
 
-    it('inputs start empty', () => {
-      render(<LoginForm onSubmit={vi.fn()} />);
-      expect(screen.getByLabelText(/email/i)).toHaveValue('');
-      expect(screen.getByLabelText(/password/i)).toHaveValue('');
+      expect(screen.getByLabelText(/ឈ្មោះពេញ/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/អ៊ីម៉ែល/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/លេខទូរស័ព្ទ/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/កូដបញ្ចុះតម្លៃ/i)).toBeInTheDocument();
+      expect(screen.getByLabelText('total-amount')).toHaveTextContent('$150');
+      expect(screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i })).toBeEnabled();
     });
   });
 
-  // ── Validation Tests ─────────────────────────────────────
-  describe('Validation', () => {
-    it('shows email error when submitting empty', async () => {
-      render(<LoginForm onSubmit={vi.fn()} />);
-      await userEvent.click(screen.getByRole('button', { name: /login/i }));
-      expect(screen.getByText(/email.*required/i)).toBeInTheDocument();
+  // ── 2. FORM VALIDATION TESTS ─────────────────────────────────────
+  describe('Form Validation', () => {
+    it('displays error messages when submitting empty required fields', async () => {
+      render(<CheckoutForm onSubmitOrder={vi.fn()} />);
+
+      const submitBtn = screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i });
+      await user.click(submitBtn);
+
+      expect(screen.getByText(/សូមបញ្ចូលឈ្មោះ/i)).toBeInTheDocument();
+      expect(screen.getByText(/សូមបញ្ចូលអ៊ីម៉ែល/i)).toBeInTheDocument();
+      expect(screen.getByText(/សូមបញ្ចូលលេខទូរស័ព្ទ/i)).toBeInTheDocument();
     });
 
-    it('shows error for invalid email format', async () => {
-      render(<LoginForm onSubmit={vi.fn()} />);
-      await fillAndSubmit('notanemail', 'password123');
-      expect(screen.getByText(/valid email/i)).toBeInTheDocument();
-    });
+    it('shows error when invalid email format is entered', async () => {
+      render(<CheckoutForm onSubmitOrder={vi.fn()} />);
 
-    it('shows password error when password is empty', async () => {
-      render(<LoginForm onSubmit={vi.fn()} />);
-      await fillAndSubmit('test@example.com', '');
-      expect(screen.getByText(/password.*required/i)).toBeInTheDocument();
+      await user.type(screen.getByLabelText(/ឈ្មោះពេញ/i), 'Sok Dara');
+      await user.type(screen.getByLabelText(/អ៊ីម៉ែល/i), 'invalid-email-address');
+      await user.type(screen.getByLabelText(/លេខទូរស័ព្ទ/i), '012345678');
+
+      await user.click(screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i }));
+
+      expect(screen.getByText(/ទម្រង់អ៊ីម៉ែលមិនត្រឹមត្រូវ/i)).toBeInTheDocument();
     });
   });
 
-  // ── Submission Tests ─────────────────────────────────────
-  describe('Submission', () => {
-    it('calls onSubmit with correct data on valid form', async () => {
-      const mockSubmit = vi.fn().mockResolvedValue(undefined);
-      render(<LoginForm onSubmit={mockSubmit} />);
-      await fillAndSubmit('user@example.com', 'secret123');
+  // ── 3. COUPON CALCULATION TESTS ──────────────────────────────────
+  describe('Coupon Calculation', () => {
+    it('applies 20% discount correctly when entering DISCOUNT20', async () => {
+      render(<CheckoutForm initialSubtotal={100} onSubmitOrder={vi.fn()} />);
+
+      const couponInput = screen.getByLabelText(/កូដបញ្ចុះតម្លៃ/i);
+      const applyBtn = screen.getByRole('button', { name: /អនុវត្ត/i });
+
+      await user.type(couponInput, 'discount20');
+      await user.click(applyBtn);
+
+      // Total គួរថយពី $100 មកនៅ $80
+      expect(screen.getByLabelText('total-amount')).toHaveTextContent('$80');
+      expect(screen.getByText(/បញ្ចុះតម្លៃ ២០%/i)).toBeInTheDocument();
+    });
+
+    it('shows error message when entering an invalid coupon code', async () => {
+      render(<CheckoutForm onSubmitOrder={vi.fn()} />);
+
+      await user.type(screen.getByLabelText(/កូដបញ្ចុះតម្លៃ/i), 'WRONGCODE');
+      await user.click(screen.getByRole('button', { name: /អនុវត្ត/i }));
+
+      const alertBox = screen.getByRole('alert');
+      expect(alertBox).toHaveTextContent(/កូដគូប៉ុងមិនត្រឹមត្រូវ/i);
+    });
+  });
+
+  // ── 4. ASYNC SUBMISSION & ERROR HANDLING ─────────────────────────
+  describe('Async Submission', () => {
+    it('disables submit button and shows loading spinner while submitting', async () => {
+      // Mock never-resolving Promise to inspect loading state
+      const mockSubmit = vi.fn(() => new Promise(() => {}));
+
+      render(<CheckoutForm initialSubtotal={100} onSubmitOrder={mockSubmit} />);
+
+      await user.type(screen.getByLabelText(/ឈ្មោះពេញ/i), 'Sok Dara');
+      await user.type(screen.getByLabelText(/អ៊ីម៉ែល/i), 'dara@edu.kh');
+      await user.type(screen.getByLabelText(/លេខទូរស័ព្ទ/i), '012345678');
+
+      const submitBtn = screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i });
+      await user.click(submitBtn);
+
+      expect(screen.getByText(/កំពុងបញ្ជាទិញ/i)).toBeInTheDocument();
+      expect(submitBtn).toBeDisabled();
+    });
+
+    it('submits correct payload on successful form submission (Happy Path)', async () => {
+      const mockSubmit = vi.fn().mockResolvedValueOnce({ orderId: 'ord_123' });
+
+      render(<CheckoutForm initialSubtotal={200} onSubmitOrder={mockSubmit} />);
+
+      await user.type(screen.getByLabelText(/ឈ្មោះពេញ/i), 'សុខ ចាន់ថន');
+      await user.type(screen.getByLabelText(/អ៊ីម៉ែល/i), 'chanthorn@edu.kh');
+      await user.type(screen.getByLabelText(/លេខទូរស័ព្ទ/i), '093888999');
+
+      await user.click(screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i }));
 
       await waitFor(() => {
+        expect(mockSubmit).toHaveBeenCalledTimes(1);
         expect(mockSubmit).toHaveBeenCalledWith({
-          email: 'user@example.com',
-          password: 'secret123',
+          name: 'សុខ ចាន់ថន',
+          email: 'chanthorn@edu.kh',
+          phone: '093888999',
+          coupon: '',
+          subtotal: 200,
+          discountPercent: 0,
+          total: 200,
         });
       });
     });
 
-    it('disables submit button while loading', async () => {
-      const mockSubmit = vi.fn(() => new Promise(() => {})); // Never resolves
-      render(<LoginForm onSubmit={mockSubmit} />);
-      await fillAndSubmit('user@example.com', 'secret123');
-      expect(screen.getByRole('button', { name: /login/i })).toBeDisabled();
-    });
+    it('displays server error message when API call fails (Sad Path)', async () => {
+      const mockSubmit = vi.fn().mockRejectedValueOnce(new Error('ប្រព័ន្ធធនាគារមានបញ្ហា!'));
 
-    it('shows server error when onSubmit rejects', async () => {
-      const mockSubmit = vi.fn().mockRejectedValue(new Error('Invalid credentials'));
-      render(<LoginForm onSubmit={mockSubmit} />);
-      await fillAndSubmit('user@example.com', 'wrong');
+      render(<CheckoutForm onSubmitOrder={mockSubmit} />);
 
-      await waitFor(() => {
-        expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials');
-      });
+      await user.type(screen.getByLabelText(/ឈ្មោះពេញ/i), 'សុខ ចាន់ថន');
+      await user.type(screen.getByLabelText(/អ៊ីម៉ែល/i), 'chanthorn@edu.kh');
+      await user.type(screen.getByLabelText(/លេខទូរស័ព្ទ/i), '093888999');
+
+      await user.click(screen.getByRole('button', { name: /បញ្ជាក់ការទិញ/i }));
+
+      const alertBox = await screen.findByRole('alert');
+      expect(alertBox).toHaveTextContent(/ប្រព័ន្ធធនាគារមានបញ្ហា/i);
     });
   });
 });
@@ -127,62 +427,40 @@ describe('LoginForm', () => {
 
 ---
 
-### UserCard.test.jsx (Async Fetch)
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
 
-```jsx
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserCard from './UserCard';
+1. `let user; beforeEach(() => { user = userEvent.setup(); });`
+   - រៀបចំ User Event Instance ថ្មីស្អាតជានិច្ច មុនពេល Test Case នីមួយៗចាប់ផ្តើមដំណើរការ។
+2. `await user.type(screen.getByLabelText(/ឈ្មោះពេញ/i), 'Sok Dara');`
+   - ស្វែងរក Input តាម Label Text "ឈ្មោះពេញ" និង Simulate ការវាយអក្សរជាក់ស្តែង។
+3. `const mockSubmit = vi.fn().mockResolvedValueOnce({ orderId: 'ord_123' });`
+   - បង្កើត Mock Function ដែលត្រៀម Resolve ទិន្នន័យ Order ID ពេល Component ហៅ Submit។
+4. `await waitFor(() => expect(mockSubmit).toHaveBeenCalledWith({ ... }));`
+   - រង់ចាំ Async Operation បញ្ចប់ និងផ្ទៀងផ្ទាត់យ៉ាងហ្មត់ចត់ថា Object Payload ដែលបានផ្ញើទៅកាន់ API មានតម្លៃ fields ត្រឹមត្រូវ ១០០%។
+5. `const alertBox = await screen.findByRole('alert');`
+   - រង់ចាំ Component បង្ហាញ Server Error Box ក្រោយពេល API Reject។
 
-describe('UserCard', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+---
 
-  it('shows skeleton while loading', () => {
-    fetch.mockImplementation(() => new Promise(() => {}));
-    render(<UserCard userId={1} />);
-    expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
-  });
-
-  it('renders user data after fetch', async () => {
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ id: 1, name: 'Leanne Graham', email: 'lg@april.biz', company: { name: 'Romaguera' } }),
-    });
-
-    render(<UserCard userId={1} />);
-
-    await waitFor(() => {
-      expect(screen.getByText('Leanne Graham')).toBeInTheDocument();
-      expect(screen.getByText('lg@april.biz')).toBeInTheDocument();
-    });
-  });
-
-  it('shows error message on network failure', async () => {
-    fetch.mockRejectedValueOnce(new Error('Network Error'));
-    render(<UserCard userId={1} />);
-    await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Network Error');
-    });
-  });
-});
-```
+## 📈 ៦. ការដំណើរការ Test & ពិនិត្យ Coverage
 
 ```bash
-# Run with verbose output
-npx vitest --reporter=verbose
+# ដំណើរការ Tests ទាំងអស់
+npm test
 
-# ✓ LoginForm > Rendering > renders all form elements
-# ✓ LoginForm > Rendering > inputs start empty
-# ✓ LoginForm > Validation > shows email error when submitting empty
-# ✓ LoginForm > Validation > shows error for invalid email format
-# ✓ LoginForm > Submission > calls onSubmit with correct data
-# ✓ LoginForm > Submission > disables submit button while loading
-# ✓ LoginForm > Submission > shows server error
-# ✓ UserCard > shows skeleton while loading
-# ✓ UserCard > renders user data after fetch
-# ✓ UserCard > shows error message on network failure
-# Test Files: 2 passed (10 tests)
+# ដំណើរការ Coverage Report
+npm run test:coverage
+```
+
+លទ្ធផលរំពឹងទុកលើ Terminal៖
+```
+ ✓ src/components/CheckoutForm.test.jsx (7 tests passed)
+ ---------------------|---------|----------|---------|---------|-------------------
+ File                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+ ---------------------|---------|----------|---------|---------|-------------------
+ CheckoutForm.jsx     |     100 |      100 |     100 |     100 |                   
+ ---------------------|---------|----------|---------|---------|-------------------
+ Test Files  1 passed (1)
+ Tests       7 passed (7)
+ Duration    420ms
 ```

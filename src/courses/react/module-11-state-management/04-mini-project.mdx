@@ -1,193 +1,470 @@
 ---
-title: "Mini Project — E-Commerce Cart with Zustand"
-description: សាងសង់ E-Commerce Shopping Cart ពេញលេញ ដោយចាប់ផ្តើមពីរចនាសម្ព័ន្ធ Normal HTML Card & Summary សិន រួចបំប្លែងទៅជា Zustand Persist Store — Product Grid, Add/Remove/Quantity, និង Order Summary។
+title: "Mini Project — Building an Enterprise E-Commerce Store with Zustand Slices & Persist"
+description: អនុវត្តបង្កើតប្រព័ន្ធ E-Commerce Shopping Store ពេញលេញមួយដោយប្រើប្រាស់ Zustand Global State Manager — រៀបចំ Domain Slices (Cart + Coupon + Toast), Auto-persistence ក្នុង LocalStorage, Cart Drawer Modal, និង Floating Alerts។
 objectives:
-  - ស្គាល់រចនាសម្ព័ន្ធ Normal HTML សម្រាប់ Product Grid និង Cart Sidebar
-  - អនុវត្ត Zustand Persist Store ក្នុង Shopping Cart
-  - ចេះ Implement Cart Logic (add, remove, quantity update)
-  - ចេះ Compute Cart Total Price & Items ចេញពី Store State
+  - "អនុវត្ត Zustand Architecture ពេញលេញជាមួយ Slice Pattern និង Persist Middleware"
+  - "ចេះគ្រប់គ្រង Cart State (Add, Increment/Decrement Qty, Remove, Clear) ដោយគ្មាន Prop Drilling"
+  - "ចេះ Implement Coupon Code Discount System និងគណនា Grand Total ក្នុង Store"
+  - "បង្កើត UI ស្អាតកម្រិត Professional ជាមួយ Live Cart Badge, Product Catalog, និង Sliding Cart Drawer"
 module: module-11-state-management
 order: 4
 quiz:
-  - question: "ហេតុអ្វី Zustand ល្អជាង Context API សម្រាប់ Shopping Cart?"
+  - question: "ហេតុអ្វីបានជា Zustand គឺជាជម្រើសដ៏ល្អឥតខ្ចោះសម្រាប់ E-Commerce Shopping Cart?"
     options:
-      - "Zustand ស្ថិតក្នុង React Library ផ្ទាល់"
-      - "Zustand Persist Middleware Save Cart ទៅ localStorage ដោយស្វ័យប្រវត្តិ, Selective Subscriptions ការពារ Product Grid Re-render ពេល Cart Summary ផ្លាស់ប្ដូរ, ហើយគ្មាន Provider Tree ឡើយ"
-      - "Zustand ជំនួស useState ទាំងអស់"
-      - "Zustand ដំណើរការ Faster ដោយ Machine Learning"
-    correctAnswer: 2
-    explanation: "Zustand ផ្ដល់ Cart Persistence ដោយ persist middleware (zero localStorage code), Optimized Re-renders ដោយ Selectors (Product grid មិន Re-render ពេល cart summary update), និង Clean Architecture ដោយ Slice Pattern — ១ Store ច្បាស់ ១ Responsibility។"
+      - "Zustand ផ្តល់នូវ Persist Middleware (Auto-save Cart ចូល Storage ដោយគ្មានកូដ boilerplate), Granular Selectors (ការពារ Product Grid Re-render ពេល Cart Summary ប្រែប្រួល), និងគ្មាន `<Provider>` Tree រញ៉េរញ៉ៃ"
+      - "ព្រោះ Zustand ដំណើរការដោយមិនបាច់ប្រើ JavaScript"
+      - "ព្រោះ Zustand ជំនួស Database Server ទាំងអស់"
+      - "ដើម្បីឱ្យទំនិញលក់ដាច់ច្រើនជាងមុន"
+    correctAnswer: 1
+    explanation: "E-Commerce Cart ទាមទារ High-Frequency Updates (Add, Quantity +/-) និង Session Persistence។ Zustand ផ្តល់នូវល្បឿនលឿនបំផុតដោយសារ Selective Subscription និង Persist Middleware ស្រាប់។"
+
+  - question: "តើ `updateQty(id, delta)` គួរដោះស្រាយករណីដែល Quantity ធ្លាក់ដល់ `0` ដោយរបៀបណា?"
+    options:
+      - "ប្រើប្រាស់ `.filter(item => item.qty > 0)` ដើម្បីលុបទំនិញនោះចេញពី Cart ដោយស្វ័យប្រវត្តិ"
+      - "បោះ Error ឱ្យ Browser Crash"
+      - "កំណត់តម្លៃ Quantity ជាចំនួនអវិជ្ជមាន"
+      - "មិនបាច់ធ្វើអ្វីទាំងអស់"
+    correctAnswer: 1
+    explanation: "នៅក្នុង E-Commerce UX ស្តង់ដារ ប្រសិនបើ User ចុចប៊ូតុងដក (`-`) រហូតដល់ចំនួនទំនិញស្មើ 0 ប្រព័ន្ធនឹងដកទំនិញនោះចេញពីកន្ត្រកដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🛒 1. Normal HTML Shopping Cart Layout
+## 🛍️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Architecture Blueprint)
 
-មុននឹងបន្ថែម Zustand Global Store នេះជារចនាសម្ព័ន្ធ HTML ធម្មតារវាង Product Card និង Cart Summary Sidebar៖
+នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **Enterprise E-Commerce Store** ដោយប្រើប្រាស់ **Zustand Sliced Store** ៖
 
-```html
-<!-- HTML Layout: Products Grid + Cart Sidebar -->
-<div class="shop-container">
-  <!-- Left Column: Product Items -->
-  <div class="products-grid">
-    <div class="product-card">
-      <div class="emoji">⚛️</div>
-      <h4>React Pro Course</h4>
-      <p class="price">$49.00</p>
-      <button type="button" class="btn-add">Add to Cart</button>
-    </div>
-  </div>
+```mermaid
+graph TD
+    Root[("🐻 Zustand Root Store (useStore.js)\npersist + devtools")]
+    
+    Root --- S1["🛒 Cart Slice (items, addItem, updateQty, removeItem)"]
+    Root --- S2["🏷️ Coupon Slice (coupon, discountPercent, applyCoupon)"]
+    Root --- S3["🔔 Toast Slice (toasts, showToast, removeToast)"]
 
-  <!-- Right Column: Cart Sidebar -->
-  <aside class="cart-sidebar">
-    <h3>🛒 Shopping Cart (1)</h3>
-    <ul class="cart-items">
-      <li>
-        <span>React Pro Course</span>
-        <div class="qty-controls">
-          <button>-</button>
-          <span>1</span>
-          <button>+</button>
-        </div>
-        <span class="item-price">$49.00</span>
-      </li>
-    </ul>
-    <div class="total-row">
-      <strong>Total:</strong>
-      <strong>$49.00</strong>
-    </div>
-  </aside>
-</div>
+    Root --> UI1["<Navbar> (Cart Badge Counter) 🏷️"]
+    Root --> UI2["<ProductGrid> (Add to Cart Trigger) 📦"]
+    Root --> UI3["<CartDrawer> (Quantity, Coupon, Checkout) 💳"]
+    Root --> UI4["<ToastAlerts> (Floating Notifications) 🚀"]
+
+    style Root fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style S1 fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style S2 fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style S3 fill:#fdf2f8,stroke:#db2777,stroke-width:2px
+    style UI1 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style UI2 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style UI3 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style UI4 fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 📦 2. Zustand Cart Store Logic
+## 💻 ២. កូដពេញលេញនៃគម្រោង (`src/ZustandStoreApp.jsx`)
 
-### 💻 Code សម្រាប់តែ Zustand Store:
-
-```javascript
-// src/store/cartStore.js
+```jsx
+// src/ZustandStoreApp.jsx
+import { useState } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export const useCartStore = create(
+// ── ១. ZUSTAND PERSISTED STORE ──
+export const useStore = create(
   persist(
     (set, get) => ({
-      items: [],
+      // ── CART STATE ──
+      cart: [],
+      couponCode: '',
+      discountPercent: 0,
+      toasts: [],
 
-      // 1. ADD ITEM
-      addItem: (product) =>
-        set((state) => {
-          const exists = state.items.find((i) => i.id === product.id);
-          if (exists) {
-            return {
-              items: state.items.map((i) =>
-                i.id === product.id ? { ...i, qty: i.qty + 1 } : i
-              ),
-            };
-          }
-          return { items: [...state.items, { ...product, qty: 1 }] };
-        }),
-
-      // 2. UPDATE QUANTITY / REMOVE
-      updateQty: (id, delta) =>
+      // ── TOAST ACTIONS ──
+      showToast: (message, type = 'success') => {
+        const id = Date.now();
         set((state) => ({
-          items: state.items
-            .map((i) => (i.id === id ? { ...i, qty: i.qty + delta } : i))
-            .filter((i) => i.qty > 0), // បើ qty <= 0 លុបចេញពី Cart
+          toasts: [...state.toasts, { id, message, type }],
+        }));
+        setTimeout(() => {
+          set((state) => ({
+            toasts: state.toasts.filter((t) => t.id !== id),
+          }));
+        }, 2500);
+      },
+
+      removeToast: (id) =>
+        set((state) => ({
+          toasts: state.toasts.filter((t) => t.id !== id),
         })),
 
-      // 3. REMOVE ITEM
-      removeItem: (id) =>
-        set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
+      // ── CART ACTIONS ──
+      addItem: (product) => {
+        const { cart, showToast } = get();
+        const existing = cart.find((i) => i.id === product.id);
 
-      // 4. GETTERS
-      getTotalPrice: () =>
-        get().items.reduce((sum, item) => sum + item.price * item.qty, 0),
+        if (existing) {
+          set({
+            cart: cart.map((i) =>
+              i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+            ),
+          });
+        } else {
+          set({ cart: [...cart, { ...product, qty: 1 }] });
+        }
+
+        showToast(`បានបន្ថែម "${product.name}" ទៅក្នុងកន្ត្រក!`);
+      },
+
+      updateQty: (id, delta) => {
+        const { cart } = get();
+        const updated = cart
+          .map((i) => (i.id === id ? { ...i, qty: i.qty + delta } : i))
+          .filter((i) => i.qty > 0);
+
+        set({ cart: updated });
+      },
+
+      removeItem: (id) => {
+        const { cart, showToast } = get();
+        const item = cart.find((i) => i.id === id);
+        set({ cart: cart.filter((i) => i.id !== id) });
+        if (item) showToast(`បានលុប "${item.name}" ចេញពីកន្ត្រក`, 'danger');
+      },
+
+      clearCart: () => {
+        const { showToast } = get();
+        set({ cart: [], couponCode: '', discountPercent: 0 });
+        showToast('កន្ត្រកទំនិញត្រូវបានសំអាតរួចរាល់', 'info');
+      },
+
+      // ── COUPON ACTIONS ──
+      applyCoupon: (code) => {
+        const { showToast } = get();
+        const clean = code.trim().toUpperCase();
+
+        if (clean === 'ZUSTAND20') {
+          set({ couponCode: clean, discountPercent: 20 });
+          showToast('🎉 បានអនុវត្តបញ្ចុះតម្លៃ ២០% ជោគជ័យ!');
+        } else {
+          set({ couponCode: '', discountPercent: 0 });
+          showToast('⚠️ កូដបញ្ចុះតម្លៃមិនត្រឹមត្រូវឡើយ', 'danger');
+        }
+      },
+
+      // ── DERIVED GETTERS ──
+      getCartMetrics: () => {
+        const { cart, discountPercent } = get();
+        const totalItems = cart.reduce((sum, i) => sum + i.qty, 0);
+        const subtotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+        const discountAmount = (subtotal * discountPercent) / 100;
+        const grandTotal = Math.max(0, subtotal - discountAmount);
+
+        return { totalItems, subtotal, discountAmount, grandTotal };
+      },
     }),
-    { name: 'shopping-cart-storage' }
+    {
+      name: 'zustand-ecommerce-cart',
+      partialize: (state) => ({
+        cart: state.cart,
+        couponCode: state.couponCode,
+        discountPercent: state.discountPercent,
+      }),
+    }
   )
 );
-```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `persist((set, get) => ({ ... }), { name: '...' })`
-   - Store នឹង Auto-save រាល់ Item ចូល LocalStorage ស្វ័យប្រវត្តិ។
-2. `exists ? map(...) : [...items, { ...product, qty: 1 }]`
-   - បើទំនិញមានក្នុង Cart រួចហើយ បន្ថែម `qty + 1`។ បើមិនទាន់មាន បន្ថែមទំនិញថ្មីដោយកំណត់ `qty: 1`។
-3. `.filter((i) => i.qty > 0)`
-   - ប្រសិនបើ User ចុចបន្ថយចំនួនដល់ 0 វានឹងលុបទំនិញនោះចេញពី Cart ស្វ័យប្រវត្តិ។
-4. `getTotalPrice: () => get().items.reduce(...)`
-   - គណនាតម្លៃសរុបនៃទំនិញទាំងអស់ក្នុង Cart យ៉ាងលឿន។
-
----
-
-## 🚀 3. Complete Integrated Cart Application
-
-```jsx
-import { useCartStore } from '../store/cartStore';
-
+// ── ២. PRODUCT DATA ──
 const PRODUCTS = [
-  { id: 1, name: 'React Pro Course', price: 49, emoji: '⚛️' },
-  { id: 2, name: 'Node.js Mastery', price: 59, emoji: '🟢' },
-  { id: 3, name: 'Next.js 15 Fullstack', price: 69, emoji: '▲' },
+  { id: 1, name: 'React Mastery Pro Suite', price: 49, category: 'Frontend', icon: '⚛️' },
+  { id: 2, name: 'Zustand & State Architecture', price: 29, category: 'Architecture', icon: '🐻' },
+  { id: 3, name: 'Next.js 15 Full-Stack Suite', price: 69, category: 'Fullstack', icon: '▲' },
+  { id: 4, name: 'Node.js & Backend Systems', price: 59, category: 'Backend', icon: '🟢' },
 ];
 
-export default function ShopApp() {
-  const { items, addItem, updateQty, removeItem, getTotalPrice } = useCartStore();
+// ── ៣. UI COMPONENTS ──
+
+function Navbar({ onOpenCart }) {
+  const { totalItems, grandTotal } = useStore((state) =>
+    state.getCartMetrics()
+  );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* PRODUCTS GRID */}
-      <div className="md:col-span-2 grid grid-cols-2 gap-4">
-        {PRODUCTS.map((product) => (
-          <div key={product.id} className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border">
-            <div className="text-3xl mb-2">{product.emoji}</div>
-            <h4 className="font-bold text-sm text-slate-800 dark:text-white">{product.name}</h4>
-            <p className="text-blue-600 font-black mt-1">${product.price}</p>
-            <button
-              onClick={() => addItem(product)}
-              className="mt-3 w-full py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold"
-            >
-              Add to Cart
-            </button>
-          </div>
-        ))}
+    <header className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center sticky top-0 z-30">
+      <div className="flex items-center gap-2">
+        <span className="text-xl">🐻</span>
+        <h1 className="font-bold text-sm text-slate-800 dark:text-white">
+          Zustand SuperStore
+        </h1>
       </div>
 
-      {/* CART SIDEBAR */}
-      <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border h-fit">
-        <h3 className="font-black text-lg text-slate-800 dark:text-white mb-3">
-          🛒 Cart ({items.length})
+      <button
+        onClick={onOpenCart}
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-2"
+      >
+        <span>🛒</span>
+        <span>{totalItems} មុខ</span>
+        <span className="bg-indigo-500/50 px-2 py-0.5 rounded-md font-mono">
+          ${grandTotal.toFixed(2)}
+        </span>
+      </button>
+    </header>
+  );
+}
+
+function ProductCard({ product }) {
+  const addItem = useStore((state) => state.addItem);
+
+  return (
+    <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition flex flex-col justify-between space-y-4">
+      <div className="flex items-start justify-between">
+        <span className="text-3xl p-2 bg-slate-50 dark:bg-slate-800 rounded-2xl">
+          {product.icon}
+        </span>
+        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-full">
+          {product.category}
+        </span>
+      </div>
+
+      <div>
+        <h3 className="font-bold text-sm text-slate-800 dark:text-white">
+          {product.name}
         </h3>
+        <p className="text-indigo-600 dark:text-indigo-400 font-black text-base mt-1">
+          ${product.price}
+        </p>
+      </div>
 
-        {items.length === 0 ? (
-          <p className="text-xs text-slate-400 py-4 text-center">Cart ទទេ</p>
-        ) : (
-          <div className="space-y-3">
-            {items.map((item) => (
-              <div key={item.id} className="flex justify-between items-center text-xs">
-                <div>
-                  <p className="font-bold text-slate-800 dark:text-white">{item.name}</p>
-                  <p className="text-slate-400">${item.price} × {item.qty}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => updateQty(item.id, -1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">-</button>
-                  <span className="font-bold px-1">{item.qty}</span>
-                  <button onClick={() => updateQty(item.id, 1)} className="px-2 py-0.5 bg-slate-100 rounded font-bold">+</button>
-                  <button onClick={() => removeItem(item.id)} className="text-red-500 ml-1">✕</button>
-                </div>
+      <button
+        onClick={() => addItem(product)}
+        className="w-full py-2 bg-slate-900 dark:bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow"
+      >
+        + Add to Cart
+      </button>
+    </div>
+  );
+}
+
+function CartDrawer({ isOpen, onClose }) {
+  const cart = useStore((state) => state.cart);
+  const couponCode = useStore((state) => state.couponCode);
+  const discountPercent = useStore((state) => state.discountPercent);
+  const updateQty = useStore((state) => state.updateQty);
+  const removeItem = useStore((state) => state.removeItem);
+  const clearCart = useStore((state) => state.clearCart);
+  const applyCoupon = useStore((state) => state.applyCoupon);
+  const showToast = useStore((state) => state.showToast);
+
+  const { subtotal, discountAmount, grandTotal } = useStore((state) =>
+    state.getCartMetrics()
+  );
+
+  const [inputCoupon, setInputCoupon] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleCouponSubmit = (e) => {
+    e.preventDefault();
+    applyCoupon(inputCoupon);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-end animate-in fade-in duration-200">
+      <div className="w-full max-w-sm bg-white dark:bg-slate-900 h-full p-6 shadow-2xl flex flex-col justify-between border-l border-slate-200 dark:border-slate-800">
+        <div>
+          <div className="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="font-bold text-base text-slate-800 dark:text-white">
+              🛒 កន្ត្រកទំនិញ ({cart.length})
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+            >
+              ✕ បិទ
+            </button>
+          </div>
+
+          {/* ITEM LIST */}
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto mt-4 pr-1">
+            {cart.length === 0 ? (
+              <li className="py-12 text-center text-xs text-slate-400">
+                កន្ត្រកទំនិញនៅទទេស្អាត!
+              </li>
+            ) : (
+              cart.map((item) => (
+                <li
+                  key={item.id}
+                  className="py-3 flex justify-between items-center text-xs"
+                >
+                  <div>
+                    <p className="font-bold text-slate-800 dark:text-white">
+                      {item.name}
+                    </p>
+                    <p className="text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
+                      ${item.price} × {item.qty}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => updateQty(item.id, -1)}
+                      className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="w-4 text-center font-bold text-xs">
+                      {item.qty}
+                    </span>
+                    <button
+                      onClick={() => updateQty(item.id, 1)}
+                      className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="text-rose-500 ml-2 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        {/* BOTTOM CHECKOUT SECTION */}
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3 text-xs">
+          {/* COUPON INPUT */}
+          <form onSubmit={handleCouponSubmit} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="កូដបញ្ចុះតម្លៃ: ZUSTAND20"
+              value={inputCoupon}
+              onChange={(e) => setInputCoupon(e.target.value)}
+              className="flex-1 px-3 py-1.5 border rounded-xl dark:bg-slate-800 dark:text-white"
+            />
+            <button
+              type="submit"
+              className="px-3 py-1.5 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700"
+            >
+              ប្រើកូដ
+            </button>
+          </form>
+
+          {/* SUMMARY */}
+          <div className="space-y-1 text-slate-600 dark:text-slate-400">
+            <div className="flex justify-between">
+              <span>តម្លៃដើម (Subtotal):</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            {discountPercent > 0 && (
+              <div className="flex justify-between text-emerald-600 font-bold">
+                <span>បញ្ចុះតម្លៃ ({discountPercent}%):</span>
+                <span>-${discountAmount.toFixed(2)}</span>
               </div>
-            ))}
-
-            <div className="border-t pt-3 mt-3 flex justify-between font-black text-sm text-slate-800 dark:text-white">
-              <span>Total:</span>
-              <span className="text-blue-600">${getTotalPrice()}</span>
+            )}
+            <div className="flex justify-between font-black text-sm text-slate-800 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span>សរុបចុងក្រោយ:</span>
+              <span>${grandTotal.toFixed(2)}</span>
             </div>
           </div>
-        )}
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={clearCart}
+              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl font-bold text-slate-600 dark:text-slate-300 transition"
+            >
+              សំអាត
+            </button>
+            <button
+              onClick={() =>
+                showToast('🚀 ការបញ្ជាទិញទទួលបានជោគជ័យ! សូមអរគុណ។')
+              }
+              className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow"
+            >
+              ទូទាត់ប្រាក់ (${grandTotal.toFixed(2)})
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+function ToastContainer() {
+  const toasts = useStore((state) => state.toasts);
+  const removeToast = useStore((state) => state.removeToast);
+
+  return (
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
+      {toasts.map((t) => (
+        <div
+          key={t.id}
+          className={`pointer-events-auto px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center justify-between gap-3 text-white transition-all transform animate-in slide-in-from-bottom-3 ${
+            t.type === 'danger'
+              ? 'bg-rose-600'
+              : t.type === 'info'
+              ? 'bg-blue-600'
+              : 'bg-emerald-600'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span>{t.type === 'danger' ? '🗑️' : '✨'}</span>
+            <span>{t.message}</span>
+          </div>
+          <button
+            onClick={() => removeToast(t.id)}
+            className="opacity-75 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── ៤. ROOT APP COMPONENT ──
+export default function ZustandStoreApp() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  return (
+    <div className="min-h-[520px] max-w-2xl mx-auto my-8 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+      <Navbar onOpenCart={() => setIsCartOpen(true)} />
+
+      <main className="p-6 flex-1">
+        <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">
+          វគ្គសិក្សាពេញនិយម (Zustand Global Store)
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {PRODUCTS.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      </main>
+
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <ToastContainer />
+    </div>
+  );
+}
 ```
+
+---
+
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃស្ថាបត្យកម្ម
+
+1. **Zero Provider Tree:**  
+   សង្កេតមើល `ZustandStoreApp` ៖ គ្មាន `<StoreProvider>` ឬ Context Wrappers ឡើយ។ Components អាចហៅ `useStore(selector)` ដោយផ្ទាល់ពីគ្រប់ទីកន្លែង។
+2. **Action Trigger ពី Store ផ្ទាល់:**  
+   នៅក្នុង `addItem` យើងអាចហៅ `showToast()` បានដោយផ្ទាល់ពីខាងក្នុង Store ដោយមិនចាំបាច់ឆ្លងកាត់ React Lifecycle ឡើយ។
+3. **Session Persistence:**  
+   `persist` middleware ធ្វើការ Save Cart ចូល LocalStorage ស្វ័យប្រវត្តិ។ សាកល្បងបន្ថែមទំនិញចូលកន្ត្រក រួចចុច Refresh (F5) នោះទិន្នន័យក្នុង Cart និង Coupon នឹងនៅរក្សាដដែល ១០០%!
+
+---
+
+## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
+
+- [x] Zustand Store ដំណើរការដោយគ្មាន Context Provider Wrapper ឡើយ
+- [x] Cart Actions (Add, Quantity +/-, Remove, Clear, Promo Discount) ដំណើរការត្រឹមត្រូវ
+- [x] Persist Middleware រក្សាទុកទិន្នន័យ Cart ក្នុង LocalStorage ស្វ័យប្រវត្តិ
+- [x] Toast Notification System បង្ហាញ Floating Alerts ស្វ័យប្រវត្តិពេលមាន Action
+- [x] Product Grid មិន Re-render ឡើយនៅពេល Cart Summary ឬ Quantity ប្រែប្រួល

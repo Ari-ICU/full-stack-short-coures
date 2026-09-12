@@ -1,110 +1,261 @@
 ---
-title: React Testing Library — Testing Components Like a User
-description: រៀនប្រើប្រាស់ React Testing Library (RTL) និង Vitest ដើម្បី Test React Components ដូចរបៀបដែល User ប្រើប្រាស់ពិតប្រាកដ ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "React Testing Library — User-Centric Component Testing & RTL Queries"
+description: សិក្សាស៊ីជម្រៅពី React Testing Library (RTL) — ស្វែងយល់ពីទស្សនវិជ្ជា "Test Behavior, Not Implementation", ឋានានុក្រមនៃ Queries (getByRole, getByLabelText), ការប្រើប្រាស់ @testing-library/user-event ដើម្បី Simulate ការចុច និងវាយអក្សរ, និង Jest-DOM Matchers ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីទស្សនវិជ្ជា RTL (Test Behavior, Not Implementation)
-  - ចេះប្រើ `render` និង `screen` queries (getByRole, getByText, getByLabelText)
-  - ចេះ Simulate User Events (click, type) ដោយប្រើ `@testing-library/user-event`
-  - ចេះប្រើ Jest-DOM Matchers (toBeInTheDocument, toHaveValue, toBeDisabled)
+  - "យល់ច្បាស់ពីទស្សនវិជ្ជា Guiding Principle របស់ React Testing Library"
+  - "ស្គាល់ពីឋានានុក្រម Query Priority (getByRole > getByLabelText > getByText > getByTestId)"
+  - "យល់ពីភាពខុសគ្នារវាង @testing-library/user-event និង fireEvent"
+  - "ចេះ Test Component States (Enabled/Disabled, Value Changes, OnClick Handlers)"
+  - "ចេះប្រើប្រាស់ Jest-DOM Matchers (toBeInTheDocument, toHaveTextContent, toBeDisabled)"
 module: module-14-testing
 order: 2
 quiz:
-  - question: "ហេតុអ្វី RTL ណែនាំឱ្យប្រើ `getByRole` ជាអាទិភាពខ្ពស់ជាងគេ?"
+  - question: "ហេតុអ្វីបានជា React Testing Library ណែនាំឱ្យយើង 'Test Behavior, Not Implementation Details'?"
     options:
-      - "ព្រោះវាដំណើរការលឿនជាង"
-      - "ព្រោះ `getByRole` ស្វែងរក Elements តាមរយៈ Semantic Accessibility Roles (ដូចជា button, textbox, heading) ដែលដូចគ្នានឹងរបៀបដែល User ពិតប្រាកដ និង Screen Readers ធ្វើអន្តរកម្មលើ Screen"
-      - "ព្រោះវាជា Requirement របស់ CSS"
-      - "ដើម្បីឱ្យ Code ខ្លីជាង"
-    correctAnswer: 2
-    explanation: "RTL ណែនាំឱ្យ Test តាមទស្សនវិស័យរបស់ User។ User មិនស្គាល់ className ឬ state variables ទេ — User ស្គាល់តែប៊ូតុង ('button') ឬប្រអប់វាយអក្សរ ('textbox')។"
+      - "ដើម្បីឱ្យ Tests មានភាពរឹងមាំ (Robust) មិនងាយបាក់បែក (Brittle) ពេលយើង Refactor កូដខាងក្នុង (ដូចជាប្តូរឈ្មោះ State variable ឬប្តូរពី useState ទៅ useReducer) ដរាបណា UI នៅតែផ្តល់លទ្ធផលដូចដើមដល់ User"
+      - "ដើម្បីសន្សំទំហំកូដក្នុង hard drive"
+      - "ព្រោះ RTL មិនអាចអានកូដ JavaScript បាន"
+      - "ដើម្បីកុំឱ្យ Browser ដំណើរការយឺត"
+    correctAnswer: 1
+    explanation: "ប្រសិនបើ Test របស់អ្នក Test លើ `wrapper.state('count')` ពេលអ្នក Refactor ប្តូរឈ្មោះ variable នោះ Test នឹង Fail ទោះបី UI នៅដើរធម្មតាក៏ដោយ (False Negative)។ RTL ណែនាំឱ្យ Test អ្វីដែល User មើលឃើញផ្ទាល់ភ្នែកលើអេក្រង់។"
+
+  - question: "ហេតុអ្វីបានជាយើងគួរជ្រើសរើស `@testing-library/user-event` ជាជាង `fireEvent` ក្នុងការ Simulate User Actions?"
+    options:
+      - "`user-event` ក្លែងធ្វើដំណើរការអន្តរកម្មពេញលេញរបស់ Browser (ចុច Focus, Hover, KeyDown, KeyPress, Change, KeyUp) ដូចមនុស្សពិតប្រាកដ រីឯ `fireEvent` គ្រាន់តែបាញ់ Dispatch Event សិប្បនិម្មិតមួយគត់នៅលើ DOM"
+      - "`fireEvent` មិនគាំទ្រភាសាខ្មែរ"
+      - "`user-event` ដំណើរការលឿនជាង fireEvent ១០០ ដង"
+      - "ទាំងពីរនេះដូចគ្នាទាំងស្រុង"
+    correctAnswer: 1
+    explanation: "ឧទាហរណ៍ ពេល User វាយអក្សរ `user-event.type()` នឹង Trigger `keyDown -> keyPress -> input -> change -> keyUp` និង Focus លើ Input ត្រឹមត្រូវតាម Browser Lifecycle។"
+
+  - question: "តើ Query មួយណាដែលមានអាទិភាពខ្ពស់បំផុត (Highest Priority) ក្នុងការស្វែងរក Elements ក្នុង RTL?"
+    options:
+      - "`getByRole` (ឧ. `screen.getByRole('button', { name: /save/i })`) — ព្រោះវាស្វែងរកតាមរយៈ Semantic Accessibility Roles ដែលដូចគ្នានឹងរបៀបដែល User និង Screen Reader មើលឃើញ"
+      - "`getByTestId` — ព្រោះវាជា ID ផ្ទាល់ខ្លួនរបស់ Developer"
+      - "`getByClassName` — ស្វែងរកតាមឈ្មោះ Class CSS"
+      - "`querySelector` — ស្វែងរកតាម Tag HTML"
+    correctAnswer: 1
+    explanation: "RTL Query Hierarchy: `getByRole` គឺលេខ ១ ជានិច្ច ព្រោះវាធានាទាំង UI Logic និង Web Accessibility (a11y) ដំណាលគ្នា។"
 ---
 
-## 🎯 1. RTL Query Priority Order
+## 🎯 ១. ទស្សនវិជ្ជារបស់ React Testing Library (Guiding Principles)
 
-1. **`getByRole`** (អាទិភាពទី ១: `button`, `textbox`, `heading`, `checkbox`)
-2. **`getByLabelText`** (ល្អសម្រាប់ Form Inputs ដែលមាន `<label>`)
-3. **`getByPlaceholderText`** (សម្រាប់ Input Placeholders)
-4. **`getByText`** (សម្រាប់ Paragraphs, Spans)
-5. **`getByTestId`** (ជម្រើសចុងក្រោយ ប្រសិនបើគ្មាន Semantic Role)
+> *"The more your tests resemble the way your software is used, the more confidence they can give you."*  
+> — **Kent C. Dodds** (Creator of RTL)
+
+```mermaid
+flowchart LR
+    subgraph BadWay["❌ Implementation Testing (ចាស់/ខុស)"]
+        A["Test State: wrapper.state('count') == 1\nTest Method: instance.handleClick()\nTest CSS: expect(div).toHaveClass('btn-blue')"]
+    end
+
+    subgraph GoodWay["✅ User-Centric Testing (RTL ស្តង់ដារ)"]
+        B["Render Component លើ DOM\nUser ចុចប៊ូតុង: userEvent.click(button)\nUser ឃើញអក្សរ: expect(screen.getByText('1')).toBeInTheDocument()"]
+    end
+```
 
 ---
 
-## 💻 2. Testing a Button Component
+## 🔍 ២. ឋានានុក្រម Query Priority ក្នុង RTL
 
-### 💻 Code នៃ Component ដែលត្រូវ Test (`Button.jsx`):
+| អាទិភាព | Query Method | ពេលណាត្រូវប្រើ? | ឧទាហរណ៍កូដ |
+| :---: | :--- | :--- | :--- |
+| **១** | **`getByRole`** | គ្រប់ Interactive Elements (`button`, `textbox`, `heading`, `checkbox`) | `screen.getByRole('button', { name: /រក្សាទុក/i })` |
+| **២** | **`getByLabelText`** | Form Inputs ដែលមាន `<label for="...">` ត្រឹមត្រូវ | `screen.getByLabelText(/អ៊ីម៉ែល/i)` |
+| **៣** | **`getByPlaceholderText`**| Form Inputs ដែលគ្មាន Label តែមាន Placeholder | `screen.getByPlaceholderText(/user@edu.kh/i)` |
+| **៤** | **`getByText`** | Paragraphs, Spans, Static Text Headers | `screen.getByText(/សូមស្វាគមន៍/i)` |
+| **៥** | **`getByDisplayValue`** | Input/Select ដែលមាន Value បច្ចុប្បន្នជាក់លាក់ | `screen.getByDisplayValue('Sok Dara')` |
+| **៦** | **`getByTestId`** | ជម្រើសចុងក្រោយបំផុត ប្រសិនបើ Element គ្មាន Semantic Role | `screen.getByTestId('custom-svg-canvas')` |
+
+---
+
+## 💻 ៣. ឧទាហរណ៍ជាក់ស្តែង ៖ Component Testing
+
+ខាងក្រោមនេះជា Counter Component ដែលមាន Min/Max Limits, Step Configuration, និង Reset Action៖
+
+### 💻 `src/components/Counter.jsx` (Source Code)
 
 ```jsx
-// src/components/Button.jsx
-export function Button({ onClick, disabled, children }) {
+// src/components/Counter.jsx
+import React, { useState } from 'react';
+
+export function Counter({ initialValue = 0, min = 0, max = 10, step = 1, onCountChange }) {
+  const [count, setCount] = useState(initialValue);
+
+  const handleIncrement = () => {
+    if (count + step <= max) {
+      const next = count + step;
+      setCount(next);
+      onCountChange?.(next);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (count - step >= min) {
+      const next = count - step;
+      setCount(next);
+      onCountChange?.(next);
+    }
+  };
+
+  const handleReset = () => {
+    setCount(initialValue);
+    onCountChange?.(initialValue);
+  };
+
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="px-4 py-2 bg-blue-600 text-white rounded-xl disabled:opacity-50"
-    >
-      {children}
-    </button>
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm max-w-xs text-center space-y-4">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">ចំនួនរាប់ (Counter)</h2>
+
+      {/* Output Display */}
+      <div
+        role="status"
+        aria-label="current-count"
+        className="text-4xl font-black text-blue-600 dark:text-blue-400"
+      >
+        {count}
+      </div>
+
+      {/* Buttons Controls */}
+      <div className="flex items-center justify-center gap-2">
+        <button
+          onClick={handleDecrement}
+          disabled={count <= min}
+          aria-label="decrement"
+          className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-lg font-bold disabled:opacity-40"
+        >
+          -
+        </button>
+
+        <button
+          onClick={handleReset}
+          className="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition"
+        >
+          Reset
+        </button>
+
+        <button
+          onClick={handleIncrement}
+          disabled={count >= max}
+          aria-label="increment"
+          className="w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold disabled:opacity-40"
+        >
+          +
+        </button>
+      </div>
+
+      {/* Boundary Alert */}
+      {count >= max && (
+        <p className="text-xs text-amber-500 font-medium">⚠️ ដល់កម្រិតអតិបរមាហើយ!</p>
+      )}
+    </div>
   );
 }
 ```
 
-### 💻 Code នៃ Test Suite (`Button.test.jsx`):
+---
+
+### 💻 `src/components/Counter.test.jsx` (Complete Test Suite)
 
 ```jsx
-// src/components/Button.test.jsx
+// src/components/Counter.test.jsx
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Button } from './Button';
+import { Counter } from './Counter';
 
-describe('Button Component', () => {
-  it('renders correctly with children text', () => {
-    // 1. Render Component ចូលក្នុង Virtual DOM
-    render(<Button>ចុចទីនេះ</Button>);
+describe('Counter Component', () => {
+  // ១. Testing Initial Render
+  it('renders initial count correctly and displays buttons', () => {
+    render(<Counter initialValue={5} />);
 
-    // 2. ស្វែងរក Element តាម Role 'button'
-    const button = screen.getByRole('button', { name: /ចុចទីនេះ/i });
-
-    // 3. ផ្ទៀងផ្ទាត់ (Assertion)
-    expect(button).toBeInTheDocument();
+    // ស្វែងរក Element តាម Accessible Role & Name
+    expect(screen.getByRole('status', { name: /current-count/i })).toHaveTextContent('5');
+    expect(screen.getByRole('button', { name: /increment/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /decrement/i })).toBeInTheDocument();
   });
 
-  it('calls onClick handler when clicked', async () => {
-    const handleClick = vi.fn(); // Mock function
-    render(<Button onClick={handleClick}>Submit</Button>);
+  // ២. Testing User Interaction (Increment)
+  it('increments count when plus button is clicked and triggers callback', async () => {
+    const user = userEvent.setup();
+    const handleCountChange = vi.fn();
 
-    // Simulate User Click
-    const button = screen.getByRole('button', { name: /submit/i });
-    await userEvent.click(button);
+    render(<Counter initialValue={0} step={2} onCountChange={handleCountChange} />);
 
-    // ផ្ទៀងផ្ទាត់ថា Function ត្រូវបានហៅ ១ ដង
-    expect(handleClick).toHaveBeenCalledTimes(1);
+    const plusBtn = screen.getByRole('button', { name: /increment/i });
+    await user.click(plusBtn);
+
+    // ផ្ទៀងផ្ទាត់ UI Update
+    expect(screen.getByRole('status', { name: /current-count/i })).toHaveTextContent('2');
+    // ផ្ទៀងផ្ទាត់ Callback
+    expect(handleCountChange).toHaveBeenCalledTimes(1);
+    expect(handleCountChange).toHaveBeenCalledWith(2);
   });
 
-  it('does NOT trigger onClick when disabled', async () => {
-    const handleClick = vi.fn();
-    render(<Button onClick={handleClick} disabled>Disabled</Button>);
+  // ៣. Testing Boundary Limits & Disabled States
+  it('disables decrement button when min limit is reached', async () => {
+    const user = userEvent.setup();
+    render(<Counter initialValue={1} min={0} />);
 
-    const button = screen.getByRole('button', { name: /disabled/i });
-    expect(button).toBeDisabled();
+    const minusBtn = screen.getByRole('button', { name: /decrement/i });
+    expect(minusBtn).not.toBeDisabled();
 
-    await userEvent.click(button);
-    expect(handleClick).not.toHaveBeenCalled(); // មិនត្រូវហៅឡើយ
+    await user.click(minusBtn); // count becomes 0 (min)
+
+    expect(screen.getByRole('status', { name: /current-count/i })).toHaveTextContent('0');
+    expect(minusBtn).toBeDisabled();
+  });
+
+  // ៤. Testing Max Boundary Alert
+  it('shows max limit warning when count hits maximum', () => {
+    render(<Counter initialValue={10} max={10} />);
+
+    const plusBtn = screen.getByRole('button', { name: /increment/i });
+    expect(plusBtn).toBeDisabled();
+    expect(screen.getByText(/ដល់កម្រិតអតិបរមាហើយ/i)).toBeInTheDocument();
+  });
+
+  // ៥. Testing Reset Action
+  it('resets count to initialValue when Reset button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<Counter initialValue={3} />);
+
+    const plusBtn = screen.getByRole('button', { name: /increment/i });
+    const resetBtn = screen.getByRole('button', { name: /reset/i });
+
+    await user.click(plusBtn); // 3 -> 4
+    expect(screen.getByRole('status', { name: /current-count/i })).toHaveTextContent('4');
+
+    await user.click(resetBtn); // reset back to 3
+    expect(screen.getByRole('status', { name: /current-count/i })).toHaveTextContent('3');
   });
 });
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `render(<Button>ចុចទីនេះ</Button>);`
-   - Render Component ចូលក្នុង jsdom environment ដើម្បីត្រៀម query។
-2. `screen.getByRole('button', { name: /ចុចទីនេះ/i })`
-   - ស្វែងរកប៊ូតុងដែលមានឈ្មោះអក្សរ "ចុចទីនេះ" (ប្រើ Regular Expression `i` មិនប្រកាន់អក្សរតូចធំ)។
-3. `expect(button).toBeInTheDocument();`
-   - Matcher ពី `@testing-library/jest-dom` បញ្ជាក់ថា Element ពិតជាមានវត្តមានលើ DOM។
-4. `const handleClick = vi.fn();`
-   - បង្កើត Mock (Spy) Function របស់ Vitest ដើម្បីតាមដានថាតើ Function នោះត្រូវបានហៅប៉ុន្មានដង និងជាមួយ parameter អ្វីខ្លះ។
-5. `await userEvent.click(button);`
-   - ក្លែងធ្វើសកម្មភាព User ចុចកណ្ដុរ (Mouse Click) លើប៊ូតុង។
-6. `expect(handleClick).toHaveBeenCalledTimes(1);`
-   - បញ្ជាក់ថា Handler ដំណើរការត្រឹមត្រូវ ១ ដងគត់។
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `const user = userEvent.setup();`
+   - បង្កើត Instance របស់ `userEvent` មុនពេលធ្វើសកម្មភាព Interactions ដែលជាស្តង់ដារ Recommended របស់ RTL v14+។
+2. `render(<Counter initialValue={5} />);`
+   - Mount Component ចូលទៅក្នុង Virtual DOM (jsdom)។
+3. `screen.getByRole('button', { name: /increment/i })`
+   - ស្វែងរក Element ដែលមាន Role ជា Button និងមាន `aria-label` ឬ Text ត្រូវគ្នានឹង `increment` (Case-Insensitive Regex)។
+4. `await user.click(plusBtn);`
+   - Simulate ការចុច Mouse របស់ User (ត្រូវមាន `await` ជានិច្ច ព្រោះ `userEvent` គឺជា asynchronous function)។
+5. `expect(minusBtn).toBeDisabled();`
+   - Jest-DOM Matcher ផ្ទៀងផ្ទាត់ថា Attribute `disabled` ពិតជាមានលើ Tag `<button>` មែន។
+6. `expect(handleCountChange).toHaveBeenCalledWith(2);`
+   - ផ្ទៀងផ្ទាត់ថា Mock Function ត្រូវបានហៅជាមួយ Parameter លេខ `2`។
+
+---
+
+## 💡 ៥. តារាង Jest-DOM Matchers ពេញនិយម
+
+- `expect(el).toBeInTheDocument()` — ពិនិត្យវត្តមានលើ DOM
+- `expect(el).toBeVisible()` — ពិនិត្យថា Element មិនត្រូវបានលាក់ដោយ `display: none` ឬ `visibility: hidden`
+- `expect(el).toBeDisabled()` / `toBeEnabled()` — ពិនិត្យស្ថានភាព Disabled
+- `expect(el).toHaveValue('admin@edu.kh')` — ពិនិត្យតម្លៃក្នុង Form Input
+- `expect(el).toHaveTextContent(/សូមស្វាគមន៍/i)` — ពិនិត្យអត្ថបទខាងក្នុង
+- `expect(el).toHaveAttribute('type', 'email')` — ពិនិត្យ Attribute HTML

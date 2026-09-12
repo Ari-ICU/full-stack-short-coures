@@ -1,97 +1,139 @@
 ---
-title: Authentication Concepts — JWT, Token Storage & Security
-description: ស្វែងយល់ពី Authentication Flow ជាមួយ JWT (JSON Web Token), Token Storage Strategies, Refresh Token Pattern, និង Security Best Practices ដែល Developer គួរតែដឹង។
+title: "Authentication Fundamentals — JWT, Storage Strategies & Security Architecture"
+description: សិក្សាស៊ីជម្រៅពីគោលការណ៍គ្រឹះនៃ Authentication & Authorization ក្នុង Web — ស្វែងយល់ពីរចនាសម្ព័ន្ធ JWT (Header, Payload, Signature), វដ្តជីវិតនៃ Access Token + Refresh Token, ការប្រៀបធៀប Storage Strategies (LocalStorage vs httpOnly Cookies), និង Security Best Practices ប្រឆាំង XSS/CSRF។
 objectives:
-  - យល់ពី JWT Structure (Header.Payload.Signature) និងរបៀប Verify
-  - ដឹងពី Token Storage Strategies (Memory vs localStorage vs httpOnly Cookie)
-  - យល់ពី Access Token + Refresh Token Pattern
-  - ស្គាល់ Auth Flow ពេញលេញ (Register → Login → Protected Resources → Logout)
+  - "យល់ច្បាស់ពីភាពខុសគ្នារវាង Authentication (Who are you?) និង Authorization (What can you do?)"
+  - "ស្គាល់រចនាសម្ព័ន្ធ ៣ ផ្នែកនៃ JWT Token (Header.Payload.Signature) និងមូលហេតុដែល Payload មិនមែនជាកន្លែងលាក់ Secrets"
+  - "យល់ពីវដ្តជីវិតនៃ Access Token (Short-lived 15m) និង Refresh Token (Long-lived 7d)"
+  - "ចេះប្រៀបធៀបគុណសម្បត្តិ និងគុណវិបត្តិនៃ Storage Strategies (Memory vs LocalStorage vs httpOnly Cookie)"
+  - "ស្គាល់ពីការវាយប្រហារ XSS និង CSRF ព្រមទាំងវិធានការការពារក្នុង React"
 module: module-12-authentication
 order: 1
 quiz:
-  - question: "Storage Strategy មួយណាដែល Secure ជាងគេសម្រាប់ Auth Token?"
+  - question: "តើ Token Storage Strategy មួយណាដែលមានសុវត្ថិភាពខ្ពស់បំផុតសម្រាប់ Production Web Apps ប្រឆាំងនឹង XSS Attacks?"
     options:
-      - "localStorage — ងាយស្រួល Read/Write"
-      - "httpOnly Cookie — Browser ការពារ JavaScript Access ធ្វើឱ្យ XSS Attack មិនអាច Steal Token"
-      - "sessionStorage — Cleared ពេល Tab Close"
-      - "URL Query Parameter — ងាយ Share"
-    correctAnswer: 2
-    explanation: "httpOnly Cookie ត្រូវបាន Set ដោយ Server ហើយ Browser ការពារ JavaScript Code (ទាំង Malicious XSS Scripts) ពីការ Access Cookie ។ localStorage/sessionStorage ដំណើរការបាន ប៉ុន្តែ Vulnerable ប្រឆាំងនឹង XSS Attack ព្រោះ JavaScript អាច Read បាន។"
+      - "`httpOnly Secure Cookie` — ដោយសារ Browser ការពារមិនឱ្យ JavaScript Code (រួមទាំង Malicious XSS Scripts) អាចអាន Cookie នេះបានឡើយ"
+      - "`localStorage` — ព្រោះវាងាយស្រួលសរសេរកូដអានតាម `getItem`"
+      - "`sessionStorage` — ព្រោះវាលុបចោលពេលបិទ Tab"
+      - "ដាក់ក្នុង URL Query Parameter"
+    correctAnswer: 1
+    explanation: "`httpOnly Cookie` ត្រូវបានបញ្ជូន និងគ្រប់គ្រងដោយ Browser ផ្ទាល់។ JavaScript គ្មានសិទ្ធិអាន `document.cookie` លើ httpOnly cookies ឡើយ ដូច្នេះទោះបីជា Hacker បង្ក XSS Attack ក៏មិនអាចលួច Token បានដែរ។"
+
+  - question: "ហេតុអ្វីបានជាយើង **ហាមដាច់ខាត** មិនឱ្យដាក់ Sensitive Data (ដូចជា Password ឬ Credit Card) ក្នុង JWT Payload?"
+    options:
+      - "ព្រោះ JWT Payload គ្រាន់តែត្រូវបាន Base64Url Encoded ប៉ុណ្ណោះ វាមិនត្រូវបាន Encrypted (សម្ងាត់) ឡើយ — នរណាក៏អាច Decode អានអក្សរក្នុង Payload បានយ៉ាងងាយស្រួល"
+      - "ព្រោះ JWT មិនអាចផ្ទុកអក្សរបានច្រើន"
+      - "ព្រោះ JWT ដំណើរការតែជាមួយលេខ ID ប៉ុណ្ណោះ"
+      - "ព្រោះវាធ្វើឱ្យ Token ផុតកំណត់ភ្លាមៗ"
+    correctAnswer: 1
+    explanation: "Base64 មិនមែនជាការ Encryption ទេ! នរណាក៏អាចយក Token ទៅបិទភ្ជាប់លើ jwt.io ដើម្បីអាន Payload បានដែរ។ Signature របស់ JWT មានតួនាទីត្រឹមតែបញ្ជាក់ថា Token មិនត្រូវបានក្លែងបន្លំប៉ុណ្ណោះ មិនមែនដើម្បីលាក់ទិន្នន័យឡើយ។"
+
+  - question: "តើអ្វីជាតួនាទីស្នូលនៃ 'Refresh Token' ក្នុង Modern Web Architecture?"
+    options:
+      - "ប្រើសម្រាប់ស្នើសុំ Access Token ថ្មីមួយទៀតនៅពេលដែល Access Token ចាស់ផុតកំណត់ (Expired) ដោយមិនចាំបាច់បង្ខំឱ្យ User ត្រូវវាយ Password Login សារជាថ្មី"
+      - "ប្រើសម្រាប់ Login ចូល Facebook"
+      - "ប្រើសម្រាប់ Download រូបភាពពី Server"
+      - "ប្រើសម្រាប់បិទដំណើរការ Browser Tab"
+    correctAnswer: 1
+    explanation: "Access Token មានអាយុកាលខ្លី (ឧ. 15 នាទី) ដើម្បីសុវត្ថិភាព។ នៅពេលវា Expired Client នឹងផ្ញើ Refresh Token (ដែលរក្សាទុកក្នុង httpOnly cookie) ទៅកាន់ Server ដើម្បីប្តូរយក Access Token ថ្មីដោយស្វ័យប្រវត្តិ (Silent Refresh)។"
 ---
 
-## 🔐 1. JWT Structure
-
-JWT (JSON Web Token) ជា String បែប `header.payload.signature` ដែលអ្នក Server ចេញ (Sign) ហើយ Client ផ្ញើ Return ក្នុង Request ជា Proof of Identity:
+## 🔐 ១. Authentication vs Authorization (ស្វែងយល់ពីភាពខុសគ្នា)
 
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9    ← Header (Base64: algorithm)
-.eyJ1c2VySWQiOiIxMjMiLCJuYW1lIjoiUmF0aGEiLCJleHAiOjE3...  ← Payload (Base64: claims)
-.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c              ← Signature (HMAC-SHA256)
+┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
+│        1. Authentication (AuthN)     │     │        2. Authorization (AuthZ)      │
+├──────────────────────────────────────┤     ├──────────────────────────────────────┤
+│ • សំនួរ: «តើអ្នកជានរណា?» (Identity) │     │ • សំនួរ: «តើអ្នកមានសិទ្ធិធ្វើអ្វី?»  │
+│ • ដំណើរការ: Login ជាមួយ Email + Pass │     │ • ដំណើរការ: ឆែក Role (Admin / User) │
+│ • លទ្ធផល: ចេញ JWT Token / Session    │     │ • HTTP Error: 403 Forbidden          │
+│ • HTTP Error: 401 Unauthorized       │     │ • ឧទាហរណ៍: លុប User, កែ Settings     │
+└──────────────────────────────────────┘     └──────────────────────────────────────┘
 ```
-
-```js
-// Decoded Payload (NOT encrypted, anyone can read!)
-{
-  "userId": "123",
-  "name": "Ratha",
-  "role": "student",
-  "iat": 1709856000,   // Issued At (Unix timestamp)
-  "exp": 1709942400    // Expires At (24 hours later)
-}
-```
-
-> **⚠️ Important:** JWT Payload ត្រូវបាន **Base64 encoded** ប៉ុន្តែ **NOT encrypted** — ដូច្នេះ ហាមដាក់ sensitive data (password, credit card) ក្នុង JWT payload!
 
 ---
 
-## 🔄 2. Full Auth Flow
+## 📜 ២. រចនាសម្ព័ន្ធនៃ JSON Web Token (JWT Anatomy)
+
+JWT គឺជា Compact String មួយដែលចែកចេញជា **៣ ផ្នែក** ដោយខណ្ឌដោយសញ្ញាចុច (`.`):
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxMjMiLCJuYW1lIjoiU29rIERhcmEiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE3MTAwMDAwMDB9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+└──────────────────┬──────────────────┘ └──────────────────────────────┬──────────────────────────────┘ └─────────────────────────┬─────────────────────────┘
+            1. HEADER                                              2. PAYLOAD                                                 3. SIGNATURE
+```
+
+### ១. Header (ក្បាលកូដ)
+បញ្ជាក់ពី Algorithm នៃការ Sign (ឧ. `HS256` ឬ `RS256`) និងប្រភេទ Token (`JWT`)។
+
+### ២. Payload (ទិន្នន័យ Claims)
+ផ្ទុកព័ត៌មាន User ID, Role, និង Expiration Time (`exp`)។  
+> [!WARNING]
+> **ចងចាំជានិច្ច ៖** Payload គ្រាន់តែជា **Base64 String** មិនត្រូវបាន Encrypted ឡើយ! ហាមដាក់ Password, PIN code ឬ Secret Keys ក្នុង Payload ជាដាច់ខាត!
+
+### ៣. Signature (ហត្ថលេខាឌីជីថល)
+Server យក `Header + Payload + SecretKey` មក Hash បញ្ចូលគ្នា ដើម្បីធានាថា គ្មាននរណាម្នាក់អាចកែប្រែទិន្នន័យក្នុង Token បានឡើយ។
+
+---
+
+## 🔄 ៣. វដ្តជីវិតពេញលេញ ៖ Access Token + Refresh Token Flow
 
 ```mermaid
 sequenceDiagram
-    participant Client as React Client
+    autonumber
+    actor User as អ្នកប្រើប្រាស់
+    participant Client as React SPA Client
     participant Server as Node/Express Server
     participant DB as Database
 
-    Note over Client, DB: REGISTER
-    Client->>Server: POST /auth/register { name, email, password }
-    Server->>DB: Hash password, save user
-    DB-->>Server: User created
-    Server-->>Client: 201 Created { accessToken, refreshToken }
+    User->>Client: បញ្ចូល Email & Password រួចចុច Login
+    Client->>Server: POST /api/auth/login { email, password }
+    Server->>DB: ផ្ទៀងផ្ទាត់ bcrypt password hash
+    DB-->>Server: ព័ត៌មានត្រឹមត្រូវ ✅
+    Server-->>Client: បញ្ជូន { accessToken (15m) } + Set httpOnly { refreshToken (7d) }
+    Client->>Client: រក្សាទុក accessToken ក្នុង Memory/State
 
-    Note over Client, DB: LOGIN
-    Client->>Server: POST /auth/login { email, password }
-    Server->>DB: Find user, bcrypt.compare(password, hash)
-    DB-->>Server: User found ✅
-    Server-->>Client: 200 OK { accessToken (15min), refreshToken (7days) }
-    Client->>Client: Store accessToken in memory, refreshToken in httpOnly cookie
+    Note over Client, Server: ដំណើរការទាញយក Protected Resources
+    Client->>Server: GET /api/orders (Headers: Authorization: Bearer <accessToken>)
+    Server-->>Client: 200 OK { orders: [...] }
 
-    Note over Client, DB: PROTECTED REQUEST
-    Client->>Server: GET /api/profile (Authorization: Bearer <accessToken>)
-    Server->>Server: jwt.verify(token, SECRET)
-    Server-->>Client: 200 OK { user data }
-
-    Note over Client, DB: REFRESH
-    Client->>Server: POST /auth/refresh (refreshToken cookie sent automatically)
-    Server->>Server: Verify refreshToken, issue new accessToken
-    Server-->>Client: 200 OK { new accessToken }
+    Note over Client, Server: នៅពេល Access Token ផុតកំណត់ (Expired)
+    Client->>Server: GET /api/orders (accessToken ផុតកំណត់ 15 នាទី)
+    Server-->>Client: 401 Unauthorized (Token Expired)
+    Client->>Server: POST /api/auth/refresh (ផ្ញើ refreshToken cookie ស្វ័យប្រវត្តិ)
+    Server-->>Client: 200 OK { newAccessToken (15m) }
+    Client->>Server: ហៅ GET /api/orders ម្តងទៀតដោយជោគជ័យ! 🎉
 ```
 
 ---
 
-## 🗄️ 3. Token Storage Strategy Comparison
+## 🗄️ ៤. ការប្រៀបធៀបយុទ្ធសាស្ត្ររក្សាទុក Token (Storage Strategies)
 
-| Strategy | XSS Safe | CSRF Safe | Notes |
-|----------|----------|-----------|-------|
-| **Memory (JS variable)** | ✅ | ✅ | Lost on page refresh — requires refresh token |
-| **localStorage** | ❌ | ✅ | Easy XSS target — avoid for sensitive apps |
-| **sessionStorage** | ❌ | ✅ | Cleared on tab close |
-| **httpOnly Cookie** | ✅ | ❌ (need CSRF token) | **Best for production** |
+| យុទ្ធសាស្ត្រ Storage | ការពារ XSS? | ការពារ CSRF? | ការថែរក្សាពេល Refresh (F5) | កម្រិតណែនាំ |
+| :--- | :--- | :--- | :--- | :--- |
+| **Memory (React State)** | ✅ មានសុវត្ថិភាព | ✅ មានសុវត្ថិភាព | ❌ បាត់ពេល Refresh (ត្រូវ Refresh Token) | ល្អបំផុតសម្រាប់ Access Token |
+| **`localStorage`** | ❌ ងាយរងគ្រោះ (XSS) | ✅ មានសុវត្ថិភាព | ✅ នៅរក្សាដដែល | សមស្របសម្រាប់ Course/Demo Projects |
+| **`sessionStorage`** | ❌ ងាយរងគ្រោះ (XSS) | ✅ មានសុវត្ថិភាព | ❌ បាត់ពេលបិទ Tab | កម្រប្រើសម្រាប់ Auth |
+| **`httpOnly Cookie`** | ✅ មានសុវត្ថិភាពខ្ពស់ | ⚠️ ត្រូវប្រើ SameSite/CSRF | ✅ នៅរក្សាដដែល | **ស្តង់ដារ Production សម្រាប់ Refresh Token** |
 
-**Practical approach for course projects:**
-```js
-// Course-level: localStorage for simplicity (acceptable)
-localStorage.setItem('token', accessToken);
+---
 
-// Production: accessToken in memory + refreshToken in httpOnly cookie
-// Let the server set: res.cookie('refresh_token', token, { httpOnly: true, secure: true })
-```
+## 🛡️ ៥. Security Best Practices សម្រាប់ React Developer
+
+1. **ការពារការវាយប្រហារ XSS (Cross-Site Scripting):**  
+   ចៀសវាងការប្រើ `dangerouslySetInnerHTML` ជាមួយទិន្នន័យពី User និង sanitize inputs ជានិច្ច។
+2. **ការពារ CSRF (Cross-Site Request Forgery):**  
+   ប្រសិនបើប្រើ Cookies ត្រូវកំណត់ Attribute `SameSite=Strict` ឬ `SameSite=Lax` និងប្រើ CSRF Tokens។
+3. **Short-Lived Access Tokens:**  
+   កំណត់អាយុកាល Access Token ត្រឹម 10 ទៅ 15 នាទី ដើម្បីកាត់បន្ថយហានិភ័យក្នុងករណីបែកធ្លាយ។
+4. **HTTPS Only:**  
+   រាល់ការបញ្ជូន Token ត្រូវតែធ្វើឡើងតាមរយៈ HTTPS ប្រកបដោយសុវត្ថិភាពជានិច្ច។
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ
+
+- **Access Token:** ប័ណ្ណសម្គាល់ខ្លួនរហ័ស (អាយុ ១៥ នាទី) ផ្ញើតាម `Authorization: Bearer <token>`។
+- **Refresh Token:** ប័ណ្ណធានារយៈពេលវែង (អាយុ ៧ ថ្ងៃ) សម្រាប់ស្នើសុំ Access Token ថ្មី។
+- **JWT Header & Payload:** បើកចំហរអានបានដោយសេរី ហាមដាក់ពាក្យសម្ងាត់។
+- **JWT Signature:** ត្រាបញ្ជាក់ពីភាពត្រឹមត្រូវ មិនឱ្យនរណាកែប្រែបាន។

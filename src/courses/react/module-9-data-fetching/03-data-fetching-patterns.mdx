@@ -1,89 +1,113 @@
 ---
-title: Advanced Data Fetching Patterns — Race Conditions & Debouncing
-description: ស្វែងយល់ពីបញ្ហា Race Condition, របៀបដោះស្រាយដោយ AbortController និង Flag Pattern, ព្រមទាំងបច្ចេកទេស Search Debouncing ដាច់ដោយឡែកមួយផ្នែកៗជាមួយការពន្យល់មួយជួរៗ។
+title: "Advanced Data Fetching Patterns — Race Conditions, Caching & Search Debouncing"
+description: សិក្សាស៊ីជម្រៅពីបញ្ហា Race Condition ក្នុង React Single Page Applications, ដំណោះស្រាយដោយ Boolean Flag Pattern និង AbortController, ព្រមទាំងការបង្កើត Custom useDebounce Hook ដើម្បីទប់ស្កាត់ API Rate Limiting។
 objectives:
-  - យល់ពីមូលហេតុដែលបង្កឱ្យមាន Race Condition ក្នុងការ Fetch ទិន្នន័យ
-  - ចេះប្រើ Boolean Flag Pattern ដើម្បីការពារ Stale Data Update
-  - ចេះប្រើ AbortController ដើម្បី Cancel Previous Request ពេល Input ផ្លាស់ប្តូរ
-  - ចេះ Implement Search Debounce Pattern ដើម្បីសន្សំ Network Requests
+  - "យល់ច្បាស់ពីមូលហេតុ និងផលប៉ះពាល់នៃ Race Condition ពេល Network Latency មិនស្មើគ្នា"
+  - "ចេះប្រើ Boolean Ignore Flag Pattern ដើម្បីទប់ស្កាត់ការសរសេរជាន់ដោយ Stale Network Response"
+  - "ចេះប្រើ `AbortController` ដើម្បីកាត់ផ្តាច់ In-flight Network Stream ពេល User វាយអក្សរបន្ត"
+  - "ចេះបង្កើត Custom Hook `useDebounce` ពីដំបូងដោយខ្លួនឯងជាមួយ Timer Cleanup"
+  - "យល់ពីយុទ្ធសាស្ត្រកាត់បន្ថយបន្ទុក Server (Throttling, Debouncing & In-memory Caching)"
 module: module-9-data-fetching
 order: 3
 quiz:
-  - question: "តើអ្វីទៅជា Race Condition ក្នុង Data Fetching?"
+  - question: "តើអ្វីទៅជា 'Race Condition' នៅក្នុង Data Fetching?"
     options:
-      - "ការប្រកួតប្រជែងល្បឿនអ៊ីនធឺណិត"
-      - "នៅពេលដែល Request ទី ១ (ចាស់) ត្រឡប់មកដល់ក្រោយ Request ទី ២ (ថ្មី) ហើយសរសេរជាន់លើទិន្នន័យថ្មី ធ្វើឱ្យ UI បង្ហាញលទ្ធផលខុស"
-      - "នៅពេល Database គាំង"
-      - "នៅពេល Component មិនព្រម Render"
-    correctAnswer: 2
-    explanation: "Network Latency មិនស្មើគ្នាទេ — Request ទី ១ អាចចំណាយពេល 1000ms ឯ Request ទី ២ ចំណាយត្រឹម 200ms។ បើគ្មានការការពារ Response នៃ Request ទី ១ នឹងមកសរសេរជាន់ State ចុងក្រោយ បង្កជា Race Condition។"
+      - "ស្ថានភាពដែល Request ទី ១ (ចាស់) ត្រឡប់មកដល់ក្រោយ Request ទី ២ (ថ្មី) ដោយសារ Network Latency ហើយទិន្នន័យចាស់បានមកសរសេរជាន់លើ State ថ្មី ធ្វើឱ្យ UI បង្ហាញលទ្ធផលខុសឆ្គង"
+      - "ការប្រកួតប្រជែងល្បឿន Render របស់ Browser"
+      - "នៅពេលដែល Database គាំងមិនដំណើរការ"
+      - "នៅពេលដែល Component មិនព្រម Re-render"
+    correctAnswer: 1
+    explanation: "Network Latency មិនស្មើគ្នាទេ — Request ទី ១ (វាយអក្សរ 'Re') អាចចំណាយពេល 1500ms ឯ Request ទី ២ (វាយអក្សរ 'React') ចំណាយត្រឹម 300ms។ Response ទី ២ មកដល់មុន បង្ហាញលទ្ធផល 'React' ប៉ុន្តែបន្តិចក្រោយមក Response ទី ១ ទើបមកដល់ ហើយសរសេរជាន់ UI បង្ហាញលទ្ធផល 'Re' វិញ ដែលនេះជា Race Condition!"
+
+  - question: "តើគោលបំណងចម្បងនៃបច្ចេកទេស 'Debouncing' លើ Search Input គឺជាអ្វី?"
+    options:
+      - "ពន្យារពេលការបាញ់ Network Request (ឧ. 400ms) រហូតដល់ User ឈប់វាយអក្សរ ដើម្បីកាត់បន្ថយចំនួន Request និងការពារ API Rate Limiting (429 Too Many Requests)"
+      - "ដើម្បីធ្វើឱ្យ CSS Animation មានល្បឿនលឿន"
+      - "ដើម្បីបម្លែងអក្សរ Input ទៅជា Upper Case ដោយស្វ័យប្រវត្តិ"
+      - "ដើម្បី Save ទិន្នន័យទៅ LocalStorage"
+    correctAnswer: 1
+    explanation: "បើគ្មាន Debounce ទេ រាល់ពេល User វាយ ១ អក្សរ React នឹងបាញ់ Request ១ ដង (វាយពាក្យ 'JavaScript' បាញ់ ១០ ដង)។ Debounce ជួយពន្យារពេល ធានាថានឹងបាញ់តែ ១ ដងគត់នៅពេល User ឈប់វាយអក្សរ។"
+
+  - question: "តើ 'Boolean Ignore Flag' Pattern ដំណើរការយ៉ាងដូចម្តេចក្នុង `useEffect`?"
+    options:
+      - "បង្កើតអថេរ `let isCurrent = true` ក្នុង Effect ហើយក្នុង Cleanup function កំណត់ `isCurrent = false`។ ពេល Response ត្រឡប់មកដល់ យើងឆែក `if (isCurrent)` មុននឹង `setState`"
+      - "លុបចោល Response ទាំងស្រុង"
+      - "បិទដំណើរការ Internet"
+      - "ប្រើសម្រាប់តែ Button Click"
+    correctAnswer: 1
+    explanation: "នៅពេល Dependency ផ្លាស់ប្តូរ React ដំណើរការ Cleanup Function របស់ Effect មុន ដោយកំណត់ `isCurrent = false`។ ដូច្នេះទោះបីជា Request ចាស់ត្រឡប់មកដល់យឺតប៉ុណ្ណាក៏ដោយ ក៏វានឹងមិនអាច Update State បានឡើយ។"
 ---
 
-## 🏃‍♂️ 1. Race Condition Visualized
+## 🏃‍♂️ ១. បញ្ហា Race Condition (The Race Condition Problem)
+
+នៅក្នុង Single Page Application (SPA) នៅពេលដែល User វាយអក្សរស្វែងរក ឬចុចប្តូរ Tab យ៉ាងរហ័ស Network Requests ជាច្រើននឹងត្រូវបាញ់ចេញជាបន្តបន្ទាប់។
+
+ដោយសារ **Network Latency មិនស្មើគ្នា** Request ដែលបាញ់ចេញមុន អាចត្រឡប់មកដល់ក្រោយគេបង្អស់ ធ្វើឱ្យទិន្នន័យចាស់មកសរសេរជាន់លើទិន្នន័យថ្មី ៖
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant React as Component State
+    autonumber
+    participant User as អ្នកប្រើប្រាស់
+    participant State as React Component State
     participant API as Backend Server
 
-    User->>API: Request 1 (search: "Re") [Takes 1500ms]
-    User->>API: Request 2 (search: "React") [Takes 300ms]
-    API-->>React: Response 2 arrives first! State = "React results" ✅
-    API-->>React: Response 1 arrives late! State = "Re results" ❌ (Race Condition!)
+    User->>API: វាយអក្សរ "Re" (Request 1) [Network យឺត: ចំណាយ 1,500ms]
+    User->>API: វាយបន្ថែម "React" (Request 2) [Network លឿន: ចំណាយ 300ms]
+    
+    API-->>State: Response 2 មកដល់មុន! State = "React Results" ✅
+    Note over State: UI បង្ហាញទិន្នន័យ React ត្រឹមត្រូវ
+
+    API-->>State: Response 1 មកដល់ក្រោយ! State = "Re Results" ❌
+    Note over State: 💥 Race Condition! UI ធ្លាក់ទៅបង្ហាញលទ្ធផលចាស់ "Re" វិញ!
 ```
 
 ---
 
-## 🛡️ 2. Solution A: Boolean Ignore Flag Pattern
+## 🛡️ ២. ដំណោះស្រាយទី ១ ៖ The Boolean Ignore Flag Pattern
 
-### 💻 Code សម្រាប់តែ Ignore Flag Pattern:
+វិធីសាមញ្ញ និងមានប្រសិទ្ធភាពខ្ពស់បំផុតក្នុងការទប់ស្កាត់ Stale Response គឺប្រើប្រាស់ **Local Ignore Flag** ៖
 
 ```javascript
 useEffect(() => {
-  let isCurrent = true; // 1. Flag បញ្ជាក់ថា Effect នេះនៅជាចុងក្រោយ
+  let isCurrent = true; // 🚩 ១. បញ្ជាក់ថា Effect បច្ចុប្បន្ននៅជាសកម្មភាពចុងក្រោយ
 
-  const fetchData = async () => {
-    const result = await fetchUserData(userId);
-    
-    // 2. ពិនិត្យមើលថាតើ Component បាន Re-render រួចហើយឬនៅ?
-    if (isCurrent) {
-      setUserData(result); // Update តែពេលណា request នេះនៅតែជា current
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(`https://api.example.com/users/${userId}`);
+      const data = await response.json();
+
+      // 🛡️ ២. ពិនិត្យមើលថាតើ Effect នេះនៅតែជា Current ឬអត់?
+      if (isCurrent) {
+        setUser(data); // Update State តែពេលណា request នេះនៅជាចុងក្រោយ
+      }
+    } catch (err) {
+      if (isCurrent) setError(err.message);
     }
   };
 
-  fetchData();
+  fetchUserData();
 
-  // 3. Cleanup: ពេល userId ប្តូរ Effect មុននឹងត្រូវ mark ថា expired
+  // 🧹 ៣. Cleanup: នៅពេល userId ផ្លាស់ប្តូរ React នឹង set isCurrent = false សម្រាប់ Effect ចាស់ភ្លាម!
   return () => {
     isCurrent = false;
   };
 }, [userId]);
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `let isCurrent = true;`
-   - បង្កើត Local Variable មួយនៅក្នុង Scope នៃ Effect បច្ចុប្បន្ន។
-2. `if (isCurrent)`
-   - មុនពេលហៅ `setUserData(result)` យើងពិនិត្យមើលថា `isCurrent` នៅតែ `true` ឬអត់។
-3. `return () => { isCurrent = false; };`
-   - នៅពេល `userId` ផ្លាស់ប្តូរ React នឹងដំណើរការ Cleanup function នៃ Effect ចាស់ភ្លាម ដោយកំណត់ `isCurrent = false`។ ដូច្នេះបើ Response ចាស់ត្រឡប់មកដល់យឺត ក៏វាមិនអាច Update State បានដែរ។
-
 ---
 
-## 🛑 3. Solution B: AbortController Pattern
+## 🛑 ៣. ដំណោះស្រាយទី ២ ៖ The AbortController Pattern
 
-### 💻 Code សម្រាប់តែ AbortController Pattern:
+ជំនួសឱ្យការគ្រាន់តែ ignore response យើងអាច **កាត់ផ្តាច់ Network Stream ពី Browser ភ្លាមៗតែម្តង** ដើម្បីសន្សំ Bandwidth ៖
 
 ```javascript
 useEffect(() => {
   const controller = new AbortController();
 
-  const loadData = async () => {
+  const searchPosts = async () => {
     try {
-      const res = await fetch(`/api/search?q=${query}`, {
-        signal: controller.signal, // ភ្ជាប់ signal ទៅ request
+      const res = await fetch(`https://api.example.com/search?q=${query}`, {
+        signal: controller.signal, // 🔗 ភ្ជាប់ signal
       });
       const data = await res.json();
       setResults(data);
@@ -94,123 +118,175 @@ useEffect(() => {
     }
   };
 
-  loadData();
+  searchPosts();
 
-  // Cleanup: Cancel request មុនភ្លាម ពេល query ផ្លាស់ប្តូរ
-  return () => controller.abort();
+  // ✂️ Cleanup: Cancel request ចាស់ភ្លាមៗពេល user វាយ query ថ្មី
+  return () => {
+    controller.abort();
+  };
 }, [query]);
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const controller = new AbortController();`
-   - បង្កើត Web API AbortController ថ្មីមួយរាល់ពេល query ផ្លាស់ប្តូរ។
-2. `signal: controller.signal`
-   - ប្រាប់ browser ថា request នេះស្ថិតក្រោមការបញ្ជារបស់ controller នេះ។
-3. `return () => controller.abort();`
-   - ពេល user វាយអក្សរបន្ទាប់ (query ប្តូរ) Cleanup នឹងកាត់ផ្តាច់ (Abort) Network Request ចាស់ចោលភ្លាមៗពី Browser តែម្តង ដោយមិនចាំបាច់រង់ចាំ Server ឆ្លើយតបឡើយ។
-4. `if (err.name !== 'AbortError')`
-   - មិនបង្ហាញ Error ក្រហមនៅពេល request ត្រូវបាន Abort ដោយចេតនា។
-
 ---
 
-## ⏱️ 4. Search Debounce Pattern (កាត់បន្ថយ Request)
+## ⏱️ ៤. Search Debouncing (ការបង្កើត Custom Hook `useDebounce`)
 
-### 💻 Code សម្រាប់តែ Debounce Logic:
+> [!TIP]
+> **ហេតុអ្វីបានជាត្រូវប្រើ Debounce?**  
+> ប្រសិនបើ User វាយពាក្យ *"FullStack"* រយៈពេល ២ វិនាទី App របស់អ្នកនឹងបាញ់ Request ចំនួន ៩ ដងទៅកាន់ Server។ ការ Debounce ជួយពន្យារពេល ៤០០ មីលីវិនាទី — App នឹងបាញ់ Request តែ **១ ដងគត់** នៅពេល User ឈប់វាយអក្សរ!
 
 ```javascript
-const [searchTerm, setSearchTerm] = useState('');
-const [debouncedTerm, setDebouncedTerm] = useState('');
+// src/hooks/useDebounce.js
+import { useState, useEffect } from 'react';
 
-// Effect ពន្យារពេល 400ms រាល់ពេល user វាយ
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setDebouncedTerm(searchTerm);
-  }, 400);
+export function useDebounce(value, delay = 400) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
-  // បើ user វាយអក្សរបន្តទៀតក្នុងអំឡុង 400ms លុប timer ចាស់ចោល
-  return () => clearTimeout(timer);
-}, [searchTerm]);
+  useEffect(() => {
+    // កំណត់ Timer រង់ចាំ
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    // ប្រសិនបើ value ផ្លាស់ប្តូរមុនពេល 400ms ផុតកំណត់ លុប Timer ចាស់ចោល!
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
 ```
-
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const timer = setTimeout(..., 400);`
-   - កំណត់ម៉ោងរង់ចាំ 400ms សិន ទើប update `debouncedTerm`។
-2. `return () => clearTimeout(timer);`
-   - បើ User វាយអក្សរបន្ថែមទៀតមុន 400ms ផុតកំណត់ Cleanup នឹងលុប Timer ចាស់ចោល រួចបង្កើត Timer ថ្មី។
-   - លទ្ធផល៖ Network Request នឹងបាញ់ចេញតែ ១ ដងគត់ នៅពេល User ឈប់វាយអក្សរ!
 
 ---
 
-## 🚀 5. Complete Integrated Search Component
+## 💻 ៥. កូដពេញលេញ ៖ Live Search Engine (Debounce + Abort + History)
 
 ```jsx
+// src/components/AdvancedLiveSearch.jsx
 import { useState, useEffect } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 
-export default function LiveSearch() {
+export default function AdvancedLiveSearch() {
   const [query, setQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debouncedQuery = useDebounce(query, 400); // ⏱️ ពន្យារពេល 400ms
+
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchCount, setSearchCount] = useState(0);
 
-  // 1. DEBOUNCE EFFECT
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(query);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [query]);
-
-  // 2. FETCH WITH ABORTCONTROLLER EFFECT
   useEffect(() => {
     if (!debouncedQuery.trim()) {
       setResults([]);
+      setIsLoading(false);
       return;
     }
 
     const controller = new AbortController();
     setIsLoading(true);
+    setError(null);
 
-    fetch(`https://jsonplaceholder.typicode.com/posts?q=${encodeURIComponent(debouncedQuery)}`, {
-      signal: controller.signal,
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    const performSearch = async () => {
+      try {
+        const response = await fetch(
+          `https://jsonplaceholder.typicode.com/posts?q=${encodeURIComponent(
+            debouncedQuery
+          )}`,
+          { signal: controller.signal }
+        );
+
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+
+        const data = await response.json();
         setResults(data);
-        setIsLoading(false);
-      })
-      .catch((err) => {
+        setSearchCount((c) => c + 1);
+      } catch (err) {
         if (err.name !== 'AbortError') {
-          console.error(err);
-          setIsLoading(false);
+          setError(err.message || 'ស្វែងរកបរាជ័យ');
         }
-      });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => controller.abort();
+    performSearch();
+
+    // ✂️ Cancel request ពេល debouncedQuery ផ្លាស់ប្តូរ ឬ Component Unmount
+    return () => {
+      controller.abort();
+    };
   }, [debouncedQuery]);
 
   return (
-    <div className="max-w-md mx-auto p-4">
-      <h2 className="text-xl font-bold mb-3 text-slate-800 dark:text-white">🔍 Live Post Search</h2>
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="ស្វែងរកចំណងជើង Post..."
-        className="w-full px-4 py-2 border rounded-xl dark:bg-slate-800 dark:text-white mb-4"
-      />
+    <div className="max-w-lg mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-5">
+      <div>
+        <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+          <span>🔍</span> Advanced Live Search Engine
+        </h2>
+        <p className="text-xs text-slate-500 mt-0.5">
+          ការពារ Race Conditions ជាមួយ Debounce (400ms) + AbortController
+        </p>
+      </div>
 
-      {isLoading && <p className="text-sm text-blue-500">កំពុងស្វែងរក...</p>}
+      {/* SEARCH INPUT */}
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="សាកល្បងវាយស្វែងរក (ឧ. 'qui', 'optio', 'dolor')..."
+          className="w-full pl-3.5 pr-10 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+        {isLoading && (
+          <div className="absolute right-3.5 top-3 w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        )}
+      </div>
 
-      <ul className="space-y-2">
-        {results.map((item) => (
-          <li key={item.id} className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border">
-            <h4 className="font-bold text-sm text-slate-800 dark:text-white capitalize">{item.title}</h4>
-          </li>
+      {/* STATS */}
+      <div className="flex justify-between items-center text-[11px] text-slate-500 px-1">
+        <span>ពាក្យស្វែងរក: <b className="text-indigo-600">"{debouncedQuery || '...'}"</b></span>
+        <span>ចំនួន Request បានបាញ់: <b>{searchCount}</b> ដង</span>
+      </div>
+
+      {/* ERROR BANNER */}
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-medium">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* RESULTS LIST */}
+      <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+        {results.length === 0 && debouncedQuery && !isLoading && (
+          <p className="text-center py-8 text-xs text-slate-400">
+            រកមិនឃើញអត្ថបទដែលត្រូវនឹង "{debouncedQuery}" ឡើយ!
+          </p>
+        )}
+
+        {results.map((post) => (
+          <div
+            key={post.id}
+            className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-xs space-y-1 hover:border-indigo-300 transition"
+          >
+            <h4 className="font-bold text-slate-800 dark:text-white capitalize">
+              {post.title}
+            </h4>
+            <p className="text-[11px] text-slate-500 line-clamp-2">{post.body}</p>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
 ```
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ
+
+| យុទ្ធសាស្ត្រ | របៀបដំណើរការ | ករណីប្រើប្រាស់ល្អបំផុត |
+| :--- | :--- | :--- |
+| **Ignore Flag** | `let isCurrent = true` ក្នុង Effect | Component Tab Switching, Pagination, User ID Change |
+| **AbortController** | `controller.abort()` ក្នុង Cleanup | Auto-complete Search, Large File Downloads |
+| **useDebounce** | `setTimeout` 400ms + `clearTimeout` | Real-time Search Inputs, Window Resize, Auto-save Forms |

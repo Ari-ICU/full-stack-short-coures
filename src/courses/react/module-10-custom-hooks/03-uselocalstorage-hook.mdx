@@ -1,126 +1,204 @@
 ---
-title: Building useLocalStorage — Persistent State Hook
-description: សាងសង់ Custom Hook useLocalStorage(key, initialValue) ដែល Sync React State ជាមួយ Browser localStorage ដោយស្វ័យប្រវត្តិ ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Building useLocalStorage — Synchronized & Persistent State Hook"
+description: សាងសង់ Custom Hook useLocalStorage(key, initialValue) កម្រិត Advanced — ស្វែងយល់ពី Lazy Initial State, JSON Serialization/Deserialization, Functional Updates (prev => next), និង Cross-Tab Synchronization តាមរយៈ Storage Events។
 objectives:
-  - យល់ពី Lazy Initial State ក្នុងការទាញតម្លៃដំបូងពី localStorage
-  - ចេះ Parse និង Stringify JSON ទិន្នន័យដោយមាន Error Handling Safe
-  - ចេះ Sync React State ទៅកាន់ localStorage រាល់ពេល State ផ្លាស់ប្តូរ
-  - ចេះយក useLocalStorage ទៅអនុវត្តជាមួយ Theme Toggle និង Persistent Cart
+  - "យល់ច្បាស់ពីបញ្ហានៃការហៅ `localStorage.setItem()` ផ្ទាល់ក្នុង React (មិន Trigger Re-render)"
+  - "ចេះប្រើ Lazy Initial State `useState(() => ...)` ដើម្បីអាន Storage តែមួយដងគត់ពេល Mount"
+  - "ចេះ Implement Functional State Updates `setValue(prev => ...)` ឱ្យដូច useState ១០០%"
+  - "ចេះប្រើ `window.addEventListener('storage')` ដើម្បី Sync ទិន្នន័យឆ្លងកាត់ Browser Tabs ផ្សេងៗ"
+  - "ចេះយក useLocalStorage ទៅអនុវត្តជាមួយ Theme Toggle និង Form Draft Auto-save"
 module: module-10-custom-hooks
 order: 3
 quiz:
-  - question: "ហេតុអ្វីត្រូវ JSON.stringify() Data មុនពេល Write ទៅ localStorage?"
+  - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើ Lazy Initialization `useState(() => getStoredValue())` ជំនួសឱ្យ `useState(getStoredValue())` ក្នុង `useLocalStorage`?"
     options:
-      - "ដើម្បីធ្វើឱ្យ Storage ប្រើ Memory តិចជាង"
-      - "localStorage Store តែ Strings — JSON.stringify() បំប្លែង Objects/Arrays/Numbers ទៅជា String format ដើម្បី Persist បានត្រឹមត្រូវ"
-      - "ដើម្បីការពារ Hackers"
-      - "ដើម្បី Compress Data"
-    correctAnswer: 2
-    explanation: "Browser localStorage API អាច Store Values ជា Strings ប៉ុណ្ណោះ។ JSON.stringify() បំប្លែង JavaScript Values (Objects, Arrays, Booleans, Numbers) ទៅជា JSON String ហើយ JSON.parse() ប្ដូរ String ត្រឡប់ទៅជា JavaScript Value ពេល Read ចេញ។"
+      - "ព្រោះការអាន `localStorage.getItem()` គឺជាប្រតិបត្តិការ Synchronous I/O ដ៏យឺត (Slow Disk Access)។ Lazy Function ធានាថាវាដំណើរការតែម្ដងគត់ពេល Mount ដំបូង និងមិនរត់ឡើងវិញរាល់ពេល Render ឡើយ"
+      - "ដើម្បីឱ្យ Storage ផ្ទុកទិន្នន័យបានច្រើន Gigabytes"
+      - "ដើម្បីលុបបំបាត់ការប្រើប្រាស់ JSON"
+      - "ដើម្បីឱ្យ Code ដំណើរការតែលើទូរស័ព្ទដៃ"
+    correctAnswer: 1
+    explanation: "`localStorage` ដំណើរការលើ Disk I/O យឺត។ ប្រសិនបើយើងមិនប្រើ Lazy Initialization Callback ទេ នោះ `localStorage.getItem()` នឹងត្រូវ Execute រាល់ពេល Component Re-render ធ្វើឱ្យប៉ះពាល់ដល់ FPS Performance របស់ App។"
+
+  - question: "តើ 'Cross-Tab Synchronization' (ធ្វើឱ្យ Tab ទី ២ ផ្លាស់ប្តូរតាម Tab ទី ១) អាចសម្រេចបានដោយរបៀបណា?"
+    options:
+      - "ប្រើប្រាស់ Window Event Listener `window.addEventListener('storage', handleStorageChange)`"
+      - "ប្រើប្រាស់ CSS Keyframes Animation"
+      - "បិទ Tab ទី ១ ចោល"
+      - "ប្រើប្រាស់ `setInterval` រៀងរាល់ ១ មីលីវិនាទី"
+    correctAnswer: 1
+    explanation: "នៅពេលដែល Tab មួយកែប្រែ `localStorage` Browser នឹងបាញ់ព្រឹត្តិការណ៍ `storage` event ទៅកាន់ Tabs ផ្សេងទៀតទាំងអស់នៃ Website ដដែល។ `useLocalStorage` អាចស្តាប់ព្រឹត្តិការណ៍នេះដើម្បី update state ឱ្យស៊ីសង្វាក់គ្នាភ្លាមៗ!"
 ---
 
-## 🗄️ 1. Native localStorage API vs React Hook
+## 🗄️ ១. បញ្ហានៃ Native `localStorage` ធៀបនឹង React State
 
-```javascript
-// ❌ បញ្ហារបស់ Native localStorage ក្នុង React:
-// ការកែប្រែ localStorage.setItem() មិន trigger ឱ្យ React Component Re-render ឡើយ!
+នៅក្នុង React ៖
+- `useState` ➔ ធ្វើឱ្យ UI Re-render ពេល State ប្តូរ ប៉ុន្តែ **បាត់បង់ទិន្នន័យពេល Refresh (F5)**។
+- `localStorage` ➔ រក្សាទុកទិន្នន័យជាប់រហូតលើ Browser ប៉ុន្តែ **មិនបង្កឱ្យ UI Re-render ឡើយ** ពេលកែប្រែតម្លៃ។
 
-// ✅ ដំណោះស្រាយ: useLocalStorage Custom Hook
-// រួមបញ្ចូល React useState + useEffect ដើម្បី Sync ទាំង React UI និង LocalStorage ដំណាលគ្នា!
+```mermaid
+graph TD
+    User["User Interaction (ចុចប្តូរ Theme / Add to Cart)"] --> Hook["⚡ useLocalStorage('app-theme', 'light')"]
+    Hook --> State["1. React State Update (UI Re-renders ភ្លាមៗ) 🖼️"]
+    Hook --> Disk["2. localStorage.setItem() (Save ជាប់ក្នុង Disk) 💾"]
+    Hook --> CrossTab["3. storage Event (Sync ទៅកាន់ Tabs ផ្សេងទៀត) 🌐"]
+
+    style Hook fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style State fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Disk fill:#faf5ff,stroke:#805ad5,stroke-width:2px
+    style CrossTab fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
 ```
 
 ---
 
-## 💻 2. Building `useLocalStorage` Hook
-
-### 💻 Code សម្រាប់តែ `useLocalStorage` Hook:
+## 💻 ២. កូដពេញលេញនៃ `src/hooks/useLocalStorage.js`
 
 ```javascript
 // src/hooks/useLocalStorage.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 export function useLocalStorage(key, initialValue) {
-  // 1. Lazy Initialization: អានទិន្នន័យពី localStorage តែម្តងគត់នៅពេល mount
+  // ── ១. LAZY INITIAL STATE (អានពី Storage តែម្តងគត់លើ Mount) ──
   const [storedValue, setStoredValue] = useState(() => {
+    if (typeof window === 'undefined') return initialValue;
+
     try {
       const item = window.localStorage.getItem(key);
-      // បើមានក្នុង localStorage យកមក parse បើគ្មានយក initialValue
+      // បើមានទិន្នន័យ Parse ជា JSON បើគ្មានយក initialValue
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
+      console.warn(`⚠️ Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
   });
 
-  // 2. Sync ទៅកាន់ localStorage រាល់ពេល key ឬ storedValue ប្រែប្រួល
-  useEffect(() => {
-    try {
-      if (storedValue === undefined) {
-        window.localStorage.removeItem(key);
-      } else {
-        window.localStorage.setItem(key, JSON.stringify(storedValue));
-      }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
+  // ── ២. CUSTOM SETTER FUNCTION (គាំទ្រទាំងតម្លៃផ្ទាល់ និង Function Updates) ──
+  const setValue = useCallback(
+    (value) => {
+      try {
+        setStoredValue((prev) => {
+          // គាំទ្រ setter ដូច useState: setValue(prev => !prev)
+          const valueToStore = value instanceof Function ? value(prev) : value;
 
-  // 3. Return ជា Array ដូច useState [value, setValue]
-  return [storedValue, setStoredValue];
+          if (typeof window !== 'undefined') {
+            if (valueToStore === undefined) {
+              window.localStorage.removeItem(key);
+            } else {
+              window.localStorage.setItem(key, JSON.stringify(valueToStore));
+            }
+          }
+
+          return valueToStore;
+        });
+      } catch (error) {
+        console.warn(`⚠️ Error setting localStorage key "${key}":`, error);
+      }
+    },
+    [key]
+  );
+
+  // ── ៣. CROSS-TAB SYNCHRONIZATION (ស្តាប់ Storage Events ពី Tabs ផ្សេង) ──
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === key && e.newValue !== null) {
+        try {
+          setStoredValue(JSON.parse(e.newValue));
+        } catch {
+          setStoredValue(e.newValue);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [key]);
+
+  return [storedValue, setValue];
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const [storedValue, setStoredValue] = useState(() => { ... });`
-   - ប្រើ **Lazy Initial State** (បញ្ជូន callback function ចូលក្នុង useState)។ វិធីនេះធានាថា `localStorage.getItem` នឹងត្រូវបាន execute តែមួយដងគត់ពេល component ដំបូង មិនមែនរាល់ពេល render ឡើយ (Performance Optimization)។
-2. `item ? JSON.parse(item) : initialValue;`
-   - ប្រសិនបើរកឃើញ key ក្នុង Storage យើង parse JSON string មកជា object/array វិញ។ បើគ្មាន យកតម្លៃ default `initialValue`។
-3. `useEffect(() => { ... }, [key, storedValue]);`
-   - រាល់ពេលដែល Developer ហៅ `setStoredValue(newValue)` React នឹង run Effect នេះដើម្បីសរសេរទិន្នន័យថ្មីចូល `localStorage.setItem(key, JSON.stringify(...))` ដោយស្វ័យប្រវត្តិ។
-4. `return [storedValue, setStoredValue];`
-   - Return ជា Array Tuple `[value, setValue]` ដើម្បីឱ្យ developer ប្រើដូច `useState` ធម្មតា ១០០%។
-
 ---
 
-## 🛠️ 3. Practical Example: Dark Mode Theme Switcher
+## 🚀 ៣. ការអនុវត្តជាក់ស្តែង ៖ Auto-saving Form Draft
 
-### 💻 Code សម្រាប់ Component:
+ខាងក្រោមនេះជា Form ដែលមានសមត្ថភាព **Auto-save សេចក្តីព្រាង (Draft)** ពេលកំពុងវាយ — ទោះបីជា User ច្រឡំដៃបិទ Tab ឬ Refresh ក៏អក្សរមិនបាត់បង់ឡើយ៖
 
 ```jsx
+// src/components/AutoSaveNote.jsx
 import { useLocalStorage } from '../hooks/useLocalStorage';
 
-export default function ThemeSwitcher() {
-  // ប្រើ Hook ដូច useState ប៉ុន្តែទិន្នន័យនៅជាប់រហូតទោះ Refresh ក៏ដោយ!
-  const [theme, setTheme] = useLocalStorage('app-theme', 'light');
+export default function AutoSaveNote() {
+  // ចុះឈ្មោះ State ភ្ជាប់ជាមួយ localStorage key 'draft_note'
+  const [draft, setDraft] = useLocalStorage('draft_note', {
+    title: '',
+    content: '',
+    lastSaved: null,
+  });
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const handleChange = (field, value) => {
+    setDraft((prev) => ({
+      ...prev,
+      [field]: value,
+      lastSaved: new Date().toLocaleTimeString(),
+    }));
+  };
+
+  const handleClear = () => {
+    setDraft({ title: '', content: '', lastSaved: null });
   };
 
   return (
-    <div className={`p-6 rounded-2xl transition ${theme === 'dark' ? 'bg-slate-900 text-white' : 'bg-white text-slate-900 shadow-md'}`}>
-      <h3 className="font-bold text-lg mb-2">
-        {theme === 'dark' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-      </h3>
-      <p className="text-sm opacity-75 mb-4">
-        សាកល្បង Refresh Page មើល! Theme របស់អ្នកនឹងនៅរក្សាដដែល។
-      </p>
-      <button
-        onClick={toggleTheme}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition"
-      >
-        ប្តូរទៅ {theme === 'light' ? 'Dark' : 'Light'}
-      </button>
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-4">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h3 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+            <span>📝</span> Auto-saving Draft Note
+          </h3>
+          <p className="text-[11px] text-slate-500">
+            {draft.lastSaved ? `រក្សាទុកចុងក្រោយម៉ោង: ${draft.lastSaved}` : 'មិនទាន់មានការកែប្រែ'}
+          </p>
+        </div>
+
+        <button
+          onClick={handleClear}
+          className="text-xs text-rose-500 hover:text-rose-600 font-bold"
+        >
+          លុបសេចក្តីព្រាង
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        <input
+          type="text"
+          value={draft.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          placeholder="ចំណងជើងអត្ថបទ..."
+          className="w-full px-3.5 py-2 border rounded-xl text-xs dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <textarea
+          rows={5}
+          value={draft.content}
+          onChange={(e) => handleChange('content', e.target.value)}
+          placeholder="សរសេរខ្លឹមសារនៅទីនេះ (ទិន្នន័យនឹង Sync ចូល LocalStorage ស្វ័យប្រវត្តិ)..."
+          className="w-full p-3.5 border rounded-2xl text-xs dark:bg-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
+
+      <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 rounded-xl text-[11px] text-indigo-700 dark:text-indigo-300">
+        💡 <b>សាកល្បងពិសោធន៍:</b> វាយអត្ថបទរួចចុច Refresh (F5) ឬបើក Tab ថ្មី — អត្ថបទរបស់អ្នកនឹងនៅរក្សាដដែល ១០០%!
+      </div>
     </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `const [theme, setTheme] = useLocalStorage('app-theme', 'light');`
-   - ចុះឈ្មោះ state ឈ្មោះ `theme` ភ្ជាប់ជាមួយ localStorage key `'app-theme'`។ បើទើបបើកដំបូង តម្លៃវាគឺ `'light'`។
-2. `setTheme(prev => ...)`
-   - ពេលចុចប៊ូតុង `setTheme` នឹង update state ក្នុង React UI ផង និង save ចូល browser storage ផង។
-3. ពេល User ចុច Refresh (`F5`) Browser នឹងទាញតម្លៃចុងក្រោយពី `'app-theme'` មកបង្ហាញភ្លាមៗ។
+## 🧠 ៤. សង្ខេប Mental Model ងាយចាំ
+
+| មុខងារ | បច្ចេកទេសអនុវត្ត | អត្ថប្រយោជន៍ចម្បង |
+| :--- | :--- | :--- |
+| **Lazy Read** | `useState(() => JSON.parse(...))` | អាន Storage តែ ១ ដងគត់លើ Mount (លឿន) |
+| **Functional Setter** | `setValue(prev => next)` | ដំណើរការដូច `useState` ដើមរបស់ React ១០០% |
+| **Cross-Tab Sync** | `window.addEventListener('storage')` | ធ្វើបច្ចុប្បន្នភាពទិន្នន័យឆ្លងកាត់ Tabs ស្វ័យប្រវត្តិ |
+| **Safe Error Handling** | `try / catch` block ជុំវិញ Storage | ការពារ App កុំឱ្យ Crash ពេល User បិទ Cookies/Storage |

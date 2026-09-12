@@ -1,158 +1,300 @@
 ---
-title: Testing Async Components — Mocking fetch & API Calls
-description: រៀន Test Components ដែលមាន Async Data Fetching ដោយប្រើ Mocking fetch() ជាមួយ vi.fn(), waitFor(), និង Testing Loading/Error/Success States ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Testing Async Components & Custom Hooks — Mocking API & Async Lifecycle"
+description: សិក្សាពីរបៀប Test Asynchronous React Components និង Custom Hooks — ស្វែងយល់ពីភាពខុសគ្នារវាង getBy*, queryBy*, និង findBy*, ការ Mock Global Fetch & Axios តាមរយៈ Vitest Spies (vi.fn()), និងការប្រើប្រាស់ renderHook + act() ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីមូលហេតុដែលត្រូវ Mock Network Requests ក្នុង Unit & Integration Tests
-  - ចេះប្រើ `vi.stubGlobal('fetch', ...)` ឬ `vi.fn()` ដើម្បី Mock API Responses
-  - ចេះប្រើ `waitFor()` និង `findBy*` queries សម្រាប់ Async State Updates
-  - ចេះ Test ទាំង Happy Path (200 OK) និង Failure Path (500 Error)
+  - "យល់ពីយន្តការ Async Testing Lifecycle ក្នុង jsdom Virtual Environment"
+  - "ចេះបែងចែកការប្រើប្រាស់រវាង getBy*, queryBy* (ពិនិត្យអវត្តមាន), និង findBy* (Async Wait)"
+  - "ចេះ Mock Global fetch API ជាមួយ vi.stubGlobal() និង mockResolvedValueOnce()"
+  - "ចេះ Test Custom Hooks ដោយប្រើ renderHook() និង act() ពី @testing-library/react"
+  - "ចេះសរសេរ Test គ្របដណ្តប់ទាំង ៣ ដំណាក់កាល ៖ Loading Spinner, Success Data, និង Network Failure"
 module: module-14-testing
 order: 3
 quiz:
-  - question: "ហេតុអ្វីមិនគួរហៅ Real Network API Calls នៅក្នុង Unit Tests?"
+  - question: "នៅពេលដែលយើងចង់ផ្ទៀងផ្ទាត់ (Assert) ថា Element មួយ **មិនត្រូវមានវត្តមាន** លើ DOM ឡើយ (Element does NOT exist) តើយើងគួរប្រើ Query មួយណា?"
     options:
-      - "ព្រោះ API Server នឹងគាំង"
-      - "ព្រោះ Real API Calls ធ្វើឱ្យ Tests ដំណើរការយឺត (Slow), មិនស្ថិតស្ថេរ (Flaky បើបាត់ Network), និងពិបាកបង្កើត Error Scenarios"
-      - "ដើម្បីកុំឱ្យបង់លុយ API"
-      - "វាជាច្បាប់របស់ JavaScript"
-    correctAnswer: 2
-    explanation: "Unit Tests ត្រូវតែ លឿន (រត់ក្នុង milliseconds), អាចទុកចិត្តបាន (Deterministic), និងអាចដំណើរការបានទោះគ្មានអ៊ីនធឺណិត (Offline)។ Mocking ផ្តល់ចម្លើយដែលយើងកំណត់ទុកជាមុន ១០០%។"
+      - "`queryBy*` (ឧ. `expect(screen.queryByText('Error')).not.toBeInTheDocument()`) — ព្រោះ `queryBy*` នឹង return `null` បើស្វែងរកមិនឃើញ ដោយមិនបោះ Error Crash ដូច `getBy*` ឡើយ"
+      - "`getBy*` — ព្រោះវាជា Query ស្តង់ដារ"
+      - "`findBy*` — ព្រោះវាជា Async Function"
+      - "`screen.debug()`"
+    correctAnswer: 1
+    explanation: "`getBy*` នឹង Throw Exception ភ្លាមៗបើ Element មិនមានលើ DOM (ធ្វើឱ្យ Test Fail មុនពេលដល់ `expect(...).not`)។ ដូច្នេះដើម្បី Assert ភាពអវត្តមាន (Absence) ត្រូវប្រើ `queryBy*` ជានិច្ច!"
+
+  - question: "តើ `findBy*` (ឧ. `screen.findByText('...')`) មានលក្ខណៈខុសប្លែកពី `getBy*` យ៉ាងដូចម្តេច?"
+    options:
+      - "`findBy*` គឺជា Asynchronous Query ដែល return Promise — វានឹងរង់ចាំ (Default Timeout 1000ms) រហូតដល់ Element លេចឡើងលើ DOM បន្ទាប់ពី Async API ឬ State Update បញ្ចប់"
+      - "`findBy*` ដំណើរការលឿនជាង `getBy*`"
+      - "`findBy*` ប្រើសម្រាប់តែស្វែងរកតួលេខប៉ុណ្ណោះ"
+      - "`findBy*` មិនគាំទ្រ Regular Expressions ឡើយ"
+    correctAnswer: 1
+    explanation: "`findBy*` គឺជាការផ្គុំគ្នារវាង `getBy*` + `waitFor()`។ វារង់ចាំមើល Virtual DOM ម្តងហើយម្តងទៀត រហូតទាល់តែ Async State បង្ហាញ Element នោះលើអេក្រង់។"
+
+  - question: "ហេតុអ្វីបានជាយើងត្រូវ Mock Network API Requests ទាំងអស់នៅក្នុង Unit & Integration Tests?"
+    options:
+      - "ដើម្បីធានាថា Tests មានល្បឿនលឿន (រត់ត្រឹម ms), អាចទុកចិត្តបាន (Deterministic / មិន Flaky ដោយសារអ៊ីនធឺណិត), អាច Run បានទោះ Offline, និងងាយស្រួលបង្កើត Error Statuses (401, 500)"
+      - "ដើម្បីឱ្យ Server ពិតប្រាកដមិនរងសម្ពាធ"
+      - "ព្រោះ Browser មិនអនុញ្ញាតឱ្យហៅ API ក្នុង Test"
+      - "ដើម្បីកុំឱ្យបង់ថ្លៃសេវា Internet"
+    correctAnswer: 1
+    explanation: "Unit/Integration Tests ត្រូវតែឯករាជ្យពី External Services។ Mocking អនុញ្ញាតឱ្យយើងត្រួតពិនិត្យ និងក្លែងធ្វើគ្រប់ Response Scenarios ទាំង Happy Path និង Error Cases តាមចិត្ត។"
 ---
 
-## 🎭 1. Testing Async Lifecycle
+## 🎭 ១. ស្ថាបត្យកម្ម Async Testing Lifecycle
 
 ```mermaid
 sequenceDiagram
-    participant Test as Vitest Runner
+    autonumber
+    actor Runner as Vitest Test Runner
     participant RTL as React Testing Library
-    participant Comp as Async Component
-    participant Mock as Mocked Fetch
+    participant Comp as <UserProfile userId="1" />
+    participant Mock as Mocked Fetch API (vi.fn)
 
-    Test->>Mock: Set Mock Response: [{ id: 1, name: "Sok" }]
-    Test->>RTL: render(<UserList />)
-    RTL->>Comp: Mount & triggers useEffect()
-    Comp-->>RTL: Initial Render: "⏳ Loading..." (Assert with getByText)
-    Comp->>Mock: fetch('/users')
-    Mock-->>Comp: Returns Mocked Data
-    Comp-->>RTL: Re-render: Displays "Sok" (Assert with waitFor/findByText)
+    Runner->>Mock: ១. រៀបចំ Mock Data: mockResolvedValueOnce({ id: 1, name: "Sok Dara" })
+    Runner->>RTL: ២. render(<UserProfile userId="1" />)
+    RTL->>Comp: Component Mount & Run Initial Render
+    Comp-->>RTL: ៣. Render UI: "⏳ កំពុងទាញយកទិន្នន័យ..."
+    Runner->>RTL: ៤. Assert Initial: expect(screen.getByText(/កំពុងទាញយក/i)).toBeInTheDocument()
+
+    Comp->>Mock: ៥. useEffect ហៅ fetch('/api/users/1')
+    Mock-->>Comp: ៦. ឆ្លើយតប Mock Data Resolve (200 OK)
+    Comp->>Comp: ៧. setUser(data), setLoading(false) -> Trigger Re-render
+
+    Comp-->>RTL: ៨. Render UI ថ្មី: "Sok Dara" & User Profile
+    Runner->>RTL: ៩. Async Assert: const name = await screen.findByText('Sok Dara')
+    Runner->>Runner: ១០. expect(name).toBeInTheDocument() ✅ TEST PASSED!
 ```
 
 ---
 
-## 💻 2. Async Component Code (`UserList.jsx`)
+## 📊 ២. តារាងប្រៀបធៀប Query Types ក្នុង RTL
+
+| ប្រភេទ Query | Element រកឃើញ | Element រកមិនឃើញ | ប្រើសម្រាប់ Asynchronous? | សេណារីយ៉ូដែលត្រូវប្រើ |
+| :--- | :--- | :--- | :---: | :--- |
+| **`getBy*`** | Return Element | **Throws Error ❌** | ❌ ទេ (Synchronous) | ពិនិត្យ Element ដែលមានវត្តមានលើ DOM ស្រាប់ |
+| **`queryBy*`** | Return Element | **Return `null` ✅** | ❌ ទេ (Synchronous) | **ពិនិត្យ Element ដែលមិនត្រូវមាន** (`.not.toBeInTheDocument()`) |
+| **`findBy*`** | Return Promise | **Throws Error (timeout) ❌** | **✅ ត្រូវ (Async/Await)** | **ទាញយកទិន្នន័យពី API / រង់ចាំ Async UI** |
+
+---
+
+## 💻 ៣. ការសរសេរ Test សម្រាប់ Async Component
+
+ខាងក្រោមនេះជា `UserProfile` Component ដែលមាន Async Fetching, Error Alert, និង Retry Mechanism៖
+
+### 💻 `src/components/UserProfile.jsx` (Source Code)
 
 ```jsx
-// src/components/UserList.jsx
-import { useState, useEffect } from 'react';
+// src/components/UserProfile.jsx
+import React, { useState, useEffect } from 'react';
 
-export function UserList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetch('https://api.example.com/users')
-      .then((res) => {
-        if (!res.ok) throw new Error('Failed to load users');
-        return res.json();
-      })
-      .then((data) => setUsers(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+  const fetchUserData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`https://api.edu.kh/users/${userId}`);
+      if (!res.ok) {
+        throw new Error('មិនអាចទាញយកទិន្នន័យអ្នកប្រើប្រាស់បានឡើយ (HTTP Error)');
+      }
+      const data = await res.json();
+      setUser(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  if (loading) return <p>⏳ Loading users...</p>;
-  if (error) return <p role="alert">⚠️ {error}</p>;
+  useEffect(() => {
+    if (userId) {
+      fetchUserData();
+    }
+  }, [userId]);
+
+  if (isLoading) {
+    return (
+      <div role="status" className="p-6 text-slate-500 animate-pulse text-sm">
+        ⏳ កំពុងទាញយកទិន្នន័យគណនី...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div role="alert" className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-sm">
+        <p className="font-bold">⚠️ មានបញ្ហា៖ {error}</p>
+        <button
+          onClick={fetchUserData}
+          className="mt-2 px-3 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold"
+        >
+          ព្យាយាមម្តងទៀត
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <ul>
-      {users.map((u) => (
-        <li key={u.id}>{u.name}</li>
-      ))}
-    </ul>
+    <div className="p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <h2 className="text-xl font-black text-slate-900 dark:text-white">{user.name}</h2>
+      <p className="text-xs text-slate-500 mt-0.5">{user.email}</p>
+      <span className="inline-block mt-3 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase">
+        {user.role}
+      </span>
+    </div>
   );
 }
 ```
 
 ---
 
-## 🧪 3. Writing the Async Test Suite
-
-### 💻 Code សម្រាប់ Test File (`UserList.test.jsx`):
+### 💻 `src/components/UserProfile.test.jsx` (Complete Test Suite)
 
 ```jsx
-// src/components/UserList.test.jsx
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// src/components/UserProfile.test.jsx
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { UserList } from './UserList';
+import userEvent from '@testing-library/user-event';
+import { UserProfile } from './UserProfile';
 
-describe('UserList Async Component', () => {
+describe('UserProfile Async Component', () => {
   beforeEach(() => {
-    // Reset Mocks មុន Test នីមួយៗ
+    // Clear mocks មុន Test នីមួយៗ
     vi.restoreAllMocks();
   });
 
-  it('displays loading state initially', () => {
-    // 1. Mock fetch ឱ្យនៅ Pending (មិនទាន់ return)
+  // ១. Test Initial Loading State
+  it('displays loading indicator initially while fetching', () => {
+    // Mock fetch ឱ្យនៅ Pending
     vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})));
 
-    render(<UserList />);
+    render(<UserProfile userId="1" />);
 
-    // 2. ផ្ទៀងផ្ទាត់ថា Loading Text បង្ហាញលើ Screen
-    expect(screen.getByText(/loading users/i)).toBeInTheDocument();
+    // ពិនិត្យឃើញ Loading Status
+    expect(screen.getByRole('status')).toHaveTextContent(/កំពុងទាញយកទិន្នន័យ/i);
+    // ផ្ទៀងផ្ទាត់ថា User Card មិនទាន់មានវត្តមានឡើយ
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
   });
 
-  it('renders user list on successful API call', async () => {
-    const mockUsers = [
-      { id: 1, name: 'Sok Dara' },
-      { id: 2, name: 'Chan Bopha' },
-    ];
+  // ២. Test Successful Data Fetching (Happy Path)
+  it('renders user information upon successful API response', async () => {
+    const mockUserData = {
+      id: 'usr_1',
+      name: 'សុខ ដារ៉ា',
+      email: 'dara@edu.kh',
+      role: 'admin',
+    };
 
-    // 1. Mock fetch ឱ្យ resolve ជាមួយ mockUsers
+    // Mock fetch ឱ្យ Return ជោគជ័យ
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({
+      vi.fn().mockResolvedValueOnce({
         ok: true,
-        json: async () => mockUsers,
+        json: async () => mockUserData,
       })
     );
 
-    render(<UserList />);
+    render(<UserProfile userId="usr_1" />);
 
-    // 2. ប្រើ findBy* (Async Query) ឬ waitFor()
-    const user1 = await screen.findByText('Sok Dara');
-    const user2 = await screen.findByText('Chan Bopha');
+    // ប្រើ findBy* ដើម្បីរង់ចាំ Async Data បង្ហាញលើ Screen
+    const userName = await screen.findByRole('heading', { name: 'សុខ ដារ៉ា' });
+    const userEmail = await screen.findByText('dara@edu.kh');
+    const userRole = await screen.findByText(/admin/i);
 
-    expect(user1).toBeInTheDocument();
-    expect(user2).toBeInTheDocument();
+    expect(userName).toBeInTheDocument();
+    expect(userEmail).toBeInTheDocument();
+    expect(userRole).toBeInTheDocument();
+
+    // ផ្ទៀងផ្ទាត់ថា Loading Spinner បាត់ចេញពី Screen វិញ
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  it('renders error message when API call fails', async () => {
-    // 1. Mock fetch ឱ្យ Return Error Status 500
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
+  // ៣. Test Network/Server Error Handling (Failure Path)
+  it('displays error alert when API call fails and allows retry', async () => {
+    const user = userEvent.setup();
+
+    // Mock លើកទី ១: បរាជ័យ (500 Error)
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce({
         ok: false,
         status: 500,
       })
-    );
+      // Mock លើកទី ២ (ពេលចុច Retry): ជោគជ័យ
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ id: 'usr_1', name: 'សុខ ដារ៉ា', email: 'dara@edu.kh', role: 'student' }),
+      });
 
-    render(<UserList />);
+    vi.stubGlobal('fetch', mockFetch);
 
-    // 2. រង់ចាំ Error Alert លេចឡើង
+    render(<UserProfile userId="usr_1" />);
+
+    // ១. រង់ចាំ Error Alert បង្ហាញ
     const errorAlert = await screen.findByRole('alert');
-    expect(errorAlert).toHaveTextContent(/failed to load users/i);
+    expect(errorAlert).toHaveTextContent(/មិនអាចទាញយកទិន្នន័យ/i);
+
+    // ២. ចុចប៊ូតុង "ព្យាយាមម្តងទៀត" (Retry)
+    const retryBtn = screen.getByRole('button', { name: /ព្យាយាមម្តងទៀត/i });
+    await user.click(retryBtn);
+
+    // ៣. ផ្ទៀងផ្ទាត់ថាទិន្នន័យថ្មីត្រូវបានទាញយកជោគជ័យ
+    const userName = await screen.findByRole('heading', { name: 'សុខ ដារ៉ា' });
+    expect(userName).toBeInTheDocument();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `vi.stubGlobal('fetch', ...)`
-   - ជំនួស Web Global `fetch()` ដោយ Mock Function របស់ Vitest ដើម្បីគ្រប់គ្រង Response។
-2. `mockResolvedValue({ ok: true, json: async () => mockUsers })`
-   - កំណត់ទិន្នន័យ Response ក្លែងក្លាយដែលយើងចង់ទទួលបាន។
-3. `await screen.findByText('Sok Dara')`
-   - **ចំណុចខុសគ្នា:** `getByText` ស្វែងរកភ្លាមៗ (Synchronous) បើគ្មាននឹងបោះ Error។ ចំណែក `findByText` នឹងរង់ចាំ (Returns a Promise) រហូតដល់ Async State update រួចរាល់ទើប Return Element។
-4. `await screen.findByRole('alert')`
-   - ស្វែងរក Element ដែលមាន role accessibility ជា `alert` ដើម្បី verify error message។
+## 🪝 ៤. ការសរសេរ Test សម្រាប់ Custom Hooks ជាមួយ `renderHook`
+
+យើងប្រើ `renderHook()` និង `act()` ពី `@testing-library/react` ដើម្បី Test Custom Hooks ដោយមិនបាច់បង្កើត UI Component ក្លែងក្លាយឡើយ៖
+
+```javascript
+// src/hooks/useToggle.test.js
+import { describe, it, expect } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useState } from 'react';
+
+// Custom Hook ឧទាហរណ៍
+function useToggle(initial = false) {
+  const [state, setState] = useState(initial);
+  const toggle = () => setState((p) => !p);
+  return [state, toggle];
+}
+
+describe('useToggle Custom Hook', () => {
+  it('initializes with default value and toggles state correctly', () => {
+    const { result } = renderHook(() => useToggle(false));
+
+    // Initial Assertion
+    expect(result.current[0]).toBe(false);
+
+    // Trigger Action ក្នុង act() Block
+    act(() => {
+      result.current[1](); // Call toggle function
+    });
+
+    // Assertion ក្រោយ Toggle
+    expect(result.current[0]).toBe(true);
+  });
+});
+```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ... }))`
+   - ចាប់បន្លំ (Stub) Global Variable `fetch` របស់ Window ដោយជំនួសដោយ Mock Function ដែលផ្តល់ Resolved Promise តែមួយដងគត់។
+2. `await screen.findByRole('heading', { name: 'សុខ ដារ៉ា' })`
+   - Asynchronous Query ដែលរង់ចាំរហូតដល់ Component re-render និងបង្ហាញ Heading `សុខ ដារ៉ា` លើ DOM។
+3. `expect(screen.queryByRole('status')).not.toBeInTheDocument();`
+   - ប្រើ `queryByRole` ដើម្បី assert ថា Loading Spinner បានរលាយបាត់ពី DOM ដោយសុវត្ថិភាព។
+4. `renderHook(() => useToggle(false))`
+   - Mount Custom Hook ចូលទៅក្នុង Virtual Test Wrapper និង return `result` ដែលអាចអាន `result.current` បានរាល់ពេល state ផ្លាស់ប្តូរ។
+5. `act(() => { ... })`
+   - ធានាថា State Updates និង Effects ទាំងអស់ត្រូវបានដំណើរការ និង Flush ចប់សព្វគ្រប់មុនពេលធ្វើ Assertion បន្ទាប់។

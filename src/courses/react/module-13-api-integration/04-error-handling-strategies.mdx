@@ -1,121 +1,204 @@
 ---
-title: Error Handling Strategies — Boundaries, Toasts & Retry
-description: រៀនបង្កើត Robust Error Handling System — React Error Boundaries, Global Toast Notifications, Axios Error Interceptors, និង Retry Logic ដើម្បីបង្ហាញ Error Messages ប្រកបដោយ Professional UX។
+title: "Enterprise Error Handling — Error Boundaries, Toast Notifications & Retry Logic"
+description: សិក្សាស៊ីជម្រៅពីយុទ្ធសាស្ត្រ Error Handling កម្រិត Enterprise ក្នុង React — រៀនបង្កើត React Error Boundaries (ការពារ UI Crash មិនឱ្យអេក្រង់ស), Global Toast Notification System (ជម្រាបដំណឹង User ប្រកបដោយភាពទាក់ទាញ), Error Classification, និង Exponential Backoff Retry Logic ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះ Implement React Error Boundary Component
-  - ចេះ Build Toast Notification System ដោយ useContext
-  - ចេះ Classify Error Types (Network, HTTP, Validation) ហើយ Handle ខុសៗ
-  - ចេះ Implement Retry with Exponential Backoff
+  - "យល់ពីរចនាសម្ព័ន្ធ Error Hierarchy ក្នុង React (Render Crash vs Async API Errors vs Validation Errors)"
+  - "ចេះបង្កើត Error Boundary Class Component ដើម្បី Catch Runtime Rendering Errors"
+  - "ចេះបង្កើត Global Toast Notification System ដោយប្រើ React Context + Custom Hook"
+  - "ចេះចាត់ថ្នាក់ Error Types (Network, Auth, Permission, Validation, Server Crash)"
+  - "ចេះ Implement Exponential Backoff Retry Algorithm សម្រាប់ Network Requests ដែលមិនមានស្ថេរភាព"
 module: module-13-api-integration
 order: 4
 quiz:
-  - question: "ហេតុអ្វី Error Boundary ត្រូវ Class Component ក្នុង React?"
+  - question: "ហេតុអ្វីបានជា React Error Boundary ត្រូវតែសរសេរជា Class Component (មិនអាចប្រើ Functional Component + Hooks) ក្នុង React v18/v19?"
     options:
-      - "Class Components ដំណើរការបានលឿនជាង"
-      - "React Error Boundary ត្រូវការ lifecycle method `componentDidCatch` និង `getDerivedStateFromError` ដែលបច្ចុប្បន្ន Hooks APIs មិនទាន់ Support — React team ប្រកាសនឹង Add Hook Support ក្នុងខាងមុខ"
-      - "Functional Components មិន Support JSX"
-      - "Class Components ល្អជាង Functional"
-    correctAnswer: 2
-    explanation: "React Error Boundaries ស្ទប់ Uncaught Errors ក្នុង Component tree។ ពួកវា ត្រូវការ `getDerivedStateFromError` (to render fallback UI) និង `componentDidCatch` (to log errors) — lifecycle methods ដែលមាន Class Components ប៉ុណ្ណោះ ក្នុង React v18។"
+      - "ព្រោះ Error Boundary ត្រូវការ Lifecycle Methods ពិសេសចំនួនពីរ គឺ `static getDerivedStateFromError` (សម្រាប់ប្តូរ State បង្ហាញ Fallback UI) និង `componentDidCatch` (សម្រាប់ Log Error ទៅកាន់ Monitoring Service ដូចជា Sentry) ដែល Hooks មិនទាន់មាន API ជំនួសឡើយ"
+      - "ព្រោះ Class Components មានល្បឿន Render លឿនជាង Functional Components"
+      - "ព្រោះ Functional Components មិនអាច Render HTML ពេលមាន Error"
+      - "វាជាច្បាប់របស់ CSS និង Tailwind"
+    correctAnswer: 1
+    explanation: "React Hooks បច្ចុប្បន្នមិនទាន់មាន Hook ណាដែលជំនួស `componentDidCatch` ឬ `getDerivedStateFromError` បានឡើយ។ ដូច្នេះ Error Boundary ត្រូវតែជា Class Component (ឬប្រើ Library ដូចជា `react-error-boundary`)។"
+
+  - question: "តើ Error ប្រភេទណាដែល React Error Boundary **មិនអាច** ស្ទាក់ចាប់ (Catch) បាន?"
+    options:
+      - "Errors ក្នុង Event Handlers (ដូចជា `onClick`), Async Code (ដូចជា `setTimeout` ឬ `fetch/axios API calls`), និង Server-Side Rendering (SSR)"
+      - "Errors ក្នុង JSX Rendering Logic"
+      - "Errors ក្នុង Lifecycle របស់កូន Components"
+      - "Errors ពេលបាត់ Child Component"
+    correctAnswer: 1
+    explanation: "Error Boundary ដំណើរការតែលើកំហុស Render ក្នុង Component Tree ប៉ុណ្ណោះ។ កំហុសក្នុង `onClick` ឬ async API calls ត្រូវតែដោះស្រាយដោយ `try-catch` ឬ Global Error Toast Notification។"
+
+  - question: "តើ 'Exponential Backoff' មានអត្ថន័យដូចម្តេចក្នុងយុទ្ធសាស្ត្រ Network Retry?"
+    options:
+      - "ជាបច្ចេកទេសពន្យារពេលរង់ចាំកាន់តែយូរឡើងៗជាលក្ខណៈគុណ (ឧ. 1s -> 2s -> 4s -> 8s) មុននឹងព្យាយាមបាញ់ Request ម្តងទៀត ដើម្បីការពារកុំឱ្យ Server កំពុង Down រងសម្ពាធ Request ផ្ទួនៗ"
+      - "ជាការបាញ់ Request ១០០ ដងក្នុងពេលតែមួយវិនាទី"
+      - "ជាការបិទ Browser Tab ភ្លាមៗ"
+      - "ជាការលុបទិន្នន័យពី LocalStorage"
+    correctAnswer: 1
+    explanation: "Exponential Backoff ជួយកាត់បន្ថយ Network Congestion និងជួយឱ្យ Server មានពេលដកដង្ហើម និង Recover ឡើងវិញដោយមិនត្រូវ Client Spamming Requests។"
 ---
 
-## 🛡️ 1. React Error Boundary
+## 🏛️ ១. ឋានានុក្រមនៃ Error Handling ក្នុង Frontend (Error Hierarchy)
 
-```jsx
-// src/components/ErrorBoundary.jsx
-import { Component } from 'react';
+```mermaid
+flowchart TD
+    A["កំហុសកើតឡើងក្នុង React App (Errors Occur)"] --> B{"តើជាកំហុសប្រភេទណា?"}
 
-export class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
+    B -- "១. UI Rendering Crash\n(Uncaught Exception ក្នុង Component)" --> C["🛡️ React Error Boundary\n(បង្ហាញ Fallback UI ស្អាត មិនឱ្យអេក្រង់ស)"]
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
+    B -- "២. Async Network / API Error\n(401, 500, Network Offline)" --> D["🍞 Global Toast Notification\n(បង្ហាញ Toast ក្រហមជូនដំណឹង User)"]
 
-  componentDidCatch(error, errorInfo) {
-    // Log to error tracking service (e.g., Sentry)
-    console.error('Error caught by boundary:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900 p-6">
-          <div className="max-w-sm text-center bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 border border-red-100 dark:border-red-900">
-            <p className="text-5xl mb-4">💥</p>
-            <h2 className="text-xl font-black text-slate-800 dark:text-white mb-2">Something went wrong!</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-mono bg-slate-50 dark:bg-slate-900 p-2 rounded-lg">
-              {this.state.error?.message}
-            </p>
-            <button
-              onClick={() => this.setState({ hasError: false, error: null })}
-              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-// Usage:
-// <ErrorBoundary>
-//   <App />
-// </ErrorBoundary>
+    B -- "៣. Form Validation Error\n(Email ខុស, Password ខ្លី)" --> E["📝 Inline Field Error\n(បង្ហាញអក្សរក្រហមនៅក្រោម Input ផ្ទាល់)"]
 ```
 
 ---
 
-## 🍞 2. Toast Notification System
+## 🛡️ ២. ការបង្កើត React Error Boundary Component
+
+ខាងក្រោមនេះជាកូដ Production Error Boundary ដែលមាន Fallback UI, Reset Handler, និង Error Reporting៖
+
+```jsx
+// src/components/ErrorBoundary.jsx
+import React, { Component } from 'react';
+
+export class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  // ១. ចាប់យក Error និង Update State ដើម្បី Render Fallback UI
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  // ២. កត់ត្រា Error ទៅកាន់ Monitoring Service (ឧ. Sentry, Datadog)
+  componentDidCatch(error, errorInfo) {
+    this.setState({ errorInfo });
+    console.error('[ErrorBoundary Caught]:', error, errorInfo);
+    // window.Sentry?.captureException(error);
+  }
+
+  // ៣. Handler សម្រាប់ឱ្យ User ចុចសាកល្បង Render ម្តងទៀត (Retry)
+  handleReset = () => {
+    this.setState({ hasError: false, error: null, errorInfo: null });
+    if (this.props.onReset) {
+      this.props.onReset();
+    }
+  };
+
+  render() {
+    if (this.state.hasError) {
+      // Fallback UI ដ៏ស្រស់ស្អាតជំនួសផ្ទាំងស (White Screen of Death)
+      return (
+        <div className="min-h-[400px] flex items-center justify-center p-6">
+          <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-8 border border-rose-200 dark:border-rose-900/50 shadow-xl text-center">
+            <div className="w-16 h-16 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+              💥
+            </div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+              សូមអភ័យទោស! មានបញ្ហាបច្ចេកទេស
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+              ផ្នែកនេះនៃកម្មវិធីបានជួបប្រទះបញ្ហាមិនរំពឹងទុក។ ក្រុមការងារយើងត្រូវបានជូនដំណឹងរួចរាល់ហើយ។
+            </p>
+
+            {/* Error Detail Snippet */}
+            <div className="p-3 bg-slate-100 dark:bg-slate-950 rounded-xl text-left mb-6 overflow-x-auto text-xs font-mono text-rose-500">
+              {this.state.error?.toString()}
+            </div>
+
+            <div className="flex items-center justify-center gap-3">
+              <button
+                onClick={this.handleReset}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition shadow-sm"
+              >
+                🔄 ព្យាយាមម្តងទៀត
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-5 py-2.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-300 transition"
+              >
+                Reload ទំព័រ
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+---
+
+## 🍞 ៣. Global Toast Notification System
+
+ប្រព័ន្ធ Toast អនុញ្ញាតឱ្យគ្រប់ Component ឬ Service អាចបាញ់ Notification ទៅកាន់ជ្រុងអេក្រង់បានយ៉ាងងាយស្រួល៖
 
 ```jsx
 // src/context/ToastContext.jsx
-import { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
+  // បន្ថែម Toast ថ្មីជាមួយ Auto-dismiss Timer
   const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = Date.now();
+    const id = Date.now() + Math.random();
     setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, duration);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, duration);
+    }
   }, []);
 
-  const removeToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
-  const STYLES = {
-    success: 'bg-green-600',
-    error: 'bg-red-600',
-    warning: 'bg-yellow-500',
-    info: 'bg-blue-600',
+  // UI Styles តាមប្រភេទ
+  const TOAST_STYLES = {
+    success: 'bg-emerald-600 text-white shadow-emerald-500/20',
+    error: 'bg-rose-600 text-white shadow-rose-500/20',
+    warning: 'bg-amber-500 text-white shadow-amber-500/20',
+    info: 'bg-blue-600 text-white shadow-blue-500/20',
   };
 
-  const ICONS = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+  const TOAST_ICONS = {
+    success: '✅',
+    error: '❌',
+    warning: '⚠️',
+    info: 'ℹ️',
+  };
 
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
 
-      {/* Toast Container */}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+      {/* Fixed Toast Container */}
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`${STYLES[toast.type]} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 max-w-xs pointer-events-auto animate-in slide-in-from-right-4`}
+            className={`${TOAST_STYLES[toast.type]} pointer-events-auto px-4 py-3.5 rounded-2xl shadow-xl flex items-center justify-between gap-3 text-sm font-semibold transition-all animate-in slide-in-from-bottom-5`}
           >
-            <span>{ICONS[toast.type]}</span>
-            <p className="text-sm font-semibold flex-1">{toast.message}</p>
-            <button onClick={() => removeToast(toast.id)} className="opacity-70 hover:opacity-100 font-black">✕</button>
+            <div className="flex items-center gap-2.5">
+              <span className="text-base">{TOAST_ICONS[toast.type]}</span>
+              <p className="leading-snug">{toast.message}</p>
+            </div>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="opacity-70 hover:opacity-100 text-xs font-black p-1"
+            >
+              ✕
+            </button>
           </div>
         ))}
       </div>
@@ -124,49 +207,67 @@ export function ToastProvider({ children }) {
 }
 
 export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be inside ToastProvider');
-  return ctx.addToast;
-}
-```
-
-```jsx
-// Usage anywhere in the app:
-import { useToast } from '../context/ToastContext';
-
-function SaveButton() {
-  const toast = useToast();
-
-  const handleSave = async () => {
-    try {
-      await postsService.create({ title: 'New Post', body: '...' });
-      toast('Post created successfully! 🎉', 'success');
-    } catch (err) {
-      toast(`Failed: ${err.message}`, 'error');
-    }
-  };
-
-  return <button onClick={handleSave}>Save</button>;
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within a ToastProvider');
+  return context;
 }
 ```
 
 ---
 
-## 🔄 3. Error Classification & Retry
+## 🔁 ៤. Exponential Backoff Retry Logic
 
-```js
-// src/lib/errorHandler.js
-export function classifyError(error) {
-  if (!navigator.onLine) return { type: 'NETWORK', message: 'No internet connection' };
-  if (error.message.includes('timeout')) return { type: 'TIMEOUT', message: 'Request timed out' };
-  if (error.response) {
-    const status = error.response.status;
-    if (status === 400) return { type: 'VALIDATION', message: error.response.data.message };
-    if (status === 401) return { type: 'AUTH', message: 'Please login again' };
-    if (status === 403) return { type: 'PERMISSION', message: 'Access denied' };
-    if (status === 404) return { type: 'NOT_FOUND', message: 'Resource not found' };
-    if (status >= 500) return { type: 'SERVER', message: 'Server error, try again later' };
+ខាងក្រោមនេះជា Utility Function ដែលសាកល្បង Fetch ឡើងវិញដោយស្វ័យប្រវត្តិតាមរូបមន្ត `2^attempt * 1000ms`៖
+
+```javascript
+// src/utils/retryFetch.js
+
+export async function fetchWithRetry(fn, maxRetries = 3, baseDelay = 1000) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      // ប្រសិនបើជា Error ដែលមិនគួរ Retry (ដូចជា 400 Bad Request ឬ 401 Unauthorized)
+      if (error.status === 400 || error.status === 401 || error.status === 403 || error.status === 404) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        // រូបមន្ត Exponential Backoff: 1s -> 2s -> 4s
+        const delay = baseDelay * Math.pow(2, attempt);
+        console.warn(`[Retry Attempt ${attempt + 1}/${maxRetries}] Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
   }
-  return { type: 'UNKNOWN', message: error.message };
+
+  throw lastError;
 }
 ```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `static getDerivedStateFromError(error)`
+   - Method ពិសេសរបស់ React Class Component ដែលដំណើរការភ្លាមៗពេលមាន Render Error ដើម្បី return state ថ្មី `{ hasError: true }`។
+2. `componentDidCatch(error, errorInfo)`
+   - ដំណើរការបន្ទាប់ពី Fallback UI ត្រូវបាន Render សម្រាប់ផ្ញើ Error Stack Trace ទៅកាន់ Monitoring Server។
+3. `const addToast = useCallback((message, type, duration) => { ... }, []);`
+   - Memoize Function ជាមួយ `useCallback` ដើម្បីការពារកុំឱ្យកើត Function ថ្មីរាល់ពេល Provider Re-render។
+   - ប្រើ `setTimeout` ដក Toast ចេញស្វ័យប្រវត្តិតាម `duration` (4 វិនាទី)។
+4. `baseDelay * Math.pow(2, attempt)`
+   - គណនាពេលវេលាពន្យារពេលកាន់តែយូរឡើងៗ (Exponential Backoff) ដើម្បីការពារ Server កុំឱ្យរងសម្ពាធខ្លាំងពេលមានបញ្ហា Network។
+
+---
+
+## 💡 ៦. Best Practices ក្នុងការគ្រប់គ្រង Error
+
+- [x] ស្រោប `<ErrorBoundary>` នៅលើ Root App និងជុំវិញ Dynamic Widgets សំខាន់ៗ
+- [x] កុំបង្ហាញ Raw Technical Errors ទៅកាន់អ្នកប្រើប្រាស់ទូទៅ — ត្រូវបកប្រែជាភាសាសាមញ្ញ និងងាយយល់
+- [x] ផ្តល់ប៊ូតុង "Retry" ឬ "Reload" ជានិច្ចដើម្បីឱ្យ User អាចដោះស្រាយបញ្ហាដោយខ្លួនឯង
+- [x] ប្រើ Global Toast សម្រាប់ async API notifications

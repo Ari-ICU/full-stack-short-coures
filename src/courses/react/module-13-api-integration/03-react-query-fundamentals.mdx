@@ -1,154 +1,267 @@
 ---
-title: TanStack Query (React Query) Fundamentals
-description: រៀនប្រើ TanStack Query v5 សម្រាប់គ្រប់គ្រង Server State — useQuery សម្រាប់ Auto-caching, useMutation សម្រាប់កែប្រែទិន្នន័យ, និង Cache Invalidation ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "TanStack Query (React Query v5) — Server State Management & Auto-Caching"
+description: សិក្សាស៊ីជម្រៅពី TanStack Query v5 សម្រាប់គ្រប់គ្រង Server State — ស្វែងយល់ពី Auto Caching, Background Refetching, useQuery (queryKey & queryFn), useMutation, និង Cache Invalidation ដើម្បីកាត់បន្ថយ Network Requests និងបង្កើនល្បឿន App ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពី Server State vs Client State
-  - ចេះ Setup QueryClientProvider ក្នុង React App
-  - ចេះប្រើ `useQuery` ជាមួយ queryKey និង queryFn
-  - ចេះប្រើ `useMutation` និង Invalidate Queries ដើម្បី Auto-refresh Data
+  - "យល់ច្បាស់ពីភាពខុសគ្នារវាង Client State (UI) និង Server State (Remote Data Cache)"
+  - "ចេះ Setup QueryClientProvider ជាមួយ Production Configurations (staleTime, gcTime, retry)"
+  - "ចេះប្រើ useQuery Hook ជាមួយ Dynamic Query Keys សម្រាប់ Fetching & Caching"
+  - "ចេះប្រើ useMutation Hook ដើម្បីធ្វើ Create, Update, Delete (CUD Operations)"
+  - "ចេះធ្វើ Invalidate Queries ដើម្បី Trigger Auto-Refetch ទិន្នន័យស្រស់ស្វ័យប្រវត្តិ"
 module: module-13-api-integration
 order: 3
 quiz:
-  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ `queryKey` ក្នុង TanStack Query?"
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ដ៏អស្ចារ្យបំផុតនៃ `queryKey` ក្នុង TanStack Query?"
     options:
+      - "វាជា Cache Key ដ៏មានឥទ្ធិពល — TanStack Query ប្រើ Query Key (ឧ. `['products', category, page]`) ដើម្បីដឹងថាតើទិន្នន័យណាត្រូវទាញយកពី Cache ភ្លាមៗ (0ms), ពេលណាត្រូវ Refetch ក្នុង Background, និងពេលណាត្រូវ Invalidate"
       - "វាជា Password សម្រាប់ Fetch API"
-      - "វាជា Unique Identifier សម្រាប់ Cache — TanStack Query ប្រើ Key នេះដើម្បីដឹងថាទិន្នន័យណាត្រូវ Cache, ពេលណាត្រូវ Refetch, និងពេលណាត្រូវ Invalidate"
-      - "ដើម្បីកំណត់ល្បឿនអ៊ីនធឺណិត"
-      - "វាជា CSS Class"
-    correctAnswer: 2
-    explanation: "queryKey ដូចជា Cache Key (ឧ. ['posts'], ['posts', id])។ ប្រសិនបើ Component ពីរហៅ useQuery ជាមួយ queryKey ដូចគ្នា វានឹងប្រើ Cache រួមគ្នាដោយមិនបាច់បាញ់ Request ទៅ Server ពីរដងឡើយ។"
+      - "វាប្រើសម្រាប់កំណត់ CSS Classes លើ Table"
+      - "វាជា Function សម្រាប់ Submit Form"
+    correctAnswer: 1
+    explanation: "TanStack Query គ្រប់គ្រង Cache តាមរយៈ Array នៃ `queryKey`។ ប្រសិនបើ Component ពីរហៅ `useQuery` ជាមួយ Query Key ដូចគ្នា វានឹង Share Cache ជាមួយគ្នាដោយមិនបាច់បាញ់ Request ស្ទួនទៅ Server ឡើយ។"
+
+  - question: "តើ `staleTime` និង `gcTime` (Garbage Collection Time) មានតួនាទីខុសគ្នាយ៉ាងដូចម្តេច?"
+    options:
+      - "`staleTime` កំណត់ថាតើទិន្នន័យនៅ 'ស្រស់ (Fresh)' រយៈពេលប៉ុន្មាន (មិនបាញ់ Request ថ្មី), រីឯ `gcTime` កំណត់ថាតើទិន្នន័យដែលគ្មានអ្នកប្រើ (Inactive) ត្រូវរក្សាទុកក្នុង RAM ប៉ុន្មាននាទីមុននឹងលុបចោល"
+      - "`staleTime` ប្រើសម្រាប់ POST Request រីឯ `gcTime` ប្រើសម្រាប់ GET Request"
+      - "`staleTime` គិតជាវិនាទី រីឯ `gcTime` គិតជាម៉ោង"
+      - "ទាំងពីរនេះជាឈ្មោះពីរនៃ Option តែមួយប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "`staleTime`: ក្នុងអំឡុងពេល Fresh App នឹងយកទិន្នន័យពី Cache ដោយមិនបាច់បាញ់ Network ឡើយ។ `gcTime`: រយៈពេលដែលទិន្នន័យ Inactive ត្រូវរក្សាទុកក្នុង Memory មុននឹងត្រូវ Garbage Collected។"
+
+  - question: "បន្ទាប់ពី `useMutation` បង្កើត Product ថ្មីបានជោគជ័យ តើយើងគួរធ្វើអ្វីដើម្បីឱ្យបញ្ជី Product List ធ្វើបច្ចុប្បន្នភាពទិន្នន័យថ្មីភ្លាមៗ?"
+    options:
+      - "ហៅ `queryClient.invalidateQueries({ queryKey: ['products'] })` ក្នុង callback `onSuccess` — TanStack Query នឹង Mark cache ចាស់ថា Stale ហើយ Auto-refetch ទិន្នន័យថ្មីមកវិញភ្លាមៗ"
+      - "ហៅ `window.location.reload()` ដើម្បី Refresh ទំព័រទាំងមូល"
+      - "រង់ចាំ ៥ នាទីទើបឃើញទិន្នន័យ"
+      - "សរសេរ `fetch()` ម្តងទៀតដោយដៃក្នុង component"
+    correctAnswer: 1
+    explanation: "Cache Invalidation គឺជាបេះដូងនៃ React Query។ ពេល Invalidate `['products']` គ្រប់ Component ណាដែលកំពុង Mount និងស្តាប់ queryKey នោះនឹង Refetch ទិន្នន័យស្រស់ស្វ័យប្រវត្តិ។"
 ---
 
-## 📦 1. Installation & Provider Setup
+## 🧠 ១. Server State vs Client State Mental Model
 
-```bash
-npm install @tanstack/react-query
+```mermaid
+flowchart LR
+    subgraph ClientState["Client State (UI State)"]
+        A["• Modal Open/Close\n• Selected Tab\n• Dark Mode\n• Form Inputs"]
+    end
+
+    subgraph ServerState["Server State (Remote Cache)"]
+        B["• Product List\n• User Profiles\n• Order History\n• Shopping Cart DB"]
+    end
+
+    ClientState -->|គ្រប់គ្រងដោយ| C["useState / Zustand / Context"]
+    ServerState -->|គ្រប់គ្រងដោយ| D["TanStack Query (React Query)"]
 ```
 
-### 💻 Code សម្រាប់ Provider Setup (`main.jsx`):
+> [!NOTE]
+> **Server State** គឺជាទិន្នន័យដែលជាកម្មសិទ្ធិរបស់ Server មិនមែនរបស់ Frontend ឡើយ។ Frontend គ្រាន់តែជា **Cache Snapshot** នៃទិន្នន័យនោះប៉ុណ្ណោះ។ TanStack Query ជួយគ្រប់គ្រង Caching, Deduplication, និង Synchronization ដោយស្វ័យប្រវត្តិ។
+
+---
+
+## ⚙️ ២. Installation & Provider Setup
+
+```bash
+npm install @tanstack/react-query @tanstack/react-query-devtools
+```
+
+### 💻 Setup ក្នុង Root Component (`src/main.jsx` ឬ `App.jsx`):
 
 ```jsx
 // src/main.jsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import App from './App';
 
-// 1. បង្កើត QueryClient instance
+// ១. បង្កើត QueryClient ជាមួយ Configuration ស្តង់ដារ Production
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // ទិន្នន័យនៅស្រស់ (Fresh) រយៈពេល ៥ នាទី
-      retry: 2,                 // បើបរាជ័យ ព្យាយាម fetch ម្តងទៀត ២ ដង
+      staleTime: 1000 * 60 * 2, // ២ នាទី (ទិន្នន័យនៅ Fresh មិនចាំបាច់បាញ់ Request ស្ទួន)
+      gcTime: 1000 * 60 * 10,   // ១០ នាទី (រក្សាទុកក្នុង Cache Memory)
+      retry: 2,                 // បើ Error ព្យាយាមសាកល្បង Fetch ២ ដងទៀត
+      refetchOnWindowFocus: true, // ពេល User ចុចត្រឡប់មក Tab វិញ វានឹង Sync ទិន្នន័យថ្មី
     },
   },
 });
 
-export default function Root() {
-  return (
-    // 2. ស្រោប Provider លើ App ទាំងមូល
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <App />
+      {/* Devtools ជួយ Inspect Cache ក្នុង Browser អំឡុងពេល Development */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  );
-}
+  </React.StrictMode>
+);
 ```
-
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `new QueryClient({...})`
-   - បង្កើត Cache Manager មេ។
-2. `staleTime: 1000 * 60 * 5`
-   - កំណត់ថាទិន្នន័យដែលទាញបាននឹងត្រូវចាត់ទុកថា Fresh រយៈពេល 5 នាទី។ ក្នុងអំឡុង 5 នាទីនេះ បើ user បើក component នេះឡើងវិញ វានឹងបង្ហាញលទ្ធផលពី Cache ភ្លាមៗ 0ms!
 
 ---
 
-## 🔍 2. `useQuery` (Fetching with Auto-caching)
+## 🔍 ៣. ការទាញយកទិន្នន័យដោយប្រើ `useQuery`
 
-### 💻 Code សម្រាប់តែ `useQuery`:
+លែងត្រូវការសរសេរ `useEffect` + `useState(data)` + `useState(loading)` + `useState(error)` ទៀតហើយ!
 
 ```jsx
+// src/components/ProductCatalog.jsx
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { postService } from '../services/post.service';
+import { productService } from '../services/product.service';
 
-export function PostList() {
-  // ហៅ useQuery
+export default function ProductCatalog() {
+  const [category, setCategory] = useState('all');
+  const [page, setPage] = useState(1);
+
+  // useQuery នឹង Auto-fetch រាល់ពេល category ឬ page ផ្លាស់ប្តូរ!
   const {
-    data: posts,
-    isLoading,
+    data: products,
+    isLoading,   // true តែពេល Fetch លើកដំបូងដែលគ្មាន Cache សោះ
+    isFetching,  // true រាល់ពេលកំពុង Fetch ក្នុង Background
     isError,
     error,
+    refetch,
   } = useQuery({
-    queryKey: ['posts'],             // 1. Unique Cache Key
-    queryFn: () => postService.getAll(), // 2. Async Function ដែល fetch data
+    queryKey: ['products', { category, page }], // Cache Key តាមលក្ខខណ្ឌ
+    queryFn: () => productService.getAll({ category, page }),
   });
 
-  if (isLoading) return <p>⏳ កំពុងទាញទិន្នន័យ...</p>;
-  if (isError) return <p>⚠️ មានបញ្ហា៖ {error.message}</p>;
+  if (isLoading) {
+    return <div className="p-8 text-center text-slate-400">⏳ កំពុងទាញយកទិន្នន័យពី Cache/Server...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="p-6 bg-rose-500/10 text-rose-500 rounded-2xl text-center">
+        <p>⚠️ មានបញ្ហា៖ {error.message}</p>
+        <button onClick={() => refetch()} className="mt-3 px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">
+          ព្យាយាមម្តងទៀត
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <ul>
-      {posts.map((p) => (
-        <li key={p.id}>{p.title}</li>
-      ))}
-    </ul>
+    <div className="space-y-6">
+      {/* Background Fetching Indicator */}
+      {isFetching && !isLoading && (
+        <div className="text-xs text-blue-500 font-bold animate-pulse">
+          🔄 កំពុង Sync ទិន្នន័យថ្មីក្នុង Background...
+        </div>
+      )}
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {products?.map((item) => (
+          <div key={item.id} className="p-5 bg-white dark:bg-slate-900 border rounded-2xl shadow-sm">
+            <h3 className="font-bold text-slate-800 dark:text-white">{item.name}</h3>
+            <p className="text-blue-600 font-black text-sm mt-1">${item.price}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `queryKey: ['posts']`
-   - កំណត់ Cache Key — TanStack Query នឹងរក្សាទុកលទ្ធផលក្រោម Key នេះ។
-2. `queryFn: () => postService.getAll()`
-   - Function ណាដែល Return Promise។ TanStack Query នឹងគ្រប់គ្រង `isLoading`, `isError`, និង `data` ឱ្យយើងស្វ័យប្រវត្តិ។
-3. **No `useEffect` Needed!** លែងត្រូវការសរសេរ `useEffect` + `useState` ទៀតហើយ!
-
 ---
 
-## ✏️ 3. `useMutation` & Cache Invalidation
+## ✏️ ៤. ការកែប្រែទិន្នន័យដោយប្រើ `useMutation`
 
-### 💻 Code សម្រាប់ `useMutation` (Create & Auto-refresh):
+`useMutation` ប្រើសម្រាប់ Create, Update, ឬ Delete (CUD) និងបញ្ជាឱ្យ Invalidate Cache ក្រោយពេលជោគជ័យ៖
 
 ```jsx
+// src/components/CreateProductForm.jsx
+import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { postService } from '../services/post.service';
+import { productService } from '../services/product.service';
 
-export function AddPostForm() {
+export default function CreateProductForm() {
   const queryClient = useQueryClient();
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
 
-  const createMutation = useMutation({
-    mutationFn: (newPost) => postService.create(newPost), // 1. API Call
-    
-    // 2. ពេល Server បង្កើត Post ជោគជ័យ
-    onSuccess: () => {
-      // បញ្ជាឱ្យ Query Cache ឈ្មោះ ['posts'] ចាត់ទុកថាហួសសម័យ (Invalidate)
-      // TanStack Query នឹង Auto-refetch បញ្ជី Posts ថ្មីមកវិញភ្លាម!
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+  // បង្កើត Mutation
+  const createProductMutation = useMutation({
+    mutationFn: (newProduct) => productService.create(newProduct),
+
+    // ពេលបង្កើតជោគជ័យ ៖
+    onSuccess: (createdProduct) => {
+      // ១. Invalidate Cache ['products'] ដើម្បីឱ្យ ProductCatalog Auto-refetch ទិន្នន័យថ្មីភ្លាមៗ!
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+
+      // ២. សម្អាត Form
+      setName('');
+      setPrice('');
     },
-    onError: (err) => {
-      alert(`បរាជ័យ៖ ${err.message}`);
+
+    onError: (error) => {
+      alert(`បរាជ័យក្នុងការបង្កើត៖ ${error.message}`);
     },
   });
 
-  const handleAdd = (text) => {
-    createMutation.mutate({ title: text, body: 'Sample content' });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!name || !price) return;
+
+    createProductMutation.mutate({
+      name,
+      price: parseFloat(price),
+    });
   };
 
   return (
-    <button
-      onClick={() => handleAdd('New Post Title')}
-      disabled={createMutation.isPending}
-      className="px-4 py-2 bg-blue-600 text-white rounded-xl"
-    >
-      {createMutation.isPending ? 'កំពុងបង្កើត...' : '➕ បង្កើត Post'}
-    </button>
+    <form onSubmit={handleSubmit} className="p-6 bg-white dark:bg-slate-900 border rounded-2xl space-y-4 max-w-md">
+      <h2 className="text-lg font-black text-slate-800 dark:text-white">➕ បន្ថែមទំនិញថ្មី</h2>
+
+      <input
+        type="text"
+        placeholder="ឈ្មោះទំនិញ..."
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="w-full px-4 py-2.5 border rounded-xl dark:bg-slate-800 dark:text-white text-sm"
+      />
+
+      <input
+        type="number"
+        placeholder="តម្លៃ ($)..."
+        value={price}
+        onChange={(e) => setPrice(e.target.value)}
+        className="w-full px-4 py-2.5 border rounded-xl dark:bg-slate-800 dark:text-white text-sm"
+      />
+
+      <button
+        type="submit"
+        disabled={createProductMutation.isPending}
+        className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold rounded-xl text-sm transition flex items-center justify-center gap-2"
+      >
+        {createProductMutation.isPending ? 'កំពុងរក្សាទុក...' : 'រក្សាទុកទំនិញ →'}
+      </button>
+    </form>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `useMutation({ mutationFn: ... })`
-   - ប្រើសម្រាប់ប្រតិបត្តិការ Create, Update, ឬ Delete (CUD)។
-2. `queryClient.invalidateQueries({ queryKey: ['posts'] })`
-   - **មន្តអាគមនៃ React Query:** ក្រោយពេល Post ថ្មីត្រូវបានបង្កើត យើងគ្រាន់តែប្រាប់ឱ្យ invalidate `['posts']` នោះ Component ណាដែលកំពុងបង្ហាញ Post List នឹងត្រូវ Refetch ទិន្នន័យថ្មីមកបង្ហាញភ្លាមៗដោយស្វ័យប្រវត្តិ!
-3. `createMutation.isPending`
-   - ផ្តល់ boolean indicator ពេល API call កំពុងដំណើរការ សម្រាប់ disable ប៊ូតុង។
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `queryKey: ['products', { category, page }]`
+   - រាល់ពេលដែល State `category` ឬ `page` ផ្លាស់ប្តូរ TanStack Query នឹង Generate Key ថ្មី ហើយស្វែងរកទិន្នន័យក្នុង Cache ឬ Fetch ពី Server ដោយស្វ័យប្រវត្តិ។
+2. `isLoading` vs `isFetching`
+   - `isLoading`: ជា `true` តែម្តងគត់នៅពេល App មិនទាន់មានទិន្នន័យ Cache ទាល់តែសោះ (Initial Loading UI)។
+   - `isFetching`: ជា `true` រាល់ពេលមាន Network Request (រួមទាំង Background Sync)។
+3. `queryClient.invalidateQueries({ queryKey: ['products'] })`
+   - សម្គាល់ Cache `['products']` ថា Stale (ហួសសម័យ) — គ្រប់ UI Component ណាដែលកំពុងបង្ហាញបញ្ជីទំនិញ នឹងធ្វើបច្ចុប្បន្នភាពទិន្នន័យស្រស់ស្វ័យប្រវត្តិ។
+4. `createProductMutation.isPending`
+   - ផ្តល់ Boolean State ដើម្បី Disable ប៊ូតុង និងបង្ហាញ Loading Indicator អំឡុងពេល Mutation កំពុងដំណើរការ។
+
+---
+
+## 💡 ៦. Best Practices ជាមួយ TanStack Query
+
+> [!TIP]
+> 1. **Encapsulate Queries in Custom Hooks:** ជំនួសឱ្យការសរសេរ `useQuery` ដោយផ្ទាល់ក្នុង Component ច្រើនដង ចូរ Encapsulate វាជា Custom Hook ដូចជា `useProducts(category)` និង `useCreateProduct()`។
+> 2. **Never Mutate in `queryFn`:** `queryFn` ត្រូវតែជា Pure Fetch Function (គ្មាន Side Effects ដូចជាកែប្រែ State ក្រៅ)។
+> 3. **Use Devtools:** បើកប្រើ `ReactQueryDevtools` ជានិច្ចអំឡុងពេលអភិវឌ្ឍន៍ ដើម្បីមើលឃើញ Cache Keys, Data Expiration, និង Network State យ៉ាងច្បាស់។

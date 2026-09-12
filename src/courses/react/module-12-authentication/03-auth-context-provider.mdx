@@ -1,122 +1,216 @@
 ---
-title: AuthContext Provider — Global Auth State
-description: រៀនបង្កើត AuthContext Provider ពេញលេញដែលគ្រប់គ្រង User State, Token Storage, Auto-Rehydration, និង Logout Action ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "AuthContext Provider — Managing Global Auth State & Session Rehydration"
+description: សិក្សាពីការបង្កើត AuthContext Provider ពេញលេញកម្រិត Production — ស្វែងយល់ពី Session Rehydration (ការទាញយក Token ពី Storage ពេល Refresh), ការគ្រប់គ្រង Auth Loading State ដើម្បីការពារ Flash-of-Redirect, និង Action Methods (Login, Logout, UpdateProfile) ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះរៀបចំ AuthContext និង Provider Structure ក្នុង React
-  - ចេះ Rehydrate User State ពី localStorage ពេលទំព័រទើបបើក
-  - យល់ពីសារៈសំខាន់នៃ `isLoading` State ក្នុង AuthContext
-  - ចេះបង្កើត `useAuth()` Custom Hook សម្រាប់ Consume Auth Context
+  - "យល់ពីរចនាសម្ព័ន្ធ Auth State ក្នុង React (user, token, isLoading, isAuthenticated)"
+  - "ចេះ Implement Session Rehydration តាមរយៈ useEffect ពេល App ចាប់ផ្តើមដំបូង"
+  - "យល់ពីសារៈសំខាន់ជាយុទ្ធសាស្ត្រនៃ isLoading State ក្នុងការការពារ Flash of Login Redirect"
+  - "ចេះបង្កើត Custom Hook useAuth() ដែលមាន Runtime Error Safety Guard"
+  - "ចេះគ្រប់គ្រង Synchronization រវាង Memory State និង Persistent Storage (localStorage)"
 module: module-12-authentication
 order: 3
 quiz:
-  - question: "ហេតុអ្វី AuthContext ត្រូវមាន `isLoading: true` នៅពេលទើបបើក App ដំបូង?"
+  - question: "ហេតុអ្វីបានជា AuthContext ត្រូវចាប់ផ្តើមដោយ `isLoading: true` នៅពេលទើបបើក App ដំបូង?"
     options:
-      - "ដើម្បីបង្ហាញ Loading Animation ឱ្យស្អាត"
-      - "ដើម្បីទប់ស្កាត់ Protected Route មិនឱ្យ Redirect User ទៅ Login Page មុនពេល App បានអាន Token ពី LocalStorage ចប់សព្វគ្រប់"
-      - "វាជាច្បាប់របស់ CSS"
-      - "ដើម្បីឱ្យ Token មិនផុតកំណត់"
-    correctAnswer: 2
-    explanation: "ពេលទើប Refresh ទំព័រ State ក្នុង memory គឺ null។ AuthContext ត្រូវចំណាយពេលអាន Storage សិន។ បើគ្មាន isLoading ទេ Protected Route នឹងស្មានថា User មិនទាន់ Login រួច kick ទៅកាន់ Login Page ខុសភ្លាមៗ (Flash of Redirect)។"
+      - "ដើម្បីទប់ស្កាត់ Protected Route មិនឱ្យ Redirect User ទៅកាន់ Login Page ដោយខុសឆ្គង ក្នុងអំឡុងពេលដែល App កំពុងអាន Token ពី Storage (ការពារ Flash of Login Redirect)"
+      - "ដើម្បីឱ្យ CSS Animations ដំណើរការបានរលូនជាងមុន"
+      - "ព្រោះ Browser តម្រូវឱ្យមាន Loading State ជាដាច់ខាតសម្រាប់គ្រប់ Context"
+      - "ដើម្បីការពារមិនឱ្យ Browser ស៊ី Memory ច្រើន"
+    correctAnswer: 1
+    explanation: "ពេល Refresh ទំព័រ (F5) State ក្នុង Memory គឺ `user: null`។ ប្រសិនបើគ្មាន `isLoading: true` ទេ Protected Route នឹងគិតស្មានថា User មិនទាន់ Login ហើយទាត់ User ចេញទៅ `/login` ភ្លាមៗ (Flash Redirect) ទោះបីជាគាត់មាន Token ក្នុង Storage ក៏ដោយ។"
+
+  - question: "តើ Custom Hook `useAuth()` គួរមាន Guard អ្វីខ្លះដើម្បីការពារ Bugs ក្នុង Development?"
+    options:
+      - "ត្រូវពិនិត្យមើល `if (!context)` ហើយបោះ `throw new Error('useAuth must be used within an AuthProvider')` ប្រសិនបើ Component ហៅប្រើ Hook នេះនៅក្រៅ `<AuthProvider>`"
+      - "ត្រូវ return `null` ជានិច្ចប្រសិនបើគ្មាន User"
+      - "ត្រូវហៅ `alert()` ប្រាប់ User"
+      - "ត្រូវ reload ទំព័រទាំងមូលឡើងវិញ"
+    correctAnswer: 1
+    explanation: "ការដាក់ Guard `if (!context) throw new Error(...)` ជួយឱ្យ Developer ដឹងភ្លាមៗតាមរយៈ Console នៅពេលភ្លេចរុំ Component ដោយ `<AuthProvider>` ជាជាងជួប Error ស្រពិចស្រពិល `Cannot read properties of null`។"
+
+  - question: "តើអ្វីកើតឡើងចំពោះ Global Auth State នៅពេលដែល User ចុចប៊ូតុង Refresh ទំព័រ (F5)?"
+    options:
+      - "React Memory State ទាំងអស់ត្រូវ Reset ទៅរក Initial Values — ហេតុនេះយើងត្រូវការ Effect ដើម្បី Rehydrate (ស្រង់យក) Token និង User Profile ពី Storage មកដាក់ក្នុង State វិញ"
+      - "React State នៅរក្សាដដែលដោយស្វ័យប្រវត្តិដោយមិនបាត់បង់ទិន្នន័យឡើយ"
+      - "Server នឹង Logout User ចេញដោយស្វ័យប្រវត្តិ"
+      - "Browser នឹងលុប Cache និង Cookies ទាំងអស់ចោលភ្លាមៗ"
+    correctAnswer: 1
+    explanation: "SPA State ស្ថិតនៅក្នុង Memory (RAM) របស់ JavaScript runtime។ ពេលទំព័រ Reload កូដ JS ត្រូវ Reset ទាំងអស់ ដូច្នេះ AuthProvider ត្រូវមាន `useEffect` ដកស្រង់ទិន្នន័យពី Storage មក Rehydrate ឡើងវិញ។"
 ---
 
-## 🏗️ 1. Auth Flow Architecture
+## 🏗️ ១. ស្ថាបត្យកម្ម AuthContext & Session Rehydration Lifecycle
 
 ```mermaid
-graph TD
-    subgraph AuthContextTree["Auth Context Structure"]
-        AP["<AuthProvider> (Wraps App)"]
-        AC["AuthContext State:\n{ user, token, isLoading, login(), logout() }"]
-    end
+sequenceDiagram
+    autonumber
+    actor User as អ្នកប្រើប្រាស់
+    participant Browser as Browser Window (F5 Reload)
+    participant Provider as <AuthProvider />
+    participant Storage as localStorage
+    participant Route as <ProtectedRoute />
 
-    AP --> AC
-    AC --> C1["<ProtectedRoute>"]
-    AC --> C2["<Navbar> (User Avatar)"]
-    AC --> C3["<LoginPage>"]
+    User->>Browser: បើកទំព័រ App ឬចុច Refresh (F5)
+    Browser->>Provider: Initialize State: { user: null, token: null, isLoading: true }
+    Provider->>Route: Provide Context (isLoading = true)
+    Note over Route: Route ឃើញ isLoading=true -> បង្ហាញ Loading Spinner (មិនទាន់ Redirect ទេ!)
+
+    Provider->>Storage: អាន getItem('auth_token') & getItem('auth_user')
+    Storage-->>Provider: ឆ្លើយតប Token & User Data ✅
+    Provider->>Provider: setUser(data), setToken(token), setIsLoading(false)
+    Provider->>Route: Provide Context (isLoading = false, isAuthenticated = true)
+    Note over Route: Route ឃើញ isAuthenticated=true -> អនុញ្ញាតឱ្យ Render Private Dashboard 🎉
 ```
 
 ---
 
-## 💻 2. Building AuthContext Step by Step
+## ⚠️ ២. យល់ដឹងពីបញ្ហា "Flash of Login Redirect"
 
-### 💻 Code សម្រាប់តែ AuthContext Definition:
+នៅពេលគ្មានការគ្រប់គ្រង `isLoading` ឱ្យបានត្រឹមត្រូវ លំដាប់ព្រឹត្តិការណ៍ខុសឆ្គងខាងក្រោមនឹងកើតឡើង៖
+
+```
+[គ្មាន isLoading Guard]
+1. F5 Refresh ទំព័រ /dashboard
+2. AuthProvider ចាប់ផ្តើមជាមួយ user = null, isAuthenticated = false
+3. ProtectedRoute ពិនិត្យឃើញ isAuthenticated = false ភ្លាមៗ
+4. ProtectedRoute ធ្វើការ Redirect User ទៅកាន់ /login ភ្លាមៗ (Flash Redirect ❌)
+5. មួយភ្លែតក្រោយមក useEffect ទើបអាន Storage ឃើញ Token... តែយឺតពេលហើយព្រោះ User ទៅដល់ Login បាត់!
+```
+
+> [!IMPORTANT]
+> **ដំណោះស្រាយស្តង់ដារ ៖** ចាប់ផ្តើម Context ជាមួយ `isLoading: true` ជានិច្ច ហើយរង់ចាំរហូតដល់ `useEffect` អាន Storage ចប់សព្វគ្រប់ ទើបកំណត់ `isLoading: false`។
+
+---
+
+## 💻 ៣. Production-Grade AuthContext Implementation
+
+ខាងក្រោមនេះជាកូដពេញលេញនៃ `AuthContext.jsx` ដែលមាន Action Methods, Safe Storage Handling, និង Custom Hook Guard៖
 
 ```jsx
 // src/context/AuthContext.jsx
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 
+// ១. បង្កើត Context Object
 const AuthContext = createContext(null);
+
+// Storage Keys
+const TOKEN_KEY = 'edu_auth_token';
+const USER_KEY = 'edu_auth_user';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // 1. ចាប់ផ្តើមដោយ true
+  const [isLoading, setIsLoading] = useState(true); // គន្លឹះសំខាន់បំផុត!
 
-  // 2. Rehydrate State ពី LocalStorage ពេល Mount
+  // ២. Session Rehydration ពេល App Mount ដំបូង
   useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem('auth_token');
-      const savedUser = localStorage.getItem('auth_user');
+    const rehydrateAuthSession = () => {
+      try {
+        const storedToken = localStorage.getItem(TOKEN_KEY);
+        const storedUser = localStorage.getItem(USER_KEY);
 
-      if (savedToken && savedUser) {
-        setToken(savedToken);
-        setUser(JSON.parse(savedUser));
+        if (storedToken && storedUser) {
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (error) {
+        console.error('Error rehydrating auth session:', error);
+        // ប្រសិនបើទិន្នន័យក្នុង storage ខូច (Corrupted JSON) សូមសម្អាតចោល
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+      } finally {
+        // បិទ Loading state បន្ទាប់ពីអានរួចរាល់ មិនថាមានទិន្នន័យ ឬអត់
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to restore auth session:', err);
-    } finally {
-      setIsLoading(false); // 3. អានរួចរាល់ទើបបិទ loading
-    }
+    };
+
+    rehydrateAuthSession();
   }, []);
 
-  // 4. Action: Login
+  // ៣. Action: Login (រក្សាទុកក្នុង Memory State និង Persistent Storage)
   const login = (userData, authToken) => {
     setUser(userData);
     setToken(authToken);
-    localStorage.setItem('auth_token', authToken);
-    localStorage.setItem('auth_user', JSON.stringify(userData));
+
+    try {
+      localStorage.setItem(TOKEN_KEY, authToken);
+      localStorage.setItem(USER_KEY, JSON.stringify(userData));
+    } catch (error) {
+      console.error('Failed to save auth to localStorage:', error);
+    }
   };
 
-  // 5. Action: Logout
+  // ៤. Action: Logout (សម្អាត Memory State និង Storage ទាំងអស់)
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+    } catch (error) {
+      console.error('Failed to clear auth from localStorage:', error);
+    }
   };
 
-  const value = {
-    user,
-    token,
-    isLoading,
-    isAuthenticated: !!user && !!token,
-    login,
-    logout,
+  // ៥. Action: Update User Profile (កែប្រែឈ្មោះ ឬព័ត៌មាន User)
+  const updateUser = (updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const updated = { ...prev, ...updatedFields };
+      localStorage.setItem(USER_KEY, JSON.stringify(updated));
+      return updated;
+    });
   };
+
+  // ៦. Memoize Context Value ដើម្បីការពារ Unnecessary Re-renders
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      isLoading,
+      isAuthenticated: !!user && !!token,
+      login,
+      logout,
+      updateUser,
+    }),
+    [user, token, isLoading]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// 6. Custom Hook ងាយស្រួល Consume
+// ៧. Custom Hook សម្រាប់ Consume Auth Context ប្រកបដោយសុវត្ថិភាព
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth() must be used within an <AuthProvider> wrapper!');
   }
   return context;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
+
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
 
 1. `const [isLoading, setIsLoading] = useState(true);`
-   - ចាប់ផ្តើមដោយ `true` ដើម្បីផ្តល់សញ្ញាថា App កំពុងឆែកមើល Storage ថា User ធ្លាប់ Login ទុកពីមុនឬអត់។
-2. `useEffect(() => { ... const savedToken = localStorage.getItem(...) }, []);`
-   - ទាញយក Token និង User Object ពី Browser Storage មក restore ចូល React State វិញ។
-3. `setIsLoading(false);`
-   - បន្ទាប់ពី Restore រួចរាល់ យើងបិទ `isLoading = false` ដើម្បីឱ្យ Route Protection អាចធ្វើការសម្រេចចិត្តបានត្រឹមត្រូវ។
-4. `const login = (userData, authToken) => { ... }`
-   - Update ទាំង React State និង Storage ដំណាលគ្នា។
-5. `const logout = () => { ... }`
-   - សម្អាត State និង Storage ទាំងអស់ចោលដើម្បីបញ្ចប់ Session។
-6. `export function useAuth()`
-   - បង្កើត Custom Hook សម្រាប់ឱ្យ Components ផ្សេងៗប្រើប្រាស់ដោយមិនបាច់ import `AuthContext` និង `useContext` ដោយដៃឡើយ។
+   - កំណត់ថា Context កំពុងស្ថិតក្នុងដំណាក់កាលអាន Session ដំបូង។ គ្រប់ Protected Components នឹងរង់ចាំរហូតដល់ Loading នេះបញ្ចប់។
+2. `useEffect(() => { ... }, []);`
+   - ដំណើរការម្តងគត់នៅពេល App ដំបូងចាប់ផ្តើម ដើម្បីអាន Token និង User Profile ពី LocalStorage។
+3. `setUser(JSON.parse(storedUser));`
+   - Parse JSON String ពី Storage ត្រឡប់មកជា JavaScript Object ដើម្បីដាក់ចូល React State។
+4. `isAuthenticated: !!user && !!token`
+   - ប្រើ Double Negation (`!!`) ដើម្បីបំប្លែងទិន្នន័យឱ្យទៅជា Boolean (`true` ប្រសិនបើមានទាំង User និង Token, `false` ប្រសិនបើគ្មាន)។
+5. `const value = useMemo(() => ({ ... }), [user, token, isLoading]);`
+   - Memoize Object `value` ដើម្បីកុំឱ្យបង្កើត Object ថ្មីរាល់ពេល Provider re-render ដែលជួយសន្សំ Performance របស់ Consumers ទាំងអស់។
+6. `if (!context) throw new Error(...)`
+   - Runtime Guard ដែលជួយចាប់កំហុសភ្លាមៗ ប្រសិនបើ Developer ភ្លេច Wrap `<AuthProvider>` នៅលើ Root App។
+
+---
+
+## 💡 ៥. Best Practices សម្រាប់ការគ្រប់គ្រង Global Auth
+
+> [!TIP]
+> 1. **Centralized Keys:** បង្កើត Constants សម្រាប់ Storage Keys (ដូចជា `TOKEN_KEY`) ដើម្បីចៀសវាងការវាយខុសអក្សរ (Typos)។
+> 2. **Try-Catch Around Storage:** Browser មួយចំនួន (ដូចជា Incognito Mode ឬពេល Storage ពេញ) អាច Throw Error ពេលហៅ `localStorage.setItem` — ការប្រើ `try-catch` ធានាថា App មិន Crash ឡើយ។
+> 3. **Axios / Fetch Interceptors:** នៅក្នុង Production អ្នកអាចភ្ជាប់ AuthContext ជាមួយ Axios Interceptors ដើម្បីចាប់ 401 Unauthorized Errors ហើយហៅ `logout()` ដោយស្វ័យប្រវត្តិ។

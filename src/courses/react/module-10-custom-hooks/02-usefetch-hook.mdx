@@ -1,148 +1,247 @@
 ---
-title: Building useFetch — Reusable Data Fetching Hook
-description: សាងសង់ Custom Hook useFetch(url) ពីដំបូង ដោយបំបែក Logic ជាផ្នែកៗ (State, Fetch Function, Refetch, Cleanup) ជាមួយការពន្យល់មួយជួរៗយ៉ាងលម្អិត។
+title: "Building useFetch — Production-Grade Asynchronous Hook with Caching & Refetch"
+description: សាងសង់ Custom Hook useFetch(url, options) កម្រិត Production ពីដំបូង — ស្វែងយល់ពី Tri-State Management, Request Cancellation ជាមួយ AbortController, Refetch Trigger, និង In-Memory Caching Pattern។
 objectives:
-  - ចេះបង្កើត useFetch Custom Hook ដែលមាន Tri-State (data, isLoading, error)
-  - ចេះ Implement Refetch Capability ដើម្បីទាញទិន្នន័យឡើងវិញតាមតម្រូវការ
-  - ចេះប្រើ AbortController ខាងក្នុង Custom Hook
-  - ចេះយក useFetch ទៅប្រើប្រាស់ក្នុង Components ច្រើនផ្សេងៗគ្នា
+  - "យល់ច្បាស់ពីស្ថាបត្យកម្មនៃ `useFetch` Hook ដើម្បីលុបបំបាត់ Boilerplate Code ក្នុង Components"
+  - "ចេះ Implement Refetch Trigger ដើម្បីទាញយកទិន្នន័យឡើងវិញតាមការបញ្ជារបស់ User"
+  - "ចេះការពារ Memory Leak និង Race Conditions ដោយប្រើ `AbortController` ខាងក្នុង Hook"
+  - "ចេះបង្កើត In-Memory Cache ដើម្បីកុំឱ្យ Fetch URLs ដដែលៗម្តងហើយម្តងទៀត"
+  - "ស្គាល់ពីកំហុស Infinite Loop ពេលបញ្ជូន Options Object ចូលក្នុង Hook"
 module: module-10-custom-hooks
 order: 2
 quiz:
-  - question: "តើអ្វីជាគុណសម្បត្តិនៃការបង្កើត useFetch Hook ប្រើផ្ទាល់ខ្លួន?"
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃការទាញយក Data Fetching Logic មកទុកក្នុង `useFetch` Custom Hook?"
     options:
-      - "ធ្វើឱ្យ Database ដំណើរការលឿនជាងមុន"
-      - "ជៀសវាងការសរសេរ useEffect + useState + try/catch ដដែលៗនៅគ្រប់ Component ដែលត្រូវការ Fetch ទិន្នន័យ"
-      - "វាជំនួស HTML tags ទាំងអស់"
-      - "ដើម្បីកុំឱ្យបង់ថ្លៃ Hosting"
-    correctAnswer: 2
-    explanation: "useFetch ទាញយក Boilerplate code (useState, useEffect, loading, error handling, cleanup) មកទុកនៅកន្លែងតែមួយ។ Component គ្រាន់តែហៅ const { data, isLoading, error } = useFetch(url) គឺរួចរាល់។"
+      - "លុបបំបាត់ការសរសេរ `useState`, `useEffect`, `try/catch`, និង `AbortController` ដដែលៗរាប់សិបដងនៅគ្រប់ Component ដែលត្រូវការ Fetch ទិន្នន័យ ធ្វើឱ្យ Codebase មានភាពស្អាត និងងាយស្រួល Maintain"
+      - "ធ្វើឱ្យ Database ផ្ទុកទិន្នន័យបានច្រើនជាងមុន"
+      - "ដើម្បីលុបចោលការប្រើប្រាស់ REST API"
+      - "ដើម្បីឱ្យ Web ដំណើរការដោយមិនបាច់ប្រើ JavaScript"
+    correctAnswer: 1
+    explanation: "`useFetch` ធ្វើការ Encapsulate asynchronous lifecycle ទាំងអស់មកទុកក្នុង Hook តែមួយ។ Component គ្រាន់តែហៅ `const { data, isLoading, error, refetch } = useFetch(url)` គឺរួចរាល់ មិនបាច់សរសេរ State ច្រើនជាន់ឡើយ។"
+
+  - question: "ប្រសិនបើយើងហៅ `useFetch(url, { headers: { Auth: 'token' } })` ដោយមិនប្រើ `useMemo` លើ Options Object តើនឹងមានបញ្ហាអ្វីកើតឡើង?"
+    options:
+      - "នឹងកើតមាន Infinite Fetch Loop ព្រោះនៅក្នុង JavaScript `{}` តែងតែបង្កើត Object Reference ថ្មីរាល់ Render ដែលធ្វើឱ្យ `useEffect` ក្នុង Hook គិតថា Options បានផ្លាស់ប្តូរ ហើយបាញ់ Request មិនចេះចប់"
+      - "Browser នឹង Error Syntax"
+      - "ទិន្នន័យទាំងអស់នឹងត្រូវលុបចេញពី Database"
+      - "គ្មានបញ្ហាអ្វីកើតឡើងឡើយ"
+    correctAnswer: 1
+    explanation: "Object Literal តែងតែមាន New Reference រាល់ពេល Component Render។ ប្រសិនបើដាក់ Object នោះក្នុង Dependency Array នៃ `useEffect` វានឹងរត់ជា Infinite Loop។ ដំណោះស្រាយគឺត្រូវប្រើ `useMemo` ឬធ្វើ Deep Comparison លើ Options។"
 ---
 
-## 🏗️ 1. Architecture of `useFetch`
+## 🏗️ ១. ស្ថាបត្យកម្មនៃ `useFetch` Custom Hook
 
 ```mermaid
-graph TD
-    subgraph CustomHook["Custom Hook: useFetch(url)"]
-        S["State: { data, isLoading, error }"]
-        E["useEffect + AbortController"]
-        R["refetch() function"]
+flowchart TD
+    subgraph HookCore["Custom Hook: useFetch(url, options)"]
+        direction TB
+        State["State Management<br/>{ data, isLoading, error }"]
+        Cache["In-Memory Cache CacheMap<br/>(URL -> Cached Response)"]
+        Abort["AbortController<br/>(Auto-cancel on Unmount/URL change)"]
+        Refetch["refetch() Callback<br/>(Manual Trigger)"]
+        State --- Cache --- Abort --- Refetch
     end
 
-    CustomHook --> C1["PostList Component"]
-    CustomHook --> C2["UserProfile Component"]
-    CustomHook --> C3["ProductGrid Component"]
+    HookCore --> C1["<UserProfile userId={1} />"]
+    HookCore --> C2["<PostList category='tech' />"]
+    HookCore --> C3["<ProductGrid />"]
+
+    style HookCore fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style C1 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style C2 fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style C3 fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 💻 2. Building `useFetch` Step by Step
-
-### 💻 Code សម្រាប់តែ `useFetch` Hook:
+## 💻 ២. កូដពេញលេញនៃ `src/hooks/useFetch.js` (ជាមួយ Caching & Refetch)
 
 ```javascript
 // src/hooks/useFetch.js
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
-export function useFetch(url) {
+// 🗄️ In-Memory Cache រក្សាទុក Responses ក្នុង Session
+const cache = new Map();
+
+export function useFetch(url, options = {}) {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Function សម្រាប់ Fetch Data
-  const fetchData = useCallback(async (signal) => {
-    if (!url) return;
+  // ប្រើ Ref ដើម្បីបង្កើត Refetch Key Trigger
+  const [reloadIndex, setReloadIndex] = useState(0);
 
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(url, { signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-      const json = await res.json();
-      setData(json);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        setError(err.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  // Function សម្រាប់អនុញ្ញាតឱ្យ User ចុច Refresh ដោយដៃ
+  const refetch = useCallback(() => {
+    if (url) cache.delete(url); // លុប Cache ចាស់ចោលដើម្បីទាញទិន្នន័យថ្មីពី Server
+    setReloadIndex((prev) => prev + 1);
   }, [url]);
 
   useEffect(() => {
+    if (!url) {
+      setData(null);
+      setIsLoading(false);
+      return;
+    }
+
+    // ⚡ ពិនិត្យមើល Cache ជាមុនសិន
+    if (cache.has(url)) {
+      setData(cache.get(url));
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     const controller = new AbortController();
-    fetchData(controller.signal);
+    setIsLoading(true);
+    setError(null);
 
-    return () => controller.abort();
-  }, [fetchData]);
+    const executeFetch = async () => {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
 
-  // បង្កើត refetch trigger
-  const refetch = () => {
-    const controller = new AbortController();
-    fetchData(controller.signal);
-  };
+        if (!response.ok) {
+          throw new Error(`HTTP Error Status: ${response.status} (${response.statusText})`);
+        }
 
-  // Return ជា Object ងាយស្រួល Destructure
+        const json = await response.json();
+
+        // រក្សាទុកក្នុង Cache សម្រាប់ប្រើលើកក្រោយ
+        cache.set(url, json);
+
+        setData(json);
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          setError(err.message || 'មានបញ្ហាមិនអាចទាញយកទិន្នន័យបានទេ');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    executeFetch();
+
+    // 🧹 Cleanup: Cancel request ពេល URL ផ្លាស់ប្តូរ ឬ Component Unmount
+    return () => {
+      controller.abort();
+    };
+  }, [url, reloadIndex]);
+
   return { data, isLoading, error, refetch };
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `export function useFetch(url)`
-   - ទទួល parameter `url` (អាសយដ្ឋាន API Endpoint ដែលត្រូវ fetch)។
-2. `const [data, setData] = useState(null);`
-   - រក្សាទុកទិន្នន័យ Response។
-3. `const fetchData = useCallback(async (signal) => {...}, [url]);`
-   - ប្រើ `useCallback` ដើម្បីកុំឱ្យ function នេះត្រូវ regenerate ថ្មីរាល់ពេល Component Re-render លុះត្រាតែ `url` ប្រែប្រួល។
-4. `const res = await fetch(url, { signal });`
-   - ភ្ជាប់ AbortSignal ដើម្បីអាច cancel request បាន។
-5. `return () => controller.abort();`
-   - Cleanup ស្វ័យប្រវត្តនៅពេល `url` ប្តូរ ឬ Component Unmount។
-6. `return { data, isLoading, error, refetch };`
-   - បញ្ជូន States ទាំងអស់ និង helper function `refetch` ចេញទៅក្រៅ។
-
 ---
 
-## 🛠️ 3. Using `useFetch` in a Component
-
-### 💻 Code សម្រាប់ Component:
+## 🚀 ៣. ការហៅប្រើប្រាស់ក្នុង Component (Tabbed Post Explorer)
 
 ```jsx
+// src/components/TabbedPostExplorer.jsx
+import { useState } from 'react';
 import { useFetch } from '../hooks/useFetch';
 
-export default function UserProfile({ userId }) {
-  // ប្រើ Hook យ៉ាងសាមញ្ញត្រឹមតែ ១ ជួរ!
-  const { data: user, isLoading, error, refetch } = useFetch(
-    `https://jsonplaceholder.typicode.com/users/${userId}`
+const CATEGORIES = [
+  { id: 1, name: 'បច្ចេកវិទ្យា (Tech)', limit: 3 },
+  { id: 2, name: 'ការរចនា (Design)', limit: 5 },
+  { id: 3, name: 'ពាណិជ្ជកម្ម (Business)', limit: 4 },
+];
+
+export default function TabbedPostExplorer() {
+  const [selectedCat, setSelectedCat] = useState(CATEGORIES[0]);
+
+  // ហៅ useFetch យ៉ាងខ្លី — ពេល selectedCat ដូរ URL ដូរ Hook នឹងទាញយកស្វ័យប្រវត្តិ!
+  const { data: posts, isLoading, error, refetch } = useFetch(
+    `https://jsonplaceholder.typicode.com/posts?_limit=${selectedCat.limit}`
   );
 
-  if (isLoading) return <div className="p-4">⏳ កំពុងទាញទិន្នន័យ User...</div>;
-  if (error) return <div className="p-4 text-red-500">⚠️ មានបញ្ហា៖ {error}</div>;
-
   return (
-    <div className="p-4 bg-white dark:bg-slate-800 rounded-xl shadow-sm border max-w-sm">
-      <h3 className="font-bold text-lg text-slate-800 dark:text-white">{user.name}</h3>
-      <p className="text-sm text-slate-500">{user.email}</p>
-      <p className="text-sm text-slate-500">{user.phone}</p>
+    <div className="max-w-lg mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-5">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 className="text-base font-black text-slate-800 dark:text-white flex items-center gap-2">
+            <span>📚</span> Tabbed Post Explorer
+          </h2>
+          <p className="text-xs text-slate-500">ដំណើរការដោយ Custom `useFetch` Hook</p>
+        </div>
 
-      <button
-        onClick={refetch}
-        className="mt-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition"
-      >
-        🔄 Refresh Profile
-      </button>
+        <button
+          onClick={refetch}
+          disabled={isLoading}
+          className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-xl text-xs font-bold transition"
+        >
+          {isLoading ? '...' : '🔄 Refetch'}
+        </button>
+      </div>
+
+      {/* CATEGORY TABS */}
+      <div className="flex gap-2">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setSelectedCat(cat)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+              selectedCat.id === cat.id
+                ? 'bg-indigo-600 text-white shadow'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
+      {/* ── STATES ── */}
+      {isLoading && (
+        <div className="py-12 text-center text-xs text-slate-400 animate-pulse">
+          ⏳ កំពុងទាញយកទិន្នន័យពី Server...
+        </div>
+      )}
+
+      {error && !isLoading && (
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-600 rounded-2xl text-xs text-center">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {!isLoading && !error && (
+        <ul className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+          {posts?.map((post) => (
+            <li
+              key={post.id}
+              className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 text-xs space-y-1"
+            >
+              <h4 className="font-bold text-slate-800 dark:text-white capitalize">
+                {post.title}
+              </h4>
+              <p className="text-[11px] text-slate-500 line-clamp-2">{post.body}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `const { data: user, isLoading, error, refetch } = useFetch(...)`
-   - ប្រើ Destructuring និង Rename `data` ទៅជា `user` ឱ្យត្រូវតាម Context នៃ Component។
-2. `if (isLoading)` និង `if (error)`
-   - គ្រប់គ្រង UI Loading និង Error បានយ៉ាងស្អាត ដោយមិនចាំបាច់សរសេរ State variables នៅក្នុង Component នេះឡើយ។
-3. `<button onClick={refetch}>`
-   - អាចចុចទាញយកទិន្នន័យថ្មីម្តងទៀតបានគ្រប់ពេលដោយគ្រាន់តែហៅ `refetch()`។
+## 🔍 ៤. ការវិភាគចំណុចគន្លឹះនៃស្ថាបត្យកម្ម
+
+1. **In-Memory Caching ជាមួយ `Map()`:**  
+   នៅពេល User ចុចប្តូរ Tab ពី Tech ➔ Design រួចត្រឡប់មក Tech វិញ `useFetch` នឹងទាញទិន្នន័យចេញពី `cache.get(url)` ភ្លាមៗ (Instant Zero-latency Loading) ដោយមិនចាំបាច់បាញ់ HTTP Request ឡើងវិញឡើយ!
+2. **Refetch Buster:**  
+   នៅពេល User ចង់បានទិន្នន័យស្រស់បំផុតពី Server ការហៅ `refetch()` នឹងដំណើរការ `cache.delete(url)` ជាមុន រួចទើបបាញ់ HTTP Request ថ្មី។
+
+---
+
+## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+
+| លក្ខណៈពិសេស | ដំណោះស្រាយក្នុង `useFetch` |
+| :--- | :--- |
+| **Tri-State Management** | ផ្ទុក `{ data, isLoading, error }` ក្នុង Hook តែមួយ |
+| **Memory Leak Protection** | រុំព័ទ្ធដោយ `AbortController` ក្នុង `useEffect` cleanup |
+| **Instant Navigation** | In-Memory `cache.set(url, json)` |
+| **Manual Refresh** | `refetch()` trigger តាមរយៈ reload index |

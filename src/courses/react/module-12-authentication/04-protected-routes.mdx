@@ -1,147 +1,230 @@
 ---
-title: Protected Routes with React Router v6
-description: រៀនបង្កើត ProtectedRoute Component ដើម្បីការពារទំព័រ Private (ដូចជា Dashboard, Profile) ដោយបង្វែរ Unauthenticated Users ទៅកាន់ Login Page ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Protected & Role-Based Routes with React Router v6"
+description: សិក្សាស៊ីជម្រៅពីការបង្កើត Protected Routes និង Role-Based Access Control (RBAC) ក្នុង React Router v6 — ស្វែងយល់ពី Route Guard Lifecycle, ការបញ្ជូន Intended Location តាមរយៈ state, និងការដោះស្រាយ Forbidden 403 Pages ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីរបៀបដំណើរការនៃ Protected Route Component ក្នុង React Router v6
-  - ចេះគ្រប់គ្រង Auth Loading State ដើម្បីការពារ Flash of Login Redirect
-  - ចេះរក្សាទុក Intended Location (URL ដើម) ដើម្បី Redirect ត្រឡប់មកវិញក្រោយ Login
-  - ចេះ Implement Role-based Authorization (Admin only pages)
+  - "យល់ច្បាស់ពីយន្តការ Route Guards ក្នុង Single Page Applications (SPA)"
+  - "ចេះបង្កើត ProtectedRoute Component ដែលការពារទំព័រ Private (Dashboard, Profile)"
+  - "ចេះរក្សាទុក Intended Location ដើម្បី Redirect User ត្រឡប់មកទំព័រដើមវិញក្រោយ Login"
+  - "ចេះបង្កើត Role-Based Authorization (Admin-only routes vs General User routes)"
+  - "យល់ពីភាពខុសគ្នារវាង Frontend Route Protection (UI Guard) និង Backend API Protection"
 module: module-12-authentication
 order: 4
 quiz:
-  - question: "ហេតុអ្វី `ProtectedRoute` ត្រូវឆែក `isLoading` មុនគេបង្អស់?"
+  - question: "ហេតុអ្វីបានជា `ProtectedRoute` ត្រូវភ្ជាប់ `state={{ from: location }}` នៅពេល Redirect User ទៅកាន់ Login Page?"
     options:
-      - "ដើម្បីធ្វើឱ្យ CSS Animation ដំណើរការ"
-      - "ដើម្បីកុំឱ្យ Component Redirect ទៅ Login Page ខុស ក្នុងអំឡុងពេល AuthContext កំពុងអាន Token ពី LocalStorage"
-      - "វាជា TypeScript Requirement"
-      - "ដើម្បីសន្សំ Bandwidth"
-    correctAnswer: 2
-    explanation: "ពេល Refresh ទំព័រ AuthContext ចំណាយពេលអាន Storage (isLoading=true)។ បើគ្មានការឆែក isLoading ទេ User ដែលមាន Token ស្រាប់នឹងត្រូវ Redirect ចេញទៅ Login Page ភ្លាមៗដោយអយុត្តិធម៌។"
+      - "ដើម្បីឱ្យ LoginPage អាចដឹងពី URL ដើមដែល User កំពុងចង់ចូល (Intended Destination) ហើយអាច Redirect គាត់ត្រឡប់ទៅទីនោះវិញដោយស្វ័យប្រវត្តិក្រោយពេល Login ជោគជ័យ"
+      - "ដើម្បីរក្សាទុក Password របស់ User ក្នុង URL state"
+      - "ដើម្បីឱ្យ React Router មិនបាត់បង់ History stack"
+      - "ដើម្បីកំណត់ពណ៌ Theme របស់ Login Page"
+    correctAnswer: 1
+    explanation: "ប្រសិនបើ User ចុចលើ Link ទៅកាន់ `/dashboard/settings/billing` តែមិនទាន់ Login នោះ `location` នឹងត្រូវបញ្ជូនទៅ Login Page។ ក្រោយ Login រួច App នឹងនាំគាត់ទៅ Settings ភ្លាម ដោយមិនបាច់ឱ្យគាត់ស្វែងរកចុចម្តងទៀតឡើយ (Great UX)។"
+
+  - question: "តើអ្វីជាភាពខុសគ្នាជាមូលដ្ឋានរវាង Frontend Protected Route និង Backend API Authorization?"
+    options:
+      - "Frontend Protected Route ការពារត្រឹមតែការបង្ហាញ UI លើ Browser ប៉ុណ្ណោះ ចំណែក Backend API គឺជាកន្លែងការពារទិន្នន័យពិតប្រាកដ (Data Security) ដោយត្រួតពិនិត្យ JWT Token លើរាល់ Request"
+      - "Frontend Protected Route ការពារ Database បាន ១០០% ដោយមិនចាំបាច់មាន Backend Check ទៀតឡើយ"
+      - "Frontend Route ប្រើ Cookie រីឯ Backend API ប្រើ localStorage"
+      - "ទាំងពីរនេះដូចគ្នាទាំងស្រុង គ្មានភាពខុសគ្នាឡើយ"
+    correctAnswer: 1
+    explanation: "កូដ Frontend ទាំងអស់ដំណើរការលើ Browser របស់អ្នកប្រើប្រាស់ ដូច្នេះ User អាចកែប្រែ State បាន។ ការពិត UI Protected Route គ្រាន់តែជួយសម្រួល UX ប៉ុណ្ណោះ រីឯទិន្នន័យសម្ងាត់ពិតប្រាកដត្រូវតែការពារដោយ Backend Middleware ជានិច្ច!"
+
+  - question: "ប្រសិនបើ User មាន Role ជា 'student' ប៉ុន្តែព្យាយាមចូលទៅកាន់ Route `/admin/settings` តើ Route Guard គួរចាត់វិធានការបែបណា?"
+    options:
+      - "បង្វែរ (Redirect) ទៅកាន់ទំព័រ `/unauthorized` (403 Forbidden) ឬ `/dashboard` ព្រោះ User បាន Authenticated រួចហើយ តែគ្មានសិទ្ធិ (Unauthorized Role)"
+      - "ទាត់ User ចេញទៅ Login Page សារជាថ្មី"
+      - "លុប Token ចោលពី localStorage"
+      - "បិទ Browser Tab ភ្លាមៗ"
+    correctAnswer: 1
+    explanation: "User បាន Authenticated រួចរាល់ហើយ ដូច្នេះមិនត្រូវទាត់ទៅ Login Page ឡើយ។ ផ្ទុយទៅវិញ ត្រូវបង្ហាញទំព័រ 403 Unauthorized ឬ Redirect ទៅកាន់ Dashboard របស់គាត់វិញ។"
 ---
 
-## 🛡️ 1. Building `ProtectedRoute` Component
+## 🛡️ ១. ស្ថាបត្យកម្ម Route Guard Decision Tree
 
-### 💻 Code សម្រាប់តែ `ProtectedRoute` Wrapper:
+```mermaid
+flowchart TD
+    A["User ព្យាយាមចូលទៅកាន់ Route ណាមួយ (ឧ. /admin/analytics)"] --> B{"តើ AuthContext កំពុង isLoading?"}
+    B -- "✅ ពិត (true)" --> C["បង្ហាញ Loading Spinner ពេញអេក្រង់ (រង់ចាំអាន Token)"]
+    B -- "❌ មិនមែន (false)" --> D{"តើ isAuthenticated == true?"}
+    
+    D -- "❌ មិនទាន់ Login" --> E["Redirect ទៅ /login\n(ភ្ជាប់ state: { from: location } + replace: true)"]
+    D -- "✅ Login រួចរាល់" --> F{"តើ Route នេះទាមទារ requiredRole?"}
+    
+    F -- "❌ អត់ទាមទារ Role (Any user)" --> G["Render Children / Outlet (អនុញ្ញាតឱ្យចូល) 🎉"]
+    F -- "✅ ទាមទារ Role (ឧ. 'admin')" --> H{"តើ user.role ត្រូវគ្នានឹង requiredRole?"}
+    
+    H -- "❌ Role មិនត្រូវគ្នា" --> I["Redirect ទៅ /unauthorized (403 Forbidden)"]
+    H -- "✅ Role ត្រឹមត្រូវ" --> G
+```
+
+---
+
+## 💻 ២. ការបង្កើត `ProtectedRoute` Component (Production Standard)
+
+ខាងក្រោមនេះជាកូដនៃ `ProtectedRoute.jsx` ដែលគាំទ្រទាំង Element Children និង Role-Based Authorization៖
 
 ```jsx
 // src/components/ProtectedRoute.jsx
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export function ProtectedRoute({ children, requiredRole }) {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const location = useLocation(); // ចងចាំ URL បច្ចុប្បន្ន
+  const location = useLocation(); // ចងចាំ Path បច្ចុប្បន្ន
 
-  // 1. ប្រសិនបើ AuthContext កំពុងពិនិត្យ Token នៅឡើយ សូមបង្ហាញ Spinner
+  // ១. ដំណាក់កាលរង់ចាំ Session Rehydration (ការពារ Flash of Redirect)
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <p className="animate-pulse text-slate-500">🔒 កំពុងផ្ទៀងផ្ទាត់សិទ្ធិ...</p>
+      <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+        <p className="text-slate-400 text-sm font-medium animate-pulse">
+          🔒 កំពុងផ្ទៀងផ្ទាត់សិទ្ធិចូលប្រើប្រាស់...
+        </p>
       </div>
     );
   }
 
-  // 2. ប្រសិនបើមិនទាន់ Login: Redirect ទៅ /login និងភ្ជាប់ URL ចាស់តាម state
+  // ២. ប្រសិនបើមិនទាន់ Authenticated: Redirect ទៅ /login ព្រមទាំងភ្ជាប់ Location ដើម
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. ប្រសិនបើទំព័រនោះត្រូវការ Role ជាក់លាក់ (ឧ. 'admin')
+  // ៣. ប្រសិនបើ Route នេះទាមទារ Role ជាក់លាក់ ហើយ User គ្មាន Role នោះ
   if (requiredRole && user?.role !== requiredRole) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  // 4. ប្រសិនបើត្រឹមត្រូវទាំងអស់ អនុញ្ញាតឱ្យ Render Private Page
+  // ៤. ប្រសិនបើសិទ្ធិត្រឹមត្រូវទាំងអស់: អនុញ្ញាតឱ្យ Render កូន Component
   return children;
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `const location = useLocation();`
-   - ទាញយក URL Path បច្ចុប្បន្នដែល User កំពុងព្យាយាមបើក (ឧ. `/dashboard/settings`)។
-2. `if (isLoading) return <LoadingSpinner />;`
-   - **ចំណុចការពារ Flash Redirect:** រង់ចាំរហូតដល់ `isLoading = false` ទើបធ្វើការសម្រេចចិត្ត។
-3. `<Navigate to="/login" state={{ from: location }} replace />`
-   - បញ្ជូន User ទៅ Login Page ព្រមទាំងភ្ជាប់ `state={{ from: location }}` ដើម្បីឱ្យក្រោយពេល Login ជោគជ័យ យើងអាច Redirect User ត្រឡប់មកកាន់ទំព័រដើមដែលគាត់ចង់ចូលវិញ។
-4. `if (requiredRole && user?.role !== requiredRole)`
-   - ពិនិត្យ Role-based Permission (បើទំព័រនោះសម្រាប់តែ Admin តែ User ធម្មតាចូល នឹងត្រូវបង្វែរទៅកាន់ទំព័រ 403 Forbidden)។
-5. `return children;`
-   - បង្ហាញ Component កូន (Private Page Content) ជូន User។
-
 ---
 
-## 🗺️ 2. Route Configuration in `App.jsx`
+## 🗺️ ៣. Router Setup ក្នុង `App.jsx`
 
-### 💻 Code សម្រាប់ Routes Setup:
+ខាងក្រោមនេះជារបៀបរៀបចំ Routes ដោយបែងចែករវាង **Public Routes**, **General Protected Routes**, និង **Admin-Only Routes**៖
 
 ```jsx
 // src/App.jsx
-import { Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
 // Public Pages
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
 
 // Private Pages
 import DashboardPage from './pages/DashboardPage';
-import AdminSettings from './pages/AdminSettings';
+import ProfilePage from './pages/ProfilePage';
+import AdminDashboard from './pages/AdminDashboard';
+import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   return (
-    <Routes>
-      {/* 🌐 Public Routes (នរណាក៏ចូលបាន) */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          {/* 🌐 ១. Public Routes (នរណាក៏អាចចូលមើលបាន) */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-      {/* 🔒 Protected Routes (ទាមទារ Login) */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
+          {/* 🔒 ២. Standard Protected Routes (សម្រាប់ Authenticated Users ទាំងអស់) */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
-      {/* 👑 Role-based Protected Route (ទាមទារ Admin Role) */}
-      <Route
-        path="/admin/settings"
-        element={
-          <ProtectedRoute requiredRole="admin">
-            <AdminSettings />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+          {/* 👑 ៣. Role-Based Protected Route (សម្រាប់តែ Admin ប៉ុណ្ណោះ) */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🚫 ៤. 404 Catch-All Route */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `<ProtectedRoute><DashboardPage /></ProtectedRoute>`
-   - រុំ `<DashboardPage />` ជាកូន (Children) នៃ `<ProtectedRoute>`។ មុនពេល `DashboardPage` អាចបង្ហាញបាន `ProtectedRoute` នឹងដំណើរការ Logic ផ្ទៀងផ្ទាត់សិទ្ធិជាមុនសិន។
-2. `requiredRole="admin"`
-   - បញ្ជូន prop ដើម្បីបញ្ជាក់ថា Route នេះត្រូវការ Role ជា Admin។
+## 🔄 ៤. យន្តការ "Redirect-Back" ក្នុង `LoginPage`
+
+នៅពេល User Login ជោគជ័យ យើងទាញយក `location.state?.from` ដើម្បីបញ្ជូនគាត់ទៅកាន់គោលដៅដើមវិញ៖
+
+```jsx
+// src/pages/LoginPage.jsx (Excerpt)
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+export default function LoginPage() {
+  const { login } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // ទាញយក URL ដើមដែល User ចង់ចូល ឬយក /dashboard ជា Default
+  const intendedDestination = location.state?.from?.pathname || '/dashboard';
+
+  const handleLoginSuccess = (userData, token) => {
+    // Save to global auth
+    login(userData, token);
+
+    // Redirect ទៅកាន់ទំព័រដើមវិញភ្លាមៗ (replace: true ការពារកុំឱ្យចុច Back មក Login វិញ)
+    navigate(intendedDestination, { replace: true });
+  };
+
+  // ...
+}
+```
 
 ---
 
-## 🔄 3. Redirect Back After Login Logic
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
 
-### 💻 Code សម្រាប់ LoginPage:
+1. `const location = useLocation();`
+   - ចាប់យក Object នៃ Route បច្ចុប្បន្ន (រួមមាន `pathname`, `search`, `hash`) ដើម្បីបញ្ជូនជា State ទៅកាន់ទំព័រ Login។
+2. `if (isLoading) return <LoadingSpinner />;`
+   - បង្ហាញ UI រង់ចាំក្នុងអំឡុងពេល Rehydration ដើម្បីការពារបញ្ហា Flash of Redirect។
+3. `<Navigate to="/login" state={{ from: location }} replace />`
+   - ធ្វើការ Redirect ទៅកាន់ `/login` ដោយមិនបន្ថែម Entry ថ្មីក្នុង Browser History Stack (`replace`) និងបញ្ជូន Location ចាស់តាមរយៈ `state`។
+4. `if (requiredRole && user?.role !== requiredRole)`
+   - ត្រួតពិនិត្យសិទ្ធិតាម Role។ បើ User មាន Role ធម្មតា (ឧ. `student`) តែព្យាយាមចូល Route `admin` វានឹងបញ្ជូនទៅ `/unauthorized`។
+5. `return children;`
+   - ប្រសិនបើការត្រួតពិនិត្យទាំងអស់បានឆ្លងកាត់ដោយជោគជ័យ Component នឹង Render Page Content ជូន User។
 
-```javascript
-// ក្នុង LoginPage.jsx ក្រោយ Login ជោគជ័យ
-const location = useLocation();
-const navigate = useNavigate();
+---
 
-// ទាញយក URL ដើម បើគ្មានយក default ជា /dashboard
-const from = location.state?.from?.pathname || '/dashboard';
+## 💡 ៦. Security Principles សម្រាប់ Frontend Developers
 
-const handleLoginSuccess = (user, token) => {
-  login(user, token);
-  navigate(from, { replace: true }); // នាំទៅទំព័រដើមវិញភ្លាមៗ!
-};
-```
+> [!WARNING]
+> **ច្បាប់មាសនៃ SPA Security ៖**
+> 1. **Frontend Route Guards គឺជា UX Feature មិនមែនជា Data Security ឡើយ!**  
+>    អ្នកប្រើប្រាស់ដែលមានជំនាញបច្ចេកទេស អាចបើក Developer Console ហើយកែប្រែ State ក្នុង Memory ដើម្បីមើលឃើញប៊ូតុង ឬ UI របស់ Admin បាន។
+> 2. **Backend API ត្រូវតែជាអ្នកការពារទិន្នន័យ (Enforce Authorization) ៖**  
+>    រាល់ Endpoint ដូចជា `DELETE /api/users/:id` ឬ `GET /api/admin/financials` ត្រូវតែពិនិត្យ JWT Role នៅលើ Server Middleware ជានិច្ច ទោះបីជា UI នៅលើ Frontend ត្រូវបានលាក់ ឬបង្ហាញក៏ដោយ។

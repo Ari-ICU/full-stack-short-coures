@@ -1,151 +1,241 @@
 ---
-title: Testing Fundamentals — Vitest & Testing Pyramid
-description: ស្វែងយល់ពី Testing Pyramid, Unit vs Integration vs E2E Tests, ការ Setup Vitest ជាមួយ Vite, និង Testing Philosophy ដែល React Developer ត្រូវដឹង។
+title: "Testing Fundamentals — Vitest, Jest-DOM & Testing Pyramid"
+description: សិក្សាស៊ីជម្រៅពីគោលការណ៍គ្រឹះនៃ Software Testing ក្នុង React — ស្វែងយល់ពី Testing Pyramid (Unit vs Integration vs E2E), ការ Setup Vitest + jsdom + Jest-DOM, Structure នៃ Test Suites (describe, it, expect), និងការសរសេរ Unit Tests សម្រាប់ Pure Functions ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ស្គាល់ Testing Pyramid — Unit, Integration, E2E
-  - ចេះ Install និង Configure Vitest ជាមួយ React
-  - ចេះ Write Basic Test Cases ជាមួយ describe/it/expect
-  - យល់ពី Test File Naming Conventions
+  - "យល់ពីទស្សនវិជ្ជានៃ Testing Pyramid និងផលចំណេញ (ROI) នៃ Test ប្រភេទនីមួយៗ"
+  - "ចេះ Install និង Configure Vitest ជាមួយ jsdom និង @testing-library/jest-dom លើ Vite/React"
+  - "ចេះប្រើប្រាស់ Vitest Test Block Functions (describe, it/test, beforeEach, afterEach)"
+  - "ចេះប្រើប្រាស់ Matchers សំខាន់ៗ (toBe, toEqual, toContain, toThrow, toBeCloseTo)"
+  - "ចេះសរសេរ Unit Tests គ្រប់ជ្រុងជ្រោយសម្រាប់ Pure Utility Functions"
 module: module-14-testing
 order: 1
 quiz:
-  - question: "Testing Pyramid ណែនាំ Test Type ណាដែលគួរ Write ច្រើនជាងគេ?"
+  - question: "តាមរយៈគោលការណ៍ 'Testing Pyramid' ហេតុអ្វីបានជាយើងគួរមាន Unit Tests ច្រើនជាងគេនៅបាតពីរ៉ាមីត?"
     options:
-      - "E2E Tests — Test ពី Browser"
-      - "Unit Tests — Small, Isolated, Fast, Cheap ជាង E2E រាប់រយ ឬ ពាន់ Unit Tests ក្នុង Project ធំ"
-      - "Integration Tests — Test ច្រើន Components ជាមួយ"
-      - "Manual Tests — Developer Test ដោយខ្លួនឯង"
-    correctAnswer: 2
-    explanation: "Testing Pyramid: Unit Tests (Bottom — ច្រើន, Fast, Cheap) → Integration Tests (Middle) → E2E Tests (Top — តិច, Slow, Expensive)។ Unit Tests Isolate Logic តូចៗ (function, component) ដោយ Mocking Dependencies ធ្វើឱ្យ Run ក្នុង Milliseconds និង Easy to Debug।"
+      - "ព្រោះ Unit Tests មានល្បឿនលឿនបំផុត (ដំណើរការក្នុងរង្វង់ Milliseconds), មានតម្លៃទាបក្នុងការបង្កើត និងថែទាំ, និងងាយស្រួលចង្អុលបង្ហាញកំហុសជាក់លាក់ (Pinpoint Errors) ក្នុងកូដ"
+      - "ព្រោះ Unit Tests អាច Test លើ Browser ពិតប្រាកដដូច E2E"
+      - "ព្រោះ Unit Tests មិនត្រូវការសរសេរកូដ Assertion"
+      - "ដើម្បីបង្កើនទំហំ Project ឱ្យធំ"
+    correctAnswer: 1
+    explanation: "Unit Tests ដំណើរការលើ Isolated Logic (ដូចជា functions, algorithms) ដោយគ្មាន UI ឬ Network ធ្ងន់ៗ ធ្វើឱ្យវាអាច Run រាប់ពាន់ Tests ក្នុងរយៈពេលត្រឹមតែប៉ុន្មានវិនាទី។"
+
+  - question: "តើអ្វីជាភាពខុសគ្នារវាង `toBe()` និង `toEqual()` ក្នុង Vitest/Jest Assertions?"
+    options:
+      - "`toBe()` ពិនិត្យភាពស្មើគ្នានៃ Primitive Values ឬ Memory Reference (`===`), រីឯ `toEqual()` ធ្វើការត្រួតពិនិត្យស៊ីជម្រៅលើគ្រប់ Properties នៃ Objects ឬ Arrays (Deep Equality)"
+      - "`toBe()` ប្រើសម្រាប់តែ Strings រីឯ `toEqual()` ប្រើសម្រាប់តែ Numbers"
+      - "`toBe()` ដំណើរការតែក្នុង Node.js រីឯ `toEqual()` ដំណើរការក្នុង Browser"
+      - "ទាំងពីរនេះដូចគ្នាទាំងស្រុង គ្មានភាពខុសគ្នាឡើយ"
+    correctAnswer: 1
+    explanation: "សម្រាប់ Primitive (number, string, boolean) យើងប្រើ `toBe()`។ សម្រាប់ Object/Array (ឧ. `{ id: 1 }` vs `{ id: 1 }`) Reference ក្នុង Memory ខុសគ្នា ដូច្នេះត្រូវប្រើ `toEqual()`។"
+
+  - question: "តើ `jsdom` បំពេញតួនាទីអ្វីនៅក្នុង Vitest Setup សម្រាប់ React?"
+    options:
+      - "ក្លែងធ្វើ Browser Environment (Window, Document, DOM APIs) នៅក្នុង Node.js runtime ដើម្បីឱ្យយើងអាច Render និង Test React Components បានដោយមិនបាច់បើក Real Browser"
+      - "ប្រើសម្រាប់បម្លែង JSX ទៅជា CSS"
+      - "ប្រើសម្រាប់ទាញយកទិន្នន័យពី Database"
+      - "ប្រើសម្រាប់ Host Website លើ Cloud"
+    correctAnswer: 1
+    explanation: "`jsdom` គឺជា JavaScript-based headless browser DOM implementation ដែលដំណើរការក្នុង Node.js ធ្វើឱ្យការ Test UI មានល្បឿនលឿនបំផុត។"
 ---
 
-## 🏗️ 1. Testing Pyramid
+## 🏛️ ១. ស្ថាបត្យកម្ម Testing Pyramid & Return on Investment (ROI)
 
 ```mermaid
 graph TD
-    subgraph Pyramid["Testing Pyramid"]
-        E2E["🔺 E2E Tests\n(Playwright, Cypress)\n• Few tests\n• Slow (seconds each)\n• Tests full user flow"]
-        INT["🔷 Integration Tests\n(React Testing Library)\n• Medium amount\n• Medium speed\n• Tests components together"]
-        UNIT["🔵 Unit Tests\n(Vitest)\n• Many tests\n• Very fast (ms each)\n• Tests isolated logic"]
+    subgraph Pyramid["Testing Pyramid Architecture"]
+        E2E["🔺 1. End-to-End (E2E) Tests\n(Playwright / Cypress)\n• ចំនួនតិច (10-20%)\n• ដំណើរការយឺត (Seconds)\n• ថ្លៃក្នុងការ Maintain\n• ផ្តល់ Confidence ខ្ពស់បំផុតលើ Full User Journey"]
+        INT["🔷 2. Integration Tests\n(React Testing Library)\n• ចំនួនមធ្យម (30-40%)\n• ល្បឿនមធ្យម\n• Test Components ធ្វើការរួមគ្នាជាមួយ Hooks & Context"]
+        UNIT["🔵 3. Unit Tests\n(Vitest)\n• ចំនួនច្រើនបំផុត (50-60%)\n• លឿនបំផុត (Milliseconds)\n• ថោក និងងាយ Maintain\n• Test Isolated Utilities, Reducers & Pure Functions"]
     end
 
     E2E --> INT --> UNIT
 
-    style E2E fill:#fff5f5,stroke:#e53e3e,color:#000
-    style INT fill:#fffaf0,stroke:#dd6b20,color:#000
-    style UNIT fill:#f0fff4,stroke:#38a169,color:#000
+    style E2E fill:#fff1f2,stroke:#f43f5e,stroke-width:2px,color:#881337
+    style INT fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    style UNIT fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
 ```
 
 ---
 
-## 📦 2. Setup Vitest + React Testing Library
+## ⚙️ ២. ការដំឡើង និង Configure Vitest + Jest-DOM
 
 ```bash
-npm install -D vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
+npm install -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom
 ```
 
-```js
-// vite.config.js — Add test config
+### ១. `vite.config.js` (Test Environment Setup)
+
+```javascript
+// vite.config.js
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    globals: true,          // Use describe/it/expect globally (no import needed)
-    environment: 'jsdom',   // Simulate browser DOM
-    setupFiles: './src/test/setup.js',
+    globals: true,                // អនុញ្ញាតឱ្យប្រើ describe, it, expect ដោយមិនបាច់ import
+    environment: 'jsdom',         // ក្លែងធ្វើ Browser DOM ក្នុង Node.js
+    setupFiles: './src/test/setup.js', // File Setup Matchers ដំបូង
+    css: true,                    // Parse CSS Classes ក្នុង Tests
   },
 });
 ```
 
-```js
+### ២. `src/test/setup.js` (Custom Matchers Injection)
+
+```javascript
 // src/test/setup.js
-import '@testing-library/jest-dom'; // Adds matchers: toBeInTheDocument, toHaveClass, etc.
+import '@testing-library/jest-dom'; // ផ្តល់ Matchers ដូចជា toBeInTheDocument(), toHaveValue()
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+// សម្អាត Virtual DOM ក្រោយ Test នីមួយៗបញ្ចប់
+afterEach(() => {
+  cleanup();
+});
 ```
 
+### ៣. `package.json` (Scripts)
+
 ```json
-// package.json — Add test scripts
 {
   "scripts": {
     "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   }
 }
 ```
 
 ---
 
-## 🧪 3. Writing Your First Tests
+## 🧪 ៣. ការសរសេរ Unit Tests សម្រាប់ Pure Business Logic
 
-```js
-// src/utils/math.js
-export function add(a, b) { return a + b; }
-export function formatPrice(price) { return `$${price.toFixed(2)}`; }
-export function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-```
+ខាងក្រោមនេះជា Module គណនាប្រាក់ និងបញ្ចុះតម្លៃក្នុង E-Commerce Cart៖
 
-```js
-// src/utils/math.test.js
-import { describe, it, expect } from 'vitest';
-import { add, formatPrice, validateEmail } from './math';
+### 💻 `src/utils/cart.js` (Source Code)
 
-describe('add()', () => {
-  it('adds two positive numbers', () => {
-    expect(add(2, 3)).toBe(5);
-  });
+```javascript
+// src/utils/cart.js
 
-  it('handles negative numbers', () => {
-    expect(add(-1, 1)).toBe(0);
-  });
-});
+// ១. គណនាតម្លៃសរុបនៃទំនិញក្នុងកន្ត្រក
+export function calculateSubtotal(items = []) {
+  return items.reduce((total, item) => {
+    if (item.price < 0 || item.quantity < 0) {
+      throw new Error('តម្លៃ ឬចំនួនទំនិញមិនអាចអវិជ្ជមានបានឡើយ!');
+    }
+    return total + item.price * item.quantity;
+  }, 0);
+}
 
-describe('formatPrice()', () => {
-  it('formats with $ and 2 decimal places', () => {
-    expect(formatPrice(9.9)).toBe('$9.90');
-    expect(formatPrice(100)).toBe('$100.00');
-  });
-});
+// ២. អនុវត្តគូប៉ុងបញ្ចុះតម្លៃ (Voucher Discount)
+export function applyDiscount(subtotal, discountPercent = 0) {
+  if (discountPercent < 0 || discountPercent > 100) {
+    throw new Error('ភាគរយបញ្ចុះតម្លៃត្រូវតែនៅចន្លោះ ០ ដល់ ១០០%');
+  }
+  const discountAmount = (subtotal * discountPercent) / 100;
+  return Math.max(0, subtotal - discountAmount);
+}
 
-describe('validateEmail()', () => {
-  it('returns true for valid emails', () => {
-    expect(validateEmail('test@example.com')).toBe(true);
-  });
-
-  it('returns false for invalid emails', () => {
-    expect(validateEmail('notanemail')).toBe(false);
-    expect(validateEmail('@nodomain.com')).toBe(false);
-  });
-});
-```
-
-```bash
-# Run tests
-npm test
-
-# Expected output:
-# ✓ src/utils/math.test.js (5)
-#   ✓ add() (2)
-#   ✓ formatPrice() (2)
-#   ✓ validateEmail() (2)
-# Test Files: 1 passed | Duration: 342ms
+// ៣. ផ្ទៀងផ្ទាត់ទម្រង់លេខទូរស័ព្ទកម្ពុជា
+export function validateKhmerPhone(phone) {
+  const regex = /^(0\d{8,9}|\+855\d{8,9})$/;
+  return regex.test(phone?.trim());
+}
 ```
 
 ---
 
-## 📁 4. Test File Convention
+### 💻 `src/utils/cart.test.js` (Comprehensive Test Suite)
 
-```
-src/
-├── components/
-│   ├── Button.jsx
-│   └── Button.test.jsx    ← Co-located (recommended)
-├── utils/
-│   ├── math.js
-│   └── math.test.js
-└── __tests__/             ← Or centralized (alternative)
-    └── integration.test.jsx
+```javascript
+// src/utils/cart.test.js
+import { describe, it, expect } from 'vitest';
+import { calculateSubtotal, applyDiscount, validateKhmerPhone } from './cart';
+
+describe('Cart Utility Functions', () => {
+  // ── 1. Testing calculateSubtotal ──────────────────────────
+  describe('calculateSubtotal()', () => {
+    it('returns 0 when cart is empty', () => {
+      const result = calculateSubtotal([]);
+      expect(result).toBe(0);
+    });
+
+    it('correctly calculates total for multiple valid items', () => {
+      const items = [
+        { price: 10, quantity: 2 }, // 20
+        { price: 15.5, quantity: 2 }, // 31
+      ];
+      expect(calculateSubtotal(items)).toBe(51);
+    });
+
+    it('throws error when item price or quantity is negative', () => {
+      const badItems = [{ price: -5, quantity: 1 }];
+      expect(() => calculateSubtotal(badItems)).toThrow('តម្លៃ ឬចំនួនទំនិញមិនអាចអវិជ្ជមានបានឡើយ!');
+    });
+  });
+
+  // ── 2. Testing applyDiscount ──────────────────────────────
+  describe('applyDiscount()', () => {
+    it('applies 20% discount correctly', () => {
+      const finalPrice = applyDiscount(100, 20);
+      expect(finalPrice).toBe(80);
+    });
+
+    it('handles float values with precision using toBeCloseTo', () => {
+      const finalPrice = applyDiscount(33.33, 10);
+      expect(finalPrice).toBeCloseTo(29.997, 2);
+    });
+
+    it('throws error when discount is greater than 100 or less than 0', () => {
+      expect(() => applyDiscount(100, 150)).toThrow(/០ ដល់ ១០០%/);
+      expect(() => applyDiscount(100, -10)).toThrow(/០ ដល់ ១០០%/);
+    });
+  });
+
+  // ── 3. Testing validateKhmerPhone ─────────────────────────
+  describe('validateKhmerPhone()', () => {
+    it('returns true for valid local numbers (012, 093)', () => {
+      expect(validateKhmerPhone('012345678')).toBe(true);
+      expect(validateKhmerPhone('093123456')).toBe(true);
+    });
+
+    it('returns true for international +855 prefix', () => {
+      expect(validateKhmerPhone('+85512345678')).toBe(true);
+    });
+
+    it('returns false for invalid numbers', () => {
+      expect(validateKhmerPhone('12345')).toBe(false);
+      expect(validateKhmerPhone('abcdefghij')).toBe(false);
+      expect(validateKhmerPhone('')).toBe(false);
+    });
+  });
+});
 ```
 
-> **💡 Naming:** Test files use `.test.jsx` or `.spec.jsx`. Vitest automatically discovers all files matching `*.test.*` or `*.spec.*`.
+---
+
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `describe('Cart Utility Functions', () => { ... })`
+   - បង្កើត Test Suite ធំមួយសម្រាប់ប្រមូលផ្តុំ Test Cases ដែលពាក់ព័ន្ធនឹងមុខងារ Cart។
+2. `it('returns 0 when cart is empty', () => { ... })`
+   - កំណត់លក្ខខណ្ឌតេស្តទោល (Single Test Case) ជាមួយឈ្មោះដែលបញ្ជាក់ពីលទ្ធផលរំពឹងទុកយ៉ាងច្បាស់លាស់ (Self-Documenting Code)។
+3. `expect(calculateSubtotal([])).toBe(0);`
+   - **Assertion:** ផ្ទៀងផ្ទាត់ថាតម្លៃដែលបានមកពី Function ពិតជាស្មើនឹង `0` មែន។
+4. `expect(() => calculateSubtotal(badItems)).toThrow(...)`
+   - ត្រូវរុំ Function Call ក្នុង Anonymous Function `() => fn()` នៅពេលតេស្ត `toThrow()` ដើម្បីកុំឱ្យ Error ធ្វើឱ្យ Test Runner គាំង។
+5. `expect(finalPrice).toBeCloseTo(29.997, 2)`
+   - ប្រើ `toBeCloseTo` សម្រាប់ Floating Point Numbers ក្នុង JavaScript ដើម្បីការពារបញ្ហា `0.1 + 0.2 !== 0.3`។
+
+---
+
+## 💡 ៥. Best Practices ក្នុងការសរសេរ Tests
+
+> [!TIP]
+> 1. **AAA Pattern (Arrange - Act - Assert):**
+>    - **Arrange:** រៀបចំទិន្នន័យ Input (Mock Data, Props)
+>    - **Act:** ដំណើរការ Function ឬ Click Event
+>    - **Assert:** ផ្ទៀងផ្ទាត់លទ្ធផលរំពឹងទុក
+> 2. **Descriptive Test Names:** សរសេរឈ្មោះ `it('should return...')` ឱ្យងាយយល់ ដើម្បីពេល Test Fail យើងដឹងភ្លាមថាខុសត្រង់ណា។
+> 3. **Fast Execution:** Unit Tests មិនគួរមាន Async Delays យូរៗឡើយ — ត្រូវរក្សាវាឱ្យដំណើរការក្រោម 10ms ក្នុងមួយ Test។

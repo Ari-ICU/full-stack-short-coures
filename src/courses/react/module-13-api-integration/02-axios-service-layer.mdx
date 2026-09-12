@@ -1,160 +1,289 @@
 ---
-title: Axios Service Layer — Typed API Client Architecture
-description: រៀនបង្កើត Production-grade API Service Layer ដោយបំបែក API Logic ចេញពី UI Components តាមរយៈ Centralized Axios Instance និង Service Modules ជាមួយការពន្យល់មួយជួរៗ។
+title: "Axios Service Layer — Enterprise API Client Architecture & Interceptors"
+description: រៀនបង្កើត Enterprise API Service Layer ប្រកបដោយស្តង់ដារវិជ្ជាជីវៈ — បំបែក API Logic ចេញពី UI Components ដោយប្រើប្រាស់ Centralized Axios Instance, Request/Response Interceptors, Auto Token Injection, និង Global 401 Error Handling ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពី Service Layer Pattern ក្នុង Frontend Architecture
-  - ចេះបង្កើត Resource Services (ឧ. authService, postService) ដាច់ដោយឡែក
-  - ចេះ Clean Component Code ដោយគ្រាន់តែហៅ Service Methods
-  - យល់ពីអត្ថប្រយោជន៍នៃ Maintainability ពេល API Endpoints ផ្លាស់ប្តូរ
+  - "យល់ពី Service Layer Pattern ក្នុង Enterprise Frontend Architecture"
+  - "ចេះបង្កើត Centralized Axios Instance ជាមួយ Custom Config (BaseURL, Timeout)"
+  - "ចេះ Implement Axios Request Interceptor ដើម្បី Attach Bearer Token ដោយស្វ័យប្រវត្តិ"
+  - "ចេះ Implement Axios Response Interceptor ដើម្បី Handle Global Errors (401 Auto-Logout)"
+  - "ចេះបង្កើត Domain Resource Services (authService, productService) ងាយស្រួល Maintain"
 module: module-13-api-integration
 order: 2
 quiz:
-  - question: "ហេតុអ្វីមិនគួរហៅ `axios.get('https://...')` ដោយផ្ទាល់ក្នុងគ្រប់ Component?"
+  - question: "ហេតុអ្វីបានជាយើងមិនគួរហៅ `axios.get('https://api.domain.com/posts')` ដោយផ្ទាល់ពីក្នុង React UI Components?"
     options:
-      - "ព្រោះ Axios មិនអនុញ្ញាត"
-      - "ព្រោះបើ API URL ឬ Auth Header ប្រែប្រួល យើងត្រូវតាមកែប្រែរាប់សិប Component — Service Layer ជួយប្រមូលផ្តុំ API calls នៅកន្លែងតែមួយ (Single Source of Truth)"
-      - "ដើម្បីឱ្យ Code រត់លឿនជាង"
-      - "វាជា TypeScript Bug"
-    correctAnswer: 2
-    explanation: "Service Layer ផ្តល់នូវ Abstraction — UI Components គ្រាន់តែដឹងថា postService.getAll() ផ្តល់ posts មកវិញ ដោយមិនចាំបាច់ខ្វល់ពី URLs, HTTP methods, headers, ឬ tokens ឡើយ។"
+      - "ព្រោះប្រសិនបើ API Base URL, Auth Headers, ឬ Error Handling Logic មានការផ្លាស់ប្តូរ យើងត្រូវតាមកែប្រែរាប់រយ Components — Service Layer ជួយប្រមូលផ្តុំ API Logic នៅកន្លែងតែមួយ (Single Source of Truth) និងរក្សា UI Components ឱ្យស្អាត"
+      - "ព្រោះ Axios មិនដំណើរការជាមួយ JSX"
+      - "ដើម្បីធ្វើឱ្យកូដ Bundle Size តូចជាងមុន"
+      - "ព្រោះ Browser នឹងបដិសេធសំណើ"
+    correctAnswer: 1
+    explanation: "Service Layer ផ្តល់នូវ Abstraction Layer ដ៏រឹងមាំ។ UI Component គ្រាន់តែហៅ `postService.getAll()` ដោយមិនបាច់ខ្វល់ពី HTTP URLs, Headers, ឬ Token Management ឡើយ។"
+
+  - question: "តើអ្វីជាតួនាទីស្នូលនៃ 'Axios Request Interceptor' ក្នុងប្រព័ន្ធ Authentication?"
+    options:
+      - "ស្ទាក់ចាប់ (Intercept) រាល់ HTTP Request មុនពេលវាត្រូវបានបញ្ជូនចេញពី Browser ដើម្បីបញ្ចូល `Authorization: Bearer <token>` ទៅក្នុង Request Header ដោយស្វ័យប្រវត្តិ"
+      - "ប្រើសម្រាប់ទប់ស្កាត់មិនឱ្យ User បិទ Browser Tab"
+      - "ប្រើសម្រាប់ប្តូរពណ៌ប៊ូតុង Submit លើ UI"
+      - "ប្រើសម្រាប់ Compress រូបភាពមុន Upload"
+    correctAnswer: 1
+    explanation: "Request Interceptor ជួយឱ្យយើងមិនបាច់សរសេរ `headers: { Authorization: ... }` ដោយដៃរាល់ពេលហៅ API ឡើយ — កូដ Interceptor នឹងដំណើរការស្វ័យប្រវត្តិកាត់បន្ថយការភ្លេចភ្លាំង និងកូដស្ទួន។"
+
+  - question: "នៅពេលដែល Server ឆ្លើយតបមកវិញនូវ Status `401 Unauthorized` តើ Response Interceptor គួរចាត់វិធានការបែបណា?"
+    options:
+      - "សម្អាត Token ចាស់ដែលផុតកំណត់ចេញពី Storage, Reset Auth State, និងបង្វែរ User ទៅកាន់ Login Page ភ្លាមៗ"
+      - "ព្យាយាមផ្ញើ Request ដដែលឡើងវិញ ១០០ ដង"
+      - "លុបទិន្នន័យទាំងអស់ក្នុង Database ចោល"
+      - "មិនបាច់ធ្វើអ្វីទាំងអស់"
+    correctAnswer: 1
+    explanation: "Response 401 បញ្ជាក់ថា Token ផុតកំណត់ ឬមិនត្រឹមត្រូវ។ Interceptor អាចចាប់ Error នេះបាននៅកម្រិត Global ហើយធ្វើការ Logout User ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 🏗️ 1. Service Layer Architecture
+## 🏗️ ១. ស្ថាបត្យកម្ម Service Layer Pattern
 
 ```mermaid
-graph TD
-    subgraph UIComponents["UI Components (Clean UI Only)"]
-        C1["PostList.jsx"]
-        C2["CreatePostModal.jsx"]
-        C3["UserProfile.jsx"]
+flowchart TD
+    subgraph UI_Layer["១. React UI Layer"]
+        C1["<ProductCatalog />"]
+        C2["<CreateProductModal />"]
+        C3["<UserProfile />"]
     end
 
-    subgraph ServiceLayer["Service Layer (API Logic)"]
-        S1["post.service.js"]
-        S2["auth.service.js"]
+    subgraph Service_Layer["២. Domain Services Layer"]
+        S1["product.service.js\n(getAll, getById, create, delete)"]
+        S2["auth.service.js\n(login, register, getMe)"]
     end
 
-    subgraph CoreClient["Centralized HTTP Client"]
-        AX["apiClient.js (Axios + Interceptors)"]
+    subgraph Client_Layer["៣. Centralized HTTP Client (Axios)"]
+        AX["apiClient.js\n• baseURL: https://api.myshop.com\n• timeout: 10000ms"]
+        REQ["Request Interceptor:\n• Attach Bearer Token"]
+        RES["Response Interceptor:\n• Return response.data\n• Catch 401 & Auto Logout"]
     end
 
-    C1 --> S1
-    C2 --> S1
+    subgraph Backend_Layer["៤. Backend Server"]
+        BE["Express / Node.js API"]
+    end
+
+    C1 & C2 --> S1
     C3 --> S2
-    S1 --> AX
-    S2 --> AX
+    S1 & S2 --> AX
+    AX --> REQ --> BE
+    BE --> RES --> S1 & S2
 ```
 
 ---
 
-## 💻 2. Building `post.service.js`
+## 💻 ២. ការបង្កើត Centralized Axios Client (`apiClient.js`)
 
-### 💻 Code សម្រាប់តែ Post Service Module:
+ខាងក្រោមនេះជាកូដនៃ Axios Client ដែលមាន Base URL, Timeout, Request Interceptor សម្រាប់ Token, និង Response Interceptor សម្រាប់ Error Handling៖
 
 ```javascript
-// src/services/post.service.js
+// src/api/apiClient.js
+import axios from 'axios';
+
+// ១. បង្កើត Axios Custom Instance
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://api.myshop.com/v1',
+  timeout: 10000, // 10 វិនាទី Timeout
+  headers: {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  },
+});
+
+// ២. Request Interceptor: បញ្ចូល Token ស្វ័យប្រវត្តិតាមរាល់ Request
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('edu_auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// ៣. Response Interceptor: ស្រង់យកទិន្នន័យ និងដោះស្រាយកំហុស 401 Global
+apiClient.interceptors.response.use(
+  (response) => {
+    // ស្រង់យកតែ response.data ផ្ទាល់ ដើម្បីកុំឱ្យ Component ត្រូវសរសេរ .data ច្រើនដង
+    return response.data;
+  },
+  (error) => {
+    // ដោះស្រាយបញ្ហា Network ឬ Timeout
+    if (!error.response) {
+      return Promise.reject(new Error('មិនអាចភ្ជាប់ទៅកាន់ Server បានឡើយ! សូមពិនិត្យមើលអ៊ីនធឺណិតរបស់អ្នក។'));
+    }
+
+    const { status, data } = error.response;
+
+    // Handle 401: Token Expired -> Auto Logout
+    if (status === 401) {
+      localStorage.removeItem('edu_auth_token');
+      localStorage.removeItem('edu_auth_user');
+      // បញ្ជូនទៅកាន់ Login Page ប្រសិនបើមិនទាន់នៅទីនោះ
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login?expired=true';
+      }
+    }
+
+    // បម្លែង Error Message ឱ្យកាន់តែច្បាស់លាស់
+    const customMessage = data?.message || `Server Error (Code: ${status})`;
+    const customError = new Error(customMessage);
+    customError.status = status;
+    customError.data = data;
+
+    return Promise.reject(customError);
+  }
+);
+
+export default apiClient;
+```
+
+---
+
+## 📦 ៣. ការបង្កើត Domain Services Modules
+
+### ១. `src/services/product.service.js`
+
+```javascript
+// src/services/product.service.js
 import apiClient from '../api/apiClient';
 
-export const postService = {
-  // 1. GET: ទាញយកបញ្ជី Posts ទាំងអស់
+export const productService = {
+  // ទាញយកបញ្ជី Products (គាំទ្រ Pagination & Filtering)
   getAll: async (params = {}) => {
-    const response = await apiClient.get('/posts', { params });
-    return response.data;
+    return apiClient.get('/products', { params });
   },
 
-  // 2. GET: ទាញយក Post មួយតាម ID
+  // ទាញយក Product មួយតាម ID
   getById: async (id) => {
-    const response = await apiClient.get(`/posts/${id}`);
-    return response.data;
+    return apiClient.get(`/products/${id}`);
   },
 
-  // 3. POST: បង្កើត Post ថ្មី
-  create: async (postData) => {
-    const response = await apiClient.post('/posts', postData);
-    return response.data;
+  // បង្កើត Product ថ្មី
+  create: async (productData) => {
+    return apiClient.post('/products', productData);
   },
 
-  // 4. PUT / PATCH: កែប្រែ Post
+  // កែប្រែ Product (Partial Update)
   update: async (id, updatedData) => {
-    const response = await apiClient.patch(`/posts/${id}`, updatedData);
-    return response.data;
+    return apiClient.patch(`/products/${id}`, updatedData);
   },
 
-  // 5. DELETE: លុប Post
+  // លុប Product
   delete: async (id) => {
-    const response = await apiClient.delete(`/posts/${id}`);
-    return response.data;
+    return apiClient.delete(`/products/${id}`);
   },
 };
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `import apiClient from '../api/apiClient';`
-   - Import Base Axios instance ដែលបាន configure headers, timeout, និង interceptors រួចរាល់។
-2. `getAll: async (params = {}) => { ... }`
-   - Function ទទួល `params` (ដូចជា pagination `page=1&limit=10` ឬ filter) រួច return តែ `response.data` ជូន caller។
-3. `create: async (postData) => { ... }`
-   - Encapsulate HTTP `POST` method និង endpoint `/posts`។
-4. `delete: async (id) => { ... }`
-   - Encapsulate HTTP `DELETE` method។
-
 ---
 
-## 🛠️ 3. Using Service Layer in UI Component
+## 🛠️ ៤. ការប្រើប្រាស់ Service Layer ក្នុង UI Component
 
-### 💻 Code សម្រាប់ UI Component:
+Component នឹងមានកូដស្អាត គ្មាន syntax ស្មុគស្មាញរបស់ Axios ឬ URLs ឡើយ៖
 
 ```jsx
-// src/components/PostList.jsx
-import { useState, useEffect } from 'react';
-import { postService } from '../services/post.service';
+// src/components/ProductList.jsx
+import React, { useState, useEffect } from 'react';
+import { productService } from '../services/product.service';
 
-export default function PostList() {
-  const [posts, setPosts] = useState([]);
+export default function ProductList() {
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // ហៅ Service យ៉ាងស្អាត ដោយគ្មាន axios syntax ក្នុង Component ឡើយ!
-    postService
-      .getAll({ _limit: 5 })
-      .then((data) => setPosts(data))
-      .catch((err) => console.error(err))
-      .finally(() => setIsLoading(false));
+    loadProducts();
   }, []);
 
-  const handleDelete = async (id) => {
+  const loadProducts = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
     try {
-      await postService.delete(id);
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+      const data = await productService.getAll({ limit: 10 });
+      setProducts(data);
     } catch (err) {
-      alert('លុបមិនបានសម្រេច!');
+      setErrorMessage(err.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  if (isLoading) return <p>⏳ កំពុងផ្ទុក Posts...</p>;
+  const handleDelete = async (id) => {
+    if (!window.confirm('តើអ្នកពិតជាចង់លុបទំនិញនេះមែនទេ?')) return;
+
+    try {
+      await productService.delete(id);
+      // Update UI ភ្លាមៗ
+      setProducts((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert(`បរាជ័យក្នុងការលុប៖ ${err.message}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center text-slate-500">
+        <div className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-2" />
+        <p>កំពុងផ្ទុកទំនិញ...</p>
+      </div>
+    );
+  }
+
+  if (errorMessage) {
+    return (
+      <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl text-rose-600 text-sm text-center">
+        ⚠️ {errorMessage}
+        <button onClick={loadProducts} className="block mx-auto mt-2 font-bold underline">
+          ព្យាយាមម្តងទៀត
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <ul className="space-y-2">
-      {posts.map((post) => (
-        <li key={post.id} className="flex justify-between p-3 border rounded-xl">
-          <span className="font-semibold text-sm">{post.title}</span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {products.map((item) => (
+        <div key={item.id} className="p-5 bg-white dark:bg-slate-900 border rounded-2xl shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="font-bold text-slate-800 dark:text-white text-base">{item.name}</h3>
+            <p className="text-blue-600 font-extrabold text-sm mt-1">${item.price}</p>
+          </div>
           <button
-            onClick={() => handleDelete(post.id)}
-            className="text-red-500 text-xs font-bold"
+            onClick={() => handleDelete(item.id)}
+            className="mt-4 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-bold transition self-end"
           >
-            លុប
+            🗑️ លុប
           </button>
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `postService.getAll({ _limit: 5 })`
-   - Component មើលទៅសាមញ្ញ និងងាយយល់ — វាគ្រាន់តែស្នើសុំ "Get All Posts" ពី Service។
-2. `await postService.delete(id)`
-   - Delete action ត្រូវធ្វើឡើងតាមរយៈ method របស់ Service។ ប្រសិនបើថ្ងៃក្រោយ Backend ប្តូរ Endpoint ពី `/posts/${id}` ទៅ `/api/v2/articles/${id}` យើងគ្រាន់តែកែតែក្នុង file `post.service.js` មួយគត់ គ្រប់ Components នឹងដំណើរការធម្មតា!
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `axios.create({ baseURL, timeout })`
+   - បង្កើត HTTP Client ផ្តាច់មុខសម្រាប់ App ទាំងមូល ដែលកំណត់ Base URL និង Timeout 10s តែមួយកន្លែង។
+2. `apiClient.interceptors.request.use((config) => { ... })`
+   - ស្ទាក់ចាប់ Request មុននឹងចាកចេញពី Browser ដើម្បីបញ្ចូល Bearer Token ទៅក្នុង HTTP Headers។
+3. `apiClient.interceptors.response.use((response) => response.data, ...)`
+   - Auto unwrap `response.data` ធ្វើឱ្យ Components មិនបាច់សរសេរ `res.data.data` ច្រើនជាន់។
+4. `if (status === 401) { ... window.location.href = '/login'; }`
+   - ចាប់ Error 401 នៅកម្រិត Global — បើ Token អស់សុពលភាព ប្រព័ន្ធនឹងសម្អាត Storage និងនាំ User ទៅ Login ភ្លាមៗ។
+5. `export const productService = { ... }`
+   - ប្រមូលផ្តុំ API Endpoints ទាំងអស់នៃ Module Product ក្នុង Object តែមួយ ដែលធ្វើឱ្យងាយស្រួល Refactor និង Unit Test (Mocking)។
+
+---
+
+## 💡 ៦. គុណសម្បត្តិសំខាន់ៗនៃ Service Layer
+
+- **Maintainability:** ពេល Backend ប្តូរ Path ពី `/products` ទៅ `/api/v2/items` យើងកែប្រែតែ 1 បន្ទាត់ក្នុង `product.service.js`។
+- **Testability:** ងាយស្រួលសរសេរ Unit Test ដោយគ្រាន់តែ Mock `productService.getAll = jest.fn()`។
+- **Clean UI:** Components ផ្តោតតែលើការបង្ហាញ UI និង Events ដោយគ្មានកូដ HTTP ស្មុគស្មាញឡើយ។

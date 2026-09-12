@@ -1,118 +1,212 @@
 ---
-title: REST API Design & CORS — What Every Frontend Dev Must Know
-description: ស្វែងយល់ពី RESTful API Conventions, HTTP Methods, Status Codes, CORS Configuration, និងរបៀប Read API Documentation ដើម្បីភ្ជាប់ Frontend ទៅ Backend ដោយ Confident។
+title: "REST API Design & CORS — What Every Frontend Developer Must Know"
+description: សិក្សាស៊ីជម្រៅពីគោលការណ៍គ្រឹះនៃ RESTful API Design, HTTP Methods, Semantic Status Codes, CORS Security Policy, Preflight Requests, និង Best Practices ក្នុងការតភ្ជាប់ Frontend ទៅកាន់ Backend ប្រកបដោយទំនុកចិត្ត។
 objectives:
-  - ស្គាល់ HTTP Methods (GET, POST, PUT, PATCH, DELETE) និង Use Cases
-  - ស្គាល់ HTTP Status Codes សំខាន់ (200, 201, 400, 401, 403, 404, 500)
-  - យល់ពី CORS — ហេតុអ្វីវាទប់ requests និងរបៀប Fix
-  - ចេះ Read REST API Endpoint Documentation
+  - "យល់ច្បាស់ពី RESTful API Conventions (Resource Naming, Nouns vs Verbs, Query Parameters)"
+  - "ស្គាល់ច្បាស់ពីភាពខុសគ្នានៃ HTTP Methods (GET, POST, PUT, PATCH, DELETE)"
+  - "ចេះបកស្រាយ HTTP Status Codes (200, 201, 204, 400, 401, 403, 404, 422, 500) ក្នុង React"
+  - "យល់ពីយន្តការ Browser CORS Policy និង Preflight OPTIONS Request"
+  - "ចេះសរសេរ Production-Ready Fetch Handler ដែលមាន Timeout, Headers, និង Error Parsing"
 module: module-13-api-integration
 order: 1
 quiz:
-  - question: "HTTP Status Code 401 vs 403 — ខុសគ្នាដូចម្តេច?"
+  - question: "HTTP Status Code `401 Unauthorized` និង `403 Forbidden` មានភាពខុសគ្នាយ៉ាងដូចម្តេចក្នុង Frontend Architecture?"
     options:
-      - "ពួកវាដូចគ្នា"
-      - "401 = Unauthorized (You haven't proven who you are — Login required). 403 = Forbidden (Server knows who you are, but you don't have Permission for this resource)"
-      - "401 = Server Error, 403 = Client Error"
-      - "401 = Not Found, 403 = Bad Request"
-    correctAnswer: 2
-    explanation: "401 Unauthorized: 'Who are you?' — Token missing/expired, Login needed. 403 Forbidden: 'I know who you are, but NO.' — Logged in as Student trying to access Admin endpoint។ Frontend should redirect to Login on 401, show 'Access Denied' on 403។"
+      - "`401 Unauthorized` សំដៅលើ User មិនទាន់បញ្ជាក់អត្តសញ្ញាណ (Token បាត់ ឬ Expired — ត្រូវ Redirect ទៅ Login) ចំណែក `403 Forbidden` សំដៅលើ Server ស្គាល់អត្តសញ្ញាណ User ហើយ តែគាត់គ្មានសិទ្ធិគ្រប់គ្រាន់ (ត្រូវបង្ហាញទំព័រ Access Denied)"
+      - "`401` គឺជា Server Error រីឯ `403` គឺជា Client Error"
+      - "`401` មានន័យថាទិន្នន័យរកមិនឃើញ (Not Found) រីឯ `403` មានន័យថា Input ខុស"
+      - "ទាំងពីរនេះដូចគ្នាទាំងស្រុង គ្រាន់តែជាឈ្មោះផ្សេងគ្នាប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "401 = 'Who are you?' (អត្តសញ្ញាណមិនទាន់ផ្ទៀងផ្ទាត់ — ត្រូវបញ្ជូនទៅ Login)។ 403 = 'I know who you are, but you cannot enter.' (User ធម្មតាព្យាយាមបើកទំព័រ Admin — ត្រូវបង្ហាញ 403 Forbidden)។"
+
+  - question: "តើអ្វីជាមូលហេតុចម្បងដែលបង្កឱ្យមានបញ្ហា 'CORS Error' នៅលើ Frontend Browser?"
+    options:
+      - "Browser Enforce Same-Origin Policy ដើម្បីការពារសុវត្ថិភាព — ប្រសិនបើ Frontend (ឧ. localhost:5173) ហៅទៅ Backend (ឧ. api.domain.com) ហើយ Backend មិនបានបញ្ជូន Header `Access-Control-Allow-Origin` នោះ Browser នឹង Block Response មិនឱ្យ JavaScript អានបានឡើយ"
+      - "ព្រោះកូដ JavaScript របស់ React សរសេរ Syntax ខុស"
+      - "ព្រោះអ៊ីនធឺណិតមានល្បឿនយឺតពេក"
+      - "ព្រោះ Browser មិនស្គាល់ React Framework"
+    correctAnswer: 1
+    explanation: "CORS គឺជាគោលការណ៍សុវត្ថិភាពដែលគ្រប់គ្រងដោយ Browser ផ្ទាល់ (Browser Security Mechanism)។ យើងមិនអាច 'Fix' CORS តាមរយៈកូដ React តែម្នាក់ឯងបានទេ — Backend Server ត្រូវតែ Configure CORS Header ដើម្បីអនុញ្ញាត Origin របស់ Frontend។"
+
+  - question: "តើ HTTP Method ណាដែលស័ក្តិសមបំផុតសម្រាប់ធ្វើបច្ចុប្បន្នភាពទិន្នន័យត្រឹមតែ 'ផ្នែកខ្លះ' នៃ Resource (Partial Update ដូចជាកែតែ email)?"
+    options:
+      - "`PATCH` — ប្រើសម្រាប់កែប្រែទិន្នន័យមួយចំនួន (Partial Update) ដោយមិនចាំបាច់ផ្ញើ Object ទាំងមូលមកជំនួស"
+      - "`PUT` — ប្រើសម្រាប់ជំនួស Resource ទាំងមូល (Complete Replacement)"
+      - "`POST` — ប្រើសម្រាប់តែបង្កើតទិន្នន័យថ្មីប៉ុណ្ណោះ"
+      - "`GET` — ប្រើសម្រាប់ទាញយកទិន្នន័យ"
+    correctAnswer: 1
+    explanation: "តាមស្តង់ដារ REST: `PUT` គឺជំនួស (Replace) Resource ទាំងមូល រីឯ `PATCH` គឺកែប្រែតែ Fields ណាដែលបានផ្ញើមកប៉ុណ្ណោះ (Partial Update)។"
 ---
 
-## 🌐 1. RESTful Endpoint Conventions
+## 🌐 ១. គោលការណ៍ RESTful URI Conventions
+
+REST (Representational State Transfer) ប្រើប្រាស់ **Nouns (នាម)** សម្រាប់សម្គាល់ Resource និង **HTTP Methods (កិរិយាស័ព្ទ)** សម្រាប់បញ្ជាក់ពីសកម្មភាព៖
 
 ```
-Base URL: https://api.myapp.com/v1
+Base URL: https://api.myshop.com/v1
 
-Resource: /posts
+Resource: /products
 
-GET    /posts          → Get all posts (list)
-GET    /posts/:id      → Get single post
-POST   /posts          → Create new post
-PUT    /posts/:id      → Replace entire post
-PATCH  /posts/:id      → Update partial fields
-DELETE /posts/:id      → Delete post
+GET    /products          → ទាញយកបញ្ជី Products ទាំងអស់ (List)
+GET    /products/:id      → ទាញយក Product មួយតាម ID
+POST   /products          → បង្កើត Product ថ្មី
+PUT    /products/:id      → ជំនួស Product ចាស់ទាំងស្រុង (Full Replace)
+PATCH  /products/:id      → កែប្រែតែ Field ខ្លះ (Partial Update ឧ. កែតែ price)
+DELETE /products/:id      → លុប Product នោះចោល
 
-Nested resources:
-GET    /posts/:id/comments    → Get comments for a post
-POST   /posts/:id/comments    → Add comment to a post
+Nested Resources (ទំនាក់ទំនងមេកូន):
+GET    /products/:id/reviews     → ទាញយក Reviews នៃ Product នោះ
+POST   /products/:id/reviews     → បង្កើត Review ថ្មីលើ Product នោះ
 
-Query params:
-GET    /posts?page=1&limit=10&category=react&sort=newest
+Query Parameters (Filtering, Sorting, Pagination):
+GET    /products?category=electronics&min_price=100&page=2&limit=10&sort=-createdAt
 ```
 
 ---
 
-## 📊 2. HTTP Status Code Reference
+## 📊 ២. តារាងយោង HTTP Status Codes សំខាន់ៗ
 
-| Code | Name | When to Use |
-|------|------|-------------|
-| **200** | OK | Successful GET, PUT, PATCH |
-| **201** | Created | Successful POST (resource created) |
-| **204** | No Content | Successful DELETE (no body) |
-| **400** | Bad Request | Invalid input, validation error |
-| **401** | Unauthorized | Not logged in / token expired |
-| **403** | Forbidden | Logged in but insufficient permissions |
-| **404** | Not Found | Resource doesn't exist |
-| **422** | Unprocessable Entity | Valid request but semantic errors |
-| **429** | Too Many Requests | Rate limit exceeded |
-| **500** | Internal Server Error | Server bug (check server logs) |
+| Status Code | ឈ្មោះបច្ចេកទេស | អត្ថន័យ | សកម្មភាពដែល Frontend ត្រូវធ្វើ |
+| :--- | :--- | :--- | :--- |
+| **`200 OK`** | Success | សំណើជោគជ័យ (GET, PUT, PATCH) | Render ទិន្នន័យលើ UI |
+| **`201 Created`** | Created | បង្កើត Resource ថ្មីបានសម្រេច (POST) | បង្ហាញ Success Toast & បិទ Modal |
+| **`204 No Content`** | No Content | ប្រតិបត្តិការជោគជ័យ តែគ្មាន Data ត្រឡប់មកវិញ (DELETE) | ដក Item ចេញពី State/Cache |
+| **`400 Bad Request`** | Bad Request | ទិន្នន័យដែលផ្ញើទៅខុសទម្រង់ (Client validation fail) | បង្ហាញ Error Messages លើ Form Fields |
+| **`401 Unauthorized`** | Unauthorized | មិនទាន់ Login ឬ Token Expired | បញ្ជូន User ទៅ Login Page |
+| **`403 Forbidden`** | Forbidden | បាន Login ហើយ តែគ្មានសិទ្ធិ (Role មិនគ្រប់) | បង្ហាញទំព័រ 403 Access Denied |
+| **`404 Not Found`** | Not Found | រក Resource មិនឃើញតាម ID | បង្ហាញ 404 Empty State / Not Found UI |
+| **`422 Unprocessable`**| Validation Error | ទិន្នន័យមាន Syntax ត្រូវតែខុស Business Rules | បង្ហាញ Validation Errors ជាក់លាក់ |
+| **`429 Rate Limit`** | Too Many Requests | User បាញ់ Request ច្រើនហួសកំណត់ | បង្ហាញសារ «សូមរង់ចាំបន្តិចសិន» |
+| **`500 Server Error`** | Internal Server Error| Server មាន Bug ឬ Crash | បង្ហាញ Fallback «សូមព្យាយាមម្តងទៀត» |
 
 ---
 
-## 🚫 3. CORS — Cross-Origin Resource Sharing
+## 🚫 ៣. ស្វែងយល់ស៊ីជម្រៅពី Browser CORS Policy
+
+CORS (Cross-Origin Resource Sharing) គឺជាយន្តការសុវត្ថិភាពរបស់ Browser ដើម្បីការពារមិនឱ្យ Website មួយ (Origin A) លួចអានទិន្នន័យពី API របស់ Website មួយទៀត (Origin B) ដោយគ្មានការអនុញ្ញាត។
 
 ```mermaid
 sequenceDiagram
-    participant Browser
-    participant React as React App (localhost:5173)
-    participant API as API Server (localhost:3000)
+    autonumber
+    actor User as អ្នកប្រើប្រាស់
+    participant Browser as Browser Client
+    participant React as React App (http://localhost:5173)
+    participant API as Backend API (https://api.myshop.com)
 
-    React->>Browser: fetch('http://localhost:3000/api/posts')
-    Browser->>API: OPTIONS /api/posts (Preflight Request)
-    Note over API: Check: Is localhost:5173 in allowed origins?
-    API-->>Browser: 200 + Access-Control-Allow-Origin: http://localhost:5173 ✅
-    Browser->>API: GET /api/posts (Actual Request)
-    API-->>Browser: 200 + Data
-
-    Note over Browser: If API returns NO CORS headers:
-    Browser--xReact: CORS Error! Request blocked ❌
+    User->>React: ចុចបង្កើត Post ថ្មី (POST Request)
+    React->>Browser: fetch('https://api.myshop.com/posts', { method: 'POST', headers: { 'Authorization': 'Bearer ...' } })
+    
+    Note over Browser, API: ១. Preflight Request (OPTIONS)
+    Browser->>API: OPTIONS /posts (Origin: http://localhost:5173, Access-Control-Request-Headers: Authorization)
+    
+    alt Backend បានអនុញ្ញាត Origin
+        API-->>Browser: 204 No Content (Access-Control-Allow-Origin: http://localhost:5173, Access-Control-Allow-Methods: POST, GET, OPTIONS)
+        Note over Browser, API: ២. Actual Request
+        Browser->>API: POST /posts { title: "..." }
+        API-->>Browser: 201 Created { id: 101, title: "..." }
+        Browser-->>React: Response Data ជោគជ័យ! ✅
+    else Backend មិនបានអនុញ្ញាត Origin
+        API-->>Browser: 403 Forbidden ឬ គ្មាន CORS Headers
+        Browser--xReact: ❌ Blocked by CORS Policy: No 'Access-Control-Allow-Origin' header is present!
+    end
 ```
 
-**Fix on Node/Express backend:**
-```js
-import cors from 'cors';
-
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://myapp.vercel.app'],
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-```
-
-> **⚠️ Important:** CORS is enforced by the **Browser** — you cannot fix CORS from the React side. The backend server must send the correct `Access-Control-Allow-Origin` header.
+> [!IMPORTANT]
+> **ច្បាប់ដាច់ខាត ៖** CORS ត្រូវបាន Enforce ដោយ **Browser** តែប៉ុណ្ណោះ (Postman ឬ Node.js គ្មាន CORS ទេ)។ អ្នកមិនអាចដោះស្រាយ CORS Error ដោយគ្រាន់តែកែប្រែកូដ React ឡើយ — ដំណោះស្រាយត្រឹមត្រូវគឺត្រូវបើក CORS លើ **Backend Server** (ឬប្រើ Vite Proxy អំឡុងពេល Development)។
 
 ---
 
-## 🛠️ 4. React + API Pattern Checklist
+## 💻 ៤. Production-Grade Fetch API Pattern
 
-```jsx
-// ✅ Always follow this pattern when calling any API:
-const createPost = async (payload) => {
-  const res = await fetch('/api/posts', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,    // Auth header
-    },
-    body: JSON.stringify(payload),            // Serialize body
-  });
+ខាងក្រោមនេះជា Utility Function សម្រាប់ Fetch Data ដែលមាន Timeout, Token Injection, និង JSON Error Parsing៖
 
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || `HTTP ${res.status}`);
+```javascript
+// src/api/fetchClient.js
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.myshop.com/v1';
+const REQUEST_TIMEOUT_MS = 8000;
+
+export async function request(endpoint, options = {}) {
+  const { body, headers = {}, token, timeout = REQUEST_TIMEOUT_MS, ...customConfig } = options;
+
+  // ១. Controller សម្រាប់ Handle Timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  // ២. កំណត់ Default Headers
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
+  };
+
+  // ៣. Inject Authorization Token ប្រសិនបើមាន
+  if (token) {
+    defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
 
-  return res.json();                          // Parse response
-};
+  const config = {
+    ...customConfig,
+    headers: {
+      ...defaultHeaders,
+      ...headers,
+    },
+    signal: controller.signal,
+  };
+
+  if (body) {
+    config.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    clearTimeout(timeoutId);
+
+    // ៤. Handle 204 No Content (គ្មាន Body)
+    if (response.status === 204) {
+      return null;
+    }
+
+    // ៥. Parse Response JSON
+    const data = await response.json().catch(() => ({}));
+
+    // ៦. Handle HTTP Errors (4xx, 5xx)
+    if (!response.ok) {
+      const error = new Error(data.message || `HTTP Error ${response.status}: ${response.statusText}`);
+      error.status = response.status;
+      error.data = data;
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`សំណើត្រូវបានកាត់ផ្តាច់ ដោយសារចំណាយពេលយូរជាង ${timeout / 1000}s (Timeout)`);
+    }
+    throw error;
+  }
+}
 ```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `const controller = new AbortController();`
+   - បង្កើត Controller សម្រាប់ Cancel ឬ Abort Request នៅពេល Network ជាប់គាំងយូរជាងពេលវេលាកំណត់ (`timeoutId`)។
+2. `if (token) defaultHeaders['Authorization'] = \`Bearer ${token}\`;`
+   - បញ្ចូល Bearer Token ស្វ័យប្រវត្តិកាត់បន្ថយការសរសេរ Duplicate Headers គ្រប់កន្លែង។
+3. `if (response.status === 204) return null;`
+   - ចៀសវាង Error `Unexpected end of JSON input` ពេល Server ឆ្លើយតប status 204 (ដូចជា DELETE Request)។
+4. `error.status = response.status; error.data = data;`
+   - ភ្ជាប់ Status Code និង Response Body ទៅក្នុង Error Object ដើម្បីឱ្យ UI Components អាចដឹងពីមូលហេតុកំហុសពិតប្រាកដ (ឧ. 401 vs 422)។
+
+---
+
+## 💡 ៦. Developer Checklist ពេលធ្វើការជាមួយ APIs
+
+- [x] ពិនិត្យ API Documentation (Swagger / Postman) មុននឹងចាប់ផ្តើមកូដ
+- [x] ប្រើ Semantic HTTP Methods ត្រឹមត្រូវ (`GET` សម្រាប់អាន, `POST` សម្រាប់បង្កើត, `PATCH` សម្រាប់កែប្រែ, `DELETE` សម្រាប់លុប)
+- [x] ដោះស្រាយគ្រប់ HTTP Error Status Codes ឱ្យត្រូវតាមលក្ខខណ្ឌ UX
+- [x] ដាក់ Request Timeout ជានិច្ចដើម្បីកុំឱ្យ UI ជាប់គាំងរហូត
+- [x] កុំព្យាយាមបិទ Browser Security ពេលជួប CORS — ត្រូវ Configure Backend ឬប្រើ Dev Proxy ឱ្យបានត្រឹមត្រូវ
