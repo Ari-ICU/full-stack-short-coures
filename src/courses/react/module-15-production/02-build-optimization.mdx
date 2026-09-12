@@ -1,95 +1,110 @@
 ---
-title: Production Build & Bundle Optimization
-description: រៀនពីដំណើរការ Build Optimization របស់ Vite — Code Splitting តាម Routes ដោយ React.lazy និង Suspense, Tree Shaking, និងការវិភាគ Bundle Size ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Production Build & Bundle Optimization — Code Splitting, Tree Shaking & Vite Rollup Config"
+description: សិក្សាស៊ីជម្រៅពីបច្ចេកទេស Build Optimization កម្រិតខ្ពស់ក្នុង Vite — ស្វែងយល់ពី Route-Based Code Splitting ជាមួយ React.lazy() & Suspense, Tree Shaking, Advanced Rollup Manual Chunks Configuration, និងការវិភាគ Bundle Size ជាមួយ Visualizer ដើម្បីសម្រេចបាន 100/100 Lighthouse Performance Score។
 objectives:
-  - យល់ពីដំណើរការ Bundle Minification និង Tree Shaking
-  - ចេះប្រើ `React.lazy()` និង `<Suspense>` ដើម្បីធ្វើ Route-based Code Splitting
-  - ចេះ Setup Rollup Visualizer ដើម្បីពិនិត្យទំហំ JS Chunks
-  - ដឹងពី Best Practices ក្នុងការកាត់បន្ថយ Initial Load Time (LCP)
+  - "យល់ពីដំណើរការ Bundle Minification, Tree Shaking, និង Chunk Splitting ក្នុង Vite"
+  - "ចេះ Implement Route-based Code Splitting ដោយប្រើ React.lazy() និង Suspense Fallback"
+  - "ចេះ Configure Rollup manualChunks ក្នុង vite.config.js ដើម្បីបំបែក Vendor Libraries ធំៗ"
+  - "ចេះ Setup rollup-plugin-visualizer ដើម្បីបង្កើត Interactive HTML Bundle Map"
+  - "យល់ពីផលប៉ះពាល់នៃ Bundle Size ទៅលើ Core Web Vitals (LCP, INP, CLS)"
 module: module-15-production
 order: 2
 quiz:
-  - question: "តើ Code Splitting ដោយប្រើ `React.lazy()` ជួយបង្កើន Performance យ៉ាងដូចម្តេច?"
+  - question: "តើ 'Tree Shaking' មានអត្ថន័យដូចម្តេចក្នុងដំណើរការ Production Build របស់ Vite/Rollup?"
     options:
+      - "ជាដំណើរការលុបបំបាត់កូដ (Dead Code Elimination) ណាដែលមិនត្រូវបានប្រើប្រាស់ (Unused Exports/Functions) ចេញពី Final JavaScript Bundle ដោយស្វ័យប្រវត្តិតាមរយៈ ES Module static analysis"
+      - "ជាការលុបរូបភាពចេញពី Folder assets"
+      - "ជាការកែតម្រូវទំហំ Font អក្សរ"
+      - "ជាការបិទដំណើរការ React Hooks"
+    correctAnswer: 1
+    explanation: "Tree Shaking ដូចជាការអង្រួនដើមឈើឱ្យស្លឹកឈើងាប់ៗជ្រុះចុះ។ ប្រសិនបើអ្នក import តែ `{ add }` ពី Library មួយដែលមាន ១០០ functions នោះ functions ៩៩ ទៀតដែលមិនប្រើ នឹងត្រូវលុបចោលពី bundle ទាំងស្រុង។"
+
+  - question: "តើ Code Splitting ដោយប្រើ `React.lazy()` ជួយបង្កើនល្បឿន Initial Page Load (LCP) យ៉ាងដូចម្តេច?"
+    options:
+      - "វាបំបែក JavaScript Monolith ធំ (ឧ. 3MB) ឱ្យទៅជា Chunks តូចៗជាច្រើន ដែល Browser នឹង Download តែទំព័រណាដែល User កំពុងបើកមើលប៉ុណ្ណោះ — ធ្វើឱ្យទំព័រដើម Load លឿនត្រឹមតែប៉ុន្មានរយ Milliseconds"
       - "វាបង្រួមរូបភាពឱ្យច្បាស់ជាងមុន"
-      - "វាបំបែក JavaScript Bundle ធំតែមួយ ឱ្យទៅជា Chunks តូចៗជាច្រើន ដែលនឹងត្រូវ Download តែពេលណា User បើកទៅកាន់ Route នោះប៉ុណ្ណោះ — ធ្វើឱ្យទំព័រដើម Load លឿនខ្លាំង"
-      - "វាលុប CSS ចេញពី App"
-      - "ដើម្បីឱ្យ Server មិនបាច់ប្រើ Memory"
-    correctAnswer: 2
-    explanation: "ដោយគ្មាន Code Splitting Browser ត្រូវទាញយកកូដ 2MB-5MB នៃទំព័រទាំងអស់ (ទាំង Dashboard, Admin Settings) មុនពេលបង្ហាញទំព័រដើម។ ជាមួយ React.lazy() ទំព័រដើម Download ត្រឹមតែ 150KB ប៉ុណ្ណោះ។"
+      - "វាលុប CSS ចេញពី Web App"
+      - "ដើម្បីកុំឱ្យ Server ស៊ី Memory"
+    correctAnswer: 1
+    explanation: "ជំនួសឱ្យការបង្ខំឱ្យ User រង់ចាំ Download កូដទំព័រ Dashboard និង Admin Settings ទាំងដែលគាត់មិនទាន់បានចូលមើល `React.lazy()` នឹង Download កូដទំព័រទាំងនោះតាមតម្រូវការជាក់ស្តែង (On-Demand Loading)។"
+
+  - question: "តើអត្ថប្រយោជន៍ចម្បងនៃ `manualChunks` ក្នុង `vite.config.js` គឺជាអ្វី?"
+    options:
+      - "ជួយបំបែក Vendor Libraries ធំៗ (ដូចជា React, TanStack Query) ទៅជា Chunk ដាច់ដោយឡែក ដែលអាច Cache ទុកក្នុង Browser បានយូរ (Long-term Caching) ដោយមិនចាំបាច់ Download សារជាថ្មីរាល់ពេលយើងកែប្រែកូដ App ផ្ទាល់ខ្លួន"
+      - "ប្រើសម្រាប់បិទ Console logs"
+      - "ប្រើសម្រាប់ទាញយកទិន្នន័យពី API"
+      - "ប្រើសម្រាប់ប្តូរពណ៌ Background របស់ App"
+    correctAnswer: 1
+    explanation: "Vendor Chunks កម្រផ្លាស់ប្តូរណាស់។ ពេលបំបែកវាដាច់ដោយឡែក Browser របស់ User អាច Cache ឯកសារ `vendor-react.js` ទុកបានរាប់ខែ — ទោះបី Developer កែប្រែកូដ App ក៏ User Download តែ App chunk តូចមួយគត់។"
 ---
 
-## ⚡ 1. Production Build Command
+## ⚡ ១. ស្ថាបត្យកម្ម Monolithic Bundle vs Optimized Split Chunks
 
-```bash
-# 1. ដំណើរការ Build សម្រាប់ Production
-npm run build
+```mermaid
+flowchart TD
+    subgraph Bad["❌ Monolithic Bundle (គ្មាន Code Splitting)"]
+        A["main.js (3.2 MB)\n[Home + Dashboard + Admin + Charts + PDF Export + React + Libraries]\n• User ត្រូវរង់ចាំ Download 3.2MB មុនពេលឃើញអ្វីៗទាំងអស់!\n• LCP: 4.8s (យឺតខ្លាំង 🐢)"]
+    end
 
-# 2. Preview Production Build នៅ Local Machine
-npm run preview
+    subgraph Good["✅ Optimized Chunks (Code Splitting + Manual Chunks)"]
+        B1["main.js (120 KB)\n[Home Page Only]"]
+        B2["vendor-react.js (140 KB)\n[React + React-DOM Cacheable]"]
+        B3["chunk-admin.js (450 KB)\n[Lazy Loaded ពេលចូល /admin]"]
+        B4["chunk-charts.js (800 KB)\n[Lazy Loaded ពេលចូល /analytics]"]
+    end
+
+    style Good fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
 ```
 
 ---
 
-## ✂️ 2. Route-based Code Splitting ជាមួយ `React.lazy`
-
-### 💻 Code សម្រាប់ Code Splitting (`App.jsx`):
+## ✂️ ២. Route-Based Code Splitting ជាមួយ `React.lazy` & `Suspense`
 
 ```jsx
 // src/App.jsx
-import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
-// 1. Eager Loading សម្រាប់ទំព័រដំបូងដែលត្រូវការបង្ហាញភ្លាមៗ
+// ១. Eager Loading សម្រាប់ Home Page (ទំព័រដំបូងដែលត្រូវការល្បឿនលឿនបំផុត)
 import HomePage from './pages/HomePage';
 
-// 2. Lazy Loading: Download ទំព័រទាំងនេះតែពេលណា User ចុចចូលប៉ុណ្ណោះ!
+// ២. Lazy Loading សម្រាប់ទំព័រធំៗផ្សេងទៀត (Download តែពេល User ចុចចូល)
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const AdminSettings = lazy(() => import('./pages/AdminSettings'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 
-// Loading Fallback Component
-function PageLoader() {
+// Fallback Loading UI ដ៏ស្រស់ស្អាត
+function PageLoadingFallback() {
   return (
-    <div className="flex h-64 items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3">
+      <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-600 rounded-full animate-spin" />
+      <p className="text-slate-400 text-xs font-bold animate-pulse">កំពុងទាញយកទំព័រ...</p>
     </div>
   );
 }
 
 export default function App() {
   return (
-    // 3. ស្រោប Suspense ពីលើ Routes
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/admin" element={<AdminSettings />} />
-      </Routes>
-    </Suspense>
+    <BrowserRouter>
+      {/* ៣. ស្រោប Suspense ពីលើ Routes ទាំងអស់ */}
+      <Suspense fallback={<PageLoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/admin" element={<AdminSettingsPage />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `import HomePage from './pages/HomePage';`
-   - **Eager Import:** ត្រូវបានដាក់បញ្ចូលក្នុង Main Bundle ភ្លាមៗ ព្រោះ User ត្រូវការមើលឃើញ Home Page មុនគេ។
-2. `const DashboardPage = lazy(() => import('./pages/DashboardPage'));`
-   - **Dynamic Import:** Vite នឹងកាត់ `DashboardPage` ទៅជា File ដាច់ដោយឡែកមួយ (ឧ. `Dashboard-B4.js`)។ កូដនេះនឹងមិនត្រូវបាន Download ឡើយ រហូតទាល់តែ User ចុចបើក URL `/dashboard`។
-3. `<Suspense fallback={<PageLoader />}>`
-   - ក្នុងអំឡុងពេល Browser កំពុង Download JS Chunk នៃទំព័រថ្មី `Suspense` នឹងបង្ហាញ `PageLoader` (Spinner) ជូន User ជាបណ្ដោះអាសន្ន។
-
 ---
 
-## 📊 3. Bundle Analysis ជាមួយ Rollup Visualizer
+## ⚙️ ៣. Advanced Rollup Chunking ក្នុង `vite.config.js`
 
-```bash
-npm install -D rollup-plugin-visualizer
-```
-
-### 💻 Code សម្រាប់ `vite.config.js`:
+ខាងក្រោមនេះជា Configuration ស្តង់ដារ Production សម្រាប់បំបែក Vendor Libraries ធំៗ និងបង្កើត Visualizer Report៖
 
 ```javascript
 // vite.config.js
@@ -100,16 +115,81 @@ import { visualizer } from 'rollup-plugin-visualizer';
 export default defineConfig({
   plugins: [
     react(),
+    // បង្កើត Interactive HTML Visualizer Report បន្ទាប់ពី build រួច
     visualizer({
-      open: true, // បើក Browser បង្ហាញក្រាហ្វិកទំហំកូដស្វ័យប្រវត្តិក្រោយ Build
+      open: false, // កំណត់ true បើចង់ឱ្យបើក browser ស្វ័យប្រវត្តិ
       filename: 'dist/stats.html',
       gzipSize: true,
+      brotliSize: true,
     }),
   ],
+  build: {
+    target: 'esnext',
+    minify: 'esbuild', // Minification លឿនបំផុត
+    sourcemap: false,  // បិទ sourcemap ក្នុង production ដើម្បីកាត់បន្ថយទំហំ
+    chunkSizeWarningLimit: 600, // កំណត់ Limit Warning (600 KB)
+
+    rollupOptions: {
+      output: {
+        // បំបែក Vendor Libraries ធំៗទៅជា Chunks ដាច់ដោយឡែក
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-query': ['@tanstack/react-query'],
+        },
+        // រៀបចំឈ្មោះឯកសារ Output ឱ្យមាន Hash សម្រាប់ Cache Busting
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
+      },
+    },
+  },
 });
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `visualizer({ open: true, filename: 'dist/stats.html' })`
-   - ពេលអ្នក run `npm run build` Plugin នេះនឹងបង្កើត Interactive Visual Map មួយបង្ហាញយ៉ាងច្បាស់ថា Library ណាធំជាងគេ (ឧ. Lodash, Moment.js, Lucide Icons) ដើម្បីងាយស្រួល Refactor។
+## 🌳 ៤. គន្លឹះ Tree Shaking & Import Optimizations
+
+### ❌ ចៀសវាងការ Import ទាំងមូល (Bloated Bundle):
+```javascript
+// ❌ នាំចូល Icon រាប់ពាន់ដែលមិនបានប្រើ (Bundle ឡើង 1MB+)
+import * as Icons from 'lucide-react';
+import _ from 'lodash';
+```
+
+### ✅ ប្រើប្រាស់ Named Direct Imports (Tree Shakeable):
+```javascript
+// ✅ នាំចូលតែ Icon ដែលប្រើប្រាស់ពិតប្រាកដ (ទំហំត្រឹមតែ 2KB)
+import { CheckCircle, AlertTriangle, ArrowRight } from 'lucide-react';
+import debounce from 'lodash/debounce';
+```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `const DashboardPage = lazy(() => import('./pages/DashboardPage'));`
+   - បំប្លែង Static Import ទៅជា Dynamic Import — Vite/Rollup នឹងបង្កើត File Chunk ថ្មីមួយដាច់ដោយឡែកភ្លាមៗ។
+2. `<Suspense fallback={<PageLoadingFallback />}>`
+   - ចាប់យក Promise នៃការ Download Chunk និងបង្ហាញ Fallback UI រហូតដល់កូដ JavaScript នៃទំព័រនោះបាន Download និង Parse រួចរាល់។
+3. `manualChunks: { 'vendor-react': ['react', ...] }`
+   - បង្កើត File `vendor-react-[hash].js` ដាច់ដោយឡែក។ នៅពេលអ្នកកែប្រែកូដ App Browser របស់ User មិនបាច់ Download React ម្តងទៀតឡើយ ដោយសារវាត្រូវបាន Cached រួចជាស្រេច។
+4. `entryFileNames: 'assets/js/[name]-[hash].js'`
+   - ប្រើ Content Hash (ឧ. `main-a8f9b2.js`) ដើម្បីធ្វើ **Cache Busting** — ពេលមាន Build ថ្មី Browser នឹង Download តែ Files ណាដែលមាន Hash ផ្លាស់ប្តូរប៉ុណ្ណោះ។
+
+---
+
+## 💡 ៦. Production Build Verification Checklist
+
+```bash
+# 1. ដំណើរការ Production Build
+npm run build
+
+# 2. ពិនិត្យមើល Preview លើ Localhost:4173 ដូច Production ពិតប្រាកដ
+npm run preview
+```
+
+- [x] Main JS Chunk មានទំហំតូចជាង 300 KB (Gzipped)
+- [x] គ្រប់ Lazy Routes បំបែកចេញជា Chunks ត្រឹមត្រូវក្នុង `dist/assets/js/`
+- [x] បើក `dist/stats.html` ដើម្បីពិនិត្យមើលថាតើគ្មាន Library ណាធំខុសប្រក្រតី
+- [x] ដំណើរការ `npm run preview` ហើយធ្វើតេស្តចុចគ្រប់ Routes ថាគ្មានកំហុស 404

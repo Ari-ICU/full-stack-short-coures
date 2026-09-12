@@ -1,94 +1,103 @@
 ---
-title: Deployment — Vercel, Netlify & CI/CD Basics
-description: រៀនបញ្ចេញ (Deploy) React App ទៅ Production ដោយ Vercel ឬ Netlify — Automatic Deploy from Git, Environment Variables ក្នុង Production, Custom Domains, Preview Deployments, និង CI/CD Pipeline Basics។
+title: "Enterprise Deployment — Vercel, Netlify, SPA Rewrites & CI/CD Pipelines"
+description: សិក្សាស៊ីជម្រៅពីដំណើរការបញ្ចេញ React Application ទៅកាន់ Production — ស្វែងយល់ពី CI/CD Automated Pipelines (GitHub Integration), ការដោះស្រាយបញ្ហា SPA 404 Error ពេល Refresh តាមរយៈ Server Rewrites (vercel.json / _redirects), ការកំណត់ Production Secrets, និង Security Headers ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះ Deploy React App ទៅ Vercel ជាមួយ Git Integration
-  - ចេះ Configure Production Environment Variables ក្នុង Vercel/Netlify Dashboard
-  - ចេះ Setup Preview Deployments ដើម្បី Test Pull Requests
-  - ចេះ Configure SPA Routing (History API) ក្នុង Netlify
+  - "យល់ពីដំណើរការ Automated CI/CD Pipeline ចាប់ពី Git Push រហូតដល់ Edge CDN"
+  - "យល់ច្បាស់ពីមូលហេតុនៃបញ្ហា 'SPA 404 Error on Direct URL Access' និងវិធីដោះស្រាយ"
+  - "ចេះ Deploy React App ទៅកាន់ Vercel និង Netlify ជាមួយ Custom Domain"
+  - "ចេះ Configure Security Headers (HSTS, CSP, X-Frame-Options) ក្នុង vercel.json"
+  - "ចេះ Setup Preview Deployments សម្រាប់ធ្វើ Code Review លើ Pull Requests"
 module: module-15-production
 order: 3
 quiz:
-  - question: "ហេតុអ្វី React SPA ត្រូវ Configure Special Redirect Rules ក្នុង Netlify?"
+  - question: "ហេតុអ្វីបានជា React Single Page Application (SPA) ជួបបញ្ហា 404 Not Found នៅពេលដែល User វាយ URL ចូលទៅកាន់ `/dashboard` ដោយផ្ទាល់ ឬចុច Refresh (F5) លើ Static Hosting Server?"
     options:
-      - "ដើម្បីសន្សំ Bandwidth"
-      - "React Router ប្រើ Browser History API សម្រាប់ Routes (/dashboard, /profile)។ Server ព្យាយាម Serve Files ដោយ /dashboard Path ប៉ុន្តែ File នោះ មិន Exist — ត្រូវ Redirect /dashboard → index.html ហើយ Let React Router Handle"
-      - "ព្រោះ Netlify ការពារ JavaScript"
-      - "ព្រោះ React Router API ផ្លាស់ប្ដូរ"
-    correctAnswer: 2
-    explanation: "Static hosting ចង় Serve Files ដោយ Path — /about → about.html (File must exist!)។ React SPA មាន index.html ១ ប៉ុណ្ណោះ ហើយ React Router Handle All Routes Client-side។ ដូច្នេះ /* → index.html Redirect ចំបាច់ ដើម្បី All URLs Return index.html ហើយ React Router ​ Handle Route ។"
+      - "ព្រោះ Static Web Server ព្យាយាមស្វែងរក File រូបវន្តឈ្មោះ `/dashboard.html` ឬ `/dashboard/index.html` ក្នុង Server Directory ដែល File នោះមិនមានពិតប្រាកដឡើយ — ដំណោះស្រាយគឺត្រូវកែ Server Rewrite Rule ឱ្យបញ្ជូនរាល់ Path (`/*`) ត្រឡប់ទៅកាន់ `/index.html` (Status 200) ដើម្បីឱ្យ React Router ទទួលចាត់ចែងបន្ត"
+      - "ព្រោះ JavaScript របស់ React ខូចខាត"
+      - "ព្រោះ Hosting Server មិន Support CSS"
+      - "ព្រោះ Database អស់ Memory"
+    correctAnswer: 1
+    explanation: "SPA មានឯកសារ HTML តែមួយគត់គឺ `index.html`។ Routing ទាំងអស់ធ្វើឡើងដោយ JavaScript ក្នុង Browser។ ដូច្នេះ Static Server ត្រូវតែមាន Rewrite Rule `/* -> /index.html` ដើម្បីកុំឱ្យ Server បោះកំហុស 404។"
+
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ 'Preview Deployments' ក្នុង Modern CI/CD Flow (Vercel/Netlify)?"
+    options:
+      - "រាល់ពេលដែល Developer បង្កើត Pull Request (PR) ថ្មីនៅលើ GitHub ប្រព័ន្ធនឹង Build និងបង្កើត Live Preview URL មួយដាច់ដោយឡែកដោយស្វ័យប្រវត្តិ ដែលអនុញ្ញាតឱ្យក្រុមការងារ (Designers, QA, Product Managers) អាចធ្វើតេស្ត Feature ថ្មីលើ Browser ពិតប្រាកដមុនពេល Merge ចូល Production"
+      - "វាជួយឱ្យ Server ដំណើរការបានលឿនជាងមុន"
+      - "វាជាមុខងារសម្រាប់លុបកូដចាស់ៗ"
+      - "ដើម្បីប្តូរឈ្មោះ Git Branch"
+    correctAnswer: 1
+    explanation: "Preview Deployments គឺជាបដិវត្តន៍នៃ Frontend CI/CD។ Developer អាចចែករំលែក Link ទៅកាន់ QA និង Stakeholders ដើម្បីសាកល្បងភ្លាមៗដោយមិនប៉ះពាល់ដល់ Live Production Site ឡើយ។"
+
+  - question: "តើឯកសារមួយណាដែលត្រូវប្រើសម្រាប់កំណត់ SPA Rewrite Rule លើ Vercel?"
+    options:
+      - "`vercel.json` នៅក្នុង Root Directory នៃគម្រោង"
+      - "`package.json`"
+      - "`index.html`"
+      - "`vite.config.js`"
+    correctAnswer: 1
+    explanation: "នៅលើ Vercel យើងបង្កើត file `vercel.json` រួចកំណត់ `rewrites: [{ \"source\": \"/(.*)\", \"destination\": \"/index.html\" }]`។"
 ---
 
-## 🚀 1. Deploying to Vercel (Recommended)
+## 🚀 ១. ស្ថាបត្យកម្ម Modern CI/CD Pipeline & Edge Delivery
 
-### Method 1: Vercel CLI
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Developer
+    participant Git as GitHub Repository
+    participant CI as CI/CD Runner (Vercel / Actions)
+    participant Edge as Global Edge CDN
+    actor User as អ្នកប្រើប្រាស់ទូទាំងពិភពលោក
 
-```bash
-# Install Vercel CLI
-npm install -g vercel
-
-# Deploy from project root
-vercel
-
-# Follow prompts:
-# ? Set up and deploy? Yes
-# ? Which scope? your-username
-# ? Link to existing project? No
-# ? Project name: my-react-app
-# ? Directory: ./
-# ✓ Deployed to https://my-react-app.vercel.app
+    Dev->>Git: git push origin main
+    Git->>CI: Trigger Deployment Webhook
+    CI->>CI: ដំណើរការ: 1. npm install, 2. npm test, 3. npm run build (Vite)
+    
+    alt Build ជោគជ័យ ✅
+        CI->>Edge: Deploy dist/ artifacts ទៅកាន់ Edge Servers ទូទាំងពិភពលោក
+        Edge-->>Dev: ជូនដំណឹងជោគជ័យ 🎉 Live at https://myapp.vercel.app
+        User->>Edge: ចូលទស្សនា Website
+        Edge-->>User: ឆ្លើយតប Cached Assets ពី Edge Node ដែលជិតបំផុត (Latency < 20ms) ⚡
+    else Build បរាជ័យ ❌
+        CI-->>Dev: បញ្ឈប់ Deploy & ផ្ញើ Email Alert ជូនដំណឹងពី Build Failure
+    end
 ```
-
-### Method 2: GitHub Integration (Best for CI/CD)
-
-1. Push your project to GitHub
-2. Go to [vercel.com](https://vercel.com) → **New Project**
-3. Import your GitHub repository
-4. Vercel auto-detects Vite → Click **Deploy**
-5. Every `git push main` → Auto-deploys to Production ✅
-6. Every Pull Request → Creates Preview URL ✅
-
----
-
-## ⚙️ 2. Production Environment Variables
-
-```
-Vercel Dashboard → Project → Settings → Environment Variables
-
-Add:
-VITE_API_URL = https://api.myapp.com
-VITE_APP_NAME = MyApp
-
-Select environments: ✅ Production  ✅ Preview  ✅ Development
-```
-
-```
-Netlify Dashboard → Site → Site Configuration → Environment Variables
-
-Same process — add VITE_* variables
-```
-
-> **🔴 Never** commit secrets to `.env.production` in your repo. Always set them via the hosting platform's dashboard/secrets.
 
 ---
 
-## 🌐 3. Netlify Deployment
+## 🛠️ ២. ដំណោះស្រាយបញ្ហា SPA 404 Error ពេល Refresh
 
-```bash
-# Install Netlify CLI
-npm install -g netlify-cli
+### ១. សម្រាប់ Vercel ៖ បង្កើត `vercel.json` ក្នុង Root Directory
 
-# Build and deploy
-npm run build
-netlify deploy --prod --dir=dist
+```json
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-**SPA Routing Fix** — Create `public/_redirects`:
+### ២. សម្រាប់ Netlify ៖ បង្កើត `public/_redirects`
+
 ```
-/*    /index.html    200
+/*    /index.html   200
 ```
 
-Or in `netlify.toml`:
+ឬក្នុង `netlify.toml`:
 ```toml
 [[redirects]]
   from = "/*"
@@ -96,59 +105,92 @@ Or in `netlify.toml`:
   status = 200
 ```
 
----
+### ៣. សម្រាប់ Nginx Server (Self-Hosted VPS):
 
-## 🔄 4. CI/CD Pipeline Overview
-
-```mermaid
-graph LR
-    subgraph Developer
-        D1["git push origin main"]
-    end
-
-    subgraph GitHub
-        G1["GitHub repository\nreceives push"]
-    end
-
-    subgraph Vercel["Vercel CI/CD"]
-        V1["Trigger Build"] --> V2["npm run build"]
-        V2 --> V3{Build OK?}
-        V3 -->|Yes| V4["Deploy to Production\nhttps://app.vercel.app ✅"]
-        V3 -->|No| V5["Build Failed\nEmail notification ❌"]
-    end
-
-    D1 --> G1 --> V1
-    style V4 fill:#f0fff4,stroke:#38a169,color:#000
-    style V5 fill:#fff5f5,stroke:#e53e3e,color:#000
+```nginx
+location / {
+    root /var/www/my-react-app/dist;
+    index index.html;
+    try_files $uri $uri/ /index.html;
+}
 ```
 
 ---
 
-## ✅ 5. Pre-Deploy Checklist
+## 🔒 ៣. ការគ្រប់គ្រង Security Headers ក្នុង Production
 
-```bash
-# Run BEFORE every deployment:
-npm run build         # No TypeScript/JSX errors
-npm test -- --run     # All tests pass
-npm run preview       # Check production build locally
+ការបន្ថែម Security Headers ជួយការពារ Web App របស់អ្នកពីការវាយប្រហារ Clickjacking, XSS, និង MIME Sniffing៖
 
-# Verify:
-# [ ] All VITE_* env vars set in hosting dashboard
-# [ ] API CORS allows production domain
-# [ ] No hardcoded localhost URLs in code
-# [ ] /public/_redirects or netlify.toml for SPA routing
-# [ ] Custom domain configured (optional)
+```json
+// vercel.json (Security Headers Configuration)
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    }
+  ]
+}
 ```
 
 ---
 
-## 📌 6. Deployment Comparison
+## ⚙️ ៤. ការកំណត់ Production Environment Variables ក្នុង Dashboard
 
-| Feature | Vercel | Netlify |
-|---------|--------|---------|
-| Vite Auto-detect | ✅ | ✅ |
-| Preview Deployments | ✅ | ✅ |
-| Serverless Functions | ✅ | ✅ |
-| SPA Redirect | ✅ Auto | ⚠️ Need `_redirects` |
-| Free Tier | Generous | Generous |
-| Best for | React/Next.js | Static Sites/SPA |
+```
+Vercel Dashboard
+  └── Project Settings
+        └── Environment Variables
+              ├── VITE_API_BASE_URL = https://api.eduportal.kh/v1
+              ├── VITE_APP_NAME = EduPortal Enterprise
+              └── (ជ្រើសរើស Environments: Production, Preview)
+```
+
+> [!IMPORTANT]
+> **ចងចាំជានិច្ច ៖** បន្ទាប់ពីបន្ថែម ឬកែប្រែ Environment Variable ក្នុង Vercel/Netlify Dashboard អ្នកត្រូវតែចុច **Redeploy** ដើម្បីឱ្យ Build Runner ចាប់យកតម្លៃថ្មីទៅបង្កើត Bundle ជាថ្មី។
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `"rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]`
+   - ប្រាប់ Static Server ថា រាល់ Path ទាំងអស់ដែល Browser ស្នើសុំ (ឧ. `/dashboard`, `/profile/edit`) ត្រូវឆ្លើយតបឯកសារ `/index.html` វិញជានិច្ច ជាមួយ Status `200 OK`។
+2. `"key": "Cache-Control", "value": "public, max-age=31536000, immutable"`
+   - បញ្ជាឱ្យ Browser និង CDN Cache ឯកសារ JS/CSS ក្នុង folder `assets/` ទុកបាន ១ ឆ្នាំពេញ ព្រោះឯកសារទាំងនោះមាន Content Hash ស្រាប់ (Cache Busting)។
+3. `"key": "X-Frame-Options", "value": "DENY"`
+   - ការពារមិនឱ្យ Hacker យក Website របស់អ្នកទៅដាក់ក្នុង `<iframe />` លើ Domain ផ្សេងដើម្បីបោកបញ្ឆោត User (Clickjacking Protection)។
+4. `try_files $uri $uri/ /index.html;` (Nginx)
+   - ពិនិត្យមើលថាតើ URL ជា File ពិតឬអត់ (`$uri`) បើមិនមែនជា File ឬ Folder ទេ សូមបញ្ជូនទៅ `/index.html` ភ្លាម។
+
+---
+
+## 💡 ៦. Pre-Deployment & Post-Deployment Checklist
+
+### 📋 Pre-Deployment Checklist (មុនពេល Deploy):
+- [x] ដំណើរការ `npm run build` និង `npm test` ធានាថាឆ្លងកាត់ដោយជោគជ័យ ១០០%
+- [x] ពិនិត្យមើលថាគ្មាន Hardcoded `http://localhost:5000` ក្នុងកូដ
+- [x] បង្កើត file `vercel.json` ឬ `public/_redirects` សម្រាប់ SPA routing
+- [x] Commit និង Push កូដទាំងអស់ទៅកាន់ GitHub `main` branch
+
+### 📋 Post-Deployment Verification (ក្រោយពេល Deploy ជោគជ័យ):
+- [x] បើក Live URL (https://your-app.vercel.app) ពិនិត្យមើលថាមិនចេញអេក្រង់ស (Blank Screen)
+- [x] ចុចបើកទំព័រ `/dashboard` រួចចុច Refresh (F5) ធានាថាមិនចេញ 404 Error
+- [x] បើក DevTools Network Tab ពិនិត្យមើលថា API Requests បាញ់ទៅកាន់ Production URL ត្រឹមត្រូវ
+- [x] ពិនិត្យសោរ HTTPS (SSL Certificate) លើ Address Bar របស់ Browser

@@ -1,114 +1,196 @@
 ---
-title: Environment Variables in Vite — Secrets, Config & Best Practices
-description: រៀនគ្រប់គ្រង Environment Variables ក្នុង Vite — ការប្រើ .env files, VITE_ prefix security rule, និង runtime validation ដោយបំបែកកូដ និងការពន្យល់មួយជួរៗ។
+title: "Environment Variables in Vite — Security, Config & Schema Validation"
+description: សិក្សាស៊ីជម្រៅពីការគ្រប់គ្រង Environment Variables ក្នុង Vite & React — ស្វែងយល់ពី Env Files Precedence, ច្បាប់សុវត្ថិភាព VITE_ Prefix Security, ភាពខុសគ្នារវាង Client vs Server Variables, និងការបង្កើត Runtime Schema Validation Module ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីតួនាទីនៃ .env files (Development vs Production)
-  - យល់ពីច្បាប់ `VITE_` Prefix Security ក្នុង Vite
-  - ចេះ Access Environment Variables តាម `import.meta.env`
-  - ចេះបង្កើត Environment Validation Config
+  - "យល់ពីឋានានុក្រមនៃ .env files (.env, .env.local, .env.development, .env.production)"
+  - "យល់ច្បាស់ពីយន្តការសុវត្ថិភាព `VITE_` Prefix ដើម្បីការពារកុំឱ្យបែកធ្លាយ Server Secrets"
+  - "ចេះអាន Environment Variables តាមរយៈ `import.meta.env` និង Vite Built-in Constants"
+  - "ចេះបង្កើត Safe Runtime Env Validation Module ដើម្បីទប់ស្កាត់ Silent Failures"
+  - "ដឹងពី Best Practices ក្នុងការគ្រប់គ្រង Secrets ក្នុង Git និង Hosting Dashboards"
 module: module-15-production
 order: 1
 quiz:
-  - question: "ហេតុអ្វី Vite តម្រូវឱ្យអថេរ Client-side ត្រូវតែចាប់ផ្តើមដោយពាក្យ `VITE_`?"
+  - question: "ហេតុអ្វីបានជា Vite តម្រូវឱ្យរាល់ Environment Variables ដែលចង់ប្រើក្នុង Client-Side Code ត្រូវតែមាន Prefix `VITE_` ជាដាច់ខាត?"
     options:
-      - "ដើម្បីឱ្យ Code មើលទៅស្រស់ស្អាត"
-      - "ជាវិធានការសុវត្ថិភាព (Security Guard) — ដើម្បីការពារកុំឱ្យ Server Secrets (ដូចជា Database Passwords, Private Keys) ត្រូវបាន Bundled ជ្រុលចូលទៅក្នុង Browser JavaScript file"
-      - "ដើម្បីឱ្យ CSS ដំណើរការ"
-      - "វាជាច្បាប់របស់ HTML5"
-    correctAnswer: 2
-    explanation: "អ្វីៗដែលមានក្នុង Client-side Bundle គឺ Public។ Vite នឹងបញ្ជូនតែអថេរណាដែលមាន Prefix 'VITE_' ប៉ុណ្ណោះទៅ Browser។ អថេរណាដែលគ្មាន VITE_ នឹងត្រូវរក្សាទុកជាការសម្ងាត់លើ Build Server។"
+      - "ដើម្បីជាវិធានការសុវត្ថិភាព (Security Safeguard) — ការពារកុំឱ្យអថេរសម្ងាត់របស់ Server (ដូចជា Database Passwords, Payment Secret Keys, Private API Tokens) ត្រូវបាន Bundled ជ្រុលចូលទៅក្នុង Browser JavaScript files ដែលនរណាក៏អាចមើលឃើញ"
+      - "ដើម្បីឱ្យ Code រត់បានលឿនជាងមុននៅលើ Browser ចាស់ៗ"
+      - "ដើម្បីប្តូរពណ៌ Theme របស់ Vite Dev Server"
+      - "វាជាច្បាប់កំហិតរបស់ TypeScript"
+    correctAnswer: 1
+    explanation: "កូដ Client-side ទាំងអស់ត្រូវបានទាញយកទៅកាន់ Browser របស់អ្នកប្រើប្រាស់។ Vite នឹងបញ្ជូនតែអថេរណាដែលមាន Prefix `VITE_` ប៉ុណ្ណោះទៅក្នុង Client Bundle។ អថេរណាដែលគ្មាន `VITE_` នឹងត្រូវរក្សាទុកជាការសម្ងាត់លើ Build Server។"
+
+  - question: "តើ File `.env.local` គួរត្រូវបាន Commit ចូលទៅក្នុង Git Repository (GitHub/GitLab) ដែរឬទេ?"
+    options:
+      - "ហាម Commit ដាច់ខាត (ត្រូវដាក់ក្នុង `.gitignore`) — ព្រោះ `.env.local` ផ្ទុក Credentials និង Custom Settings ផ្ទាល់ខ្លួនរបស់ Developer ម្នាក់ៗនៅលើម៉ាស៊ីនផ្ទាល់"
+      - "ត្រូវតែ Commit ជានិច្ចដើម្បីឱ្យសមាជិកក្រុមទាំងអស់ប្រើរួមគ្នា"
+      - "អាច Commit បានលុះត្រាតែមានទំហំតូចជាង 1KB"
+      - "គ្មានបញ្ហាអ្វីឡើយ"
+    correctAnswer: 1
+    explanation: "ឯកសារ `.env.local` និង `.env.production.local` ត្រូវតែបន្ថែមទៅក្នុង `.gitignore` ជានិច្ច ដើម្បីការពារការបែកធ្លាយ Passwords និង API Keys ទៅកាន់ Public Repositories។"
+
+  - question: "តើអថេរ Built-in មួយណាដែល Vite ផ្តល់ជូនដើម្បីពិនិត្យថា App កំពុងដំណើរការក្នុង Development Server ឬ Production Build?"
+    options:
+      - "`import.meta.env.DEV` (ជា `true` ក្នុង dev server និង `false` ក្នុង production build) និង `import.meta.env.PROD`"
+      - "`process.env.IS_REACT`"
+      - "`window.isProductionMode`"
+      - "`document.environment`"
+    correctAnswer: 1
+    explanation: "Vite ផ្តល់នូវ Built-in Constants ដូចជា `import.meta.env.MODE` ('development' | 'production'), `import.meta.env.DEV` (boolean), និង `import.meta.env.PROD` (boolean) ដោយស្វ័យប្រវត្តិ។"
 ---
 
-## 📁 1. Env File Hierarchy
+## 📁 ១. ឋានានុក្រមនៃ `.env` Files (Resolution Precedence)
 
-```
-.env                # Default values (រត់គ្រប់ environments)
-.env.local          # Local overrides (ផ្ទាល់ខ្លួន — កុំ commit ចូល git)
-.env.development    # ប្រើពេល run `npm run dev`
-.env.production     # ប្រើពេល run `npm run build`
+Vite ផ្ទុក Environment Variables តាមលំដាប់លំដោយអាទិភាពដូចខាងក្រោម (ខាងក្រោម Overwrite ខាងលើ)៖
+
+```mermaid
+flowchart TD
+    A[".env\n(Default Values សម្រាប់គ្រប់ Modes)"] --> B[".env.local\n(Local Overrides — មិនត្រូវ Commit ចូល Git ឡើយ)"]
+    B --> C[".env.[mode]\n(ឧ. .env.development ឬ .env.production)"]
+    C --> D[".env.[mode].local\n(អាទិភាពខ្ពស់បំផុត — Overrides អ្វីៗទាំងអស់)"]
+
+    style D fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
 ```
 
 ---
 
-## 🔒 2. Setting Up `.env` Files
+## 🔒 ២. ការរៀបចំ `.env` Files ប្រកបដោយសុវត្ថិភាព
 
-### 💻 Code សម្រាប់ `.env.development`:
+### ១. `.env.example` (Commit ចូល Git ជាគំរូសម្រាប់ក្រុមការងារ)
+
+```bash
+# .env.example - ឯកសារគំរូ (កុំដាក់ Secret ពិតប្រាកដនៅទីនេះ!)
+VITE_API_BASE_URL=https://api.example.com/v1
+VITE_APP_NAME="EduPortal Enterprise"
+VITE_ENABLE_ANALYTICS=false
+VITE_SUPPORT_EMAIL=support@example.com
+```
+
+### ២. `.env.development` (ប្រើពេល run `npm run dev`)
 
 ```bash
 # .env.development
-VITE_API_BASE_URL=http://localhost:5000/api
-VITE_APP_TITLE=EduApp (Dev Mode)
+VITE_API_BASE_URL=http://localhost:5000/api/v1
+VITE_APP_NAME="EduPortal (Dev Mode)"
 VITE_ENABLE_ANALYTICS=false
 
-# ❌ អថេរគ្មាន VITE_ នឹងមិនត្រូវបានបញ្ជូនទៅ Browser ឡើយ
-DB_PASSWORD=secret123_hidden_from_browser
+# ❌ អថេរគ្មាន VITE_ នឹងមិនត្រូវបាន Export ទៅ Browser ឡើយ (មានសុវត្ថិភាពលើ Server)
+DATABASE_PASSWORD=super_secret_db_pass_123
 ```
 
-### 💻 Code សម្រាប់ `.env.production`:
+### ៣. `.env.production` (ប្រើពេល run `npm run build`)
 
 ```bash
 # .env.production
-VITE_API_BASE_URL=https://api.eduapp.com/v1
-VITE_APP_TITLE=EduApp
+VITE_API_BASE_URL=https://api.eduportal.kh/v1
+VITE_APP_NAME="EduPortal Pro"
 VITE_ENABLE_ANALYTICS=true
 ```
 
 ---
 
-## 💻 3. Accessing Env Variables in React
+## 🛡️ ៣. ការបង្កើត Safe Runtime Env Validation Module
 
-### 💻 Code សម្រាប់អាន Env Variable:
-
-```javascript
-// src/api/client.js
-// 1. ប្រើ import.meta.env ជំនួស process.env ក្នុង Vite
-const API_URL = import.meta.env.VITE_API_BASE_URL;
-const IS_DEV = import.meta.env.DEV; // Vite Built-in Boolean (true ក្នុង dev mode)
-
-console.log('Current API Endpoint:', API_URL);
-
-export const apiClient = {
-  baseURL: API_URL,
-};
-```
-
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
-
-1. `import.meta.env.VITE_API_BASE_URL`
-   - ទាញយកតម្លៃ URL តាម Environment បច្ចុប្បន្ន។ ពេល dev វាយក `localhost:5000` ពេល build production វាយក `https://api.eduapp.com` ស្វ័យប្រវត្តិ។
-2. `import.meta.env.DEV`
-   - អថេរ Built-in របស់ Vite ផ្តល់តម្លៃ `true` ពេលកំពុង run dev server និង `false` ពេល build production។
-
----
-
-## 🛡️ 4. Safe Runtime Validation Module
-
-### 💻 Code សម្រាប់ Validation Config (`src/config/env.js`):
+ដើម្បីចៀសវាងបញ្ហា App Crash ដោយសារភ្លេចកំណត់ Environment Variables យើងបង្កើត Module ផ្ទៀងផ្ទាត់នៅពេល App ចាប់ផ្តើមដំណើរការដំបូង៖
 
 ```javascript
 // src/config/env.js
-const requiredEnvVars = ['VITE_API_BASE_URL'];
 
-// ត្រួតពិនិត្យអថេរដែលខ្វះមិនបាន
-for (const key of requiredEnvVars) {
-  if (!import.meta.env[key]) {
-    throw new Error(
-      `❌ Missing required environment variable: ${key}\n` +
-      `សូមបង្កើត file .env ឬ .env.local រួចកំណត់ ${key}=your_value`
-    );
+/**
+ * ត្រួតពិនិត្យ និង Validate Environment Variables ទាំងអស់
+ */
+function validateEnv() {
+  const requiredVariables = [
+    { key: 'VITE_API_BASE_URL', example: 'https://api.domain.com/v1' },
+    { key: 'VITE_APP_NAME', example: 'My React App' },
+  ];
+
+  const missing = [];
+
+  for (const { key, example } of requiredVariables) {
+    if (!import.meta.env[key]) {
+      missing.push(`  • ${key} (ឧទាហរណ៍: ${example})`);
+    }
+  }
+
+  if (missing.length > 0) {
+    const errorMessage =
+      `🚨 [Environment Config Error] ខ្វះអថេរចាំបាច់ដូចខាងក្រោម ៖\n` +
+      missing.join('\n') +
+      `\n\n👉 សូមបង្កើត file .env.local រួចកំណត់តម្លៃទាំងនេះមុនពេលបន្ត!`;
+
+    // បង្ហាញ Error ច្បាស់ៗលើ Console
+    console.error(errorMessage);
+    if (import.meta.env.DEV) {
+      alert(errorMessage);
+    }
+    throw new Error(errorMessage);
   }
 }
 
+// ដំណើរការ Validation ភ្លាមៗពេល Module ត្រូវបាន Load
+validateEnv();
+
+// Export Object ដែលមាន Type-safe & Fallback Values
 export const ENV = {
-  API_URL: import.meta.env.VITE_API_BASE_URL,
-  APP_TITLE: import.meta.env.VITE_APP_TITLE || 'My React App',
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+  APP_NAME: import.meta.env.VITE_APP_NAME || 'React Course App',
+  ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true',
+  SUPPORT_EMAIL: import.meta.env.VITE_SUPPORT_EMAIL || 'support@edu.kh',
+
+  // Vite Built-in Helpers
   IS_DEV: import.meta.env.DEV,
+  IS_PROD: import.meta.env.PROD,
+  MODE: import.meta.env.MODE,
 };
 ```
 
-### 🔍 ការពន្យល់មួយជួរៗ (Line-by-Line Explanation):
+---
 
-1. `for (const key of requiredEnvVars)`
-   - ពិនិត្យរកមើលថាតើ Developer បានកំណត់ environment variables គ្រប់គ្រាន់ហើយឬនៅ។
-2. `throw new Error(...)`
-   - ប្រសិនបើភ្លេចដាក់ `VITE_API_BASE_URL` កម្មវិធីនឹងបោះ Error ប្រាប់ភ្លាមៗ ជៀសវាងការ Render App មកចេញកំហុសស្ងាត់ៗ (Silent Failures)។
+## 💻 ៤. ការប្រើប្រាស់ `ENV` ក្នុង React Components & Services
+
+```jsx
+// src/components/Header.jsx
+import React from 'react';
+import { ENV } from '../config/env';
+
+export default function Header() {
+  return (
+    <header className="px-6 py-4 bg-white dark:bg-slate-900 border-b flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span className="text-xl font-black text-blue-600">{ENV.APP_NAME}</span>
+        {ENV.IS_DEV && (
+          <span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-600 text-[10px] font-black uppercase">
+            Development Mode
+          </span>
+        )}
+      </div>
+
+      <div className="text-xs text-slate-500">
+        API: <code className="font-mono">{ENV.API_BASE_URL}</code>
+      </div>
+    </header>
+  );
+}
+```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `import.meta.env.VITE_API_BASE_URL`
+   - ES Module Standard Syntax របស់ Vite សម្រាប់អានអថេរ (ជំនួសឱ្យ `process.env` ចាស់របស់ Node.js/Webpack)។
+2. `ENABLE_ANALYTICS: import.meta.env.VITE_ENABLE_ANALYTICS === 'true'`
+   - គ្រប់ Environment Variables ក្នុង `.env` គឺសុទ្ធតែជា **String**។ ដូច្នេះដើម្បីទទួលបានតម្លៃ Boolean ពិតប្រាកដ យើងត្រូវប្រៀបធៀបជាមួយ String `'true'`។
+3. `validateEnv()`
+   - ត្រួតពិនិត្យភ្លាមៗនៅ Runtime — ប្រសិនបើ Developer ភ្លេច config អថេរ វានឹង Throw Error ប្រាប់ពីដំណោះស្រាយភ្លាមៗ មិនឱ្យកើតមាន Silent Bugs។
+4. `DATABASE_PASSWORD=...` (គ្មាន Prefix `VITE_`)
+   - មិនត្រូវបាន bundle ចូលក្នុង `dist/` ឡើយ — ធានាសុវត្ថិភាព ១០០% ប្រឆាំងការលួចមើលកូដតាម Browser DevTools។
+
+---
+
+## 💡 ៦. Production Security Checklist
+
+- [x] បន្ថែម `.env.local` និង `.env.*.local` ទៅក្នុង `.gitignore` ជានិច្ច
+- [x] ហាមដាច់ខាតមិនឱ្យដាក់ Secret Keys (DB Password, Stripe Secret, AWS Private Key) ជាមួយ Prefix `VITE_`
+- [x] បង្កើត `.env.example` សម្រាប់ឱ្យ Developer ផ្សេងទៀតក្នុងក្រុមកូពីទៅប្រើ
+- [x] កំណត់ Production Environment Variables តាមរយៈ Dashboard របស់ Hosting Platform (Vercel, Netlify, Cloudflare)
