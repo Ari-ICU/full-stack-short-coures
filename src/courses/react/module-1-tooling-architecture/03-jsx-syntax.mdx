@@ -1,93 +1,219 @@
 ---
-title: JSX Syntax Rules, Expressions & Fragments
-description: សិក្សាពី JSX Syntax, ច្បាប់សំខាន់ៗ, ការបញ្ចូល JavaScript Expressions, និងការប្រើប្រាស់ Fragments។
+title: "JSX Syntax Rules, Dynamic Expressions & Fragments"
+description: សិក្សាស៊ីជម្រៅពី JSX Syntax — ស្វែងយល់ពីរបៀបដែល JSX ត្រូវបាន Transpile ទៅជា React.createElement, វិធានគ្រឹះទាំង ៣ (Single Root, Self-closing tags, camelCase), ការបង្កប់ Dynamic JavaScript Expressions, និងការប្រើប្រាស់ Fragments (<></>) ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - យល់ពីទម្រង់ JSX និងដំណើរការ Transpilation ទៅជា JavaScript
-  - ចេះអនុវត្ត 3 Core Rules របស់ JSX (`Single Root`, `Close Tags`, `camelCase`)
-  - ចេះបង្កប់ JavaScript Expressions និងការប្រើប្រាស់ `<></>` (Fragments)
+  - "យល់ច្បាស់ពីទម្រង់ JSX និងដំណើរការ Transpilation ទៅជា JavaScript ដោយ Babel/Vite"
+  - "ចេះអនុវត្ត 3 Core Rules របស់ JSX (Single Root Element, Close All Tags, camelCase Attributes)"
+  - "ចេះបង្កប់ Dynamic JavaScript Variables, Mathematical Calculations, និង Ternary Logic ក្នុង Curly Braces {}"
+  - "យល់ពីមូលហេតុ និងអត្ថប្រយោជន៍នៃការប្រើប្រាស់ React Fragments (<>...</>) ដើម្បីកាត់បន្ថយ DOM Bloat"
+  - "ស្គាល់ពីភាពខុសគ្នានៃ HTML Attributes ក្នុង JSX (class -> className, for -> htmlFor)"
 module: module-1-tooling-architecture
 order: 3
 quiz:
   - question: "តើហេតុអ្វីបានជាយើងមិនអាច return Elements ពីរទន្ទឹមគ្នាដោយគ្មាន Single Root Element ឬ Fragment ក្នុង JSX?"
     options:
-      - "ព្រោះ JavaScript Functions អាច return បានតែតម្លៃ (Value/Object) តែមួយគត់ក្នុងពេលតែមួយ"
-      - "ព្រោះ Browser មិនស្គាល់ HTML Tags ច្រើន"
-      - "ព្រោះ Vite មិនអនុញ្ញាតអោយបង្កើតប៊ូតុងច្រើន"
+      - "ព្រោះ JSX ត្រូវបាន Compile ទៅជា `React.createElement()` calls ហើយ JavaScript Function មួយអាច return បានតែមួយ Object/Value តែប៉ុណ្ណោះក្នុងពេលតែមួយ"
+      - "ព្រោះ Browser មិនស្គាល់ HTML Tags ច្រើនក្នុងពេលតែមួយ"
+      - "ព្រោះ Vite មិនអនុញ្ញាតឱ្យបង្កើតប៊ូតុងច្រើនលើទំព័រ"
       - "ព្រោះ React ដំណើរការបានតែនៅលើទំព័រតែមួយ"
     correctAnswer: 1
-    explanation: "JSX ត្រូវបាន compile ទៅជា `React.createElement()` calls។ ដោយសារ Function ក្នុង JS អាច return បានតែមួយ Value ប៉ុណ្ណោះ ដូច្នេះ JSX ត្រូវតែមាន Tag មេតែមួយគត់ ឬ Fragment `<></>` រុំព័ទ្ធជុំវិញ។"
+    explanation: "`return (<h1>...</h1><p>...</p>)` គឺស្មើនឹង `return React.createElement('h1'), React.createElement('p')` ដែលជា Invalid JS Syntax។ ដូច្នេះយើងត្រូវរុំវាដោយ Single Root `<div>` ឬ Fragment `<>...</>`។"
+
+  - question: "តើការប្រើប្រាស់ React Fragment `<>...</>` ផ្តល់អត្ថប្រយោជន៍អ្វីខ្លះបើប្រៀបធៀបនឹងការប្រើ Tag `<div>` រុំពីក្រៅ?"
+    options:
+      - "Fragment អនុញ្ញាតឱ្យយើងរុំ Elements ជាច្រើនបញ្ចូលគ្នាដោយមិនបន្ថែម Extra DOM Node ទៅក្នុង Browser HTML ឡើយ — ជួយឱ្យ CSS Flex/Grid ដំណើរការត្រឹមត្រូវ និងកាត់បន្ថយ DOM Tree Bloat"
+      - "Fragment ជួយឱ្យកូដ JavaScript ដំណើរការលឿនជាងមុន ១០ ដង"
+      - "Fragment ប្រើសម្រាប់តែផ្ទុក Buttons ប៉ុណ្ណោះ"
+      - "គ្មានអត្ថប្រយោជន៍អ្វីឡើយ គ្រាន់តែជាជម្រើស"
+    correctAnswer: 1
+    explanation: "ការប្រើ `<div>` ច្រើនជាន់ដោយមិនចាំបាច់ អាចធ្វើឱ្យខូច CSS Flexbox/Grid layouts និងបង្កើនទំហំ DOM Tree។ Fragment ជួយរុំកូដដោយគ្មាន Node បន្ថែមលើ Real DOM ឡើយ។"
+
+  - question: "តើ Attribute ណាខ្លះដែលត្រូវបានប្តូរឈ្មោះក្នុង JSX ដោយសារតែវាជា Reserved Keywords ក្នុង JavaScript?"
+    options:
+      - "`class` ប្តូរទៅជា `className` និង `for` ប្តូរទៅជា `htmlFor`"
+      - "`id` ប្តូរទៅជា `elementId`"
+      - "`src` ប្តូរទៅជា `sourcePath`"
+      - "`href` ប្តូរទៅជា `linkHref`"
+    correctAnswer: 1
+    explanation: "ក្នុង JavaScript ពាក្យ `class` (សម្រាប់បង្កើត JS Class) និង `for` (សម្រាប់ For Loop) គឺជា Reserved Words។ ហេតុនេះ JSX ត្រូវប្រើ `className` និង `htmlFor` ជំនួស។"
 ---
 
-## 🎭 1. អ្វីទៅជា JSX?
+## 🎭 ១. ដំណើរការ Transpilation នៃ JSX (Behind the Scenes)
 
-**JSX (JavaScript XML)** គឺជា Syntax Extension ដែលអនុញ្ញាតឱ្យយើងសរសេរ HTML-like syntax នៅក្នុងឯកសារ JavaScript។
+**JSX (JavaScript XML)** មិនមែនជា HTML ពិតប្រាកដឡើយ — វាគឺជា Syntax Extension ដែលបង្កើតឡើងដើម្បីឱ្យ Developer អាចសរសេរ UI Components ក្នុង JavaScript ដោយស្រួលមើល។
 
 ```mermaid
-flowchart LR
-    subgraph Step1["1. Developer Writes JSX"]
-        A["<code>&lt;button className='btn'&gt;Click&lt;/button&gt;</code>"]
+flowchart TD
+    subgraph Step1["១. កូដ JSX ដែល Developer សរសេរ"]
+        A["<code>&lt;button className='btn-primary' onClick={handleClick}&gt;<br>  ចូលគណនី<br>&lt;/button&gt;</code>"]
     end
 
-    subgraph Step2["2. Vite / Babel Compilation"]
-        B["<code>React.createElement(<br>'button',<br>{ className: 'btn' },<br>'Click'<br>)</code>"]
+    subgraph Step2["២. Vite / Babel Transpiler (ESbuild)"]
+        B["<code>React.createElement(<br>  'button',<br>  { className: 'btn-primary', onClick: handleClick },<br>  'ចូលគណនី'<br>)</code>"]
     end
 
-    subgraph Step3["3. Virtual DOM Object"]
-        C["<code>{ type: 'button', props: { className: 'btn', children: 'Click' } }</code>"]
+    subgraph Step3["៣. React Virtual DOM Element (JS Object)"]
+        C["<code>{<br>  type: 'button',<br>  props: { className: 'btn-primary', children: 'ចូលគណនី' }<br>}</code>"]
     end
 
-    subgraph Step4["4. Real DOM Output"]
-        D["<code>&lt;button class='btn'&gt;Click&lt;/button&gt;</code>"]
+    subgraph Step4["៤. Browser Real HTML DOM"]
+        D["<code>&lt;button class='btn-primary'&gt;ចូលគណនី&lt;/button&gt;</code>"]
     end
 
-    A -->|Transpile| B
-    B -->|Execute JS| C
-    C -->|Render| D
+    A -->|Transpiled by Vite| B
+    B -->|Executed in RAM| C
+    C -->|Reconciliation Patch| D
 
-    style Step1 fill:#ebf8ff,stroke:#3182ce,color:#000
-    style Step2 fill:#fffaf0,stroke:#dd6b20,color:#000
-    style Step3 fill:#faf5ff,stroke:#805ad5,color:#000
-    style Step4 fill:#f0fff4,stroke:#38a169,color:#000
+    style Step1 fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a
+    style Step2 fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    style Step3 fill:#faf5ff,stroke:#805ad5,stroke-width:2px,color:#4c1d95
+    style Step4 fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
 ```
 
 ---
 
-## 📏 2. វិធានគ្រឹះទាំង ៣ របស់ JSX (The 3 Core Rules)
+## 📏 ២. វិធានមាសទាំង ៣ របស់ JSX (The 3 Core Rules)
 
-1. **Single Root Element:** ត្រូវតែមាន Element មេតែមួយគត់ ឬប្រើ **Fragment** `<></>`៖
+### វិធានទី ១ ៖ Single Root Element (ឬប្រើ React Fragment)
+គ្រប់ Component ត្រូវតែ Return Element មេតែមួយគត់។ ប្រសិនបើមិនចង់បន្ថែម `<div>` បន្ថែមលើ DOM ទេ ចូរប្រើ **Fragment** `<>...</>`៖
+
 ```jsx
-// ✅ ត្រឹមត្រូវ (ប្រើ Fragment)
+// ❌ ខុស: Return Elements ពីរទន្ទឹមគ្នា (Syntax Error)
+return (
+  <h1>ចំណងជើង</h1>
+  <p>កថាខណ្ឌ</p>
+);
+
+// ✅ ត្រឹមត្រូវ: ប្រើ React Fragment (<>...</>)
 return (
   <>
-    <h1>សួស្តី</h1>
-    <p>ស្វាគមន៍មកកាន់ React</p>
+    <h1>ចំណងជើង</h1>
+    <p>កថាខណ្ឌ</p>
   </>
 );
 ```
 
-2. **Close All Tags:** រាល់ Tags ទាំងអស់ត្រូវតែបិទជានិច្ច (រួមទាំង Self-closing tags ដូចជា `<img />`, `<input />`, `<br />`)។
+---
 
-3. **camelCase Attributes:** ឈ្មោះ HTML Attributes ត្រូវប្តូរជា camelCase៖
-   - `class` $\rightarrow$ **`className`**
-   - `onclick` $\rightarrow$ **`onClick`**
-   - `for` $\rightarrow$ **`htmlFor`**
+### វិធានទី ២ ៖ បិទគ្រប់ Tags ទាំងអស់ (Close All Tags)
+ក្នុង HTML ធម្មតា Tag មួយចំនួនដូចជា `<img>` ឬ `<input>` មិនបាច់បិទក៏បាន ប៉ុន្តែក្នុង JSX រាល់ Tag ទាំងអស់ត្រូវតែបិទជាដាច់ខាត (Self-Closing Tags)៖
+
+```jsx
+// ❌ ខុសក្នុង JSX
+<img src="/avatar.jpg">
+<input type="text">
+<br>
+
+// ✅ ត្រឹមត្រូវក្នុង JSX
+<img src="/avatar.jpg" alt="Avatar" />
+<input type="text" placeholder="វាយឈ្មោះ..." />
+<br />
+```
 
 ---
 
-## 🧮 3. ការប្រើប្រាស់ JavaScript Expressions ក្នុង `{ }`
+### វិធានទី ៣ ៖ ប្រើប្រាស់ camelCase សម្រាប់ Attributes
+ដោយសារ JSX គឺស្ថិតក្នុងឯកសារ JavaScript Attributes ភាគច្រើនត្រូវសរសេរជា camelCase៖
 
-យើងអាចបញ្ចូល JavaScript Variables, Calculations, ឬ Function Calls ចូលក្នុង JSX ដោយប្រើប្រាស់សញ្ញា **`{ }`** (Curly Braces)៖
+| HTML ធម្មតា | JSX ក្នុង React | មូលហេតុបច្ចេកទេស |
+| :--- | :--- | :--- |
+| `class="btn"` | **`className="btn"`** | `class` ជា JS Reserved Word សម្រាប់ Object Classes |
+| `for="email"` | **`htmlFor="email"`** | `for` ជា JS Reserved Word សម្រាប់ For Loop |
+| `onclick="..."` | **`onClick={...}`** | ប្រើប្រាស់ React Synthetic Event System |
+| `tabindex="0"` | **`tabIndex={0}`** | អនុវត្តតាម camelCase convention |
+| `stroke-width` | **`strokeWidth`** | SVG Attributes ត្រូវប្តូរជា camelCase |
+
+---
+
+## 🧮 ៣. ការបង្កប់ JavaScript Expressions ក្នុង `{ }`
+
+សញ្ញា **Curly Braces `{ }`** ប្រៀបដូចជាបង្អួចវេទមន្តដែលអនុញ្ញាតឱ្យយើងដំណើរការកូដ JavaScript ណាមួយក៏បាន (Variables, Math, String Methods, Ternaries) នៅខាងក្នុង HTML UI៖
 
 ```jsx
-export default function UserGreeting() {
-  const userName = "រដ្ឋា";
-  const unreadCount = 5;
+// src/components/UserProfileCard.jsx
+import React from 'react';
+
+export default function UserProfileCard() {
+  const user = {
+    firstName: 'សុខ',
+    lastName: 'ដារ៉ា',
+    role: 'Full-Stack Developer',
+    experienceYears: 4,
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+    isProMember: true,
+  };
+
+  const currentYear = new Date().getFullYear();
 
   return (
-    <div className="card">
-      <h2>សួស្តី, {userName.toUpperCase()}! 👋</h2>
-      <p>សារមិនទាន់អាន: {unreadCount * 2} សារ</p>
+    <div className="max-w-sm mx-auto p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl text-center">
+      {/* Dynamic Image & Alt Expression */}
+      <img
+        src={user.avatarUrl}
+        alt={`${user.firstName} ${user.lastName}`}
+        className="w-20 h-20 rounded-full mx-auto mb-4 border-4 border-blue-500 shadow-md object-cover"
+      />
+
+      {/* String Concatenation Expression */}
+      <h2 className="text-xl font-black text-slate-800 dark:text-white">
+        {user.firstName} {user.lastName}
+      </h2>
+
+      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mt-0.5">
+        {user.role}
+      </p>
+
+      {/* Math Calculation Expression */}
+      <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl flex justify-around text-xs font-bold text-slate-600 dark:text-slate-300">
+        <div>
+          <p className="text-slate-400 font-medium">បទពិសោធន៍</p>
+          <p className="text-base text-slate-800 dark:text-white mt-0.5">{user.experienceYears} ឆ្នាំ</p>
+        </div>
+        <div className="border-r border-slate-200 dark:border-slate-700" />
+        <div>
+          <p className="text-slate-400 font-medium">ឆ្នាំចាប់ផ្តើម</p>
+          <p className="text-base text-slate-800 dark:text-white mt-0.5">{currentYear - user.experienceYears}</p>
+        </div>
+      </div>
+
+      {/* Ternary Condition Expression */}
+      <div className="mt-4">
+        {user.isProMember ? (
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-black rounded-full border border-amber-500/20">
+            ⭐ PRO SUBSCRIBER
+          </span>
+        ) : (
+          <span className="text-xs text-slate-400 font-medium">FREE TIER</span>
+        )}
+      </div>
     </div>
   );
 }
 ```
+
+---
+
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `alt={\`${user.firstName} ${user.lastName}\`}`
+   - ប្រើ Template Literal ខាងក្នុង `{}` ដើម្បីបូកបញ្ចូល string ឈ្មោះ និងត្រកូលចូលទៅក្នុង Attribute `alt`។
+2. `{currentYear - user.experienceYears}`
+   - គណនា phép trừ គណិតវិទ្យាដោយផ្ទាល់ក្នុង JSX (ឧ. `2026 - 4 = 2022`)។
+3. `{user.isProMember ? (...) : (...)}`
+   - ប្រើ Ternary Operator ដើម្បីបង្ហាញ Badge ផ្សេងគ្នាតាមលក្ខខណ្ឌ Boolean។ ហាមប្រើ `if-else` statement ក្នុង `{}` ព្រោះ `if-else` មិនមែនជា Expression ដែល return តម្លៃឡើយ។
+4. `<div className="border-r ..."/>`
+   - Self-closing tag ត្រឹមត្រូវតាមស្តង់ដារ JSX។
+
+---
+
+## 💡 ៥. អ្វីដែល *អាច* និង *មិនអាច* ដាក់ក្នុង `{ }`
+
+| ប្រភេទ Expression | អាចដាក់ក្នុង `{ }` បាន? | ឧទាហរណ៍ |
+| :--- | :---: | :--- |
+| **Variables & Math** | ✅ បាន | `{price * quantity}`, `{user.name}` |
+| **Function Calls** | ✅ បាន | `{formatPrice(100)}`, `{title.toUpperCase()}` |
+| **Ternary Operator** | ✅ បាន | `{isLoggedIn ? <Logout /> : <Login />}` |
+| **Logical AND (`&&`)** | ✅ បាន | `{hasUnread && <Badge count={3} />}` |
+| **`if-else` Statements** | ❌ មិនបាន | ត្រូវប្តូរទៅប្រើ Ternary `?:` ជំនួស |
+| **`for` Loops** | ❌ មិនបាន | ត្រូវប្តូរទៅប្រើ `.map()` ជំនួស |
+| **Raw Objects** | ❌ មិនបាន (Error) | `{ { name: "Sok" } }` នឹង throw React child error |

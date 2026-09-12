@@ -1,108 +1,259 @@
 ---
-title: Functional Components, Nesting & Modular Imports/Exports
-description: សិក្សាពីរបៀបបង្កើត Functional Components, ការរៀបចំ Component Nesting Hierarchy, និងការប្រើប្រាស់ ES6 Modular Imports/Exports។
+title: "Functional Components, Component Hierarchy & Modular ES6 Exports"
+description: សិក្សាស៊ីជម្រៅពី Functional Components — ស្វែងយល់ពី PascalCase Naming Convention, គោលការណ៍ Single Responsibility Principle (SRP), ឋានានុក្រម Component Tree Hierarchy, និងការប្រើប្រាស់ ES6 Default vs Named Exports ជាមួយការពន្យល់មួយជួរៗ។
 objectives:
-  - ចេះបង្កើត Functional Components ជាមួយ PascalCase
-  - យល់ដឹងពី Component Nesting និង Single Responsibility Principle (SRP)
-  - ចេះប្រើ Default Export និង Named Export ក្នុង React
+  - "យល់ពីទម្រង់ និងកាយវិភាគវិទ្យានៃ React Functional Component"
+  - "ចេះអនុវត្ត PascalCase Naming Rules សម្រាប់សម្គាល់ Component ក្នុង JSX"
+  - "យល់ពីគោលការណ៍ Single Responsibility Principle (SRP) ក្នុងការបំបែកកូដជា Components តូចៗ"
+  - "ចេះប្រើប្រាស់ និងបែងចែករវាង Default Export (`export default`) និង Named Export (`export { ... }`)"
+  - "ចេះផ្គុំ Component Tree (Nesting) បង្កើតជា Web Page ពេញលេញ"
 module: module-1-tooling-architecture
 order: 4
 quiz:
-  - question: "តើអ្វីជាភាពខុសគ្នារវាង Default Export និង Named Export ក្នុង React?"
+  - question: "ហេតុអ្វីបានជាឈ្មោះរបស់ React Component ត្រូវតែចាប់ផ្តើមដោយអក្សរធំ (PascalCase ដូចជា `UserProfile` ឬ `PrimaryButton`) ជាដាច់ខាត?"
     options:
-      - "Default Export ប្រើសម្រាប់តែ HTML tags"
-      - "ឯកសារមួយអាចមាន Default Export តែមួយគត់ (នាំចូលដោយឈ្មោះអ្វីក៏បាន) រីឯ Named Export អាចមានច្រើន និងត្រូវនាំចូលក្នុងសញ្ញា { }"
-      - "Named Export ដំណើរការតែជាមួយ CSS"
-      - "ពួកវាទាំងពីរគ្មានអ្វីខុសគ្នាឡើយ"
-    correctAnswer: 2
-    explanation: "`export default Component` អនុញ្ញាតឱ្យនាំចូលដោយ `import MyComponent from './Component'` (ឈ្មោះតាមចិត្ត) ចំណែក `export { A, B }` ត្រូវតែនាំចូលតាមឈ្មោះពិតប្រាកដ `{ A, B }`។"
+      - "ដើម្បីឱ្យ JSX Compiler អាចបែងចែកបានច្បាស់រវាង Native HTML Elements (ដូចជា `<div>`, `<button>`) និង Custom React Components — បើចាប់ផ្តើមដោយអក្សរតូច React នឹងស្មានថាជា Tag HTML ធម្មតា"
+      - "ដើម្បីឱ្យ CSS ដំណើរការបានលឿនជាងមុន"
+      - "ព្រោះ JavaScript Functions ទាំងអស់ត្រូវតែសរសេរអក្សរធំ"
+      - "វាជាច្បាប់របស់ Browser"
+    correctAnswer: 1
+    explanation: "JSX Compiler ប្រើអក្សរតូច (lowercase) សម្រាប់ HTML built-in tags (`<header>`, `<span>`)។ ប្រសិនបើអ្នកសរសេរ `<myButton />` វានឹង Render HTML tag `<mybutton>` មិនដំណើរការ React Function ឡើយ។ ដូច្នេះត្រូវតែប្រើ `<MyButton />`។"
+
+  - question: "តើអ្វីជាភាពខុសគ្នារវាង `Default Export` និង `Named Export` ក្នុង ES6 Modules?"
+    options:
+      - "ឯកសារមួយអាចមាន Default Export តែមួយគត់ (អាច Import ដោយប្រើឈ្មោះអ្វីក៏បាន) រីឯ Named Export អាចមានច្រើនក្នុងឯកសារតែមួយ ហើយត្រូវ Import តាមឈ្មោះពិតប្រាកដក្នុងសញ្ញា `{ }`"
+      - "Default Export ប្រើសម្រាប់តែ Strings រីឯ Named Export ប្រើសម្រាប់តែ Functions"
+      - "Named Export ដំណើរការតែជាមួយ CSS តែប៉ុណ្ណោះ"
+      - "ទាំងពីរនេះដូចគ្នាទាំងស្រុង"
+    correctAnswer: 1
+    explanation: "`export default App` -> `import App from './App'` (ឬ `import MyApp from './App'`)។ ចំណែក `export function Button` -> `import { Button } from './Button'` (ត្រូវតែផ្គូផ្គងឈ្មោះត្រឹមត្រូវក្នុង `{ }`)។"
+
+  - question: "តាមរយៈគោលការណ៍ Single Responsibility Principle (SRP) តើ Component មួយគួរមានទំហំ និងភារកិច្ចបែបណា?"
+    options:
+      - "Component មួយគួរទទួលខុសត្រូវលើកិច្ចការតែមួយគត់ (Do one thing well) — ជួយឱ្យកូដងាយយល់, ងាយ Test, និងអាចយកទៅ Reusable ឡើងវិញនៅកន្លែងផ្សេងៗបានយ៉ាងងាយ"
+      - "Component មួយត្រូវតែផ្ទុកកូដទាំងមូលនៃ Website (១,០០០ បន្ទាត់ឡើងទៅ)"
+      - "Component មិនត្រូវ return JSX ឡើយ"
+      - "Component ត្រូវតែមាន CSS ទាំងអស់ក្នុងខ្លួន"
+    correctAnswer: 1
+    explanation: "ការបំបែក Page ធំមួយទៅជា Components តូចៗ (Header, Hero, FeatureCard, Footer) ធ្វើឱ្យ Project មានរបៀបរៀបរយ និងងាយស្រួលថែទាំ។"
 ---
 
-## 🧩 1. អ្វីទៅជា Functional Component?
+## 🧩 ១. កាយវិភាគវិទ្យានៃ Functional Component (Component Anatomy)
 
-នៅក្នុង React, **Component** គឺជា JavaScript Function ដែលទទួល Data និង return ចេញជា JSX សម្រាប់គូរ UI នៅលើ Browser។ ឈ្មោះ Component ត្រូវតែចាប់ផ្តើមដោយ **PascalCase** (អក្សរធំនៅខាងមុខ) ជានិច្ច។
+នៅក្នុង React, **Component** គឺជា Pure JavaScript Function មួយដែលទទួល Inputs (Props) និង Return ចេញជា JSX Element សម្រាប់បង្ហាញលើអេក្រង់ ៖
 
 ```jsx
-// 1. បង្កើត Button Component
-export function PrimaryButton() {
-  return <button className="btn-primary">ចុចទីនេះ</button>;
+// 1. Function Name ត្រូវតែជា PascalCase (អក្សរធំនៅខាងមុខ)
+export function StatusBadge({ status = 'active' }) {
+  // 2. Component Logic (JavaScript code)
+  const isOnline = status === 'active';
+
+  // 3. Return JSX UI
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+      isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+    }`}>
+      <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+      {isOnline ? 'Active' : 'Offline'}
+    </span>
+  );
 }
 ```
 
 ---
 
-## 🌳 2. Component Hierarchy & Nesting
+## 🌳 ២. រចនាសម្ព័ន្ធ Component Tree Hierarchy (Component Nesting)
 
-យើងអាចយក Components តូចៗមកផ្គុំគ្នា (Nesting) បង្កើតជារចនាសម្ព័ន្ធទំព័រពេញលេញមួយ៖
+Component អាចត្រូវបានយកមកផ្គុំគ្នាតាមលំដាប់ជាន់ថ្នាក់ (Parent-Child Hierarchy) ដូចជាមែកធាង ៖
 
 ```mermaid
 flowchart TD
-    subgraph RootLevel["Root Level"]
-        App["&lt;App /&gt; (Root Container)"]
+    subgraph Root["១. Root Level"]
+        App["&lt;App /&gt; (Container មេ)"]
     end
 
-    subgraph LayoutLevel["Layout Level"]
+    subgraph Layout["២. Layout Level"]
         Nav["&lt;Navbar /&gt;"]
-        Main["&lt;MainContent /&gt;"]
+        Main["&lt;LandingContent /&gt;"]
         Foot["&lt;Footer /&gt;"]
     end
 
-    subgraph FeatureLevel["Feature & UI Level"]
-        Side["&lt;Sidebar /&gt;"]
-        Feed["&lt;FeedList /&gt;"]
-        Card1["&lt;PostCard /&gt;"]
-        Card2["&lt;PostCard /&gt;"]
-        Btn["&lt;Button /&gt;"]
+    subgraph Feature["៣. Feature Level"]
+        Hero["&lt;HeroBanner /&gt;"]
+        Grid["&lt;FeatureGrid /&gt;"]
+    end
+
+    subgraph Atoms["៤. Reusable Atom Level"]
+        Card1["&lt;FeatureCard /&gt;"]
+        Card2["&lt;FeatureCard /&gt;"]
+        Card3["&lt;FeatureCard /&gt;"]
+        Btn["&lt;PrimaryButton /&gt;"]
     end
 
     App --> Nav
     App --> Main
     App --> Foot
 
-    Main --> Side
-    Main --> Feed
-    Feed --> Card1
-    Feed --> Card2
+    Main --> Hero
+    Main --> Grid
+
+    Grid --> Card1 & Card2 & Card3
+    Hero --> Btn
     Card1 --> Btn
     Card2 --> Btn
+    Card3 --> Btn
 
-    style RootLevel fill:#ebf8ff,stroke:#3182ce,color:#000
-    style LayoutLevel fill:#fffaf0,stroke:#dd6b20,color:#000
-    style FeatureLevel fill:#f0fff4,stroke:#38a169,color:#000
-    style App fill:#3182ce,stroke:#fff,color:#fff
-    style Btn fill:#38a169,stroke:#fff,color:#fff
+    style Root fill:#eff6ff,stroke:#3b82f6,stroke-width:2px,color:#1e3a8a
+    style Layout fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#78350f
+    style Feature fill:#faf5ff,stroke:#805ad5,stroke-width:2px,color:#4c1d95
+    style Atoms fill:#f0fdf4,stroke:#22c55e,stroke-width:2px,color:#14532d
 ```
 
 ---
 
-## 📦 3. Modular Imports & Exports
+## 📦 ៣. ការបែងចែក ES6 Modules: Default vs Named Exports
 
-ដើម្បីឱ្យកូដស្អាត យើងបំបែក Component នីមួយៗដាក់ក្នុងឯកសារដាច់ដោយឡែកពីគ្នា ក្នុង folder `src/components/`៖
+| លក្ខណៈពិសេស | `Default Export` | `Named Export` |
+| :--- | :--- | :--- |
+| **ចំនួនក្នុងមួយ File** | មានបានតែ **១ គត់** (`export default ...`) | អាចមាន **ច្រើន** (`export function A()`, `export const B`) |
+| **ការ Export** | `export default function Navbar() { ... }` | `export function Button() { ... }` |
+| **ការ Import** | `import Navbar from './Navbar'` | `import { Button } from './Button'` |
+| **ការប្តូរឈ្មោះពេល Import** | អាចដាក់ឈ្មោះតាមចិត្ត (`import MyNav ...`) | ត្រូវប្រើ `as` (`import { Button as PrimaryBtn } ...`) |
+| **ការណែនាំប្រើប្រាស់** | សមស្របសម្រាប់ **Page ឬ Main Component** | សមស្របសម្រាប់ **UI Kits, Icons, Utilities** |
 
-```javascript
-// ឯកសារ: src/components/Header.jsx
-export default function Header() {
-  return <header><h1>គេហទំព័ររបស់ខ្ញុំ</h1></header>;
-}
+---
 
-// ឯកសារ: src/components/Badge.jsx (Named Export)
-export function Badge({ label }) {
-  return <span className="badge">{label}</span>;
-}
-```
+## 💻 ៤. កូដគំរូនៃប្រព័ន្ធ Component Modular Architecture
 
-នាំចូលមកប្រើក្នុង `App.jsx`៖
+### ១. `src/components/FeatureCard.jsx` (Named Export)
+
 ```jsx
-// ឯកសារ: src/App.jsx
-import Header from './components/Header';       // Default Import
-import { Badge } from './components/Badge';     // Named Import
+// src/components/FeatureCard.jsx
+import React from 'react';
 
-export default function App() {
+export function FeatureCard({ icon, title, description, isHighlighted = false }) {
   return (
-    <div>
-      <Header />
-      <Badge label="New Feature" />
+    <div className={`p-6 rounded-3xl border transition-all duration-300 hover:shadow-lg ${
+      isHighlighted
+        ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white border-blue-500 shadow-blue-500/20 shadow-md'
+        : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white border-slate-200 dark:border-slate-800'
+    }`}>
+      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4 ${
+        isHighlighted ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600'
+      }`}>
+        {icon}
+      </div>
+      <h3 className="text-lg font-black leading-tight mb-2">{title}</h3>
+      <p className={`text-xs leading-relaxed ${isHighlighted ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+        {description}
+      </p>
     </div>
   );
 }
 ```
+
+---
+
+### ២. `src/components/Navbar.jsx` (Named Export)
+
+```jsx
+// src/components/Navbar.jsx
+import React from 'react';
+
+export function Navbar() {
+  return (
+    <header className="px-6 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40">
+      <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-2 font-black text-lg text-slate-900 dark:text-white">
+          <span className="text-2xl">⚡</span>
+          <span>FastReact</span>
+        </div>
+        <nav className="flex items-center gap-4">
+          <button className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-blue-600">
+            មេរៀន
+          </button>
+          <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+            ចាប់ផ្តើមរៀន →
+          </button>
+        </nav>
+      </div>
+    </header>
+  );
+}
+```
+
+---
+
+### ៣. `src/App.jsx` (Default Export & Integration)
+
+```jsx
+// src/App.jsx
+import React from 'react';
+import { Navbar } from './components/Navbar';
+import { FeatureCard } from './components/FeatureCard';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans">
+      <Navbar />
+
+      <main className="max-w-6xl mx-auto px-6 py-12 space-y-12">
+        {/* Hero Section */}
+        <section className="text-center space-y-4 max-w-2xl mx-auto">
+          <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-black rounded-full uppercase tracking-wider">
+            ⚛️ Modular Component Architecture
+          </span>
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white leading-tight">
+            រៀនបង្កើត React Components ប្រកបដោយវិជ្ជាជីវៈ
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            បំបែកកូដធំៗទៅជា Reusable Components តូចៗដែលងាយស្រួលអាន ងាយស្រួលតេស្ត និងងាយស្រួលថែទាំ។
+          </p>
+        </section>
+
+        {/* Feature Grid Section */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <FeatureCard
+            icon="⚡"
+            title="ល្បឿនលឿនជាមួយ Vite"
+            description="បង្កើត និង Compile កូដជាមួយ Native ES Modules ផ្តល់ Hot Module Replacement (HMR) ភ្លាមៗ 0ms។"
+          />
+          <FeatureCard
+            icon="🧩"
+            title="Reusable Components"
+            description="សរសេរកូដម្តង យកទៅប្រើប្រាស់បានរាប់សិបកន្លែងដោយគ្រាន់តែបញ្ជូន Props ខុសៗគ្នា។"
+            isHighlighted={true}
+          />
+          <FeatureCard
+            icon="🛡️"
+            title="Type-Safe & Scalable"
+            description="រចនាសម្ព័ន្ធ Folder ច្បាស់លាស់ ងាយស្រួលពង្រីកសម្រាប់គម្រោង Enterprise ខ្នាតធំ។"
+          />
+        </section>
+      </main>
+    </div>
+  );
+}
+```
+
+---
+
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+1. `export function FeatureCard({ icon, title, description, isHighlighted = false })`
+   - បង្កើត Named Export Component ដែល Destructure យក Props ភ្លាមៗនៅ parameter list ព្រមទាំងកំណត់ Default Value `isHighlighted = false`។
+2. `import { Navbar } from './components/Navbar';`
+   - Named Import ពី Folder `components` ដោយប្រើ Curly Braces `{}` ដើម្បីនាំចូល Component ជាក់លាក់។
+3. `export default function App() { ... }`
+   - Default Export សម្រាប់ Root Component ដែលតំណាងឱ្យទំព័រទាំងមូល។
+4. `<FeatureCard isHighlighted={true} ... />`
+   - ប្រើប្រាស់ Component ដដែល តែផ្តល់ Stylistic Appearance ខុសគ្នាទាំងស្រុងដោយគ្រាន់តែបញ្ជូន Prop `isHighlighted`។
+
+---
+
+## 💡 ៦. Component Best Practices សម្រាប់ Developer
+
+- [x] ដាក់ឯកសារ Component មួយក្នុងមួយ File ជានិច្ច (ឧ. `Navbar.jsx`)
+- [x] ដាក់ឈ្មោះ Component និង File ជា **PascalCase** (ឧ. `FeatureCard.jsx` មិនមែន `featureCard.jsx`)
+- [x] រក្សា Component ឱ្យខ្លី និងងាយយល់ (ក្រោម ១៥០ បន្ទាត់) — បើវែងពេក ចូរពិចារណាបំបែកជា Sub-components
+- [x] ដាក់ Reusable Components ក្នុង Folder `src/components/` និង Page Views ក្នុង `src/pages/`
