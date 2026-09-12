@@ -1,145 +1,365 @@
 ---
-title: "Custom Context Providers & Hooks"
-description: សិក្សាពី Best Practices ក្នុងការរៀបចំ Scalable Custom Context Providers ជាមួយ Custom Consumer Hooks (useAuth, useCart) ឱ្យមានសុវត្ថិភាព និងងាយស្រួល Maintain។
+title: "Custom Context Providers & useReducer Integration Patterns"
+description: សិក្សាពី Best Practices ក្នុងការរៀបចំ Scalable Context Modules ដោយរួមបញ្ចូល Context API ជាមួយ useReducer — បង្កើត State & Dispatch Split Context សម្រាប់ High-Performance Architecture ក្នុង Enterprise React Apps។
 objectives:
-  - បង្កើត Dedicated Context Module ដាច់ដោយឡែកក្នុង Folder src/context/
-  - បង្កើត Custom Hooks (useAuth()) អមជាមួយ Error Safety Check ពេលភ្លេច Provider
-  - រៀបចំ Clean Architecture សម្រាប់ Global State ក្នុង Project ខ្នាតធំ
+  - រៀបចំ Clean Architecture សម្រាប់ Context ក្នុង Folder `src/context/` តាមស្តង់ដារ
+  - បង្កើត Custom Context Hooks (useAuth, useCart) រួមជាមួយ Fail-Safe Guard
+  - ចេះបញ្ចូល Context API ជាមួយ useReducer ដើម្បីគ្រប់គ្រង State បែប Redux-like ដោយមិនបាច់ Install Library
+  - ចេះបំបែក State Context និង Dispatch Context (Split Pattern) ដើម្បីទប់ស្កាត់ Unnecessary Re-renders
+  - បង្កើត Root Provider Combiner ដើម្បីលុបបំបាត់បញ្ហា "Provider Hell"
 module: module-7-global-state
 order: 4
 quiz:
   - question: "ហេតុអ្វីបានជាយើងគួរបង្កើត Custom Hook `useAuth()` ជំនួសឱ្យការហៅ `useContext(AuthContext)` ផ្ទាល់ក្នុងគ្រប់ Component?"
     options:
-      - "ដើម្បីឱ្យកូដខ្លី និងអាច throw Error ច្បាស់លាស់ ប្រសិនបើនរណាម្នាក់ភ្លេច wrap Component ដោយ `<AuthProvider>`"
-      - "ដើម្បីឱ្យ Context ដំណើរការជាមួយ CSS"
-      - "ដើម្បីលុបបំបាត់ JavaScript"
-      - "ដើម្បី run លើ mobile"
+      - "ដើម្បីធ្វើ Encapsulation លើ Context Import និងអាច throw Error ច្បាស់លាស់ភ្លាមៗ ប្រសិនបើនរណាម្នាក់ភ្លេច wrap Component ដោយ `<AuthProvider>`"
+      - "ដើម្បីឱ្យ Context ដំណើរការជាមួយ Tailwind CSS"
+      - "ដើម្បីលុបបំបាត់ការប្រើប្រាស់ Functions ក្នុង JavaScript"
+      - "ដើម្បីឱ្យ React អាចទាញយកទិន្នន័យពី Database ដោយស្វ័យប្រវត្តិ"
     correctAnswer: 1
-    explanation: "Custom Context Hook (ដូចជា `useAuth()`) ជួយ Encapsulate context import និងផ្តល់ Developer-friendly error message ភ្លាមៗ ប្រសិនបើ component ត្រូវហៅនៅក្រៅ Provider boundary។"
+    explanation: "Custom Context Hook (ដូចជា `useAuth()`) ជួយឱ្យ Child Component គ្រាន់តែ import មួយបន្ទាត់ (`import { useAuth } from '...'`) និងផ្តល់ Developer-friendly error message ភ្លាមៗ ប្រសិនបើ component ត្រូវហៅនៅក្រៅ Provider boundary។"
+
+  - question: "តើ 'Split Context Pattern' (បំបែកជា AuthStateContext និង AuthDispatchContext) ជួយដោះស្រាយបញ្ហាអ្វី?"
+    options:
+      - "ការពារកុំឱ្យ Components ដែលត្រូវការត្រឹមតែ `dispatch` (ដូចជា Logout Button) ត្រូវ Re-render នៅពេលដែល State ផ្លាស់ប្តូរ"
+      - "ជួយឱ្យ Code Build លឿនជាងមុន"
+      - "ជួយឱ្យ Form Submit ដោយមិនបាច់ចុចប៊ូតុង"
+      - "កាត់បន្ថយទំហំ File JSX"
+    correctAnswer: 1
+    explanation: "នៅពេលដែល State ផ្លាស់ប្តូរ មានតែ Components ដែលអាន `AuthStateContext` ប៉ុណ្ណោះដែលត្រូវ Re-render ចំណែក Components ដែលអាន `AuthDispatchContext` នឹងមិន Re-render ឡើយ ព្រោះ reference របស់ `dispatch` មិនដែលផ្លាស់ប្តូរទេ។"
+
+  - question: "តើបញ្ហា 'Provider Hell' (ការដាក់ Providers រុំព័ទ្ធជាន់គ្នា ១០ ជាន់ក្នុង App.jsx) អាចដោះស្រាយដោយរបៀបណា?"
+    options:
+      - "បង្កើត Provider Combiner / Composition Component ដែលប្រមូលផ្តុំ Providers ទាំងអស់បញ្ចូលគ្នានៅកន្លែងតែមួយ"
+      - "លុប Providers ទាំងអស់ចោល ហើយប្រើ Global Variables"
+      - "ប្តូរពី React ទៅជា Static HTML វិញ"
+      - "ដាក់ Context ទាំងអស់ចូលក្នុង 1 State តែមួយ"
+    correctAnswer: 1
+    explanation: "ការបង្កើត Component ដូចជា `<AppProviders>` ឬការប្រើ Array Reduce Pattern ជួយចងក្រង Providers ជាច្រើនជាន់ឱ្យនៅសល់តែ Wrapper តែមួយគត់យ៉ាងស្រស់ស្អាត។"
 ---
 
-## 🏛️ ១. ស្ថាបត្យកម្ម Custom Provider Module (Clean Pattern)
+## 🏛️ ១. ស្ថាបត្យកម្ម Dedicated Context Module (Clean Architecture)
 
-ជំនួសឱ្យការសរសេរកូដ Context ច្របូកច្របល់ក្នុង `App.jsx` យើងបំបែកវាជា **Dedicated Context Module** មួយក្នុង `src/context/AuthContext.jsx`៖
+ជំនួសឱ្យការសរសេរកូដ Context ច្របូកច្របល់នៅខាងក្នុង `App.jsx` យើងរៀបចំវាជា **Dedicated Context Module** មួយក្នុង Folder `src/context/` ៖
+
+```
+src/
+├── context/
+│   ├── AuthContext.jsx      # 🔐 User Session & Authentication
+│   ├── ThemeContext.jsx     # 🎨 Theme Mode (Light / Dark)
+│   ├── CartContext.jsx      # 🛒 E-Commerce Cart + useReducer
+│   └── AppProviders.jsx     # 🧩 Provider Combiner
+```
 
 ```mermaid
 flowchart TD
     subgraph ContextModule["Dedicated Context Module (src/context/AuthContext.jsx)"]
         direction TB
-        Ctx["1. createContext() (បង្កើត Context ខាងក្នុង)"]
-        Prov["2. <AuthProvider> (Export Provider Component)"]
-        Hook["3. useAuth() (Export Custom Consumer Hook)"]
-        Ctx --- Prov --- Hook
+        Ctx["1. Private Context Instances<br/>(AuthStateCtx & AuthDispatchCtx)"]
+        Reducer["2. Auth Reducer Function<br/>(LOGIN_START, LOGIN_SUCCESS, LOGOUT)"]
+        Prov["3. <AuthProvider> Component<br/>(ផ្គត់ផ្គង់ State & Dispatch)"]
+        Hooks["4. Export Custom Hooks<br/>(useAuth, useAuthDispatch)"]
+        Ctx --- Reducer --- Prov --- Hooks
     end
 
-    subgraph CleanApp["ការហៅប្រើប្រាស់ក្នុង App"]
+    subgraph CleanConsumers["ការហៅប្រើប្រាស់ក្នុង Components"]
         direction TB
         AppWrap["<AuthProvider><App /></AuthProvider>"]
-        NavComp["const { user, login, logout } = useAuth();"]
+        NavComp["const { user, isAuthenticated } = useAuth();"]
+        BtnComp["const dispatch = useAuthDispatch();"]
     end
 
-    ContextModule --> CleanApp
+    ContextModule --> CleanConsumers
 
     style ContextModule fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
-    style CleanApp fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style CleanConsumers fill:#f0fff4,stroke:#38a169,stroke-width:2px
 ```
 
 ---
 
-## 🛠️ ២. ហេតុអ្វីគួរបង្កើត Custom Hook ដូចជា `useAuth()`?
+## ⚡ ២. The Split Context Pattern (បំបែក State និង Dispatch សម្រាប់ High-Performance)
 
-សាកស្រមៃមើលកូដ ២ នេះ៖
-
-### ❌ របៀបធម្មតា (ត្រូវ Import ២ ដងគ្រប់កន្លែង):
-```jsx
-// ក្នុង Navbar.jsx
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext'; // ⚠️ ត្រូវ import Context Object
-
-function Navbar() {
-  const auth = useContext(AuthContext); // បើភ្លេច wrap Provider វានឹង return undefined ដោយស្ងាត់ៗ!
-}
-```
-
-### ✅ របៀប Custom Hook (ស្អាត និងមានសុវត្ថិភាព):
-```jsx
-// ក្នុង Navbar.jsx
-import { useAuth } from '../context/AuthContext'; // ✨ Import តែមួយគត់!
-
-function Navbar() {
-  const { user, logout } = useAuth(); // មាន Safety Check ស្វ័យប្រវត្តិ!
-}
-```
+> [!TIP]
+> **ហេតុអ្វីបានជាត្រូវបំបែក State និង Dispatch?**  
+> នៅក្នុង React `dispatch` function ពី `useReducer` ត្រូវបានធានាថាមាន **Stable Identity** (មិនដែលផ្លាស់ប្តូរ reference ឡើយរវាង render)។  
+> ប្រសិនបើយើងបំបែក Context ជាពីរ៖
+> 1. `AuthStateContext` ➔ សម្រាប់ Components ដែលត្រូវការបង្ហាញទិន្នន័យ (User Profile, Avatar)
+> 2. `AuthDispatchContext` ➔ សម្រាប់ Components ដែលត្រូវការតែ Action (Logout Button, Login Form)
+> 
+> នៅពេល User Login ឬ Logout សមាសភាគដែលមានតែប៊ូតុង **នឹងមិនត្រូវ Re-render ឡើងវិញជាដាច់ខាត!**
 
 ---
 
-## 💻 ៣. កូដគំរូពេញលេញ ៖ `AuthContext.jsx`
+## 💻 ៣. កូដគំរូកម្រិត Enterprise ៖ `AuthContext.jsx` ពេញលេញ
 
 ```jsx
-// ឯកសារ: src/context/AuthContext.jsx
-import { createContext, useContext, useState } from 'react';
+// src/context/AuthContext.jsx
+import { createContext, useContext, useReducer, useEffect } from 'react';
 
-// ១. បង្កើត Context (រក្សាទុកជា Private ក្នុង file នេះ)
-const AuthContext = createContext(null);
+// ── ១. បង្កើត PRIVATE CONTEXT OBJECTS ──
+const AuthStateContext = createContext(null);
+const AuthDispatchContext = createContext(null);
 
-// ២. បង្កើត Provider Component
+// ── ២. INITIAL STATE ──
+const initialAuthState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  isLoading: true, // សម្រាប់ពិនិត្យមើល Token ដំបូង
+  error: null,
+};
+
+// ── ៣. AUTH REDUCER ──
+function authReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return { ...state, isLoading: true, error: null };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticated: true,
+        user: action.payload.user,
+        token: action.payload.token,
+        error: null,
+      };
+
+    case 'LOGIN_FAILURE':
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        error: action.payload,
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticated: false,
+        user: null,
+        token: null,
+        error: null,
+      };
+
+    case 'RESTORE_SESSION':
+      return {
+        ...state,
+        isLoading: false,
+        isAuthenticated: !!action.payload.user,
+        user: action.payload.user,
+        token: action.payload.token,
+      };
+
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+}
+
+// ── ៤. PROVIDER COMPONENT ──
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('auth_user', JSON.stringify(userData));
-  };
+  // 🔄 ពិនិត្យមើល LocalStorage ពេល App ចាប់ផ្តើមដំណើរការដំបូង
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('auth_user');
+      const savedToken = localStorage.getItem('auth_token');
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
-  };
+      if (savedUser && savedToken) {
+        dispatch({
+          type: 'RESTORE_SESSION',
+          payload: { user: JSON.parse(savedUser), token: savedToken },
+        });
+      } else {
+        dispatch({ type: 'RESTORE_SESSION', payload: { user: null, token: null } });
+      }
+    } catch {
+      dispatch({ type: 'RESTORE_SESSION', payload: { user: null, token: null } });
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthStateContext.Provider value={state}>
+      <AuthDispatchContext.Provider value={dispatch}>
+        {children}
+      </AuthDispatchContext.Provider>
+    </AuthStateContext.Provider>
   );
 }
 
-// ៣. Custom Hook អមដោយ Safety Check (Developer Experience)
+// ── ៥. CUSTOM HOOKS WITH FAIL-SAFE GUARDS ──
+
+// Hook សម្រាប់អាន State (User, Auth status, Loading)
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthStateContext);
   if (!context) {
     throw new Error('useAuth() ត្រូវតែប្រើប្រាស់នៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
   }
   return context;
 }
+
+// Hook សម្រាប់ទាញយក Dispatch Function (Login, Logout actions)
+export function useAuthDispatch() {
+  const context = useContext(AuthDispatchContext);
+  if (!context) {
+    throw new Error('useAuthDispatch() ត្រូវតែប្រើប្រាស់នៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
+  }
+  return context;
+}
+
+// Helper Functions សម្រាប់ Login / Logout ដោយស្វ័យប្រវត្តិ
+export function useAuthActions() {
+  const dispatch = useAuthDispatch();
+
+  const login = async (email, password) => {
+    dispatch({ type: 'LOGIN_START' });
+    try {
+      // ក្លែងធ្វើ API Request
+      if (email === 'admin@gmail.com' && password === '123456') {
+        const dummyUser = { id: 1, name: 'Sok Dara', email, role: 'Admin' };
+        const dummyToken = 'jwt-token-sample-xyz';
+
+        localStorage.setItem('auth_user', JSON.stringify(dummyUser));
+        localStorage.setItem('auth_token', dummyToken);
+
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: { user: dummyUser, token: dummyToken },
+        });
+      } else {
+        throw new Error('Email ឬ Password មិនត្រឹមត្រូវឡើយ!');
+      }
+    } catch (err) {
+      dispatch({ type: 'LOGIN_FAILURE', payload: err.message });
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_user');
+    localStorage.removeItem('auth_token');
+    dispatch({ type: 'LOGOUT' });
+  };
+
+  return { login, logout };
+}
 ```
 
 ---
 
-## 🚀 ៤. របៀបហៅប្រើប្រាស់ក្នុង App
+## 🚀 ៤. ការប្រើប្រាស់ក្នុង Application UI
 
 ```jsx
-import { AuthProvider, useAuth } from './context/AuthContext';
+// src/App.jsx
+import { useState } from 'react';
+import { AuthProvider, useAuth, useAuthActions } from './context/AuthContext';
 
-function UserProfile() {
-  const { user, logout } = useAuth();
+function Navbar() {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const { logout } = useAuthActions();
 
-  if (!user) return <p className="text-xs text-slate-400">សូម Login ដើម្បីបន្ត</p>;
+  if (isLoading) {
+    return <header className="p-4 text-xs text-slate-400">កំពុងផ្ទុក Session...</header>;
+  }
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="font-bold text-sm">សួស្តី, {user.name}</span>
-      <button onClick={logout} className="px-3 py-1 bg-rose-600 text-white rounded-lg text-xs font-bold">
-        Logout
+    <header className="p-4 border-b flex justify-between items-center bg-white dark:bg-slate-900">
+      <div className="font-bold text-sm text-slate-800 dark:text-white">
+        🛡️ Enterprise Auth Portal
+      </div>
+
+      {isAuthenticated ? (
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            សួស្តី, {user.name} ({user.role})
+          </span>
+          <button
+            onClick={logout}
+            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow"
+          >
+            ចាកចេញ (Logout)
+          </button>
+        </div>
+      ) : (
+        <span className="text-xs text-slate-400">មិនទាន់ Login ទេ</span>
+      )}
+    </header>
+  );
+}
+
+function LoginForm() {
+  const { isAuthenticated, error, isLoading } = useAuth();
+  const { login } = useAuthActions();
+  const [email, setEmail] = useState('admin@gmail.com');
+  const [password, setPassword] = useState('123456');
+
+  if (isAuthenticated) {
+    return (
+      <div className="p-6 text-center text-emerald-600 font-bold text-sm">
+        🎉 អ្នកបាន Login រួចរាល់ហើយ!
+      </div>
+    );
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    login(email, password);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-sm mx-auto">
+      <h3 className="font-bold text-base text-slate-800 dark:text-white">ចូលប្រើប្រាស់គណនី</h3>
+      
+      {error && (
+        <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-medium">
+          ⚠️ {error}
+        </div>
+      )}
+
+      <div>
+        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+          Email (ប្រើ: admin@gmail.com)
+        </label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-3 py-2 border rounded-xl text-xs dark:bg-slate-800 dark:text-white"
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
+          Password (ប្រើ: 123456)
+        </label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-3 py-2 border rounded-xl text-xs dark:bg-slate-800 dark:text-white"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow"
+      >
+        {isLoading ? 'កំពុងផ្ទៀងផ្ទាត់...' : 'Login ចូលគណនី'}
       </button>
-    </div>
+    </form>
   );
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <div className="p-6 max-w-sm mx-auto bg-white dark:bg-slate-800 rounded-2xl shadow border">
-        <UserProfile />
+      <div className="min-h-[420px] max-w-md mx-auto my-8 bg-white dark:bg-slate-900 rounded-3xl border shadow-xl overflow-hidden">
+        <Navbar />
+        <LoginForm />
       </div>
     </AuthProvider>
   );
@@ -148,10 +368,57 @@ export default function App() {
 
 ---
 
-## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+## 🧩 ៥. ដំណោះស្រាយ "Provider Hell" ជាមួយ AppProviders Combiner
 
-| លក្ខណៈពិសេស | អត្ថប្រយោជន៍ចម្បង |
-| :--- | :--- |
-| **Encapsulation** | `createContext` នៅខាងក្នុង `AuthContext.jsx` មិនបាច់ export ផ្តេសផ្តាស |
-| **Safety Guard** | `if (!context) throw new Error(...)` ប្រាប់ developer ភ្លាមបើភ្លេច wrap Provider |
-| **Clean Imports** | Component ផ្សេងៗគ្រាន់តែ import `useAuth` មួយបន្ទាត់ជាការស្រេច |
+នៅពេលកម្មវិធីរបស់អ្នកមានច្រើន Providers (Auth, Theme, Cart, Toast, QueryClient...) ការរុំជាន់គ្នាក្នុង `App.jsx` នឹងមើលទៅមិនស្អាត (Pyramid of Doom)៖
+
+```jsx
+// ❌ Provider Hell
+<AuthProvider>
+  <ThemeProvider>
+    <CartProvider>
+      <ToastProvider>
+        <App />
+      </ToastProvider>
+    </CartProvider>
+  </ThemeProvider>
+</AuthProvider>
+```
+
+### ✅ ដំណោះស្រាយស្អាត ៖ `AppProviders.jsx`
+
+```jsx
+// src/context/AppProviders.jsx
+import { AuthProvider } from './AuthContext';
+import { ThemeProvider } from './ThemeContext';
+import { CartProvider } from './CartContext';
+import { ToastProvider } from './ToastContext';
+
+export function AppProviders({ children }) {
+  return (
+    <AuthProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </CartProvider>
+      </ThemeProvider>
+    </AuthProvider>
+  );
+}
+
+// ក្នុង main.jsx ឬ App.jsx គ្រាន់តែរុំមួយជាន់ប៉ុណ្ណោះ!
+// <AppProviders><App /></AppProviders>
+```
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ
+
+| មុខងារ | បច្ចេកទេសអនុវត្ត | អត្ថប្រយោជន៍ចម្បង |
+| :--- | :--- | :--- |
+| **Context Encapsulation** | រក្សាទុក Context ជា Private ក្នុង module | ការពារការ Import ច្របូកច្របល់ពីខាងក្រៅ |
+| **Safety Guard** | `if (!context) throw new Error(...)` | ជួយដាស់តឿន Developer ភ្លាមៗបើភ្លេច Provider |
+| **Split Pattern** | បំបែក `StateContext` និង `DispatchContext` | ទប់ស្កាត់ Unnecessary Re-render លើ Consumer Components |
+| **Provider Combiner** | បង្កើត `<AppProviders>` Component | លុបបំបាត់ Provider Hell ធ្វើឱ្យ Codebase មានរបៀបរៀបរយ |

@@ -1,49 +1,60 @@
 ---
-title: "useReducer Hook & Complex State"
-description: សិក្សាពី The Reducer Pattern, Hook useReducer, dispatch(action), និងការគ្រប់គ្រង Complex State ក្នុង React ឱ្យមានរបៀបរៀបរយ។
+title: "useReducer Hook — Managing Complex State & Action Dispatches"
+description: សិក្សាស៊ីជម្រៅពី The Reducer Pattern, useReducer Hook, Pure Reducer Functions, Action Dispatching, និងការគ្រប់គ្រង Complex State ក្នុង React ឱ្យមានរបៀបរៀបរយ និង Predictable។
 objectives:
-  - យល់ពី Reducer Pattern តាមរយៈគំរូ (state, action) => newState
-  - ស្គាល់រចនាសម្ព័ន្ធ Action Object ({ type, payload })
-  - ចេះប្រើ useReducer ជំនួស useState ច្រើនដងសម្រាប់ State ស្មុគស្មាញ
-  - ដឹងពីពេលវេលាដែលគួរជ្រើសរើស useState ធៀបនឹង useReducer
+  - យល់ច្បាស់ពី Reducer Mental Model តាមរយៈរូបមន្ត `(state, action) => newState`
+  - ស្គាល់គោលការណ៍ Immutability និង Pure Function Rules ក្នុង Reducer
+  - ចេះរៀបចំ Flux Standard Action Structure (`{ type, payload }`)
+  - ចេះសរសេរ `useReducer` សម្រាប់ Complex State (Add, Remove, Update Quantity, Apply Discount)
+  - ស្គាល់បច្ចេកទេស Lazy Initialization ជាមួយ `init` function ក្នុង useReducer
+  - យល់ច្បាស់ពីពេលវេលាដែលគួរជ្រើសរើសរវាង `useState` និង `useReducer`
 module: module-7-global-state
 order: 3
 quiz:
-  - question: "តើអ្វីទៅជា Pure Reducer Function?"
+  - question: "តើអ្វីទៅជា Pure Reducer Function នៅក្នុង React?"
     options:
-      - "ជា Function ដែលធ្វើ API call ដោយផ្ទាល់"
-      - "ជា Pure JavaScript Function ដែលទទួលយក State បច្ចុប្បន្ន និង Action រួច return ចេញនូវ New State ដោយមិនកែប្រែ (mutate) state ចាស់ និងគ្មាន side-effects"
-      - "ជា Function សម្រាប់ render JSX"
-      - "ជា Database query"
-    correctAnswer: 2
-    explanation: "Reducer គឺជា Pure Function ដែលត្រូវតែ Predictable: រាល់ពេលបញ្ជូន State និង Action ដដែល វានឹង return នូវ New State ដូចគ្នាជានិច្ច ដោយមិនកែប្រែ state ចាស់ផ្ទាល់ឡើយ (Immutable)។"
-
-  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ `useReducer` ធៀបនឹង `useState`?"
-    options:
-      - "ប្រមូលផ្តុំ Logic នៃការកែប្រែ State ទាំងអស់មកទុកនៅកន្លែងតែមួយ (Single Reducer) ដែលធ្វើឱ្យកូដងាយស្រួល Test និង Debug ពេល State មានភាពស្មុគស្មាញ"
-      - "ធ្វើឱ្យ Browser ប្រើប្រាស់ Memory តិចជាង"
-      - "ព្រោះ useReducer មិនត្រូវការ JSX"
-      - "ដើម្បីលុប JavaScript ចោល"
+      - "ជា Pure JavaScript Function ដែលទទួលយក State បច្ចុប្បន្ន និង Action រួច return ចេញនូវ New State ដោយមិនកែប្រែ (mutate) state ចាស់ និងគ្មាន Side-effects (ដូចជា API call ឬ Timer)"
+      - "ជា Function ដែលធ្វើ Async/Await API calls ទៅកាន់ Server ដោយផ្ទាល់"
+      - "ជា Function ពិសេសសម្រាប់ Render JSX ទៅលើ DOM"
+      - "ជា Database Query សម្រាប់ Update PostgreSQL table"
     correctAnswer: 1
-    explanation: "`useReducer` បំបែក 'តើត្រូវធ្វើអ្វី (Action)' ចេញពី 'របៀបធ្វើបច្ចុប្បន្នភាព State (Reducer)' ដែលធ្វើឱ្យ State Logic ស្អាត និងងាយស្រួលថែទាំ។"
+    explanation: "Reducer គឺជា Pure Function ដែលត្រូវតែ Predictable: រាល់ពេលបញ្ជូន State និង Action ដដែល វានឹង return នូវ New State ដូចគ្នាជានិច្ច ដោយមិនកែប្រែ state ចាស់ផ្ទាល់ឡើយ (Immutable) ហើយមិនត្រូវមាន side-effects ដូចជា `fetch()`, `Math.random()`, ឬ `Date.now()` នៅខាងក្នុង reducer ឡើយ។"
+
+  - question: "តើអ្វីជាអត្ថប្រយោជន៍ចម្បងនៃ `useReducer` ធៀបនឹង `useState` នៅពេល State មានភាពស្មុគស្មាញ?"
+    options:
+      - "បំបែក 'អ្វីដែលបានកើតឡើង (Action)' ចេញពី 'របៀបធ្វើបច្ចុប្បន្នភាព State (Reducer Logic)' និងប្រមូលផ្តុំ State Transitions ទាំងអស់នៅកន្លែងតែមួយ ដែលធ្វើឱ្យកូដងាយស្រួល Test និង Debug"
+      - "ធ្វើឱ្យកម្មវិធីដំណើរការលឿនជាងមុន ១០០ ដងដោយស្វ័យប្រវត្តិ"
+      - "ជួយលុបបំបាត់ការប្រើប្រាស់ JavaScript ក្នុង React"
+      - "អនុញ្ញាតឱ្យ State រក្សាទុកក្នុង Database ដោយមិនបាច់ប្រើ Backend"
+    correctAnswer: 1
+    explanation: "`useReducer` ជួយប្រមូលផ្តុំ Business Logic នៃការផ្លាស់ប្តូរ State ទាំងអស់ចូលក្នុង Reducer Function តែមួយនៅក្រៅ Component ដែលធ្វើឱ្យ Component UI មានទំហំខ្លី ងាយស្រួលអាន និងអាចសរសេរ Unit Test លើ Reducer បានយ៉ាងងាយ។"
+
+  - question: "តើការកែប្រែ State របៀបណាដែលជាកំហុសធ្ងន់ធ្ងរ (Anti-pattern) នៅក្នុង Reducer Function?"
+    options:
+      - "ការកែប្រែ State ដោយផ្ទាល់ ដូចជា `state.items.push(action.payload)` ឬ `state.total = 100`"
+      - "ការ return Object ថ្មី `{ ...state, items: [...state.items, action.payload] }`"
+      - "ការប្រើ `switch(action.type)`"
+      - "ការកំណត់ default case ដែល return `state` ចាស់"
+    correctAnswer: 1
+    explanation: "React State ត្រូវតែ Immutable។ ការធ្វើ Direct Mutation ដូចជា `state.push()` នឹងមិនបង្កើត Object Reference ថ្មីទេ ដែលធ្វើឱ្យ React មិនដឹងថា State បានផ្លាស់ប្តូរ ហើយបដិសេធមិនព្រម Re-render UI!"
 ---
 
 ## ⚙️ ១. គោលការណ៍នៃ Reducer Pattern (Mental Model)
 
-ដើម្បីយល់ពី `useReducer` សូមស្រមៃមើល **«តុកុងទ័រធនាគារ»** 🏦៖
-1. **អ្នក (User / Component):** ដើរទៅកុងទ័រហើយប្រាប់បុគ្គលិកថា៖ *«ខ្ញុំចង់ដកប្រាក់ $50»* (`dispatch({ type: 'WITHDRAW', payload: 50 })`)។
-2. **បុគ្គលិកធនាគារ (Reducer Function):** ពិនិត្យច្បាប់ និងគណនាតុល្យភាពថ្មី (`(state, action) => newState`)។
-3. **តុល្យភាពកុងថ្មី (New State):** គណនីរបស់អ្នកត្រូវបានកាត់ប្រាក់ ស្របតាមច្បាប់ធនាគារ។
+ដើម្បីយល់ពី `useReducer` សូមស្រមៃមើល **«តុបញ្ជរធនាគារ»** 🏦៖
+1. **អ្នក (User / UI Component):** ដើរទៅកាន់តុបញ្ជរហើយប្រាប់បុគ្គលិកថា៖ *«ខ្ញុំចង់ដកប្រាក់ $50»* (`dispatch({ type: 'WITHDRAW', payload: 50 })`)។ អ្នកមិនមានសិទ្ធិដើរចូលទៅបើកទូដែកដកលុយដោយខ្លួនឯងទេ!
+2. **បុគ្គលិកធនាគារ (Reducer Function):** ពិនិត្យមើលច្បាប់ធនាគារ ពិនិត្យសមតុល្យក្នុងគណនីរបស់អ្នក រួចកាត់ប្រាក់តាមរូបមន្តច្បាស់លាស់ (`(state, action) => newState`)។
+3. **សមតុល្យគណនីថ្មី (New State):** គណនីរបស់អ្នកត្រូវបានកត់ត្រាតម្លៃថ្មី ហើយធនាគារចេញបង្កាន់ដៃជូនអ្នក (UI Re-render)។
 
 ```mermaid
 flowchart TD
-    subgraph ReducerLoop["The Reducer Pattern Loop"]
+    subgraph ReducerLoop["The Reducer Pattern State Loop"]
         direction TB
-        UI["1. User Action<br/>(ចុច 'Add to Cart')"] --> Dispatch["2. dispatch({ type: 'ADD_ITEM', payload })"]
-        Dispatch --> Reducer["3. Pure Reducer Function<br/>(state, action) => newState"]
-        Reducer --> NewState["4. គណនា New State (Immutable Copy)"]
-        NewState --> Store["5. Central State ត្រូវបាន Update"]
-        Store --> ReRender["6. Components Re-render បង្ហាញទិន្នន័យថ្មី 🚀"]
+        UI["1. User Interaction 👆<br/>(ចុចប៊ូតុង 'Add to Cart')"] --> Dispatch["2. dispatch({ type: 'ADD_ITEM', payload: product }) 📨"]
+        Dispatch --> Reducer["3. Pure Reducer Function ⚙️<br/>(state, action) => newState"]
+        Reducer --> NewState["4. គណនា New State (Immutable Copy) 📦"]
+        NewState --> Store["5. Central State ត្រូវបានធ្វើបច្ចុប្បន្នភាព"]
+        Store --> ReRender["6. Components Re-render បង្ហាញ UI ថ្មី 🚀"]
     end
 
     style ReducerLoop fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
@@ -58,104 +69,259 @@ flowchart TD
 ## 🧩 ២. ធាតុផ្សំទាំង ៤ នៃ `useReducer`
 
 ```jsx
-const [state, dispatch] = useReducer(reducer, initialState);
+const [state, dispatch] = useReducer(reducer, initialState, init);
 ```
 
 | ធាតុផ្សំ | តួនាទីជាក់ស្តែង | ឧទាហរណ៍ |
 | :--- | :--- | :--- |
-| **`state`** | ទិន្នន័យបច្ចុប្បន្ន | `{ items: [], total: 0 }` |
-| **`dispatch`** | Function សម្រាប់បញ្ជូន Action ទៅ Reducer | `dispatch({ type: 'ADD', payload: item })` |
-| **`action`** | Object ដែលពិពណ៌នាពីអ្វីដែលបានកើតឡើង | `{ type: 'REMOVE_ITEM', payload: id }` |
-| **`reducer`** | Pure Function គណនា New State | `(state, action) => newState` |
+| **`state`** | ទិន្នន័យបច្ចុប្បន្នដែលផ្ទុកក្នុង Component | `{ items: [], discount: 0, total: 0 }` |
+| **`dispatch`** | Function សម្រាប់បញ្ជូន Action ទៅកាន់ Reducer | `dispatch({ type: 'ADD_ITEM', payload: item })` |
+| **`reducer`** | Pure Function សម្រាប់គណនា State ថ្មី | `function cartReducer(state, action) { ... }` |
+| **`action`** | Object ដែលពិពណ៌នាពីអ្វីដែលបានកើតឡើង | `{ type: 'REMOVE_ITEM', payload: { id: 101 } }` |
+| **`init` (Optional)** | Function សម្រាប់ Lazy Initialize State ដំបូង | `(initialArgs) => ({ ...initialArgs })` |
 
 ---
 
-## 💻 ៣. កូដជាក់ស្តែង ៖ Shopping Cart ជាមួយ `useReducer`
+## 📜 ៣. ច្បាប់មាស ៣ យ៉ាងនៃ Reducer Function
+
+> [!IMPORTANT]
+> **ច្បាប់មាសទាំង ៣ (Golden Rules):**
+> 1. **Immutable State:** ហាមកែប្រែ (`mutate`) `state` parameter ដើមជាដាច់ខាត។ ត្រូវបង្កើត Object/Array ថ្មីតាមរយៈ Spread Operator (`...`) ឬ Immutable methods (`.filter()`, `.map()`)។
+> 2. **Deterministic (Predictable):** បញ្ជូន State ដដែល និង Action ដដែល ត្រូវតែទទួលបាន New State ដូចគ្នាជានិច្ច។
+> 3. **No Side-Effects:** ហាមសរសេរ API calls (`fetch`), ហាមហៅ `setTimeout`, និងហាមប្រើ Non-deterministic functions ដូចជា `Math.random()` ឬ `Date.now()` នៅខាងក្នុង Reducer។
+
+---
+
+## 💻 ៤. ការអនុវត្តជាក់ស្តែង ៖ Shopping Cart & Order Manager
+
+ខាងក្រោមនេះជាកូដជាក់ស្តែងនៃការគ្រប់គ្រង Cart ដែលមានមុខងារ៖ បន្ថែមទំនិញ, កែសម្រួលចំនួន (Quantity), លុបទំនិញ, ដាក់លេខកូដបញ្ចុះតម្លៃ (Discount), និងគណនាតម្លៃសរុបស្វ័យប្រវត្ត៖
 
 ```jsx
+// src/components/AdvancedCartApp.jsx
 import { useReducer } from 'react';
 
-// ១. INITIAL STATE
-const initialState = { items: [], totalAmount: 0 };
+// ── ១. INITIAL STATE ──
+const initialCartState = {
+  items: [
+    { id: 1, name: 'Mechanical Keyboard RGB', price: 85, quantity: 1 },
+    { id: 2, name: 'Wireless Gaming Mouse', price: 45, quantity: 2 },
+  ],
+  discountCode: '',
+  discountPercent: 0, // ឧ. 10 = 10%
+};
 
-// ២. REDUCER FUNCTION (Pure Function នៅក្រៅ Component)
+// ── ២. PURE REDUCER FUNCTION ──
 function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const updatedItems = [...state.items, action.payload];
+      const existingIndex = state.items.findIndex(
+        (item) => item.id === action.payload.id
+      );
+
+      // ប្រសិនបើមានក្នុង Cart រួចហើយ បង្កើនចំនួន quantity + 1
+      if (existingIndex > -1) {
+        const updatedItems = state.items.map((item, index) =>
+          index === existingIndex
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+        return { ...state, items: updatedItems };
+      }
+
+      // ប្រសិនបើតំណាងឱ្យ item ថ្មី បន្ថែមចូលក្នុង items array
       return {
-        items: updatedItems,
-        totalAmount: state.totalAmount + action.payload.price,
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
       };
     }
+
+    case 'UPDATE_QUANTITY': {
+      const { id, quantity } = action.payload;
+
+      // បើ quantity ធ្លាក់ដល់ 0 ត្រូវលុប item នោះចេញ
+      if (quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter((item) => item.id !== id),
+        };
+      }
+
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.id === id ? { ...item, quantity } : item
+        ),
+      };
+    }
+
     case 'REMOVE_ITEM': {
-      const updatedItems = state.items.filter((i) => i.id !== action.payload.id);
       return {
-        items: updatedItems,
-        totalAmount: state.totalAmount - action.payload.price,
+        ...state,
+        items: state.items.filter((item) => item.id !== action.payload.id),
       };
     }
+
+    case 'APPLY_COUPON': {
+      const code = action.payload.trim().toUpperCase();
+      if (code === 'DISCOUNT10') {
+        return { ...state, discountCode: code, discountPercent: 10 };
+      }
+      if (code === 'VIP20') {
+        return { ...state, discountCode: code, discountPercent: 20 };
+      }
+      return { ...state, discountCode: code, discountPercent: 0 };
+    }
+
     case 'CLEAR_CART':
-      return initialState;
+      return { ...state, items: [], discountCode: '', discountPercent: 0 };
+
     default:
       return state;
   }
 }
 
-// ៣. COMPONENT
-export default function CartApp() {
-  const [cart, dispatch] = useReducer(cartReducer, initialState);
+// ── ៣. COMPONENT UI ──
+export default function AdvancedCartApp() {
+  const [cart, dispatch] = useReducer(cartReducer, initialCartState);
+
+  // 🧮 គណនាតម្លៃចេញពី State (Derived State)
+  const subtotal = cart.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const discountAmount = (subtotal * cart.discountPercent) / 100;
+  const grandTotal = Math.max(0, subtotal - discountAmount);
 
   return (
-    <div className="p-6 max-w-md mx-auto border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-3xl shadow-xl space-y-4">
-      <div className="flex justify-between items-center pb-3 border-b">
-        <h2 className="text-lg font-bold text-slate-800 dark:text-white">កន្ត្រកទំនិញ</h2>
-        <span className="text-sm font-black text-blue-600 dark:text-blue-400">
-          សរុប៖ ${cart.totalAmount}
-        </span>
-      </div>
-
-      <div className="flex gap-2">
-        <button
-          onClick={() =>
-            dispatch({
-              type: 'ADD_ITEM',
-              payload: { id: Date.now(), name: 'Mouse Wireless', price: 25 },
-            })
-          }
-          className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition shadow"
-        >
-          + ថែម Mouse ($25)
-        </button>
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-5">
+      <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 className="text-base font-bold text-slate-800 dark:text-white">
+            🛒 កន្ត្រកទំនិញ
+          </h2>
+          <span className="text-xs text-slate-500">
+            {cart.items.length} មុខទំនិញ
+          </span>
+        </div>
 
         <button
           onClick={() => dispatch({ type: 'CLEAR_CART' })}
-          className="px-3 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-xs transition"
+          className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition"
         >
           សំអាតកន្ត្រក
         </button>
       </div>
 
-      <ul className="divide-y divide-slate-100 dark:divide-slate-700 max-h-48 overflow-y-auto">
+      {/* ITEM LIST */}
+      <ul className="divide-y divide-slate-100 dark:divide-slate-800 max-h-56 overflow-y-auto pr-1">
         {cart.items.length === 0 ? (
-          <li className="py-4 text-center text-xs text-slate-400">កន្ត្រកនៅទទេស្អាត</li>
+          <li className="py-8 text-center text-xs text-slate-400">
+            កន្ត្រកទំនិញនៅទទេស្អាត!
+          </li>
         ) : (
           cart.items.map((item) => (
-            <li key={item.id} className="py-2.5 flex justify-between items-center text-xs">
-              <span className="font-medium text-slate-700 dark:text-slate-200">{item.name}</span>
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-slate-900 dark:text-white">${item.price}</span>
+            <li
+              key={item.id}
+              className="py-3 flex justify-between items-center text-xs"
+            >
+              <div>
+                <p className="font-bold text-slate-800 dark:text-slate-200">
+                  {item.name}
+                </p>
+                <p className="text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
+                  ${item.price} × {item.quantity} = ${item.price * item.quantity}
+                </p>
+              </div>
+
+              {/* QUANTITY CONTROLS */}
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: item })}
-                  className="text-rose-500 hover:text-rose-600 font-bold"
+                  onClick={() =>
+                    dispatch({
+                      type: 'UPDATE_QUANTITY',
+                      payload: { id: item.id, quantity: item.quantity - 1 },
+                    })
+                  }
+                  className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 flex items-center justify-center transition"
                 >
-                  លុប
+                  -
+                </button>
+                <span className="w-4 text-center font-bold">{item.quantity}</span>
+                <button
+                  onClick={() =>
+                    dispatch({
+                      type: 'UPDATE_QUANTITY',
+                      payload: { id: item.id, quantity: item.quantity + 1 },
+                    })
+                  }
+                  className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 flex items-center justify-center transition"
+                >
+                  +
+                </button>
+                <button
+                  onClick={() =>
+                    dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })
+                  }
+                  className="text-rose-500 hover:text-rose-700 ml-2 font-bold"
+                >
+                  ✕
                 </button>
               </div>
             </li>
           ))
         )}
       </ul>
+
+      {/* QUICK ADD BUTTON */}
+      <button
+        onClick={() =>
+          dispatch({
+            type: 'ADD_ITEM',
+            payload: { id: 3, name: 'USB-C Fast Charger 65W', price: 30 },
+          })
+        }
+        className="w-full py-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold hover:bg-indigo-100 transition"
+      >
+        + ថែម Fast Charger ($30)
+      </button>
+
+      {/* COUPON SECTION */}
+      <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        <div className="flex gap-2">
+          <button
+            onClick={() =>
+              dispatch({ type: 'APPLY_COUPON', payload: 'DISCOUNT10' })
+            }
+            className="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-semibold"
+          >
+            ប្រើកូដ: DISCOUNT10 (-10%)
+          </button>
+          <button
+            onClick={() => dispatch({ type: 'APPLY_COUPON', payload: 'VIP20' })}
+            className="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-semibold"
+          >
+            ប្រើកូដ: VIP20 (-20%)
+          </button>
+        </div>
+      </div>
+
+      {/* SUMMARY */}
+      <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl space-y-1.5 text-xs">
+        <div className="flex justify-between text-slate-600 dark:text-slate-400">
+          <span>តម្លៃដើម (Subtotal):</span>
+          <span>${subtotal.toFixed(2)}</span>
+        </div>
+        {cart.discountPercent > 0 && (
+          <div className="flex justify-between text-emerald-600 font-semibold">
+            <span>បញ្ចុះតម្លៃ ({cart.discountPercent}%):</span>
+            <span>-${discountAmount.toFixed(2)}</span>
+          </div>
+        )}
+        <div className="flex justify-between font-black text-sm text-slate-800 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-700">
+          <span>សរុបត្រូវទូទាត់:</span>
+          <span>${grandTotal.toFixed(2)}</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -163,10 +329,31 @@ export default function CartApp() {
 
 ---
 
-## ⚖️ ៤. ពេលណាគួរប្រើ `useState` vs `useReducer`?
+## 🔍 ៥. ការវិភាគចំណុចគន្លឹះនៃ Reducer Logic
 
-| លក្ខណៈវិនិច្ឆ័យ | ប្រើ `useState` | ប្រើ `useReducer` |
+1. **ការចៀសវាង Array Mutation ពេល Update Quantity:**  
+   យើងប្រើ `state.items.map(...)` ដើម្បីបង្កើត Object Item ថ្មីសម្រាប់តែ item ដែលត្រូវ update `{ ...item, quantity }` និងរក្សាទុក items ផ្សេងទៀតដដែល។
+2. **ការគ្រប់គ្រង Quantity ធ្លាក់ដល់ 0:**  
+   ប្រសិនបើ User ចុចដករហូតដល់ `quantity <= 0` Reducer នឹងដំណើរការ `.filter()` ដោយស្វ័យប្រវត្តិដើម្បីដក item នោះចេញពីបញ្ជី។
+3. **Derived State (តម្លៃគណនាបន្ត):**  
+   យើងមិនរក្សាទុក `subtotal` ឬ `grandTotal` ក្នុង state ផ្ទាល់ឡើយ ព្រោះវាអាចគណនាបានដោយផ្ទាល់ចេញពី `cart.items` និង `cart.discountPercent` (ចៀសវាងបញ្ហា Out-of-sync State)។
+
+---
+
+## ⚖️ ៦. តារាងប្រៀបធៀប ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
+
+| លក្ខណៈវិនិច្ឆ័យ | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
 | :--- | :--- | :--- |
-| **ប្រភេទ State** | Primitives (string, number, boolean) | Objects, Arrays ឬ State ដែលមានច្រើន fields |
-| **State Transitions** | ១ ទៅ ២ សកម្មភាពសាមញ្ញ (Toggle, Increment) | ច្រើនសកម្មភាព (Add, Remove, Edit, Clear) |
-| **Business Logic** | Logic សាមញ្ញក្នុង Event Handler | Logic ស្មុគស្មាញដែលត្រូវផ្តុំគ្នាក្នុង Reducer |
+| **ទម្រង់ State** | Primitive values (String, Number, Boolean) | Objects, Arrays, ឬ Nested Data Structures |
+| **ភាពស្មុគស្មាញនៃ Logic** | ១ ទៅ ២ សកម្មភាពសាមញ្ញ (Toggle, Increment) | ច្រើន Actions ដែលមានច្បាប់ Business Logic ស្មុគស្មាញ |
+| **ទំនាក់ទំនងរវាង State** | State fields ដំណើរការឯករាជ្យពីគ្នា | ការផ្លាស់ប្តូរ field មួយជះឥទ្ធិពលលើ field ផ្សេងទៀត |
+| **ការធ្វើ Unit Test** | ពិបាក Test logic ដោយគ្មាន UI component | ងាយស្រួល Test ព្រោះ Reducer ជា Pure Function ដាច់ដោយឡែក |
+| **Refactoring & Debugging** | Event Handlers រាយប៉ាយពេញ JSX | Logic ទាំងអស់ប្រមូលផ្តុំនៅកន្លែងតែមួយក្នុង Reducer |
+
+---
+
+## 📋 ៧. សង្ខេបចំណុចសំខាន់ៗ (Key Takeaways)
+
+- `useReducer` គឺជាជម្រើសដ៏ល្អបំផុតសម្រាប់ State ដែលមានភាពស្មុគស្មាញ និងមាន State Transitions ច្រើន។
+- Reducer Function ត្រូវតែជា **Pure Function** ជានិច្ច (គ្មាន side-effects និងគោរព Immutability ១០០%)។
+- `dispatch(action)` ផ្តល់ភាពងាយស្រួលក្នុងការបញ្ជូនសារពី UI ទៅកាន់ Reducer ដោយមិនចាំបាច់ដឹងពីរបៀបគណនា State ខាងក្នុងឡើយ។

@@ -1,44 +1,54 @@
 ---
-title: Prop Drilling Problem & Mental Model
-description: សិក្សាពីបញ្ហា Prop Drilling ក្នុង React Component Trees ខ្នាតធំ — ហេតុអ្វីបានជាការបញ្ជូន Props កាត់ Components ច្រើនជាន់បង្កជាបញ្ហា និងរបៀបដោះស្រាយដោយប្រើ Context API។
+title: "Understanding Prop Drilling & State Management Trade-offs"
+description: សិក្សាពីបញ្ហា Prop Drilling ក្នុង React Component Trees ខ្នាតធំ — មូលហេតុដែលការបញ្ជូន Props កាត់ Intermediate Components បង្កផលវិបាក ដំណោះស្រាយដោយ Component Composition និងការប្រើប្រាស់ Context API។
 objectives:
-  - យល់ពីនិយមន័យនៃ Prop Drilling តាមរយៈឧទាហរណ៍ជាក់ស្តែង (ការបញ្ជូន Props កាត់ Intermediate Components)
-  - ដឹងពីផលប៉ះពាល់នៃការ Maintain កូដពេល Component Tree មានជម្រៅជ្រៅ
-  - ស្គាល់ភាពខុសគ្នារវាង Component Composition និង Context API
-  - យល់ពីពេលណាដែលត្រូវជ្រើសរើសប្រើ Global State
+  - យល់ច្បាស់ពីនិយមន័យ និងបញ្ហានៃ Prop Drilling តាមរយៈ Component Tree ច្រើនជាន់
+  - ស្គាល់ពីផលប៉ះពាល់លើ Code Maintainability, Refactoring, និង Re-render Performance
+  - ចេះប្រើ Component Composition (Children / Slots Pattern) ជាដំណោះស្រាយបឋមមុនឈានដល់ Global State
+  - យល់ពីពេលវេលាសមស្របដែលត្រូវជ្រើសរើសរវាង Props, Component Composition, និង Context API
 module: module-7-global-state
 order: 1
 quiz:
-  - question: "តើ 'Prop Drilling' សំដៅទៅលើអ្វីក្នុង React?"
+  - question: "តើអ្វីទៅជា 'Prop Drilling' នៅក្នុង React?"
     options:
-      - "ការបញ្ជូន Props ពី Parent ឆ្លងកាត់ Components ជាច្រើននៅកណ្តាលដែលមិនត្រូវការប្រើប្រាស់ Props ទាំងនោះ ដោយគ្រាន់តែធ្វើជាស្ពានចម្លងទៅឱ្យ Child ខាងក្នុងបំផុត"
-      - "ការ Download Props ពី Database"
-      - "ការបង្កើត CSS Animation លើ Props"
-      - "ជា Tool មួយក្នុង React DevTools"
+      - "ការបញ្ជូន Props ពី Parent Component កាត់តាម Components កណ្តាលជាច្រើនជាន់ដែលមិនត្រូវការប្រើប្រាស់ Props ទាំងនោះ ដោយគ្រាន់តែធ្វើជាស្ពានចម្លងទៅឱ្យ Child ខាងក្នុងបំផុត"
+      - "ការទាញយក Props ដោយស្វ័យប្រវត្តិចេញពី Database ឬ Backend API"
+      - "បច្ចេកទេសបង្កើត CSS Animation លើ HTML Elements"
+      - "មុខងារពិសេសមួយនៅក្នុង React Developer Tools សម្រាប់ Export កូដ"
     correctAnswer: 1
-    explanation: "Prop Drilling កើតឡើងនៅពេល Component នៅកណ្តាល (ដូចជា Layout, Sidebar, List) ត្រូវទទួល និងបញ្ជូន Props បន្តទៅមុខទៀត ទោះបីខ្លួនវាមិនត្រូវការទិន្នន័យនោះសោះក៏ដោយ។"
+    explanation: "Prop Drilling កើតឡើងនៅពេល Component នៅកណ្តាល (ដូចជា Layout, Sidebar, CardContainer) ត្រូវទទួល និងបញ្ជូន Props បន្តទៅមុខទៀត ទោះបីខ្លួនវាមិនត្រូវការទិន្នន័យនោះសោះក៏ដោយ។"
 
-  - question: "តើអ្វីជាផលវិបាកធំបំផុតនៃ Prop Drilling ក្នុង Project ធំៗ?"
+  - question: "តើអ្វីជាផលវិបាកចម្បងនៃ Prop Drilling ក្នុងកម្មវិធីដែលមានទំហំធំ (Large-scale Apps)?"
     options:
-      - "ធ្វើឱ្យកូដពិបាកកែសម្រួល (Refactoring Nightmare) — បើប្តូរឈ្មោះ Prop មួយ ត្រូវតាមកែប្រែគ្រប់ Component នៅកណ្តាលទាំងអស់"
-      - "ធ្វើឱ្យ Browser បិទកុំព្យូទ័រ"
-      - "ធ្វើឱ្យបាត់បង់ file HTML"
-      - "គ្មានបញ្ហាអ្វីទាល់តែសោះ"
+      - "ធ្វើឱ្យកូដពិបាកកែសម្រួល (Refactoring Nightmare) — ប្រសិនបើប្តូរឈ្មោះ ឬរចនាសម្ព័ន្ធ Prop មួយ ត្រូវតាមកែប្រែគ្រប់ Intermediate Components ទាំងអស់"
+      - "ធ្វើឱ្យ Browser គាំង ឬបិទ Tab ដោយស្វ័យប្រវត្តិ"
+      - "បណ្តាលឱ្យបាត់បង់ឯកសារ HTML និង CSS ពេល Build Production"
+      - "មិនមានផលប៉ះពាល់អ្វីទាំងអស់ដល់ដំណើរការនៃការសរសេរកូដ"
     correctAnswer: 1
-    explanation: "នៅពេល Component Tree ជ្រៅខ្លាំង ការផ្លាស់ប្តូរ Props ទាមទារឱ្យយើងកែប្រែកូដនៅក្នុង files ច្រើនជាន់ដែលមិនពាក់ព័ន្ធ ងាយនឹងបង្ក Bugs និងពិបាកថែទាំ។"
+    explanation: "នៅពេល Component Tree មានជម្រៅជ្រៅ ការផ្លាស់ប្តូរ Props ទាមទារឱ្យយើងកែប្រែកូដនៅក្នុង files ច្រើនជាន់ដែលមិនពាក់ព័ន្ធ ធ្វើឱ្យ Components បាត់បង់ Reusability ងាយនឹងបង្ក Bugs និងពិបាកថែទាំ។"
+
+  - question: "មុននឹងសម្រេចចិត្តប្រើ Global State (Context API) តើបច្ចេកទេសអ្វីក្នុង React ដែលអាចដោះស្រាយបញ្ហា Prop Drilling កម្រិតស្រាលបាន?"
+    options:
+      - "Component Composition (ការប្រើប្រាស់ `children` prop ឬ JSX Slots)"
+      - "ការលុប Components កណ្តាលទាំងអស់ចោល"
+      - "ការប្រើ `eval()` ក្នុង JavaScript"
+      - "ការបង្កើត LocalStorage រាល់ពេលផ្លាស់ប្តូរ State"
+    correctAnswer: 1
+    explanation: "Component Composition (ការបញ្ជូន JSX តាមរយៈ `children` prop) អនុញ្ញាតឱ្យ Top Component បញ្ជូនទិន្នន័យផ្ទាល់ទៅកាន់ Target Component ដោយ Intermediate Components មិនបាច់ដឹងពី Props ទាំងនោះឡើយ។"
 ---
 
-## 🕳️ ១. Prop Drilling ជាអ្វី? (បញ្ហា Component ច្រើនជាន់)
+## 🕳️ ១. Prop Drilling ជាអ្វី? (The Intermediate Component Problem)
 
-ស្រមៃមើលស្ថានភាពមួយ៖ អ្នកចង់ផ្ញើកញ្ចប់ឥវ៉ាន់មួយទៅកាន់មិត្តភក្តិនៅជាន់ទី ៤ នៃអគារមួយ។  
-ប៉ុន្តែអ្នកមិនអាចដើរឡើងទៅជាន់ទី ៤ ដោយផ្ទាល់បានទេ — អ្នកត្រូវហុចឥវ៉ាន់ទៅឱ្យអ្នកជាន់ទី ១ ➔ អ្នកជាន់ទី ១ ហុចបន្តទៅអ្នកជាន់ទី ២ ➔ អ្នកជាន់ទី ២ ហុចទៅអ្នកជាន់ទី ៣ ➔ ទើបដល់ដៃមិត្តភក្តិរបស់អ្នក!
+នៅក្នុង React ទិន្នន័យតែងតែធ្វើដំណើរក្នុងទិសដៅតែមួយពីលើចុះក្រោម ហៅថា **Unidirectional Data Flow** (Top-down)។ នៅពេលដែល App របស់អ្នករីកធំឡើង Component Tree នឹងកាន់តែមានជម្រៅជ្រៅ។
+
+ស្រមៃមើលស្ថានភាពជាក់ស្តែង៖ អ្នកមានទិន្នន័យ `currentUser` នៅលើកំពូលគេ (`App`) ហើយអ្នកចង់បង្ហាញរូប Profile នៅលើ `UserAvatar` ដែលស្ថិតនៅជាន់ទី ៤ ខាងក្នុងគេបង្អស់។
 
 ```mermaid
 graph TD
-    App["App (មានទិន្នន័យ User)"] --> Layout["Layout (មិនត្រូវការ User ទេ ⚠️)"]
-    Layout --> Sidebar["Sidebar (មិនត្រូវការ User ទេ ⚠️)"]
-    Sidebar --> NavItem["NavItem (មិនត្រូវការ User ទេ ⚠️)"]
-    NavItem --> UserAvatar["UserAvatar (ត្រូវការទិន្នន័យ User! 🎯)"]
+    App["App (មាន State: currentUser) 🏠"] --> Layout["Layout (មិនត្រូវការ user ទេ ⚠️)"]
+    Layout --> Sidebar["Sidebar (មិនត្រូវការ user ទេ ⚠️)"]
+    Sidebar --> NavItem["NavItem (មិនត្រូវការ user ទេ ⚠️)"]
+    NavItem --> UserAvatar["UserAvatar (ត្រូវការទិន្នន័យ currentUser! 🎯)"]
 
     style App fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
     style Layout fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
@@ -49,7 +59,7 @@ graph TD
 
 > [!IMPORTANT]
 > **និយមន័យ Prop Drilling ៖**  
-> គឺជាដំណើរការនៃការបញ្ជូន `props` ពី Component មេខាងលើ ឆ្លងកាត់ Components កូនៗជាច្រើននៅកណ្តាល ដែល **មិនត្រូវការប្រើប្រាស់ Props ទាំងនោះសោះ** ដោយគ្រាន់តែធ្វើជាស្ពានចម្លងទៅឱ្យ Component ខាងក្រោមបង្អស់!
+> គឺជាដំណើរការនៃការបញ្ជូន `props` ពី Parent Component ខាងលើ ឆ្លងកាត់ Components កូនៗជាច្រើននៅកណ្តាល (Intermediate Components) ដែល **មិនត្រូវការប្រើប្រាស់ Props ទាំងនោះសោះ** ដោយគ្រាន់តែធ្វើជាស្ពានចម្លងបន្តទៅឱ្យ Component ខាងក្រោមបង្អស់!
 
 ---
 
@@ -62,77 +72,187 @@ ContextAPI
 ```
 
 > [!TIP]
-> **សាកល្បងពិសោធន៍:**
+> **ការពិសោធន៍ជាក់ស្តែង:**
 > 1. ចុចជ្រើសរើស **"Props"** រួចចុច **"Pass Data"** ➔ សង្កេតមើលទិន្នន័យត្រូវធ្វើដំណើរម្តងមួយកម្រិតឆ្លងកាត់ Layout, Sidebar, និង NavItem យ៉ាងយឺត។
 > 2. ចុចជ្រើសរើស **"Context"** រួចចុច **"Pass Data"** ➔ ទិន្នន័យធ្វើដំណើរដូច **Teleportation** ផ្ទាល់ពី Top Provider ទៅដល់ UserAvatar ភ្លាមៗតែម្តង!
 
 ---
 
-## 💻 ៣. ឧទាហរណ៍កូដ Prop Drilling និងផលប៉ះពាល់
+## 💻 ៣. ឧទាហរណ៍កូដ Prop Drilling និងផលប៉ះពាល់ជាក់ស្តែង
 
-### ❌ កូដដែលមានបញ្ហា Prop Drilling:
+### ❌ កូដដែលមានបញ្ហា Prop Drilling (៤ ជាន់):
 
 ```jsx
-// 1. App.jsx (Top Component)
-function App() {
-  const [user] = useState({ name: 'Sok Dara', avatar: '/dara.jpg' });
+// 1. App.jsx (Top Component — កន្លែងបង្កើត State)
+import { useState } from 'react';
 
-  // ⚠️ ត្រូវបាញ់ user ទៅ Layout
-  return <Layout user={user} />;
+export default function App() {
+  const [user, setUser] = useState({
+    name: 'Sok Dara',
+    role: 'Frontend Developer',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
+  });
+
+  // ⚠️ ត្រូវបាញ់ user និង onLogout ទៅកាន់ Layout
+  return <AppLayout user={user} onLogout={() => setUser(null)} />;
 }
 
-// 2. Layout.jsx (កណ្តាល — មិនប្រើ user ទេ តែត្រូវទទួលបន្ត)
-function Layout({ user }) {
+// 2. AppLayout.jsx (Intermediate Component ១)
+function AppLayout({ user, onLogout }) {
+  // ⚠️ Layout ខ្លួនឯងមិនត្រូវការ user ទេ ប៉ុន្តែត្រូវទទួលបន្តដើម្បីហុចទៅ Sidebar
   return (
-    <div className="layout">
-      <Sidebar user={user} />
+    <div className="flex h-screen bg-slate-100">
+      <Sidebar user={user} onLogout={onLogout} />
+      <main className="flex-1 p-6">Main Content Area</main>
     </div>
   );
 }
 
-// 3. Sidebar.jsx (កណ្តាល — មិនប្រើ user ទេ តែត្រូវទទួលបន្ត)
-function Sidebar({ user }) {
+// 3. Sidebar.jsx (Intermediate Component ២)
+function Sidebar({ user, onLogout }) {
+  // ⚠️ Sidebar ក៏មិនត្រូវការ user ដែរ តែត្រូវហុចទៅ NavProfile
   return (
-    <aside>
-      <UserAvatar user={user} />
+    <aside className="w-64 bg-white border-r p-4 flex flex-col justify-between">
+      <nav>Sidebar Navigation Links</nav>
+      <NavProfile user={user} onLogout={onLogout} />
     </aside>
   );
 }
 
-// 4. UserAvatar.jsx (Target — ត្រូវការ user ពិតប្រាកដ)
+// 4. NavProfile.jsx (Intermediate Component ៣)
+function NavProfile({ user, onLogout }) {
+  // ⚠️ NavProfile ក៏គ្រាន់តែជា Container ហុចបន្ត
+  return (
+    <div className="border-t pt-4">
+      <UserAvatar user={user} />
+      <button onClick={onLogout} className="text-xs text-rose-500 mt-2">
+        Logout
+      </button>
+    </div>
+  );
+}
+
+// 5. UserAvatar.jsx (Target Component — ត្រូវការទិន្នន័យ user ពិតប្រាកដ)
 function UserAvatar({ user }) {
-  return <img src={user.avatar} alt={user.name} />;
+  if (!user) return <div className="text-xs text-slate-400">Guest User</div>;
+
+  return (
+    <div className="flex items-center gap-3">
+      <img
+        src={user.avatar}
+        alt={user.name}
+        className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
+      />
+      <div>
+        <p className="text-sm font-bold text-slate-800">{user.name}</p>
+        <p className="text-xs text-slate-500">{user.role}</p>
+      </div>
+    </div>
+  );
 }
 ```
 
-### 💣 ហេតុអ្វីបានជារបៀបនេះជាបញ្ហា?
-1. **កូដចង្អៀត និងស្ទួន (Boilerplate):** Components នៅកណ្តាល (`Layout`, `Sidebar`) ត្រូវបង្ខំចិត្តប្រកាស props ដែលខ្លួនមិនប្រើ។
-2. **ពិបាកកែសម្រួល (Refactoring Nightmare):** បើថ្ងៃក្រោយអ្នកចង់ប្តូរឈ្មោះ prop ពី `user` ទៅ `currentUser` អ្នកត្រូវតាមកែប្រែគ្រប់ files ទាំងអស់នៅកណ្តាល!
+### 💣 ហេតុអ្វីបានជា Prop Drilling បង្កជាបញ្ហាធ្ងន់ធ្ងរ?
+
+1. **កូដចង្អៀត និងស្ទួន (Boilerplate Bloat):** Components នៅកណ្តាល (`AppLayout`, `Sidebar`, `NavProfile`) ត្រូវបង្ខំចិត្តប្រកាស props ក្នុង parameter list និង forward បន្ត ដែលធ្វើឱ្យកូដស្មុគស្មាញដោយឥតប្រយោជន៍។
+2. **ពិបាកកែសម្រួល (Refactoring Nightmare):** ប្រសិនបើអ្នកចង់ប្តូរឈ្មោះ prop ពី `user` ទៅ `currentUser` ឬចង់បន្ថែម `theme` prop មួយទៀត អ្នកត្រូវបើកកែប្រែគ្រប់ files ទាំងអស់នៅកណ្តាល!
+3. **បាត់បង់ភាពឯករាជ្យនៃ Component (Tight Coupling):** Components នៅកណ្តាលមិនអាចយកទៅ reuse នៅកន្លែងផ្សេងបានដោយងាយស្រួលឡើយ ព្រោះវាជាប់ជំពាក់នឹង props ដែលខ្លួនមិនបានប្រើ។
+4. **ងាយនឹងបាត់បង់ទិន្នន័យ (Prop Loss):** ប្រសិនបើ developer ម្នាក់ភ្លេច pass prop នៅជាន់ណាមួយ កម្មវិធីនឹង crash ឬកើត error `Cannot read properties of undefined`។
 
 ---
 
-## 🚀 ៤. ដំណោះស្រាយ ៖ Direct Access ជាមួយ Context API
+## 🧩 ៤. ដំណោះស្រាយបឋម ៖ Component Composition (Children / Slots Pattern)
 
-ជាមួយ **React Context API** យើងបង្កើត **Direct Tunnel (ផ្លូវកាត់ផ្ទាល់)** ៖
+មុននឹងប្រញាប់ប្រញាល់បង្កើត Global State ឬ Context API ជានិច្ច សូមចងចាំថា **Component Composition** គឺជាដំណោះស្រាយស្អាតបំផុតក្នុង React!
+
+ជំនួសឱ្យការបញ្ជូន data កាត់ intermediate components យើងអាចបញ្ជូន **JSX Component ផ្ទាល់** តាមរយៈ `children` prop៖
 
 ```jsx
-// UserAvatar.jsx អាចអានទិន្នន័យពី UserContext ដោយផ្ទាល់ 0 Prop Drilling!
-import { useUser } from './context/UserContext';
+// App.jsx (Top Component)
+export default function App() {
+  const [user, setUser] = useState({ name: 'Sok Dara', avatar: '/dara.jpg' });
+
+  return (
+    <AppLayout
+      sidebar={
+        <Sidebar>
+          {/* ✅ UserAvatar ទទួល user ដោយផ្ទាល់ពី App! */}
+          <UserAvatar user={user} onLogout={() => setUser(null)} />
+        </Sidebar>
+      }
+    >
+      <main>Content</main>
+    </AppLayout>
+  );
+}
+
+// AppLayout.jsx — មិនបាច់ស្គាល់ user prop ឡើយ!
+function AppLayout({ sidebar, children }) {
+  return (
+    <div className="flex">
+      {sidebar}
+      {children}
+    </div>
+  );
+}
+
+// Sidebar.jsx — គ្រាន់តែ render children
+function Sidebar({ children }) {
+  return <aside>{children}</aside>;
+}
+```
+
+> [!TIP]
+> **ពេលណាគួរប្រើ Component Composition?**  
+> នៅពេលដែលទិន្នន័យត្រូវបានប្រើប្រាស់ដោយ Component តែមួយ ឬពីរ ប៉ុន្តែវាគ្រាន់តែស្ថិតនៅជ្រៅក្នុង Layout Hierarchy។ វិធីនេះជួយលុបបំបាត់ Prop Drilling ដោយមិនបាច់បង្កើត Context ឡើយ!
+
+---
+
+## 🚀 ៥. ដំណោះស្រាយកម្រិតខ្ពស់ ៖ Direct Access ជាមួយ Context API
+
+នៅពេលដែលទិន្នន័យត្រូវប្រើប្រាស់ដោយ Components ជាច្រើននៅរាយប៉ាយពេញកម្មវិធី (ដូចជា Current User, Theme, Cart, Multi-language) **React Context API** គឺជាដំណោះស្រាយដ៏មានឥទ្ធិពលបំផុត៖
+
+```mermaid
+graph TD
+    UserProvider["UserProvider (Broadcasting User State) 📡"]
+    UserProvider -.-> AppLayout["AppLayout"]
+    UserProvider -.-> Sidebar["Sidebar"]
+    UserProvider ==>|"Direct Tunnel (useUser)"| UserAvatar["UserAvatar 🎯"]
+    UserProvider ==>|"Direct Tunnel (useUser)"| Header["Header 🎯"]
+
+    style UserProvider fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
+    style UserAvatar fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Header fill:#f0fff4,stroke:#38a169,stroke-width:2px
+```
+
+```jsx
+// ក្នុង UserAvatar.jsx — អាន State ដោយផ្ទាល់ 0 Prop Drilling!
+import { useUser } from '../context/UserContext';
 
 function UserAvatar() {
-  const user = useUser(); // ✅ ទាញយកដោយផ្ទាល់ មិនបាច់ឆ្លងកាត់ Layout ឬ Sidebar ឡើយ!
+  const { user } = useUser(); // ✨ ទាញយកទិន្នន័យដោយផ្ទាល់
 
+  if (!user) return <span>Guest</span>;
   return <img src={user.avatar} alt={user.name} />;
 }
 ```
 
 ---
 
-## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ (Cheat Sheet)
+## 🧠 ៦. តារាងប្រៀបធៀបយុទ្ធសាស្ត្រគ្រប់គ្រង State (Decision Matrix)
 
-| ចំណុចប្រៀបធៀប | Prop Drilling (Props ធម្មតា) | Context API (Global State) |
-| :--- | :--- | :--- |
-| **ទម្រង់បញ្ជូន** | បញ្ជូនពីលើចុះក្រោមតាមជាន់នីមួយៗ | បង្កើត Provider នៅលើ ➔ Consumer ចាប់យកផ្ទាល់ |
-| **កម្រិតសមស្រប** | សមស្របសម្រាប់ Component ១ ទៅ ២ ជាន់ | សមស្របសម្រាប់ Component លើសពី ៣ ជាន់ឡើងទៅ |
-| **ការកែប្រែកូដ** | ពិបាកកែព្រោះជាប់ពាក់ព័ន្ធច្រើន files | ងាយស្រួល ព្រោះកែតែ Consumer និង Provider |
-| **ករណីប្រើប្រាស់ទូទៅ** | បញ្ជូនទិន្នន័យក្នុង Component កូនៗផ្ទាល់ខ្លួន | User Auth, Theme (Dark/Light), Cart, Language |
+| លក្ខណៈវិនិច្ឆ័យ | Props ធម្មតា | Component Composition | Context API | External State Library (Zustand/Redux) |
+| :--- | :--- | :--- | :--- | :--- |
+| **ជម្រៅ Component Tree** | ១ ទៅ ២ ជាន់ | ២ ទៅ ៣ ជាន់ | ៣ ជាន់ឡើងទៅ | ទូទាំង App ធំៗ |
+| **ចំនួន Consumer** | ១ ទៅ ២ Components | ១ Component | ច្រើន Components ក្នុង Subtree | រាប់សិប Components ពេញ App |
+| **កម្រិតភាពស្មុគស្មាញ** | ទាបបំផុត (Zero overhead) | ទាប (ប្រើប្រាស់ JSX) | មធ្យម (Provider + Hook) | ខ្ពស់ (Store + Selectors) |
+| **ការ Re-render** | កើតលើ Component ដែលទទួល | កើតលើ Component ដែលទទួល | កើតលើរាល់ Consumer ដែល Subscribe | កើតតែលើ Selector ជាក់លាក់ |
+| **ករណីប្រើប្រាស់ល្អបំផុត** | Local UI State, Buttons, Inputs | Layouts, Modal dialogs, Drawers | Auth, Theme, Language, Notifications | E-Commerce Cart, Complex Caching |
+
+---
+
+## 📋 ៧. សង្ខេបចំណុចសំខាន់ៗ (Key Takeaways)
+
+- **Prop Drilling** មិនមែនជា Bug ទេ តែជា Code Smell ដែលកើតឡើងនៅពេល Component Tree ជ្រៅ ហើយធ្វើឱ្យកូដពិបាកកែសម្រួល (Tightly Coupled)។
+- កុំប្រញាប់ប្រញាល់បង្កើត Global State គ្រប់ពេល! សាកល្បង **Component Composition (`children` prop)** ជាមុនសិន។
+- ប្រើ **Context API** នៅពេលដែលទិន្នន័យពិតជា "Global" (មាន Consumers ច្រើននៅទីតាំងខុសៗគ្នា) ដូចជា Auth Session, Theme Mode, ឬ Shopping Cart។

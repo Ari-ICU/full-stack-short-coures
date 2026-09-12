@@ -1,189 +1,539 @@
 ---
-title: "Mini Project: Multi-Context Shop & Toasts"
-description: អនុវត្តបង្កើត Global E-Commerce Cart & Floating Toast Notification System ដោយប្រើ Multi-Context Architecture (CartContext + ToastContext) ឱ្យមានភាពស៊ីសង្វាក់ និងងាយយល់។
+title: "Mini Project — Building an E-Commerce Store with Multi-Context & Cart Reducer"
+description: អនុវត្តបង្កើតប្រព័ន្ធ Global E-Commerce Store ពេញលេញមួយដោយប្រើ Multi-Context Architecture (CartContext ជាមួយ useReducer + ToastContext ជាមួយ Auto-dismiss Timer) ឱ្យមានភាពស៊ីសង្វាក់ សុវត្ថិភាព និង Performance ខ្ពស់។
 objectives:
   - បង្កើត Multi-Context Architecture (CartContext + ToastContext) ដាច់ដោយឡែកពីគ្នា
-  - ចេះបញ្ជូន Actions (Add to Cart, Trigger Toast) ឆ្លងកាត់ Components ដោយគ្មាន Prop Drilling
-  - អនុវត្ត Toast Auto-dismiss Timer ក្នុង Context Provider
-  - យល់ពីអត្ថប្រយោជន៍នៃ Separation of Contexts (កាត់បន្ថយ Unnecessary Re-renders)
+  - អនុវត្ត `useReducer` ក្នុង Context Provider សម្រាប់គ្រប់គ្រង Cart Actions (Add, Quantity, Remove, Discount, Clear)
+  - បង្កើត Floating Toast Notification System ជាមួយ Auto-dismiss Timer
+  - ចេះបញ្ជូន Actions ឆ្លងកាត់ Components ដោយគ្មាន Prop Drilling
+  - យល់ពីអត្ថប្រយោជន៍នៃ Separation of Concerns ដើម្បីកាត់បន្ថយ Unnecessary Re-renders
 module: module-7-global-state
 order: 5
 quiz:
-  - question: "តើការបង្កើត Multiple Specific Contexts (ឧ. CartContext, ToastContext) ល្អជាងបង្កើត One Big Context ដូចម្តេច?"
+  - question: "តើការបង្កើត Multiple Focused Contexts (ឧ. CartContext, ToastContext) ល្អជាងបង្កើត One Big Monolithic Context ដូចម្តេច?"
     options:
-      - "ការពារកុំឱ្យ Component ដែល Subscribe លើ Toast ត្រូវ Re-render នៅពេល Cart ផ្លាស់ប្តូរ និងធ្វើឱ្យកូដមាន Modularity ខ្ពស់"
-      - "ដើម្បីឱ្យ Browser ប្រើ CSS តិចជាង"
-      - "ព្រោះ React មិនអនុញ្ញាតឱ្យ Context ផ្ទុកលើសពី ១ State"
-      - "ដើម្បីលុប useState ចោល"
+      - "កាត់បន្ថយ Unnecessary Re-renders — ការ Update ទំនិញក្នុង Cart នឹងមិនធ្វើឱ្យ Notification components ត្រូវ Re-render ឡើយ និងធ្វើឱ្យ Codebase មាន Modularity ខ្ពស់"
+      - "ដើម្បីឱ្យ Browser ចំណាយ RAM តិចជាងមុន ៩០%"
+      - "ព្រោះ React មិនអនុញ្ញាតឱ្យ Context មួយផ្ទុកលើសពី ១ State ឡើយ"
+      - "ដើម្បីលុបបំបាត់ការប្រើប្រាស់ Reducer"
     correctAnswer: 1
-    explanation: "Multiple Focused Contexts (Separation of Concerns) កាត់បន្ថយ Unnecessary Re-renders — ការ Update ទំនិញក្នុង Cart នឹងមិនធ្វើឱ្យ Notification components ត្រូវ Re-render ឡើយ។"
+    explanation: "ការបំបែក Context តាម Domain មុខងារ (Separation of Concerns) ជួយឱ្យ Component ដែល Subscribe លើតែ Toast មិនចាំបាច់ត្រូវ Re-render ឡើងវិញរាល់ពេលដែល Cart State ផ្លាស់ប្តូរឡើយ។"
+
+  - question: "នៅពេលបង្កើត Auto-dismiss Toast ក្នុង React Context តើគួរដោះស្រាយ Timer Cleanup ដូចម្តេចដើម្បីការពារ Memory Leak?"
+    options:
+      - "ប្រើ `setTimeout` រួមជាមួយ `clearTimeout` ឬគ្រប់គ្រង state dismiss តាម Timestamp ID ជាក់លាក់"
+      - "ប្រើ `while(true)` loop ក្នុង Component"
+      - "បិទ Browser Tab ភ្លាមៗក្រោយពេលបង្ហាញ Toast"
+      - "មិនបាច់ធ្វើអ្វីទេ ព្រោះ React លុប Timer ដោយស្វ័យប្រវត្តិតាមរយៈ CSS"
+    correctAnswer: 1
+    explanation: "រាល់ពេលប្រើប្រាស់ Asynchronous Timer (`setTimeout`) គួរតែមានយន្តការ Clear Timer ឬកំណត់ ID ជាក់លាក់ ដើម្បីកុំឱ្យ Timer ចាស់កែប្រែ State បន្ទាប់ពី Component ត្រូវបាន Unmount។"
 ---
 
-## 🏗️ ១. ស្ថាបត្យកម្ម Multi-Context (CartContext + ToastContext)
+## 🛍️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ Multi-Context (Architecture Blueprint)
 
-នៅក្នុង App ខ្នាតធំ យើងមិនគួរញាត់ State ទាំងអស់ចូលក្នុង Context តែមួយឡើយ។ យើងបែងចែកវាជា **២ Contexts ដាច់ដោយឡែកពីគ្នា** ៖
+នៅក្នុងគម្រោងខ្នាតធំ យើងមិនត្រូវច្របល់ State ទាំងអស់ចូលក្នុង Global Container តែមួយឡើយ។ យើងបែងចែកវាជា **២ Dedicated Contexts** ៖
+1. **`CartContext` (គ្រប់គ្រងដោយ `useReducer`):** ផ្ទុកទិន្នន័យទំនិញ, ចំនួន (Quantity), ការបញ្ចុះតម្លៃ (Promo Code), និងការគណនាតម្លៃសរុប។
+2. **`ToastContext` (គ្រប់គ្រងដោយ `useState` + Timer):** បង្ហាញ Floating Notification Message នៅជ្រុងខាងក្រោម និងបិទទៅវិញដោយស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី។
 
 ```mermaid
 graph TD
-    Root["<App>"] --> CP["<CartProvider> (គ្រប់គ្រងទំនិញក្នុងកន្ត្រក)"]
-    CP --> TP["<ToastProvider> (គ្រប់គ្រងផ្ទាំង Notification)"]
-    TP --> Layout["<ShopLayout>"]
-    Layout --> Grid["<ProductGrid> (ហៅ addToCart + showToast) 🛍️"]
-    Layout --> Toast["<ToastContainer> (បង្ហាញផ្ទាំង Toast ស្វ័យប្រវត្តិ) 🔔"]
+    Root["<App>"] --> CP["<CartProvider> (useReducer: Add, Qty, Remove, Promo) 🛒"]
+    CP --> TP["<ToastProvider> (useState + Auto-dismiss Timer) 🔔"]
+    TP --> Shell["<StoreLayout>"]
+    Shell --> Header["<StoreHeader> (បង្ហាញ Badge ចំនួនទំនិញ & Cart Modal Button) 🏷️"]
+    Shell --> Grid["<ProductGrid> (ហៅ addItem + showToast) 🛍️"]
+    Shell --> Drawer["<CartDrawer> (បញ្ជីទំនិញ, ប្តូរចំនួន, គណនាតម្លៃ) 💳"]
+    Shell --> Toast["<ToastContainer> (បង្ហាញផ្ទាំង Toast Alert បណ្តែត) 🚀"]
 
     style Root fill:#f8f9fa,stroke:#cbd5e1,stroke-width:2px
     style CP fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
     style TP fill:#faf5ff,stroke:#805ad5,stroke-width:2px
-    style Grid fill:#f0fff4,stroke:#38a169,stroke-width:2px
-    style Toast fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style Header fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Grid fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style Drawer fill:#fdf2f8,stroke:#db2777,stroke-width:2px
+    style Toast fill:#eff6ff,stroke:#2563eb,stroke-width:2px
 ```
 
 ---
 
-## 💻 ២. កូដពេញលេញនៃគម្រោង E-Commerce Demo
+## 💻 ២. កូដពេញលេញនៃគម្រោង (Complete E-Commerce Project)
+
+### 📂 ឯកសារទី ១ ៖ `ToastContext.jsx` (Notification System)
 
 ```jsx
-import { createContext, useContext, useState } from 'react';
+// src/context/ToastContext.jsx
+import { createContext, useContext, useState, useCallback } from 'react';
 
-// ==========================================
-// ១. CART CONTEXT
-// ==========================================
-const CartContext = createContext(null);
-
-export function CartProvider({ children }) {
-  const [items, setItems] = useState([]);
-
-  const addToCart = (product) => {
-    setItems((prev) => [...prev, product]);
-  };
-
-  const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
-
-  return (
-    <CartContext.Provider value={{ items, addToCart, totalAmount, count: items.length }}>
-      {children}
-    </CartContext.Provider>
-  );
-}
-
-export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used within CartProvider');
-  return context;
-}
-
-// ==========================================
-// ២. TOAST CONTEXT
-// ==========================================
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {
-  const [toast, setToast] = useState(null);
+  const [toasts, setToasts] = useState([]);
 
-  const showToast = (message) => {
-    setToast(message);
-    // បិទ Toast ស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី
+  // Function សម្រាប់ Trigger Toast ថ្មី
+  const showToast = useCallback((message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    const newToast = { id, message, type };
+
+    setToasts((prev) => [...prev, newToast]);
+
+    // ⏱️ Auto-dismiss ក្នុងរយៈពេល ២.៥ វិនាទី
     setTimeout(() => {
-      setToast(null);
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 2500);
-  };
+  }, []);
+
+  const removeToast = useCallback((id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {toast && (
-        <div className="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-slate-700 animate-bounce flex items-center gap-2 z-50">
-          <span>🔔</span>
-          <span>{toast}</span>
-        </div>
-      )}
+
+      {/* Floating Toast Notification Container */}
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none max-w-sm">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold flex items-center justify-between gap-3 text-white transition-all transform animate-in slide-in-from-bottom-3 ${
+              toast.type === 'danger'
+                ? 'bg-rose-600'
+                : toast.type === 'info'
+                ? 'bg-blue-600'
+                : 'bg-emerald-600'
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <span>{toast.type === 'danger' ? '🗑️' : '✨'}</span>
+              <span>{toast.message}</span>
+            </div>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="opacity-75 hover:opacity-100 font-bold ml-2"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
     </ToastContext.Provider>
   );
 }
 
 export function useToast() {
   const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used within ToastProvider');
+  if (!context) throw new Error('useToast() ត្រូវតែប្រើក្នុង <ToastProvider>!');
   return context;
 }
+```
 
-// ==========================================
-// ៣. PRODUCT CARD COMPONENT
-// ==========================================
+---
+
+### 📂 ឯកសារទី ២ ៖ `CartContext.jsx` (Cart State + useReducer)
+
+```jsx
+// src/context/CartContext.jsx
+import { createContext, useContext, useReducer, useMemo } from 'react';
+
+const CartContext = createContext(null);
+
+const initialCartState = {
+  items: [],
+  promoCode: '',
+  discountPercent: 0,
+};
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TO_CART': {
+      const existing = state.items.find((item) => item.id === action.payload.id);
+      if (existing) {
+        return {
+          ...state,
+          items: state.items.map((item) =>
+            item.id === action.payload.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item
+          ),
+        };
+      }
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
+      };
+    }
+
+    case 'UPDATE_QUANTITY': {
+      const { id, quantity } = action.payload;
+      if (quantity <= 0) {
+        return {
+          ...state,
+          items: state.items.filter((item) => item.id !== id),
+        };
+      }
+      return {
+        ...state,
+        items: state.items.map((item) =>
+          item.id === id ? { ...item, quantity } : item
+        ),
+      };
+    }
+
+    case 'REMOVE_FROM_CART':
+      return {
+        ...state,
+        items: state.items.filter((item) => item.id !== action.payload.id),
+      };
+
+    case 'APPLY_PROMO': {
+      const code = action.payload.trim().toUpperCase();
+      if (code === 'REACT20') {
+        return { ...state, promoCode: code, discountPercent: 20 };
+      }
+      return { ...state, promoCode: code, discountPercent: 0 };
+    }
+
+    case 'CLEAR_CART':
+      return { ...state, items: [], promoCode: '', discountPercent: 0 };
+
+    default:
+      return state;
+  }
+}
+
+export function CartProvider({ children }) {
+  const [state, dispatch] = useReducer(cartReducer, initialCartState);
+
+  // 🧮 Derived States
+  const totalCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = state.items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const discountAmount = (subtotal * state.discountPercent) / 100;
+  const grandTotal = Math.max(0, subtotal - discountAmount);
+
+  const value = useMemo(
+    () => ({
+      items: state.items,
+      promoCode: state.promoCode,
+      discountPercent: state.discountPercent,
+      totalCount,
+      subtotal,
+      discountAmount,
+      grandTotal,
+      dispatch,
+    }),
+    [state, totalCount, subtotal, discountAmount, grandTotal]
+  );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+export function useCart() {
+  const context = useContext(CartContext);
+  if (!context) throw new Error('useCart() ត្រូវតែប្រើក្នុង <CartProvider>!');
+  return context;
+}
+```
+
+---
+
+### 📂 ឯកសារទី ៣ ៖ `App.jsx` (Components Integration)
+
+```jsx
+// src/App.jsx
+import { useState } from 'react';
+import { ToastProvider, useToast } from './context/ToastContext';
+import { CartProvider, useCart } from './context/CartContext';
+
+const PRODUCTS = [
+  { id: 1, title: 'React Mastery Pro Course', price: 49, category: 'Frontend' },
+  { id: 2, title: 'Next.js 15 Full-Stack Suite', price: 79, category: 'Fullstack' },
+  { id: 3, title: 'TypeScript Enterprise Architecture', price: 39, category: 'Languages' },
+  { id: 4, title: 'Tailwind CSS Modern UI Kit', price: 29, category: 'Design' },
+];
+
+function Header({ onOpenCart }) {
+  const { totalCount, grandTotal } = useCart();
+
+  return (
+    <header className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center sticky top-0 z-30">
+      <div className="flex items-center gap-2">
+        <span className="text-xl">🛍️</span>
+        <h1 className="font-bold text-slate-800 dark:text-white text-sm">
+          DevTech Academy Store
+        </h1>
+      </div>
+
+      <button
+        onClick={onOpenCart}
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-2"
+      >
+        <span>🛒</span>
+        <span>{totalCount} មុខ</span>
+        <span className="bg-indigo-500/50 px-2 py-0.5 rounded-md">
+          ${grandTotal.toFixed(2)}
+        </span>
+      </button>
+    </header>
+  );
+}
+
 function ProductCard({ product }) {
-  const { addToCart } = useCart();
+  const { dispatch } = useCart();
   const { showToast } = useToast();
 
-  const handleBuy = () => {
-    addToCart(product);
-    showToast(`បានបន្ថែម "${product.title}" ចូលកន្ត្រកជោគជ័យ!`);
+  const handleAddToCart = () => {
+    dispatch({ type: 'ADD_TO_CART', payload: product });
+    showToast(`បានបញ្ចូល "${product.title}" ទៅក្នុងកន្ត្រកជោគជ័យ!`);
   };
 
   return (
-    <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-100 dark:border-slate-700 flex justify-between items-center">
+    <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-3">
       <div>
-        <h4 className="font-bold text-sm text-slate-800 dark:text-white">{product.title}</h4>
-        <p className="text-xs text-blue-600 dark:text-blue-400 font-black mt-0.5">${product.price}</p>
+        <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-md">
+          {product.category}
+        </span>
+        <h3 className="font-bold text-xs text-slate-800 dark:text-white mt-2">
+          {product.title}
+        </h3>
       </div>
-      <button
-        onClick={handleBuy}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow"
-      >
-        + Add to Cart
-      </button>
+
+      <div className="flex justify-between items-center pt-2">
+        <span className="font-black text-sm text-indigo-600 dark:text-indigo-400">
+          ${product.price}
+        </span>
+        <button
+          onClick={handleAddToCart}
+          className="px-3 py-1.5 bg-slate-900 dark:bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow"
+        >
+          + Add to Cart
+        </button>
+      </div>
     </div>
   );
 }
 
-// ==========================================
-// ៤. ROOT APP COMPONENT
-// ==========================================
-export default function ContextMiniProject() {
+function CartDrawer({ isOpen, onClose }) {
+  const {
+    items,
+    promoCode,
+    discountPercent,
+    subtotal,
+    discountAmount,
+    grandTotal,
+    dispatch,
+  } = useCart();
+  const { showToast } = useToast();
+  const [inputPromo, setInputPromo] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleApplyPromo = (e) => {
+    e.preventDefault();
+    dispatch({ type: 'APPLY_PROMO', payload: inputPromo });
+    if (inputPromo.trim().toUpperCase() === 'REACT20') {
+      showToast('🎉 បានអនុវត្តបញ្ចុះតម្លៃ ២០% ជោគជ័យ!');
+    } else {
+      showToast('⚠️ កូដបញ្ចុះតម្លៃមិនត្រឹមត្រូវឡើយ', 'danger');
+    }
+  };
+
+  const handleClear = () => {
+    dispatch({ type: 'CLEAR_CART' });
+    showToast('កន្ត្រកទំនិញត្រូវបានសំអាតរួចរាល់', 'info');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex justify-end animate-in fade-in duration-200">
+      <div className="w-full max-w-sm bg-white dark:bg-slate-900 h-full p-6 shadow-2xl flex flex-col justify-between border-l border-slate-200 dark:border-slate-800">
+        <div>
+          <div className="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="font-bold text-base text-slate-800 dark:text-white">
+              🛒 កន្ត្រករបស់អ្នក ({items.length})
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+            >
+              ✕ បិទ
+            </button>
+          </div>
+
+          {/* ITEM LIST */}
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800 max-h-72 overflow-y-auto mt-4 pr-1">
+            {items.length === 0 ? (
+              <li className="py-12 text-center text-xs text-slate-400">
+                មិនទាន់មានទំនិញក្នុងកន្ត្រកនៅឡើយទេ!
+              </li>
+            ) : (
+              items.map((item) => (
+                <li
+                  key={item.id}
+                  className="py-3 flex justify-between items-center text-xs"
+                >
+                  <div>
+                    <p className="font-bold text-slate-800 dark:text-white">
+                      {item.title}
+                    </p>
+                    <p className="text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
+                      ${item.price} × {item.quantity}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() =>
+                        dispatch({
+                          type: 'UPDATE_QUANTITY',
+                          payload: { id: item.id, quantity: item.quantity - 1 },
+                        })
+                      }
+                      className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="w-4 text-center font-bold text-xs">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        dispatch({
+                          type: 'UPDATE_QUANTITY',
+                          payload: { id: item.id, quantity: item.quantity + 1 },
+                        })
+                      }
+                      className="w-5 h-5 rounded bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold"
+                    >
+                      +
+                    </button>
+                    <button
+                      onClick={() => {
+                        dispatch({
+                          type: 'REMOVE_FROM_CART',
+                          payload: { id: item.id },
+                        });
+                        showToast(`បានលុប "${item.title}"`, 'danger');
+                      }}
+                      className="text-rose-500 ml-2 font-bold"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+
+        {/* BOTTOM CHECKOUT SECTION */}
+        <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3 text-xs">
+          {/* PROMO INPUT */}
+          <form onSubmit={handleApplyPromo} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="កូដ: REACT20"
+              value={inputPromo}
+              onChange={(e) => setInputPromo(e.target.value)}
+              className="flex-1 px-3 py-1.5 border rounded-xl dark:bg-slate-800 dark:text-white"
+            />
+            <button
+              type="submit"
+              className="px-3 py-1.5 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700"
+            >
+              ប្រើកូដ
+            </button>
+          </form>
+
+          {/* SUMMARY BREAKDOWN */}
+          <div className="space-y-1 text-slate-600 dark:text-slate-400">
+            <div className="flex justify-between">
+              <span>តម្លៃដើម (Subtotal):</span>
+              <span>${subtotal.toFixed(2)}</span>
+            </div>
+            {discountPercent > 0 && (
+              <div className="flex justify-between text-emerald-600 font-bold">
+                <span>បញ្ចុះតម្លៃ ({discountPercent}%):</span>
+                <span>-${discountAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-black text-sm text-slate-800 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-800">
+              <span>សរុបចុងក្រោយ:</span>
+              <span>${grandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <button
+              onClick={handleClear}
+              className="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-xl font-bold text-slate-600 dark:text-slate-300 transition"
+            >
+              សំអាត
+            </button>
+            <button
+              onClick={() =>
+                showToast('🚀 ការបញ្ជាទិញទទួលបានជោគជ័យ! សូមអរគុណ។')
+              }
+              className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow"
+            >
+              ទូទាត់ប្រាក់ (${grandTotal.toFixed(2)})
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function StoreApp() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
   return (
     <CartProvider>
       <ToastProvider>
-        <ShopContent />
+        <div className="min-h-[520px] max-w-lg mx-auto my-8 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col">
+          <Header onOpenCart={() => setIsCartOpen(true)} />
+
+          <main className="p-4 flex-1">
+            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+              វគ្គសិក្សាដែលមានប្រជាប្រិយភាព
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {PRODUCTS.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </main>
+
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+          />
+        </div>
       </ToastProvider>
     </CartProvider>
-  );
-}
-
-function ShopContent() {
-  const { count, totalAmount } = useCart();
-
-  return (
-    <div className="max-w-md mx-auto p-6 space-y-4">
-      {/* Header Cart Badge */}
-      <div className="flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl shadow border">
-        <h2 className="text-base font-bold text-slate-800 dark:text-white">🛍️ Web Dev Shop</h2>
-        <div className="text-xs font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-3 py-1.5 rounded-full">
-          🛒 {count} items (${totalAmount})
-        </div>
-      </div>
-
-      {/* Product List */}
-      <ProductCard product={{ id: 1, title: 'React Mastery Masterclass', price: 49 }} />
-      <ProductCard product={{ id: 2, title: 'Next.js 15 Full-Stack Course', price: 69 }} />
-      <ProductCard product={{ id: 3, title: 'TypeScript Pro Architecture', price: 39 }} />
-    </div>
   );
 }
 ```
 
 ---
 
-## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃកូដ
+## 🔍 ៣. ការវិភាគចំណុចគន្លឹះនៃស្ថាបត្យកម្ម
 
-1. **ហេតុអ្វីបានជាបំបែក CartContext និង ToastContext?**  
-   ប្រសិនបើដាក់បញ្ចូលគ្នាក្នុង Context តែមួយ រាល់ពេលអ្នកចុច "Add to Cart" នោះ Notification Component ក៏ត្រូវ Re-render ដែរ។ ការបំបែកជាពីរធ្វើឱ្យកូដ Re-render តែ Component ណាដែលចាំបាច់ប៉ុណ្ណោះ (Performance Optimization)។
-2. **Auto-dismiss Toast ដំណើរការយ៉ាងណា?**  
-   ក្នុង `ToastProvider` យើងប្រើ `setTimeout(() => setToast(null), 2500)` ដើម្បីបិទ Notification ដោយស្វ័យប្រវត្តិ។
+1. **Separation of Concerns:**  
+   `CartProvider` គ្រប់គ្រង Business State ឯ `ToastProvider` គ្រប់គ្រង Transient UI State។ នៅពេល Toast បិទទៅវិញ មានតែ Toast Container ប៉ុណ្ណោះដែល update ដោយ Cart Items មិនត្រូវគណនាឡើងវិញឡើយ។
+2. **Auto-dismiss Timer ជាមួយ Unique ID:**  
+   ក្នុង `ToastProvider` យើងប្រើ `Date.now() + Math.random()` ដើម្បីបង្កើត Toast ID តែមួយគត់ និងច្រោះចេញតាម `id` ដោយមិនបារម្ភពីបញ្ហាច្រឡំ Message ឡើយ។
+3. **Derived State Optimization:**  
+   `totalCount`, `subtotal`, និង `grandTotal` ត្រូវបានគណនាក្នុង Provider ហើយរុំដោយ `useMemo` ដើម្បីផ្តល់ជូន Consumer ភ្លាមៗដោយគ្មានគណនាស្ទួន។
 
 ---
 
 ## 🏆 ៤. បញ្ជីត្រួតពិនិត្យការអនុវត្ត (Checklist)
 
-- [x] Cart State ត្រូវបានចែករំលែកឆ្លងកាត់ Components ដោយគ្មាន Prop Drilling
-- [x] ចុច Add to Cart បង្ហាញ Toast Alert បណ្តែតនៅជ្រុងខាងស្តាំស្វ័យប្រវត្តិ
-- [x] Toast បាត់ទៅវិញដោយស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី
-- [x] តម្លៃសរុប និងចំនួនទំនិញ Update ភ្លាមៗនៅលើ Header
+- [x] Cart State ដំណើរការដោយ `useReducer` ជាមួយ Actions: Add, Quantity (+/-), Remove, Clear, និង Promo Code
+- [x] Toast Notification System ដំណើរការជាមួយ Floating UI Alert និង Auto-dismiss Timer (២.៥ វិនាទី)
+- [x] គ្មាន Prop Drilling ឆ្លងកាត់ Components ឡើយ
+- [x] ប៊ូតុង Add to Cart បញ្ជូន State ទៅ Cart ផង និងបញ្ជូន Alert ទៅ Toast ផងក្នុងពេលតែមួយ
+- [x] Cart Modal បង្ហាញការគណនាតម្លៃដើម បញ្ចុះតម្លៃ និងតម្លៃសរុបយ៉ាងត្រឹមត្រូវ

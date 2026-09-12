@@ -1,149 +1,210 @@
 ---
-title: "Context API: Provider & Consumer Pattern"
-description: សិក្សាពីការបង្កើត Context ជាមួយ createContext, Provider Component, និង useContext Hook — ស្វែងយល់ពីរបៀបរៀបចំ Global State ឱ្យស្អាត និងងាយស្រួលប្រើប្រាស់។
+title: "Context API — createContext, Provider & useContext Fundamentals"
+description: សិក្សាស៊ីជម្រៅពី React Context API — ស្វែងយល់ពី createContext, Provider Pattern, useContext Hook, ការបង្កើត Safe Custom Hook, និងវិធីទប់ស្កាត់បញ្ហា Re-render លើ Global State។
 objectives:
-  - យល់ពីគោលការណ៍ Provider & Consumer ក្នុង React
-  - ចេះបង្កើត Context Object ដោយប្រើ createContext(null)
-  - ចេះបង្កើត Provider Component ដើម្បីចែករំលែក State ទៅកាន់ Children
-  - ចេះទាញយក Global State តាមរយៈ useContext ឬ Custom Hook
+  - យល់ច្បាស់ពី Provider & Consumer Pattern ក្នុង React
+  - ចេះបង្កើត Context Container ជាមួយ `createContext(defaultValue)` និងយល់ពីតួនាទីរបស់ Default Value
+  - ចេះប្រើ `<Context.Provider value={...}>` ដើម្បីចែករំលែក State និង Functions ចុះទៅកូនៗ
+  - ចេះប្រើ `useContext` Hook រួមជាមួយ Fail-Fast Safety Guard ក្នុង Custom Hook
+  - យល់ពីបញ្ហា Re-render នៅពេលបញ្ជូន Object Reference ក្នុង `value` prop និងវិធីដោះស្រាយជាមួយ `useMemo`
 module: module-7-global-state
 order: 2
 quiz:
-  - question: "តើ ៣ ជំហានគ្រឹះក្នុងការប្រើប្រាស់ React Context API មានអ្វីខ្លះ?"
+  - question: "តើ ៣ ជំហានគ្រឹះក្នុងការបង្កើត និងប្រើប្រាស់ React Context API មានអ្វីខ្លះ?"
     options:
-      - "1. createContext() -> 2. Wrap ជាមួយ <Context.Provider value={...}> -> 3. ទាញយកតាម useContext(Context)"
-      - "1. useState() -> 2. useEffect() -> 3. return"
-      - "1. fetch() -> 2. parse() -> 3. save()"
-      - "1. HTML -> 2. CSS -> 3. JS"
+      - "1. createContext() -> 2. Wrap Component Tree ជាមួយ <Context.Provider value={...}> -> 3. ទាញយក State តាម useContext(Context)"
+      - "1. useState() -> 2. useEffect() -> 3. return JSX"
+      - "1. fetch() API -> 2. JSON.parse() -> 3. localStorage.setItem()"
+      - "1. document.getElementById() -> 2. addEventListener() -> 3. innerHTML"
     correctAnswer: 1
-    explanation: "Context API ដំណើរការតាម Provider-Consumer Pattern៖ 1. បង្កើត Context, 2. បញ្ជូនតម្លៃតាមរយៈ Provider Component នៅ Top-level, 3. ទាញយកតម្លៃតាម useContext() ក្នុង Child Components។"
+    explanation: "Context API ដំណើរការតាម Provider-Consumer Pattern៖ 1. បង្កើត Context Container, 2. បញ្ជូនតម្លៃតាមរយៈ Provider Component នៅ Top-level, 3. ទាញយកតម្លៃតាម useContext() ក្នុង Child Components ណាមួយក៏បាន។"
 
-  - question: "តើអ្វីទៅជាតួនាទីរបស់ `<Context.Provider value={...}>`?"
+  - question: "តើតម្លៃ `defaultValue` ដែលយើងបញ្ជូនទៅ `createContext(defaultValue)` ដំណើរការនៅពេលណា?"
     options:
-      - "ជា Component មេដែលបញ្ជូនទិន្នន័យ (value) ចុះទៅឱ្យគ្រប់ Components កូនៗទាំងអស់ដែលស្ថិតនៅខាងក្នុងវា"
-      - "ជាកន្លែងសម្រាប់សរសេរ CSS"
-      - "ជា function សម្រាប់ load web page"
-      - "ជា database table"
+      - "ដំណើរការតែនៅពេលដែល Component មួយហៅ `useContext` នៅក្រៅព្រំដែន `<Context.Provider>` ប៉ុណ្ណោះ"
+      - "ដំណើរការជា State ដំបូងរបស់ Provider គ្រប់ពេល"
+      - "ដំណើរការតែនៅពេល Browser ដាច់ Internet"
+      - "ដំណើរការតែនៅពេល Build Production"
     correctAnswer: 1
-    explanation: "Provider ដើរតួជាអ្នកផ្គត់ផ្គង់ទិន្នន័យ។ រាល់ Component ណាដែលរុំព័ទ្ធដោយ Provider អាចអាន ឬ update តម្លៃក្នុង `value` prop បានដោយផ្ទាល់។"
+    explanation: "`defaultValue` ក្នុង `createContext(defaultValue)` មិនមែនជា Initial State របស់ Provider ទេ ប៉ុន្តែវាជា Fallback Value ដែលនឹងត្រូវប្រើ ប្រសិនបើសមាសភាគមួយព្យាយាមអាន Context ដោយមិនត្រូវបានរុំព័ទ្ធដោយ Provider ខាងលើ។"
+
+  - question: "ហេតុអ្វីបានជាការបញ្ជូន `value={{ theme, toggleTheme }}` ទៅកាន់ Provider ដោយគ្មាន `useMemo` អាចបង្កជាបញ្ហា Performance ក្នុង App ធំៗ?"
+    options:
+      - "ព្រោះរាល់ពេល Provider Re-render វានឹងបង្កើត Object Reference ថ្មីជានិច្ច ដែលបង្ខំឱ្យ Consumer Components ទាំងអស់ត្រូវ Re-render តាម ទោះបីទិន្នន័យមិនផ្លាស់ប្តូរក៏ដោយ"
+      - "ព្រោះវាធ្វើឱ្យ JavaScript error មិនដំណើរការ"
+      - "ព្រោះ Provider មិនអាចផ្ទុក Functions បានទេ"
+      - "ព្រោះ React ហាមឃាត់ការប្រើ Object ក្នុង Context"
+    correctAnswer: 1
+    explanation: "នៅក្នុង JavaScript `{}` តែងតែបង្កើត New Object Reference ក្នុង Memory។ ប្រសិនបើ Parent Re-render តម្លៃ `value` នឹងក្លាយជា Object ថ្មី ធ្វើឱ្យ Consumers ទាំងអស់ដែល Subscribe ត្រូវ Re-render ឡើងវិញ។ ការប្រើ `useMemo` ឬការបំបែក Context ជួយដោះស្រាយបញ្ហានេះ។"
 ---
 
 ## 🌐 ១. គោលការណ៍ Provider & Consumer (Mental Model)
 
-ដើម្បីយល់ពី Context API សូមស្រមៃមើល **«ប៉មផ្សាយសញ្ញា Wi-Fi»** 📶៖
-- **Provider (ប៉មបញ្ជូនសញ្ញា):** ដាក់នៅកណ្តាលផ្ទះ ហើយផ្សាយសញ្ញា Wi-Fi (State) ចេញមកក្រៅ។
-- **Consumer (ទូរស័ព្ទ/កុំព្យូទ័រ):** គ្រប់ឧបករណ៍ណាដែលនៅក្នុងផ្ទះនោះ អាចភ្ជាប់យក Wi-Fi (useContext) មកប្រើប្រាស់បានគ្រប់ពេល ដោយមិនបាច់តខ្សែឆ្លងកាត់បន្ទប់ឡើយ!
+ដើម្បីយល់ពីដំណើរការនៃ Context API សូមស្រមៃមើល **«ប៉មផ្សាយសញ្ញា Wi-Fi»** 📶 នៅក្នុងអគារមួយ៖
+- **Provider (ប៉មបញ្ជូនសញ្ញា):** ដាក់នៅជាន់លើគេនៃអគារ ហើយធ្វើការផ្សាយរលកសញ្ញា (State & Functions) ចេញមកក្រៅ។
+- **Consumers (ទូរស័ព្ទ / កុំព្យូទ័រ):** គ្រប់ឧបករណ៍ដែលស្ថិតនៅក្នុងរង្វង់គ្របដណ្តប់នៃអគារនោះ អាចភ្ជាប់យកសញ្ញា Wi-Fi (`useContext`) មកប្រើប្រាស់បានភ្លាមៗ ដោយមិនចាំបាច់តខ្សែឆ្លងកាត់ជាន់នីមួយៗឡើយ!
 
 ```mermaid
 graph TD
-    Provider["<ThemeContext.Provider value={{ theme, toggleTheme }}> (ប៉មបញ្ជូន Wi-Fi) 📶"]
-    Provider --> CompA["Header Component"]
-    Provider --> CompB["Sidebar Component"]
-    CompB --> DeepChild["ThemeToggleSwitch (ប្រើ useContext ចាប់យកផ្ទាល់!) 🎯"]
+    Provider["<ThemeContext.Provider value={{ theme, toggleTheme }}> 📶 (ប៉មផ្សាយ State)"]
+    Provider --> Layout["<AppLayout> (មិនបាច់ទទួល Props)"]
+    Layout --> Sidebar["<Sidebar> (មិនបាច់ទទួល Props)"]
+    Layout --> Content["<MainContent> (មិនបាច់ទទួល Props)"]
+    Sidebar --> Switch["<ThemeToggleSwitch> (useTheme() ភ្ជាប់យកផ្ទាល់!) 🎯"]
+    Content --> Card["<ThemedCard> (useTheme() ភ្ជាប់យកផ្ទាល់!) 🎯"]
 
     style Provider fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
-    style DeepChild fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Switch fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Card fill:#f0fff4,stroke:#38a169,stroke-width:2px
+    style Layout fill:#f8f9fa,stroke:#cbd5e1,stroke-width:1px
+    style Sidebar fill:#f8f9fa,stroke:#cbd5e1,stroke-width:1px
+    style Content fill:#f8f9fa,stroke:#cbd5e1,stroke-width:1px
 ```
 
 ---
 
-## 🛠️ ២. ជំហានទាំង ៣ ក្នុងការបង្កើត Context (The 3 Steps)
+## 🛠️ ២. សសរស្តម្ភទាំង ៣ នៃ Context API (The 3 Core Pillars)
 
 ```
-[ជំហាន ១: createContext] ➔ [ជំហាន ២: Provider Wrap] ➔ [ជំហាន ៣: useContext]
-    (បង្កើតបំពង់បង្ហូរ)           (បញ្ជូនទិន្នន័យ)              (ទាញយកមកប្រើ)
+[ជំហាន ១: createContext] ➔ [ជំហាន ២: Context.Provider] ➔ [ជំហាន ៣: useContext]
+    (បង្កើតបំពង់បង្ហូរ)              (ផ្សាយទិន្នន័យ)                 (ទាញយកមកប្រើប្រាស់)
 ```
 
-1. **`createContext()` :** បង្កើត Context Container ថ្មីមួយ។
-2. **`<Context.Provider value={...}>` :** រុំព័ទ្ធ Component Tree ហើយបញ្ជូន State តាមរយៈ `value` prop។
-3. **`useContext(Context)` :** Component កូនទាញយកទិន្នន័យពី Context មកប្រើផ្ទាល់។
+### ១. `createContext(defaultValue)`
+បង្កើត Context Object មួយ។ `defaultValue` គឺសម្រាប់ជា **Fallback** ក្នុងករណី Component មួយហៅប្រើ Context ដោយមិនមាន Provider រុំព័ទ្ធពីលើ។ ជាទូទៅគេកំណត់វាជា `null` ដើម្បីងាយស្រួលឆែក Error។
+
+### ២. `<Context.Provider value={currentValue}>`
+ជា React Component ដែលរុំព័ទ្ធ Subtree នៃ Components របស់អ្នក។ រាល់ Consumer ទាំងអស់ដែលនៅខាងក្រោម Provider នេះ នឹងទទួលបានតម្លៃដែលបញ្ជូនតាមរយៈ `value` prop។
+
+### ៣. `useContext(ContextObject)`
+ជា React Hook ដែលអនុញ្ញាតឱ្យ Functional Component ណាមួយអាចអានតម្លៃបច្ចុប្បន្នពី Provider ដែលនៅជិតបំផុតពីខាងលើ។
 
 ---
 
-## 💻 ៣. កូដជាក់ស្តែង ៖ បង្កើត `ThemeContext.jsx`
+## 💻 ៣. ការអនុវត្តជាក់ស្តែង ៖ បង្កើត `ThemeContext.jsx`
 
-រៀបចំ Context ឱ្យស្អាតក្នុង file ដាច់ដោយឡែក (ឧ. `src/context/ThemeContext.jsx`)៖
+យើងរៀបចំ Context ឱ្យមានស្តង់ដារ Clean Architecture ក្នុងឯកសារដាច់ដោយឡែក `src/context/ThemeContext.jsx`៖
 
 ```jsx
 // src/context/ThemeContext.jsx
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useMemo } from 'react';
 
-// ១. បង្កើត Context
+// ១. បង្កើត Context Container
 export const ThemeContext = createContext(null);
 
-// ២. បង្កើត Provider Component
+// ២. បង្កើត Custom Provider Component
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('light'); // 'light' | 'dark'
 
+  // Function សម្រាប់ Toggle Theme
   const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
+  // ✅ ប្រើ useMemo ដើម្បីការពារ Unnecessary Re-renders
+  const contextValue = useMemo(() => {
+    return {
+      theme,
+      isDark: theme === 'dark',
+      toggleTheme,
+    };
+  }, [theme]);
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-// ៣. បង្កើត Custom Hook ងាយស្រួលហៅប្រើ
+// ៣. បង្កើត Safe Custom Hook (Fail-fast pattern)
 export function useTheme() {
   const context = useContext(ThemeContext);
+
+  // 🛡️ Error Safety Guard: បញ្ជាក់ប្រាប់ Developer ភ្លាមៗបើភ្លេច Provider
   if (!context) {
-    throw new Error('useTheme ត្រូវតែប្រើនៅក្នុង <ThemeProvider>');
+    throw new Error('useTheme() ត្រូវតែប្រើប្រាស់នៅខាងក្នុង <ThemeProvider> ប៉ុណ្ណោះ!');
   }
+
   return context;
 }
 ```
 
 ---
 
-## 🚀 ៤. កូដពេញលេញ ៖ Theme Switcher App
+## 🚀 ៤. ការផ្គុំ Components និងការហៅប្រើប្រាស់ក្នុង App
+
+ខាងក្រោមនេះជា App ពេញលេញដែលបង្ហាញពីរបៀបប្រើ `ThemeProvider` រួមជាមួយ Child Components ជាច្រើន៖
 
 ```jsx
+// src/App.jsx
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 
+// ── COMPONENT ១: HEADER ──
 function Header() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, isDark, toggleTheme } = useTheme();
 
   return (
-    <header className="p-4 border-b flex justify-between items-center">
-      <h1 className="font-bold text-sm">🌐 Global Theme Context</h1>
+    <header className="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900 transition-colors">
+      <div className="flex items-center gap-2">
+        <span className="text-xl">🌐</span>
+        <h1 className="font-bold text-slate-800 dark:text-white text-sm">
+          React Global Theme Switcher
+        </h1>
+      </div>
+
       <button
         onClick={toggleTheme}
-        className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow"
+        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center gap-2"
       >
-        ប្តូរពណ៌: {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
+        <span>{isDark ? '☀️' : '🌙'}</span>
+        <span>ប្តូរទៅ {isDark ? 'Light Mode' : 'Dark Mode'}</span>
       </button>
     </header>
   );
 }
 
-function MainContent() {
-  const { theme } = useTheme();
+// ── COMPONENT ២: MAIN CONTENT CARD ──
+function ProfileCard() {
+  const { theme, isDark } = useTheme();
 
   return (
     <div
-      className={`p-8 rounded-2xl m-4 text-center transition-colors ${
-        theme === 'dark'
-          ? 'bg-slate-900 text-white border border-slate-700'
-          : 'bg-slate-100 text-slate-800 border border-slate-200'
+      className={`p-6 rounded-2xl m-4 border transition-all duration-300 ${
+        isDark
+          ? 'bg-slate-800 border-slate-700 text-white shadow-2xl'
+          : 'bg-white border-slate-200 text-slate-800 shadow-md'
       }`}
     >
-      <h3 className="font-black text-xl">Current Theme: {theme.toUpperCase()}</h3>
-      <p className="text-xs opacity-75 mt-2">
-        Component នេះអាន Theme ពី Context ដោយផ្ទាល់ មិនបាច់ឆ្លងកាត់ Props ឡើយ!
-      </p>
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center font-bold text-lg">
+          JD
+        </div>
+        <div>
+          <h2 className="font-bold text-base">John Doe</h2>
+          <p className="text-xs opacity-70">Senior React Engineer</p>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-between items-center text-xs">
+        <span className="opacity-75">ស្ថានភាព Theme បច្ចុប្បន្ន:</span>
+        <span className="font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">
+          {theme}
+        </span>
+      </div>
     </div>
   );
 }
 
+// ── ROOT APP COMPONENT ──
 export default function App() {
   return (
     <ThemeProvider>
-      <div className="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="min-h-[400px] max-w-md mx-auto my-8 bg-slate-50 dark:bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800">
         <Header />
-        <MainContent />
+        <main className="p-2">
+          <ProfileCard />
+        </main>
       </div>
     </ThemeProvider>
   );
@@ -152,11 +213,37 @@ export default function App() {
 
 ---
 
-## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+## 🔍 ៥. ការពន្យល់កូដមួយជំហានៗ (Line-by-Line Breakdown)
 
-| មុខងារ | កូដសរសេរ | តួនាទីជាក់ស្តែង |
+1. `export const ThemeContext = createContext(null);`
+   - បង្កើត Context Container។ យើងដាក់ `null` ជា default ដើម្បីឱ្យ Custom Hook អាចឆែកដឹងថា តើ component កំពុងរត់ក្នុង Provider ឬអត់។
+2. `const [theme, setTheme] = useState('light');`
+   - រក្សាទុក State ពិតប្រាកដនៅខាងក្នុង `ThemeProvider`។
+3. `const contextValue = useMemo(() => ({ theme, isDark, toggleTheme }), [theme]);`
+   - ចងក្រង State និង Handlers ចូលក្នុង Object តែមួយ។ ដោយសារមាន `useMemo` Object នេះនឹងមិនត្រូវបានបង្កើតឡើងវិញរាល់ពេល Parent component re-render ឡើយ ដរាបណា `theme` មិនទាន់ផ្លាស់ប្តូរ។
+4. `if (!context) throw new Error(...)`
+   - **Fail-Fast Error Handling:** បើ Developer ម្នាក់ភ្លេច wrap `<ThemeProvider>` នៅពីលើ ហើយព្យាយាមហៅ `useTheme()` កម្មវិធីនឹងផ្តល់សារព្រមានច្បាស់លាស់ភ្លាមៗ មិនបណ្តោយឱ្យកើត Bug ស្ងាត់ៗឡើយ។
+
+---
+
+## ⚡ ៦. ការយល់ដឹងពី Re-render Gotcha & Best Practices
+
+> [!WARNING]
+> **Context Re-render Pitfall ៖**  
+> នៅពេលតម្លៃ `value` ក្នុង Provider ផ្លាស់ប្តូរ **រាល់ Component ទាំងអស់ដែលហៅ `useContext` នឹងត្រូវ Re-render ឡើងវិញដោយស្វ័យប្រវត្តិ** ទោះបីជា Component នោះប្រើប្រាស់តែមួយចំណែកតូចនៃ Data ក៏ដោយ!
+
+### 💡 ដំណោះស្រាយដើម្បីបង្កើន Performance:
+1. **កុំដាក់ State ទាំងអស់ចូលក្នុង Context តែមួយ:** បំបែកជា Contexts តូចៗតាមមុខងារ (ឧ. `AuthContext`, `ThemeContext`, `CartContext`)។
+2. **បំបែក State និង Dispatch (Actions):** បង្កើត `ThemeStateContext` សម្រាប់តែទិន្នន័យ និង `ThemeDispatchContext` សម្រាប់តែ Functions ដូចជា `toggleTheme`។ វិធីនេះ Components ដែលត្រូវការតែប៊ូតុងចុច នឹងមិនចាំបាច់ Re-render ពេល State ផ្លាស់ប្តូរឡើយ!
+3. **ប្រើ `useMemo` សម្រាប់ Object Value:** តែងតែរុំ Object នៃ `value` prop ដោយ `useMemo` ជានិច្ច។
+
+---
+
+## 🧠 ៧. សង្ខេប Mental Model ងាយចាំ (Quick Reference)
+
+| ធាតុផ្សំ | កូដសរសេរ | តួនាទីជាក់ស្តែង |
 | :--- | :--- | :--- |
-| **បង្កើត Context** | `createContext(null)` | បង្កើតបំពង់បង្ហូរទិន្នន័យ |
-| **បញ្ជូនទិន្នន័យ** | `<Context.Provider value={{...}}>` | រុំព័ទ្ធ Component Tree ហើយបញ្ជូនតម្លៃ |
-| **ទាញយកទិន្នន័យ** | `useContext(Context)` | អានទិន្នន័យពី Provider ខាងលើ |
-| **Custom Hook** | `export function useTheme() { ... }` | ផ្តល់ភាពងាយស្រួល និងសុវត្ថិភាពខ្ពស់ |
+| **Context Instance** | `const Ctx = createContext(null)` | បំពង់បង្ហូរទិន្នន័យ (Data Channel) |
+| **Provider** | `<Ctx.Provider value={value}>` | អ្នកផ្សាយ និងគ្រប់គ្រង State ទៅកាន់ Subtree |
+| **Consumer Hook** | `const data = useContext(Ctx)` | អ្នកចាប់សញ្ញា និង Subscribe យក State |
+| **Custom Hook Guard** | `export function useMyCtx() { ... }` | ផ្តល់ Developer Experience ល្អ និងសុវត្ថិភាពខ្ពស់ |
