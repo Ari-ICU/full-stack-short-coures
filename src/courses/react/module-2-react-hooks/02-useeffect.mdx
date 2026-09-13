@@ -1,0 +1,75 @@
+---
+title: "useEffect: Side Effects & Lifecycle Synchronization"
+description: "ស្វែងយល់ពី Side Effects ក្នុង React, Dependency Array Semantics, Cleanup Functions សម្រាប់ទប់ស្កាត់ Memory Leaks, និងវិធានការចៀសវាង Infinite Loops។"
+objectives:
+  - "យល់ច្បាស់ពីភាពខុសគ្នារវាង Pure Rendering និង Side Effects"
+  - "ក្តាប់បាននូវ Dependency Array ទាំង ៣ ទម្រង់ (No deps, [], [deps])"
+  - "ចេះសរសេរ Cleanup Function សម្រាប់ Event Listeners, Timers និង Subscriptions"
+  - "យល់ពីមូលហេតុ និងវិធីដោះស្រាយ Infinite Re-rendering Loops"
+module: module-2-react-hooks
+order: 2
+quiz:
+  - question: "តើនៅពេលណាដែល Cleanup Function ក្នុង `useEffect` ត្រូវបានហៅដំណើរការ?"
+    options:
+      - "នៅពេល Component ត្រូវ Unmount ចេញពី DOM ឬមុនពេល Effect ដំណើរការម្តងទៀតជាមួយ Dependencies ថ្មី"
+      - "នៅពេល User Refresh browser តែប៉ុណ្ណោះ"
+      - "នៅពេល Render លើកដំបូង"
+      - "នៅពេលមាន Error កើតឡើង"
+    correctAnswer: 1
+    explanation: "Cleanup Function ដំណើរការមុនពេល Effect ត្រូវ run សារជាថ្មី ឬនៅពេល Component ត្រូវ Unmount ដើម្បីលុប Timers/Listeners ការពារ Memory Leak។"
+  - question: "តើ `useEffect(() => { ... }, [])` (Empty Dependency Array) ដំណើរការនៅពេលណា?"
+    options:
+      - "ដំណើរការតែម្តងគត់បន្ទាប់ពី Component Mount លើកដំបូង"
+      - "ដំណើរការរាល់ពេល State ណាមួយផ្លាស់ប្តូរ"
+      - "មិនដែលដំណើរការឡើយ"
+      - "ដំណើរការតែពេល User ចុច Mouse"
+    correctAnswer: 1
+    explanation: "Empty array `[]` មានន័យថា Effect មិនពឹងផ្អែកលើ State/Props ណាឡើយ ដូច្នេះវា run តែម្តងគត់នៅពេល Component Mount ដំបូង។"
+---
+
+# 🔄 useEffect & Synchronization
+
+`useEffect` អនុញ្ញាតឱ្យ Functional Component អាចធ្វើការងារជាមួយ **Side Effects** ដូចជាការតភ្ជាប់ Network, ការកែប្រែ Document Title, ការកំណត់ Timers, ឬការភ្ជាប់ Browser Event Listeners។
+
+```mermaid
+flowchart TD
+    Render["១. Component Render JSX"]
+    DOMUpdate["២. React Update Browser DOM & Screen Paint"]
+    RunEffect["៣. useEffect Callback ដំណើរការ"]
+    DepsChange{"៤. តើ Dependencies ប្រែប្រួលទេ?"}
+    Cleanup["៥. Run Cleanup Function ចាស់"]
+    ReRun["៦. Run Effect ថ្មី"]
+
+    Render --> DOMUpdate --> RunEffect
+    RunEffect --> DepsChange
+    DepsChange -- "បាទ/ចាស (Changed)" --> Cleanup --> ReRun
+    DepsChange -- "ទេ (Same)" --> Idle["រង់ចាំ State បន្ទាប់"]
+```
+
+---
+
+## ការប្រើប្រាស់ Cleanup Function
+
+```tsx
+import { useState, useEffect } from "react";
+
+export function WindowSizeTracker() {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  return (
+    <div className="p-4 bg-slate-900 rounded-xl text-white">
+      ទទឹងអេក្រង់បច្ចុប្បន្ន: <span className="font-bold text-indigo-400">{windowWidth}px</span>
+    </div>
+  );
+}
+```

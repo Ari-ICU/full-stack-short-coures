@@ -1,0 +1,101 @@
+---
+title: "Events: Handling User Interactions & SyntheticEvents"
+description: "ស្វែងយល់ពីប្រព័ន្ធ SyntheticEvent របស់ React, Event Handlers, ការបញ្ជូន Arguments, e.preventDefault(), e.stopPropagation(), និង Event Delegation។"
+objectives:
+  - "យល់ដឹងពីប្រព័ន្ធ React SyntheticEvent ដែលធ្វើការ Cross-Browser"
+  - "ចេះសរសេរ Inline Handlers និង Named Event Functions"
+  - "ចេះបញ្ជូន Custom Arguments ទៅកាន់ Event Handlers"
+  - "ចេះគ្រប់គ្រង Form Default Submission និង Event Bubbling"
+module: module-1-fundamentals
+order: 5
+quiz:
+  - question: "តើ React SyntheticEvent ជាអ្វី?"
+    options:
+      - "ជា Cross-browser Wrapper ស្រោបលើ Native Browser Event ដើម្បីឱ្យ Event APIs ដំណើរការដូចគ្នានៅលើគ្រប់ Browsers"
+      - "ជា Event ដែលកើតឡើងតែលើ Robot ប៉ុណ្ណោះ"
+      - "ជា function សម្រាប់ download video"
+      - "ជាកូដ CSS សម្រាប់ធ្វើ Animation"
+    correctAnswer: 1
+    explanation: "SyntheticEvent ផ្តល់នូវ Interface ដូចគ្នានឹង Native DOM Event ដែរ ប៉ុន្តែធានាថាដំណើរការដូចគ្នា 100% លើ Chrome, Safari, Firefox, Edge។"
+---
+
+# ⚡ React Event Handling & SyntheticEvents
+
+React ប្រើប្រព័ន្ធ **SyntheticEvent** ដែលជា Wrapper ស្រោបពីលើ Native Browser Events ដើម្បីធានាថាកូដ Event ដំណើរការដូចគ្នាបេះបិទលើគ្រប់ Browser ទាំងអស់។
+
+```mermaid
+flowchart TD
+    UserClick["User ចុច Mouse (Browser Native Event)"]
+    Delegation["React Root Event Listener (Event Delegation)"]
+    Synthetic["React បង្កើត SyntheticEvent Wrapper"]
+    Handler["ហៅ Function Handler របស់អ្នក (onClick, onChange, ...)"]
+
+    UserClick --> Delegation --> Synthetic --> Handler
+```
+
+---
+
+## ១. Event Handlers និងការបញ្ជូន Arguments
+
+```tsx
+import { MouseEvent } from "react";
+
+export function EventDemo() {
+  const handleSimpleClick = (e: MouseEvent<HTMLButtonElement>) => {
+    console.log("Button clicked at coords:", e.clientX, e.clientY);
+  };
+
+  const handleDeleteItem = (id: string, name: string, e: MouseEvent) => {
+    e.stopPropagation(); // ទប់ស្កាត់ Event Bubbling
+    console.log(`Deleting ${name} (ID: ${id})`);
+  };
+
+  return (
+    <div className="space-y-4">
+      <button onClick={handleSimpleClick} className="px-4 py-2 bg-indigo-600 text-white rounded-lg">
+        Click Me
+      </button>
+
+      <button
+        onClick={(e) => handleDeleteItem("item-101", "Product A", e)}
+        className="px-4 py-2 bg-rose-600 text-white rounded-lg"
+      >
+        Delete Product
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## ២. Form Submission & `e.preventDefault()`
+
+```tsx
+import { FormEvent, useState } from "react";
+
+export function SearchBox() {
+  const [query, setQuery] = useState("");
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // 🛑 ទប់ស្កាត់ Browser Refresh
+    if (!query.trim()) return;
+    console.log("Searching for:", query);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="ស្វែងរក..."
+        className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+      />
+      <button type="submit" className="px-4 py-2 bg-emerald-600 text-white rounded-lg">
+        ស្វែងរក
+      </button>
+    </form>
+  );
+}
+```

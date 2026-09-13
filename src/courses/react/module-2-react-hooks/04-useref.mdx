@@ -1,0 +1,68 @@
+---
+title: "useRef: DOM References & Mutable Values"
+description: "ស្វែងយល់ពី useRef Hook — ការភ្ជាប់ទៅកាន់ Browser DOM Elements ដោយផ្ទាល់ (Focus, Scroll), ការរក្សាទុក Mutable Values ដោយមិន trigger Re-render, និងភាពខុសគ្នារវាង Ref និង State។"
+objectives:
+  - "យល់ដឹងពីគោលបំណងចម្បងពីរនៃ useRef (DOM Access & Persisting Values)"
+  - "ចេះប្រើ Ref ដើម្បី Focus Input, Play/Pause Video, និង Scroll DOM"
+  - "ចេះប្រើ Ref ផ្ទុក Timer IDs និង Previous State Values"
+  - "បែងចែកឱ្យដាច់រវាង `useState` (Trigger Render) និង `useRef` (No Render)"
+module: module-2-react-hooks
+order: 4
+quiz:
+  - question: "តើការកែប្រែតម្លៃ `ref.current = newValue` នឹងបណ្តាលឱ្យ Component Re-render ដែរឬទេ?"
+    options:
+      - "ទេ! ការកែប្រែ `.current` មិន Trigger ការ Re-render ឡើយ"
+      - "បាទ/ចាស! វានឹង Re-render ដូច useState ដែរ"
+      - "Re-render លុះត្រាតែ ref ជាលេខ"
+      - "Re-render តែលើ Mobile"
+    correctAnswer: 1
+    explanation: "`useRef` គឺជា JavaScript Object ធម្មតា `{ current: initialValue }`។ ការប្តូរតម្លៃរបស់វាគឺ Silent ហើយមិនបង្កឱ្យមាន Re-render ឡើយ។"
+---
+
+# 📌 useRef: DOM Access & Persistent Values
+
+`useRef` គឺជា Hook ពិសេសដែលផ្តល់ឱ្យយើងនូវ **Generic Mutable Container** ដែលរក្សាតម្លៃនៅគង់វង្សឆ្លងកាត់គ្រប់ Render cycles ទាំងអស់ដោយ **មិន Trigger ការ Re-render ឡើយ**។
+
+---
+
+## ការចាប់យក DOM Element & Persistent Values
+
+```tsx
+import { useState, useRef } from "react";
+
+export function Stopwatch() {
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startTimer = () => {
+    if (timerRef.current !== null) return;
+    setIsRunning(true);
+    timerRef.current = setInterval(() => {
+      setSeconds((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsRunning(false);
+  };
+
+  return (
+    <div className="p-6 bg-slate-900 rounded-xl text-center space-y-4 text-white">
+      <p className="text-4xl font-mono font-bold text-indigo-400">{seconds}s</p>
+      <div className="flex justify-center gap-2">
+        <button onClick={startTimer} disabled={isRunning} className="px-4 py-2 bg-emerald-600 rounded-lg disabled:opacity-50">
+          Start
+        </button>
+        <button onClick={stopTimer} disabled={!isRunning} className="px-4 py-2 bg-rose-600 rounded-lg disabled:opacity-50">
+          Stop
+        </button>
+      </div>
+    </div>
+  );
+}
+```

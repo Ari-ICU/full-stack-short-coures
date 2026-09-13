@@ -1,0 +1,114 @@
+---
+title: "State: Component Memory & Immutability"
+description: "ស្វែងយល់ពី State ក្នុង React, ភាពខុសគ្នារវាង State និង Props, useState Hook, Asynchronous Batching, និងវិធានការ Immutability លើ Objects និង Arrays។"
+objectives:
+  - "យល់ច្បាស់ពី State ជា 'Component Memory' ដែល trigger ការ Re-render"
+  - "បែងចែកដាច់ស្រឡះរវាង Props (External) និង State (Internal)"
+  - "ចេះប្រើ Updater Function (prev => prev + 1) ដើម្បីដោះស្រាយ Async Batching"
+  - "អនុវត្ត Immutability ជាមួយ Spread Operator (...) លើ Object និង Array"
+module: module-1-fundamentals
+order: 4
+quiz:
+  - question: "តើអ្វីដែលកើតឡើងនៅពេលដែល State របស់ Component ត្រូវបានផ្លាស់ប្តូរតាមរយៈ setState?"
+    options:
+      - "React នឹង Re-render Component នោះ (និង Child Components របស់វា) ដើម្បី Update UI លើ Screen"
+      - "Browser នឹង Refresh ទំព័រទាំងមូលឡើងវិញ"
+      - "ទិន្នន័យក្នុង Database នឹងត្រូវលុប"
+      - "គ្មានអ្វីកើតឡើងទេរហូតដល់ User ចុច Save"
+    correctAnswer: 1
+    explanation: "ការផ្លាស់ប្តូរ State គឺជា Trigger សំខាន់ដែលប្រាប់ React ឱ្យ Re-render Component ដើម្បីឆ្លុះបញ្ចាំងទិន្នន័យថ្មីលើ Screen។"
+  - question: "តើកូដមួយណាដែលជាវិធីត្រឹមត្រូវក្នុងការ Update Array State `const [items, setItems] = useState(['A', 'B'])`?"
+    options:
+      - "`setItems(prev => [...prev, 'C'])` (បង្កើត Array ថ្មីតាម Spread Operator)"
+      - "`items.push('C'); setItems(items);` (កែប្រែ Array ចាស់ដោយផ្ទាល់)"
+      - "`items[2] = 'C';`"
+      - "`delete items[0];`"
+    correctAnswer: 1
+    explanation: "React តម្រូវឱ្យមាន Immutability — យើងមិនត្រូវ mutate array ចាស់ដោយ `.push()` ឡើយ តែត្រូវបង្កើត Array ថ្មីដោយ Spread `[...prev, 'C']`។"
+---
+
+# 🧠 React State & Immutability
+
+ប្រសិនបើ **Props** ប្រៀបដូចជា Arguments ដែលបញ្ជូនចូលពីក្រៅ នោះ **State** គឺជា **អង្គចងចាំផ្ទៃក្នុង (Internal Memory)** របស់ Component។
+
+```mermaid
+sequenceDiagram
+    participant User as អ្នកប្រើប្រាស់ (User)
+    participant Comp as React Component
+    participant VDOM as Virtual DOM
+    participant DOM as Browser DOM
+
+    User->>Comp: ចុចប៊ូតុង (Click Event)
+    Comp->>Comp: setCount(prev => prev + 1)
+    Note over Comp: State ប្រែប្រួល (State Change)
+    Comp->>VDOM: Re-render Virtual DOM
+    VDOM->>DOM: Diffing & Commit Minimal Real DOM Update
+    DOM-->>User: UI បង្ហាញលេខថ្មីភ្លាមៗ
+```
+
+---
+
+## ១. useState Mechanics & Functional Updates
+
+```tsx
+import { useState } from "react";
+
+export function Counter() {
+  const [count, setCount] = useState<number>(0);
+
+  const handleIncrementTriple = () => {
+    // ✅ ត្រឹមត្រូវ: ប្រើ Functional Updater ឡើងបាន +3 យ៉ាងសុក្រឹត
+    setCount((prev) => prev + 1);
+    setCount((prev) => prev + 1);
+    setCount((prev) => prev + 1);
+  };
+
+  return (
+    <div className="p-6 bg-slate-900 rounded-xl text-center">
+      <p className="text-3xl font-bold text-indigo-400 mb-4">{count}</p>
+      <button
+        onClick={handleIncrementTriple}
+        className="px-4 py-2 bg-indigo-600 text-white rounded-lg"
+      >
+        +3 (Triple Increment)
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+## ២. Immutability ជាមួយ Object និង Array
+
+```tsx
+interface Todo {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export function TodoManager() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  // ១. Add Item (Spread Operator)
+  const addTodo = (title: string) => {
+    const newTodo: Todo = { id: crypto.randomUUID(), title, completed: false };
+    setTodos((prev) => [...prev, newTodo]);
+  };
+
+  // ២. Toggle Item (.map)
+  const toggleTodo = (id: string) => {
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+    );
+  };
+
+  // ៣. Delete Item (.filter)
+  const deleteTodo = (id: string) => {
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  return <div className="space-y-2">{/* Render Todo items */}</div>;
+}
+```

@@ -1,0 +1,74 @@
+---
+title: "useState: Deep Dive & State Best Practices"
+description: "ស្វែងយល់ស៊ីជម្រៅពី useState Hook — Lazy Initial State, React 18 Automatic Batching, ការបែងចែក State, និងការចៀសវាង Redundant State។"
+objectives:
+  - "ចេះប្រើ Lazy Initial State សម្រាប់គណនាទិន្នន័យធ្ងន់ៗពេល First Render"
+  - "យល់ដឹងពីយន្តការ Automatic Batching ក្នុង React 18+"
+  - "ចេះបំបែក State និងចៀសវាង Redundant Derived State"
+  - "អនុវត្ត Best Practices ក្នុងការគ្រប់គ្រង Local State"
+module: module-2-react-hooks
+order: 1
+quiz:
+  - question: "តើ Lazy Initial State `useState(() => getHeavyData())` ផ្តល់អត្ថប្រយោជន៍អ្វី?"
+    options:
+      - "Function គណនានឹងដំណើរការតែម្តងគត់នៅពេល Initial Mount (មិនដំណើរការសារឡើងវិញនៅគ្រប់ Re-render ឡើយ)"
+      - "ជួយឱ្យ State update លឿនជាងមុន ១០០ ដង"
+      - "ជួយ Save ទិន្នន័យទៅ LocalStorage ដោយស្វ័យប្រវត្តិ"
+      - "សម្រាប់តែលេខ Float ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "បើបញ្ជូន function `() => ...` ទៅ `useState` React នឹង Execute វាតែពេល Initial Render ដំបូងបង្អស់ប៉ុណ្ណោះ ដែលជួយសន្សំ CPU ពេលអាន JSON ធំៗ ឬ localStorage។"
+  - question: "តើអ្វីទៅជា Redundant State ដែលយើងគួរចៀសវាង?"
+    options:
+      - "ការបង្កើត State សម្រាប់ទិន្នន័យដែលអាចគណនាចេញពី Props ឬ State ផ្សេងទៀតបាន (Derived State)"
+      - "State ដែលមានឈ្មោះវែងពេក"
+      - "State ដែលជា Boolean"
+      - "State ដែលសរសេរក្នុង TypeScript"
+    correctAnswer: 1
+    explanation: "ប្រសិនបើតម្លៃមួយអាចគណនាបានពី State ឬ Props ស្រាប់ (ឧ. `fullName = firstName + ' ' + lastName`) យើងមិនគួរបង្កើត `const [fullName, setFullName]` ឡើយ ព្រោះអាចធ្វើឱ្យ State មិនស៊ីចង្វាក់គ្នា (Out of sync)។"
+---
+
+# 🎣 useState Deep Dive & Best Practices
+
+`useState` គឺជា Hook មូលដ្ឋានបំផុតនៅក្នុង React សម្រាប់បន្ថែម Local State ទៅកាន់ Functional Component។
+
+---
+
+## ១. Lazy Initial State (សម្រាប់កិច្ចការធ្ងន់ៗ)
+
+ប្រសិនបើ Initial State របស់អ្នកត្រូវអានពី `localStorage` ឬ Parse JSON ធំៗ ចូរប្រើ **Lazy Initializer** ដោយបញ្ជូន Function៖
+
+```tsx
+import { useState } from "react";
+
+export function HeavyComponent() {
+  const [savedConfig, setSavedConfig] = useState(() => {
+    try {
+      const item = localStorage.getItem("app_config");
+      return item ? JSON.parse(item) : { theme: "dark", zoom: 100 };
+    } catch {
+      return { theme: "dark", zoom: 100 };
+    }
+  });
+
+  return <div>Config Theme: {savedConfig.theme}</div>;
+}
+```
+
+---
+
+## ២. ចៀសវាង Redundant State (ប្រើ Derived State)
+
+```tsx
+export function CartSummary({ items }: { items: { id: string; price: number; quantity: number }[] }) {
+  // ✅ ត្រឹមត្រូវ: គណនាជា Derived Variable ដោយផ្ទាល់ពេល Render
+  const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItemsCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  return (
+    <div className="p-4 bg-slate-900 rounded-xl">
+      <p>សរុបចំនួនទំនិញ: {totalItemsCount}</p>
+      <p className="text-xl font-bold text-emerald-400">តម្លៃសរុប: ${totalPrice.toFixed(2)}</p>
+    </div>
+  );
+}
+```

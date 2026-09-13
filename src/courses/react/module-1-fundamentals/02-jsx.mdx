@@ -1,0 +1,128 @@
+---
+title: "JSX: Syntax, Rules & Transpilation"
+description: "ស្វែងយល់ស៊ីជម្រៅពី JSX Syntax — របៀបដែល JSX ត្រូវបាន Transpile ទៅជា React.createElement, វិធានមាសទាំង ៣, ការបង្កប់ Dynamic Expressions, និង React Fragments (<></>)។"
+objectives:
+  - "យល់ច្បាស់ពីដំណើរការ Transpilation របស់ JSX ទៅជា JavaScript Object"
+  - "ចេះអនុវត្ត 3 Core Rules របស់ JSX (Single Root, Self-Closing, camelCase)"
+  - "ចេះបង្កប់ JavaScript Expressions ក្នុង Curly Braces {}"
+  - "យល់ពីមូលហេតុនៃការប្រើប្រាស់ React Fragments (<>...</>)"
+module: module-1-fundamentals
+order: 2
+quiz:
+  - question: "តើ JSX ត្រូវបាន Convert ទៅជាអ្វីនៅពេល Build ដោយ Compiler (Vite/Babel)?"
+    options:
+      - "React.createElement() Function Calls / Virtual DOM Objects"
+      - "HTML string សុទ្ធ"
+      - "SQL Database Queries"
+      - "Binary Assembly Machine Code"
+    correctAnswer: 1
+    explanation: "JSX គ្រាន់តែជា Syntactic Sugar សម្រាប់ `React.createElement()` ដែលបង្កើត Virtual DOM JavaScript Objects។"
+  - question: "ហេតុអ្វីបានជាយើងត្រូវប្រើ `className` ជំនួសឱ្យ `class` ក្នុង JSX?"
+    options:
+      - "ដោយសារ `class` គឺជា JavaScript Reserved Keyword សម្រាប់បង្កើត Class"
+      - "ដើម្បីឱ្យ CSS ដំណើរការលឿនជាងមុន"
+      - "ព្រោះ Browser មិនស្គាល់ពាក្យ class"
+      - "គ្រាន់តែជាចំណង់ចំណូលចិត្ត"
+    correctAnswer: 1
+    explanation: "ក្នុង JS ពាក្យ `class` ត្រូវបានកក់ទុក (Reserved Word) ដូច្នេះ React ប្រើ `className` សម្រាប់ HTML class attribute។"
+  - question: "តើ Fragment `<>...</>` ជួយដោះស្រាយបញ្ហាអ្វីខ្លះ?"
+    options:
+      - "អនុញ្ញាតឱ្យ return Elements ច្រើនទន្ទឹមគ្នាដោយមិនបង្កើត Extra DOM Node (<div>) ឡើយ"
+      - "ជួយ load រូបភាពបានលឿនជាងមុន"
+      - "ជួយឱ្យ Component មាន State ដោយស្វ័យប្រវត្តិ"
+      - "ជួយភ្ជាប់ API ដោយស្វ័យប្រវត្តិ"
+    correctAnswer: 1
+    explanation: "Fragment ជួយរុំ Multiple Elements ដោយមិនបន្ថែម <div> ឥតប្រយោជន៍ទៅកាន់ Browser DOM Tree ឡើយ។"
+---
+
+# 🎭 JSX Syntax & Transpilation
+
+**JSX (JavaScript XML)** គឺជា Syntax Extension សម្រាប់ JavaScript ដែលអនុញ្ញាតឱ្យយើងសរសេរ HTML-like markup នៅខាងក្នុង JavaScript Code។
+
+```mermaid
+flowchart LR
+    JSX["JSX Code<br/><code>&lt;h1 className='title'&gt;Hello&lt;/h1&gt;</code>"]
+    Compiler["Compiler (Babel / SWC / Vite)"]
+    JS["JS Call<br/><code>React.createElement('h1', {className: 'title'}, 'Hello')</code>"]
+    VDOM["Virtual DOM Node (JS Object)"]
+    RealDOM["Real Browser DOM"]
+
+    JSX --> Compiler --> JS --> VDOM --> RealDOM
+```
+
+---
+
+## ១. វិធានមាសទាំង ៣ នៃ JSX (The 3 Golden Rules)
+
+### វិធានទី ១: ត្រូវតែមាន Single Root Element ឬ Fragment
+JavaScript Function មិនអាច return តម្លៃ ២ ដំណាលគ្នាដោយគ្មាន wrapper ឡើយ៖
+
+```tsx
+// ❌ INVALID: Error!
+export function BadComponent() {
+  return (
+    <h1>ចំណងជើង</h1>
+    <p>អត្ថបទ</p>
+  );
+}
+
+// ✅ VALID: ប្រើ React Fragment (<>...</>)
+export function GoodComponent() {
+  return (
+    <>
+      <h1 className="text-xl font-bold">ចំណងជើង</h1>
+      <p className="text-slate-400">អត្ថបទពន្យល់</p>
+    </>
+  );
+}
+```
+
+### វិធានទី ២: ត្រូវបិទគ្រប់ Tags ទាំងអស់ (Self-Closing Tags)
+HTML tags ណាដែលគ្មាន children ត្រូវតែបិទដោយសញ្ញា `/>` ជានិច្ច៖
+
+```tsx
+// ✅ ត្រូវបិទជានិច្ច
+<img src="/logo.png" alt="Logo" />
+<input type="text" placeholder="Enter name" />
+<br />
+<hr />
+```
+
+### វិធានទី ៣: ប្រើ camelCase សម្រាប់ Attributes ស្ទើរតែទាំងអស់
+
+| Standard HTML | React JSX | មូលហេតុ |
+| :--- | :--- | :--- |
+| `class` | `className` | `class` ជា JS Reserved Word |
+| `for` | `htmlFor` | `for` ជា JS Loop Keyword |
+| `onclick` | `onClick` | camelCase Event handler |
+| `tabindex` | `tabIndex` | camelCase DOM attribute |
+
+---
+
+## ២. ការបង្កប់ JavaScript Expressions ក្នុង JSX `{}`
+
+យើងអាចសរសេរ JavaScript Expression ណាមួយដែលមាន return value នៅខាងក្នុងសញ្ញា `{ }` បាន៖
+
+```tsx
+export function ProductPriceCard() {
+  const productName = "Mechanical Keyboard";
+  const price = 120;
+  const discountPercent = 15;
+  const isAvailable = true;
+
+  return (
+    <div className="p-6 bg-slate-900 rounded-xl text-white">
+      <h2 className="text-lg font-bold">{productName.toUpperCase()}</h2>
+      <p className="text-sm text-slate-400">
+        Status: {isAvailable ? "🟢 In Stock" : "🔴 Out of Stock"}
+      </p>
+      <div className="mt-4">
+        <span className="text-2xl font-bold text-emerald-400">
+          ${price * (1 - discountPercent / 100)}
+        </span>
+        <span className="ml-2 text-sm line-through text-slate-500">${price}</span>
+      </div>
+    </div>
+  );
+}
+```

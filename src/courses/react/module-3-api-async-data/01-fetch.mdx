@@ -1,0 +1,103 @@
+---
+title: "Fetch: Modern Native Data Fetching"
+description: "ស្វែងយល់ពីរបៀបទាញយកទិន្នន័យពី REST API ដោយប្រើប្រាស់ Native Fetch API ក្នុង React — Async/Await, Response Handling, និង AbortController សម្រាប់ Cancel Requests។"
+objectives:
+  - "យល់ដឹងពីរបៀបហៅ native window.fetch() ក្នុង useEffect"
+  - "ចេះ Handle HTTP status codes (res.ok) និង parse JSON data"
+  - "ចេះប្រើ AbortController ដើម្បី Cancel Pending Requests ពេល Component Unmount"
+  - "ចេះចាប់ Network Exceptions ជាមួយ try...catch...finally blocks"
+module: module-3-api-async-data
+order: 1
+quiz:
+  - question: "ហេតុអ្វីបានជា `fetch()` មិន throw error ដោយស្វ័យប្រវត្តិនៅពេល Server ឆ្លើយតប status 404 ឬ 500?"
+    options:
+      - "ព្រោះ `fetch()` នឹង reject promise លុះត្រាតែមាន Network Failure ឬ CORS Error ប៉ុណ្ណោះ ដូច្នេះយើងត្រូវពិនិត្យមើល `res.ok` ដោយផ្ទាល់"
+      - "ព្រោះ 404 មិនមែនជាលេខ Error"
+      - "ព្រោះ Fetch API មិនស្គាល់ status code"
+      - "ព្រោះ fetch ធ្វើការតែលើ Status 200 ប៉ុណ្ណោះ"
+    correctAnswer: 1
+    explanation: "`fetch()` Promise នឹង Resolve ជាធម្មតាដរាបណាមាន HTTP response។ យើងត្រូវពិនិត្យ `if (!res.ok) throw new Error(...)` ដើម្បីដឹងពី HTTP Errors។"
+---
+
+# 🌐 Data Fetching ជាមួយ Fetch API
+
+Native **Fetch API** គឺជាមធ្យោបាយស្តង់ដាររបស់ Browser សម្រាប់ធ្វើ HTTP Requests ទៅកាន់ RESTful API ពី React។
+
+```mermaid
+flowchart TD
+    Mount["Component Mount"] --> Effect["useEffect Triggered"]
+    Effect --> Abort["បង្កើត AbortController"]
+    Abort --> Req["fetch(url, { signal: controller.signal })"]
+    Req --> Res{"res.ok?"}
+    Res -- "Yes (200 OK)" --> JSON["res.json() -> setData(data)"]
+    Res -- "No (404/500)" --> Err["throw Error -> setError(err.message)"]
+    JSON --> StopLoading["setIsLoading(false)"]
+    Err --> StopLoading
+```
+
+---
+
+## ឧទាហរណ៍៖ Complete Data Fetching ជាមួយ AbortController
+
+```tsx
+import { useState, useEffect } from "react";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export function UserList() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadUsers() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const res = await fetch("https://jsonplaceholder.typicode.com/users", {
+          signal: controller.signal,
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        const data: User[] = await res.json();
+        setUsers(data);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          setError(err.message || "Failed to load users");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadUsers();
+
+    return () => {
+      controller.abort(); // Cancel request if component unmounts
+    };
+  }, []);
+
+  if (isLoading) return <p className="text-slate-400">កំពុងទាញយកទិន្នន័យ...</p>;
+  if (error) return <p className="text-rose-400">កំហុស: {error}</p>;
+
+  return (
+    <ul className="space-y-2">
+      {users.map((u) => (
+        <li key={u.id} className="p-3 bg-slate-800 rounded-lg text-white">
+          {u.name} ({u.email})
+        </li>
+      ))}
+    </ul>
+  );
+}
+```

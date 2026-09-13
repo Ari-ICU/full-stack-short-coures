@@ -1,0 +1,66 @@
+---
+title: "Axios: Robust HTTP Client & Interceptors"
+description: "ស្វែងយល់ពី Axios HTTP Client ក្នុង React — ការបង្កើត Base Instance, Request & Response Interceptors, Automatic JSON Parsing, និង Centralized Error Handling។"
+objectives:
+  - "យល់ដឹងពីអត្ថប្រយោជន៍របស់ Axios ធៀបនឹង Native Fetch"
+  - "ចេះបង្កើត axios.create() instance ជាមួយ baseURL និង default headers"
+  - "ចេះប្រើ Request Interceptor ដើម្បីបាញ់ Token ដោយស្វ័យប្រវត្តិ"
+  - "ចេះប្រើ Response Interceptor ដើម្បីចាប់ 401 Unauthorized Error"
+module: module-3-api-async-data
+order: 2
+quiz:
+  - question: "តើ Interceptors ក្នុង Axios ផ្តល់សារៈសំខាន់អ្វីខ្លះ?"
+    options:
+      - "អនុញ្ញាតឱ្យយើង Modify Requests មុនពេលបាញ់ចេញ (ដូចជាភ្ជាប់ JWT token) និង Catch Responses មុនពេលទៅដល់ Component (ដូចជា Handle 401 Refresh Token)"
+      - "ជួយទប់ស្កាត់ Virus ក្នុង Browser"
+      - "ជួយ Render React UI ឱ្យលឿនជាងមុន"
+      - "សម្រាប់តែប្តូរពណ៌ Button"
+    correctAnswer: 1
+    explanation: "Axios Interceptors ដើរតួជា Middleware ដែលចាប់យក Request/Response ទាំងអស់នៅចំណុចកណ្តាល (Centralized)។"
+---
+
+# 🚀 Axios HTTP Client & Interceptors
+
+**Axios** គឺជា Promise-based HTTP Client ដ៏ពេញនិយមបំផុតសម្រាប់ React ដោយសារវាមានសមត្ថភាពស្វ័យប្រវត្តិក្នុងការ Parse JSON, Timeout Control, និង Interceptors។
+
+---
+
+## ១. ការបង្កើត Centralized API Client
+
+```tsx
+// src/services/api.ts
+import axios from "axios";
+
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "https://api.example.com/v1",
+  timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Request Interceptor (Attach Bearer Token)
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response Interceptor (Global Error Handling)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.warn("Session expired. Redirecting to login...");
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+```

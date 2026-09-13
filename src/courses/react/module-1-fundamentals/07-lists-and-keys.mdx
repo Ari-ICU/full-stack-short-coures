@@ -1,0 +1,70 @@
+---
+title: "Lists & Keys: Rendering Dynamic Collections"
+description: "ស្វែងយល់ពីរបៀប Render Dynamic Collections ដោយប្រើ JavaScript .map(), សារៈសំខាន់នៃ key prop ចំពោះ Diffing Algorithm, និងមូលហេតុដែលមិនគួរប្រើ Array Index ជា Key។"
+objectives:
+  - "ចេះប្រើ Array.prototype.map() ដើម្បី Render Dynamic Lists ក្នុង JSX"
+  - "យល់ច្បាស់ពីយន្តការ Reconciliation / Diffing Algorithm របស់ React"
+  - "ដឹងពីមូលហេតុច្បាស់លាស់ដែលមិនត្រូវប្រើ Array Index ជា Key"
+  - "ចេះបង្កើត Unique Stable IDs សម្រាប់ List Items"
+module: module-1-fundamentals
+order: 7
+quiz:
+  - question: "តើ `key` prop ក្នុង React List Rendering មានតួនាទីអ្វី?"
+    options:
+      - "ជួយឱ្យ React Virtual DOM ដឹងច្បាស់ថា Item ណាខ្លះត្រូវបាន Add, Update ឬ Remove ដើម្បីកុំឱ្យ Re-render ខុស"
+      - "សម្រាប់កំណត់លេខរៀងលើ HTML table"
+      - "សម្រាប់ភ្ជាប់ជាមួយ Database Primary Key ដោយស្វ័យប្រវត្តិ"
+      - "សម្រាប់ដាក់ Style ពណ៌លើ List"
+    correctAnswer: 1
+    explanation: "`key` គឺជា Unique Identifier សម្រាប់ React Diffing Algorithm តាមដានអត្តសញ្ញាណនៃ Element នីមួយៗឆ្លងកាត់ Renders ជាច្រើន។"
+---
+
+# 📋 Lists & Keys in React
+
+នៅពេលដែលយើងចង់ Render ទិន្នន័យជា Array (ដូចជាបញ្ជីផលិតផល ឬ Users) យើងប្រើ JavaScript `.map()` Method ដើម្បីបំប្លែង Data Array ទៅជា JSX Elements Array។
+
+```mermaid
+flowchart TD
+    Data["Data Array: [{id: '1', name: 'MacBook'}, {id: '2', name: 'iPhone'}]"]
+    Map[".map((item) => &lt;ProductCard key={item.id} ... /&gt;)"]
+    VDOM["React Virtual DOM (តាមដានតាម Stable Key)"]
+    DOM["Render ទៅលើ Browser DOM"]
+
+    Data --> Map --> VDOM --> DOM
+```
+
+---
+
+## ការប្រើប្រាស់ `.map()` និង `key` Prop
+
+```tsx
+interface CourseCardProps {
+  id: string;
+  title: string;
+  category: string;
+  lessonsCount: number;
+}
+
+export function CourseList() {
+  const courses: CourseCardProps[] = [
+    { id: "c-1", title: "React Fundamentals", category: "Frontend", lessonsCount: 8 },
+    { id: "c-2", title: "Node.js Architecture", category: "Backend", lessonsCount: 12 },
+    { id: "c-3", title: "PostgreSQL Masterclass", category: "Database", lessonsCount: 10 },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+      {courses.map((course) => (
+        <div
+          key={course.id}
+          className="p-5 bg-slate-900 border border-slate-800 rounded-xl hover:border-indigo-500 transition"
+        >
+          <span className="text-xs text-indigo-400 font-semibold">{course.category}</span>
+          <h3 className="text-lg font-bold text-white mt-1">{course.title}</h3>
+          <p className="text-sm text-slate-400 mt-2">{course.lessonsCount} មេរៀន</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```

@@ -1,0 +1,59 @@
+---
+title: "Empty State: Designing Zero-Data Experiences"
+description: "ស្វែងយល់ពីរបៀបរចនា Empty States ក្នុង React — ការបង្ហាញ Zero-Data Placeholders, Illustrations, និង Call-to-Action (CTA) Buttons ដើម្បីជំរុញឱ្យ User ចាប់ផ្តើមសកម្មភាព។"
+objectives:
+  - "យល់ដឹងពីតួនាទីនៃ Empty State ចំពោះ Onboarding និង First-time UX"
+  - "ចេះ Render Empty View នៅពេល API ឆ្លើយតប `data.length === 0`"
+  - "ចេះបន្ថែម Call-To-Action (CTA) Buttons ដូចជា 'បង្កើតទំនិញដំបូងរបស់អ្នក'"
+  - "បែងចែករវាង Initial Zero State និង Filter Not Found State"
+module: module-3-api-async-data
+order: 6
+quiz:
+  - question: "តើនៅពេលណាដែល Empty State គួរតែត្រូវបាន Render?"
+    options:
+      - "នៅពេលដែល API ដំណើរការជោគជ័យ (Not Loading & No Error) ប៉ុន្តែទិន្នន័យ Array គ្មានធាតុណាមួយឡើយ (array.length === 0)"
+      - "នៅពេលកំពុងទាញយកទិន្នន័យ"
+      - "នៅពេល Network ដាច់"
+      - "នៅពេល User មិនទាន់ Login"
+    correctAnswer: 1
+    explanation: "Empty State បង្ហាញនៅពេលប្រតិបត្តិការ Fetch ជោគជ័យ ប៉ុន្តែគ្មាន Record ណាមួយនៅក្នុង Database ឡើយ។"
+---
+
+# 📭 Empty State Architecture
+
+**Empty State (Zero Data)** គឺជាឱកាសដ៏ល្អដើម្បីណែនាំអ្នកប្រើប្រាស់ពីជំហានបន្ទាប់ដែលពួកគេគួរធ្វើ (Onboarding) ជាជាងការបង្ហាញផ្ទាំងទទេ។
+
+---
+
+## ឧទាហរណ៍៖ Reusable Empty State Component
+
+```tsx
+interface EmptyStateProps {
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+export function EmptyState({ title, description, actionLabel, onAction }: EmptyStateProps) {
+  return (
+    <div className="p-12 text-center border-2 border-dashed border-slate-800 rounded-3xl max-w-lg mx-auto space-y-4">
+      <div className="w-16 h-16 bg-slate-800 text-slate-400 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+        📦
+      </div>
+      <div className="space-y-1">
+        <h3 className="text-lg font-bold text-white">{title}</h3>
+        <p className="text-sm text-slate-400">{description}</p>
+      </div>
+      {actionLabel && onAction && (
+        <button
+          onClick={onAction}
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-xl transition shadow-lg shadow-indigo-500/20"
+        >
+          {actionLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+```

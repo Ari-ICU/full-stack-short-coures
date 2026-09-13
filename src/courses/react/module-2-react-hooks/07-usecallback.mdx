@@ -1,0 +1,67 @@
+---
+title: "useCallback: Function Reference Stability"
+description: "ស្វែងយល់ពី useCallback Hook — JavaScript Function Referral Equality, ការការពារ Re-rendering នៃ Memoized Child Components (React.memo), និងការប្រើប្រាស់ត្រឹមត្រូវ។"
+objectives:
+  - "យល់ដឹងពី Function Reference Equality (fn1 !== fn2) ក្នុង JavaScript"
+  - "ចេះប្រើ useCallback ដើម្បី Stabilize Function References"
+  - "ផ្សំ useCallback ជាមួយ React.memo ដើម្បីការពារ Unnecessary Child Renders"
+  - "ដឹងពីភាពខុសគ្នារវាង useMemo (Memoize Value) និង useCallback (Memoize Function)"
+module: module-2-react-hooks
+order: 7
+quiz:
+  - question: "តើភាពខុសគ្នាចម្បងរវាង `useMemo` និង `useCallback` គឺជាអ្វី?"
+    options:
+      - "`useMemo` ចងចាំតម្លៃគណនា (Value) ខណៈ `useCallback` ចងចាំ Function Reference ផ្ទាល់"
+      - "`useCallback` ប្រើសម្រាប់តែ Fetch API ប៉ុណ្ណោះ"
+      - "`useMemo` ប្រើតែក្នុង Class Components"
+      - "គ្មានភាពខុសគ្នាអ្វីឡើយ"
+    correctAnswer: 1
+    explanation: "`useCallback(fn, deps)` គឺស្មើនឹង `useMemo(() => fn, deps)` — វាចងចាំ Instance នៃ Function ដើម ដើម្បីកុំឱ្យបង្កើត Reference ថ្មីនៅរាល់ Render។"
+---
+
+# 🔗 useCallback: Function Reference Stability
+
+នៅក្នុង JavaScript Function នីមួយៗគឺជា Object មួយ។ រាល់ពេលដែល Component Re-render នោះ Function ថ្មីមួយនឹងត្រូវបានបង្កើតឡើងជាមួយនឹង **Memory Reference ថ្មី** ជានិច្ច (`() => {} !== () => {}`)។
+
+`useCallback` ជួយ **ចងចាំ Function Reference ដដែល** រវាង Render cycles ទាំងអស់។
+
+---
+
+## ការប្រើប្រាស់ `useCallback` ជាមួយ `React.memo`
+
+```tsx
+import { useState, useCallback, memo } from "react";
+
+const ExpensiveRow = memo(function ExpensiveRow({
+  id,
+  onDelete,
+}: {
+  id: string;
+  onDelete: (id: string) => void;
+}) {
+  return (
+    <div className="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+      <span>Item #{id}</span>
+      <button onClick={() => onDelete(id)} className="px-3 py-1 bg-rose-600 text-white rounded text-sm">
+        Delete
+      </button>
+    </div>
+  );
+});
+
+export function ParentList() {
+  const [items, setItems] = useState(["1", "2", "3"]);
+
+  const handleDelete = useCallback((id: string) => {
+    setItems((prev) => prev.filter((item) => item !== id));
+  }, []);
+
+  return (
+    <div className="space-y-2">
+      {items.map((id) => (
+        <ExpensiveRow key={id} id={id} onDelete={handleDelete} />
+      ))}
+    </div>
+  );
+}
+```

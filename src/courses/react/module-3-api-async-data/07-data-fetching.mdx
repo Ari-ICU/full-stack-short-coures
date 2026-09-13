@@ -1,0 +1,72 @@
+---
+title: "Data Fetching: Race Conditions & Modern Patterns"
+description: "ស្វែងយល់ពីបញ្ហា Race Conditions ក្នុងការទាញយកទិន្នន័យ, Flag Cancellation Pattern (let ignore = false), Caching Strategies, និងសេចក្តីផ្តើមនៃ SWR / Query Patterns។"
+objectives:
+  - "យល់ដឹងពីរបៀបដែល Race Conditions កើតឡើងពេល Search ឬ Filter លឿនៗ"
+  - "ចេះប្រើ Boolean Flag (let ignore = false) ដើម្បី Ignore Stale Responses"
+  - "ស្គាល់ពីគោលការណ៍ Stale-While-Revalidate (SWR)"
+  - "យល់ដឹងពីគុណសម្បត្តិនៃ Server State Libraries ធៀបនឹង useEffect Fetching"
+module: module-3-api-async-data
+order: 7
+quiz:
+  - question: "តើ Race Condition ក្នុងការ Fetch ទិន្នន័យកើតឡើងយ៉ាងដូចម្តេច?"
+    options:
+      - "នៅពេល Request ចាស់ (ឧ. Query A) ឆ្លើយតបយឺតជាង Request ថ្មី (Query B) ធ្វើឱ្យលទ្ធផលនៃ Query ចាស់មកជាន់ពីលើ Query ថ្មី"
+      - "នៅពេល Browser ដំណើរការលឿនពេក"
+      - "នៅពេលកូដ TypeScript មាន syntax error"
+      - "នៅពេល Database ត្រូវ Reboot"
+    correctAnswer: 1
+    explanation: "ដោយសារ Network Latency ប្រែប្រួល Response នៃ Request មុនអាចមកដល់ក្រោយគេបង្អស់ បង្កឱ្យ UI បង្ហាញទិន្នន័យខុស។"
+---
+
+# 🏎️ Data Fetching Patterns & Race Conditions
+
+នៅពេលដែលអ្នកប្រើប្រាស់ចុចប្តូរ Tabs ឬវាយពាក្យស្វែងរកលឿនៗ Requests ជាច្រើនត្រូវបានបាញ់ចេញដំណាលគ្នា។
+
+```mermaid
+sequenceDiagram
+    participant User as អ្នកប្រើប្រាស់
+    participant React as React Component
+    participant Server as Backend API
+
+    User->>React: វាយ "Cat" (Request 1)
+    React->>Server: GET /search?q=cat (យឺត 800ms)
+    User->>React: វាយ "Dog" (Request 2)
+    React->>Server: GET /search?q=dog (លឿន 200ms)
+    Server-->>React: Response 2 ("Dog") មកដល់មុន -> set UI = Dog
+    Server-->>React: Response 1 ("Cat") មកដល់ក្រោយ -> set UI = Cat (❌ RACE CONDITION BUG)
+```
+
+---
+
+## ការដោះស្រាយដោយប្រើ Cleanup Flag Pattern
+
+```tsx
+import { useState, useEffect } from "react";
+
+export function SearchResults({ query }: { query: string }) {
+  const [data, setData] = useState<string[]>([]);
+
+  useEffect(() => {
+    let ignore = false; // Flag ដើម្បីទប់ស្កាត់ Stale Response
+
+    async function fetchData() {
+      const res = await fetch(`https://api.example.com/search?q=${query}`);
+      const json = await res.json();
+      if (!ignore) {
+        setData(json.results);
+      }
+    }
+
+    if (query) {
+      fetchData();
+    }
+
+    return () => {
+      ignore = true; // ប្រសិនបើ query ផ្លាស់ប្តូរ Ignore response ចាស់ចោលភ្លាម
+    };
+  }, [query]);
+
+  return <div>{/* Render Results */}</div>;
+}
+```

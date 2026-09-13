@@ -1,0 +1,65 @@
+---
+title: "useMemo: Optimizing Expensive Computations"
+description: "ស្វែងយល់ពី useMemo Hook — ការធ្វើ Value Memoization, ការកាត់បន្ថយការគណនាធ្ងន់ៗ (Heavy Filtering/Sorting), និងការចៀសវាង Premature Optimization។"
+objectives:
+  - "យល់ដឹងពីគោលការណ៍ Memoization ក្នុងការចងចាំតម្លៃគណនា"
+  - "ចេះប្រើ useMemo សម្រាប់ចម្រាញ់ទិន្នន័យធំៗ (Heavy Search & Filter)"
+  - "យល់ដឹងពី Referral Equality នៃ Objects និង Arrays"
+  - "ដឹងពីពេលដែលមិនគួរប្រើ useMemo (Overhead Cost)"
+module: module-2-react-hooks
+order: 6
+quiz:
+  - question: "តើ `useMemo` ធ្វើការចងចាំ (Cache) នូវអ្វី?"
+    options:
+      - "ចងចាំលទ្ធផលនៃការគណនា (Computed Value) នៃ Function ហើយ run ឡើងវិញតែពេល Dependencies ប្រែប្រួល"
+      - "ចងចាំរូបភាពក្នុង Browser"
+      - "ចងចាំលេខ Password របស់អ្នកប្រើ"
+      - "ចងចាំ Function Definition"
+    correctAnswer: 1
+    explanation: "`useMemo` ត្រឡប់នូវ Memoized Value ដែលបានគណនា។ វានឹងគណនាឡើងវិញលុះត្រាតែមាន Item ណាមួយក្នុង Dependency Array ផ្លាស់ប្តូរ។"
+---
+
+# ⚡ useMemo: Optimizing Heavy Calculations
+
+`useMemo` គឺជា Hook សម្រាប់ធ្វើ **Memoization (ការចងចាំលទ្ធផលគណនា)** ដើម្បីជៀសវាងការដំណើរការកិច្ចការធ្ងន់ៗសារឡើងវិញនៅគ្រប់ Render cycle។
+
+---
+
+## ឧទាហរណ៍៖ ការ Filter បញ្ជីទិន្នន័យរាប់ពាន់ Items
+
+```tsx
+import { useState, useMemo } from "react";
+
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+}
+
+export function ProductCatalog({ products }: { products: Product[] }) {
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCat = selectedCategory === "all" || p.category === selectedCategory;
+      return matchesSearch && matchesCat;
+    });
+  }, [products, search, selectedCategory]);
+
+  return (
+    <div className="p-6 bg-slate-900 text-white rounded-xl">
+      <input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="ស្វែងរកផលិតផល..."
+        className="w-full px-4 py-2 bg-slate-800 text-white rounded-lg mb-4"
+      />
+      <p className="text-sm text-slate-400">រកឃើញ {filteredProducts.length} ផលិតផល</p>
+    </div>
+  );
+}
+```

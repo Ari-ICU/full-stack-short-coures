@@ -1,0 +1,89 @@
+---
+title: "useContext: Context API & Consuming Shared Data"
+description: "ស្វែងយល់ពីរបៀបដោះស្រាយ Prop Drilling ដោយប្រើ Context API, Provider Pattern, Custom Consumer Hooks, និងការរៀបចំ Global Data។"
+objectives:
+  - "យល់ដឹងពីបញ្ហា Prop Drilling និងពេលណាដែលគួរប្រើ Context"
+  - "ចេះបង្កើត Context ដោយប្រើ createContext និង Context.Provider"
+  - "ចេះបង្កើត Custom Hook (ឧ. useTheme, useAuth) សម្រាប់ Consume Context យ៉ាងមានសុវត្ថិភាព"
+  - "ដឹងពីផលប៉ះពាល់ Re-rendering នៃ Context និងវិធីបង្ការ"
+module: module-2-react-hooks
+order: 3
+quiz:
+  - question: "តើ Prop Drilling គឺជាអ្វី?"
+    options:
+      - "ការបញ្ជូន Props កាត់តាម Component ជាច្រើនជាន់ដែលមិនត្រូវការទិន្នន័យនោះ គ្រាន់តែដើម្បីឱ្យទៅដល់ Deep Child Component ខាងក្រោម"
+      - "ការចាក់ប្រេងលើ CPU"
+      - "ការសរសេរ CSS ក្នុង Props"
+      - "ការលុប Props ចោល"
+    correctAnswer: 1
+    explanation: "Prop Drilling ធ្វើឱ្យកូដស្មុគស្មាញដោយសារត្រូវ pass props ឆ្លងកាត់ Intermediary Components ច្រើនជាន់។"
+  - question: "តើហេតុអ្វីបានជាយើងគួរបង្កើត Custom Hook ដូចជា `useTheme()` ជំនួសឱ្យការហៅ `useContext(ThemeContext)` ដោយផ្ទាល់?"
+    options:
+      - "ដើម្បីអាច Check បញ្ជាក់ថាតើ Component កំពុងស្ថិតនៅខាងក្នុង ThemeProvider ឬអត់ និងផ្តល់ Error ច្បាស់លាស់"
+      - "ដើម្បីឱ្យ Theme ប្តូរពណ៌លឿនជាងមុន"
+      - "ព្រោះ React ហាមមិនឱ្យប្រើ useContext ដោយផ្ទាល់"
+      - "ដើម្បីបិទដំណើរការ TypeScript"
+    correctAnswer: 1
+    explanation: "Custom Hook ជួយ Wrap Error Handling `if (!context) throw new Error(...)` និងផ្តល់ Type-safe Context យ៉ាងស្រួល។"
+---
+
+# 🌐 useContext & Context API
+
+**Context API** អនុញ្ញាតឱ្យយើងចែករំលែកទិន្នន័យ (ដូចជា Current User, Theme, Cart) ទៅកាន់គ្រប់ Components ទាំងអស់នៅក្នុង Tree ដោយមិនចាំបាច់ឆ្លងកាត់ **Prop Drilling** ឡើយ។
+
+```mermaid
+flowchart TD
+    subgraph WithoutContext["ដោយគ្មាន Context (Prop Drilling)"]
+        A1["<App theme='dark' />"] --> B1["<MainLayout theme='dark' />"]
+        B1 --> C1["<Header theme='dark' />"]
+        C1 --> D1["<ThemeToggle theme='dark' />"]
+    end
+
+    subgraph WithContext["ដោយប្រើ Context API"]
+        A2["<ThemeProvider />"]
+        D2["<ThemeToggle /><br/>(ហៅ useTheme() ដោយផ្ទាល់)"]
+        A2 -. "Direct Access" .-> D2
+    end
+```
+
+---
+
+## ការអនុវត្ត Theme Context ពេញលេញជាមួយ TypeScript
+
+```tsx
+// src/context/ThemeContext.tsx
+import { createContext, useContext, useState, ReactNode } from "react";
+
+type Theme = "light" | "dark";
+
+interface ThemeContextType {
+  theme: Theme;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <div className={theme === "dark" ? "dark bg-slate-950 text-white" : "bg-white text-slate-900"}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
+}
+```

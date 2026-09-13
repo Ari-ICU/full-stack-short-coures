@@ -1,0 +1,70 @@
+---
+title: "Loading State: Spinners, Skeletons & UX"
+description: "ស្វែងយល់ពីការរចនា Loading Experiences ក្នុង React — Spinner Components, Skeleton Loaders ដើម្បីការពារ Cumulative Layout Shift (CLS), និង Optimistic Feedbacks។"
+objectives:
+  - "យល់ដឹងពីសារៈសំខាន់នៃ Loading State ក្នុងការផ្តល់ Feedback ដល់ User"
+  - "ចេះបង្កើត Spinner Animation ដោយប្រើ Tailwind CSS / SVG"
+  - "ចេះបង្កើត Skeleton Loader ដែលមានទំហំស្មើនឹង Real Content ដើម្បីកាត់បន្ថយ Layout Shift"
+  - "ចេះគ្រប់គ្រង Button-level Loading State អំឡុងពេល Form Submission"
+module: module-3-api-async-data
+order: 4
+quiz:
+  - question: "ហេតុអ្វីបានជា Skeleton Loaders ត្រូវបានគេពេញនិយមជាង Spinner រង្វង់មូលសម្រាប់ទំព័រ Content-heavy?"
+    options:
+      - "ព្រោះ Skeleton បង្ហាញរចនាសម្ព័ន្ធប្លង់ទុកជាមុន ជួយកាត់បន្ថយ Perceived Waiting Time និងការពារ Layout Shift (CLS)"
+      - "ព្រោះ Skeleton មិនប្រើប្រាស់ Internet"
+      - "ព្រោះ Spinner មិនអាចដាក់ពណ៌បាន"
+      - "ព្រោះ Skeleton ផ្ទុកទិន្នន័យស្រាប់"
+    correctAnswer: 1
+    explanation: "Skeleton Screens ផ្តល់នូវ Visual Clue អំពីទ្រង់ទ្រាយ Content ដែលនឹងលេចឡើង ធ្វើឱ្យ User មានអារម្មណ៍ថា App ដំណើរការលឿនជាងមុន។"
+---
+
+# ⏳ Designing Loading States & Skeletons
+
+ការបង្ហាញ Loading State ត្រឹមត្រូវជួយបង្កើន User Experience (UX) យ៉ាងខ្លាំងដោយធ្វើឱ្យ User ដឹងថាកម្មវិធីកំពុងដំណើរការ មិនគាំងនោះឡើយ។
+
+---
+
+## ១. Reusable Skeleton Loader Component
+
+```tsx
+export function ProductCardSkeleton() {
+  return (
+    <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl animate-pulse space-y-4">
+      <div className="w-full h-48 bg-slate-800 rounded-xl" />
+      <div className="space-y-2">
+        <div className="w-3/4 h-4 bg-slate-800 rounded" />
+        <div className="w-1/2 h-4 bg-slate-800 rounded" />
+      </div>
+      <div className="flex justify-between items-center pt-2">
+        <div className="w-20 h-6 bg-slate-800 rounded" />
+        <div className="w-24 h-8 bg-slate-800 rounded-lg" />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## ២. Button Inline Loading Spinner
+
+```tsx
+export function SubmitButton({ isLoading, children }: { isLoading: boolean; children: React.ReactNode }) {
+  return (
+    <button
+      type="submit"
+      disabled={isLoading}
+      className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium rounded-lg transition"
+    >
+      {isLoading && (
+        <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+        </svg>
+      )}
+      <span>{isLoading ? "កំពុងរក្សាទុក..." : children}</span>
+    </button>
+  );
+}
+```
