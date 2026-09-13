@@ -137,181 +137,24 @@ const initialAuthState = {
 
 ---
 
-### ជំហានទី ២ ៖ បង្កើត Auth Reducer Logic និង Action Handlers (បំបែកតាមសកម្មភាព)
-
-មុននឹងសរសេរ Logic នៃ Action នីមួយៗ យើងកំណត់ទម្រង់ **Reducer Function Signature** ជាមុនសិន ៖
+### ជំហានទី ២ ៖ បង្កើត Pure Auth Reducer Function
+គ្រប់គ្រងការផ្លាស់ប្តូរ State ទៅតាម Action Types នីមួយៗ ៖
 
 ```javascript
-// ⚙️ Auth Reducer Function Signature
+// src/context/AuthContext.jsx (បន្ត)
+
+// Pure Reducer Function សម្រាប់គ្រប់គ្រង Auth State
 function authReducer(state, action) {
   switch (action.type) {
-    // ករណី Action Cases នីមួយៗនឹងត្រូវសរសេរនៅខាងក្រោមនេះ...
-    default:
-      throw new Error(`Unhandled action type: ${action.type}`);
-  }
-}
-```
-
----
-
-#### ២.១ — ចាប់ផ្តើមដំណើរការ Login (`LOGIN_START`)
-- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
-```javascript
-case 'LOGIN_START':
-  return { ...state, isLoading: true, error: null };
-```
-
-- **២. Dispatch Trigger (ក្នុង Handler) ៖**
-```javascript
-dispatch({ type: 'LOGIN_START' });
-```
-
-- **៣. HTML / JSX (Loading State Button) ៖**
-```jsx
-<button type="submit" disabled={isLoading}>
-  {isLoading ? 'កំពុងផ្ទៀងផ្ទាត់...' : 'Login ចូលគណនី'}
-</button>
-```
-
----
-
-#### ២.២ — Login ជោគជ័យ (`LOGIN_SUCCESS`)
-- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
-```javascript
-case 'LOGIN_SUCCESS':
-  return {
-    ...state,
-    isLoading: false,
-    isAuthenticated: true,
-    user: action.payload.user,
-    token: action.payload.token,
-    error: null,
-  };
-```
-
-- **២. Dispatch Trigger (ក្នុង Handler) ៖**
-```javascript
-dispatch({
-  type: 'LOGIN_SUCCESS',
-  payload: { user: dummyUser, token: dummyToken },
-});
-```
-
-- **៣. HTML / JSX (បង្ហាញឈ្មោះអ្នកប្រើប្រាស់) ៖**
-```jsx
-<div>
-  <span>សួស្តី, {user.name} ({user.role})</span>
-</div>
-```
-
----
-
-#### ២.៣ — Login បរាជ័យ (`LOGIN_FAILURE`)
-- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
-```javascript
-case 'LOGIN_FAILURE':
-  return {
-    ...state,
-    isLoading: false,
-    isAuthenticated: false,
-    user: null,
-    token: null,
-    error: action.payload,
-  };
-```
-
-- **២. Dispatch Trigger (ក្នុង Handler) ៖**
-```javascript
-dispatch({
-  type: 'LOGIN_FAILURE',
-  payload: 'Email ឬ Password មិនត្រឹមត្រូវឡើយ!',
-});
-```
-
-- **៣. HTML / JSX (បង្ហាញសារ Error) ៖**
-```jsx
-{error && <p className="error-message">⚠️ {error}</p>}
-```
-
----
-
-#### ២.៤ — ចាកចេញពីគណនី (`LOGOUT`)
-- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
-```javascript
-case 'LOGOUT':
-  return {
-    ...state,
-    isLoading: false,
-    isAuthenticated: false,
-    user: null,
-    token: null,
-    error: null,
-  };
-```
-
-- **២. Handler Function ៖**
-```javascript
-const handleLogout = () => {
-  localStorage.removeItem('auth_user');
-  localStorage.removeItem('auth_token');
-  dispatch({ type: 'LOGOUT' });
-};
-```
-
-- **៣. HTML / JSX (Logout Button) ៖**
-```jsx
-<button onClick={handleLogout}>
-  ចាកចេញ (Logout)
-</button>
-```
-
----
-
-#### ២.៥ — ស្ដារ Session ឡើងវិញពេល Refresh (`RESTORE_SESSION`)
-- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
-```javascript
-case 'RESTORE_SESSION':
-  return {
-    ...state,
-    isLoading: false,
-    isAuthenticated: !!action.payload.user,
-    user: action.payload.user,
-    token: action.payload.token,
-  };
-```
-
-- **២. Dispatch Trigger (ក្នុង `useEffect`) ៖**
-```javascript
-useEffect(() => {
-  const savedUser = localStorage.getItem('auth_user');
-  const savedToken = localStorage.getItem('auth_token');
-
-  if (savedUser && savedToken) {
-    dispatch({
-      type: 'RESTORE_SESSION',
-      payload: { user: JSON.parse(savedUser), token: savedToken },
-    });
-  } else {
-    dispatch({ type: 'RESTORE_SESSION', payload: { user: null, token: null } });
-  }
-}, []);
-```
-
-- **៣. HTML / JSX (Session Loading Indicator) ៖**
-```jsx
-if (isLoading) return <header>កំពុងផ្ទុក Session...</header>;
-```
-
----
-
-#### ២.៦ — ផ្គុំចូលជា Pure Auth Reducer Function ពេញលេញ
-
-```javascript
-function authReducer(state, action) {
-  switch (action.type) {
+    // ១. ចាប់ផ្តើម Login (បើក Loading និងសម្អាត Error ចាស់)
     case 'LOGIN_START':
-      return { ...state, isLoading: true, error: null };
+      return {
+        ...state,
+        isLoading: true,
+        error: null,
+      };
 
+    // ២. Login ជោគជ័យ (រក្សាទុក User, Token និងកំណត់ Authenticated)
     case 'LOGIN_SUCCESS':
       return {
         ...state,
@@ -322,6 +165,7 @@ function authReducer(state, action) {
         error: null,
       };
 
+    // ៣. Login បរាជ័យ (រក្សាទុកសារ Error និងបិទ Loading)
     case 'LOGIN_FAILURE':
       return {
         ...state,
@@ -332,6 +176,7 @@ function authReducer(state, action) {
         error: action.payload,
       };
 
+    // ៤. Logout (សម្អាត User Session ទាំងអស់ចេញពី State)
     case 'LOGOUT':
       return {
         ...state,
@@ -342,6 +187,7 @@ function authReducer(state, action) {
         error: null,
       };
 
+    // ៥. ស្ដារ Session ឡើងវិញពី LocalStorage ពេល Refresh Browser
     case 'RESTORE_SESSION':
       return {
         ...state,

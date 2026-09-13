@@ -35,23 +35,23 @@ quiz:
       - "`useReducer()`"
       - "`useMemo()`"
     correctAnswer: 1
-    explanation: "តាមលំនាំដើម Functional Components មិនទទួលយក `ref` prop ឡើយ។ យើងត្រូវរុំ Child Component ដោយ `React.forwardRef((props, ref) => ...)` ដើម្បី Forward `ref` ទៅកាន់ Native DOM Node ខាងក្នុង។"
+    explanation: "តាមលំនាំដើមក្នុង React 18 Functional Components មិនទទួលយក `ref` prop ឡើយ។ យើងត្រូវរុំ Child Component ដោយ `React.forwardRef((props, ref) => ...)` ដើម្បី Forward `ref` ទៅកាន់ Native DOM Node ខាងក្នុង (ចំណាំ៖ ក្នុង React 19 `ref` អាចបញ្ជូនជា prop ធម្មតាបាន)។"
 ---
 
-## 🔍 ១. Mental Model: `useState` vs `useRef`
+## 💡 ១. Mental Model: `useState` vs `useRef` (ការប្រៀបធៀបងាយយល់)
 
-នៅក្នុង React យើងមានឧបករណ៍ពីរសម្រាប់រក្សាទុកទិន្នន័យក្នុង Component៖
+ដើម្បីយល់ពី `useRef` សូមស្រមៃមើលភាពខុសគ្នារវាង **ក្តារខៀនសាធារណៈ** និង **សៀវភៅកត់ត្រាក្នុងហោប៉ៅ** ៖
 
-1. **`useState` (UI State — សម្រាប់ទិន្នន័យដែលប៉ះពាល់ការបង្ហាញលើ Screen):**  
-   រាល់ពេល State ផ្លាស់ប្តូរ ➔ React នឹង Re-render UI ភ្លាមៗ។
-2. **`useRef` (Silent Container — សម្រាប់ទិន្នន័យដែលមិនប៉ះពាល់ UI Render):**  
-   ជាប្រអប់សម្ងាត់ `{ current: initialValue }` ដែលរក្សាទុកតម្លៃក្នុង Memory ដោយមិនបង្កឱ្យមាន Re-render ឡើយ។
+* **📢 `useState` (ក្តារខៀនសាធារណៈ ៖ UI State) ៖**  
+  រាល់ពេលអ្នកលុបសរសេរលេខថ្មីលើក្តារខៀន មនុស្សគ្រប់គ្នាក្នុងបន្ទប់នឹងងាកមកមើល ហើយបន្ទប់ទាំងមូលត្រូវរៀបចំឡើងវិញ (**Re-render UI** ភ្លាមៗ)។ ស័ក្តិសមសម្រាប់ទិន្នន័យដែលត្រូវបង្ហាញលើអេក្រង់។
+* **🤫 `useRef` (សៀវភៅកត់ត្រាក្នុងហោប៉ៅ ៖ Silent Memory Container) ៖**  
+  អ្នកដកសៀវភៅចេញពីហោប៉ៅមកកត់ត្រាលេខកូដសម្ងាត់ ឬកាន់ពិលឡាស៊ែរបាញ់ចង្អុលវត្ថុអ្វីមួយ ដោយគ្មាននរណាម្នាក់ដឹង ឬរំខានដល់អ្នកដទៃឡើយ (**Zero Re-render** ស្ងាត់ស្ងៀម)។
 
 ```mermaid
 flowchart TD
     subgraph useStateModel["useState (Reactive UI Engine)"]
         direction TB
-        S1["setCount(count + 1)"] --> S2["Triggers Re-render Cycle 🔄"]
+        S1["setCount(count + 1)"] --> S2["Triggers Component Re-render 🔄"]
         S2 --> S3["UI Repainted on Screen 🖼️"]
     end
 
@@ -69,34 +69,43 @@ flowchart TD
 
 ## 🛠️ ២. មហិទ្ធិឫទ្ធិទាំង ២ នៃ `useRef`
 
+`useRef(initialValue)` នឹង Return មកវិញនូវ JavaScript Object ធម្មតាមួយគឺ `{ current: initialValue }` ដែលមានតួនាទីធំៗ ២ ៖
+
 ```
-┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
-│       1. Direct DOM Access           │     │    2. Persistent Mutable Container   │
-├──────────────────────────────────────┤     ├──────────────────────────────────────┤
-│ • Auto-focus input fields            │     │ • ផ្ទុក Timer / Interval IDs          │
-│ • Scroll to specific element         │     │ • ផ្ទុក Previous Prop/State value     │
-│ • HTML5 Video / Audio Playback       │     │ • រាប់ចំនួន Render Counts            │
-│ • Canvas 2D / WebGL Contexts         │     │ • ផ្ទុក WebSocket / Instance Object   │
-└──────────────────────────────────────┘     └──────────────────────────────────────┘
+┌─────────────────────────────────────────┐     ┌─────────────────────────────────────────┐
+│        ១. Direct DOM Access (ពិលឡាស៊ែរ)   │     │    ២. Persistent Mutable Value (សៀវភៅកត់)│
+├─────────────────────────────────────────┤     ├─────────────────────────────────────────┤
+│ • Auto-focus លើ Input fields            │     │ • ផ្ទុក Timer / setInterval IDs         │
+│ • Scroll ទៅកាន់ទីតាំងណាមួយលើទំព័រ       │     │ • ផ្ទុក Previous Prop ឬ State ចាស់      │
+│ • បញ្ជា Video / Audio (Play, Pause)     │     │ • រាប់ចំនួនដងនៃការ Render (Render Count) │
+│ • ភ្ជាប់ទៅកាន់ Canvas ឬ 3D Libraries    │     │ • ផ្ទុក WebSocket ឬ Socket.io Instance  │
+└─────────────────────────────────────────┘     └─────────────────────────────────────────┘
 ```
 
 ---
 
-## 🎯 ៣. ការអនុវត្តជាក់ស្តែង ៖ ករណីសិក្សាទាំង ៤ (Use Cases)
+## 🎯 ៣. ការអនុវត្តជាក់ស្តែង ៖ ករណីសិក្សាទាំង ៤ (Step-by-Step)
 
-### ករណីទី ១ ៖ Search Auto-Focus ជាមួយ Keyboard Shortcut (`Cmd+K`)
+---
+
+### ករណីទី ១ ៖ Auto-Focus លើ Input ជាមួយ Shortcut (`Cmd + K` / `Ctrl + K`)
+
+នៅពេលចង់ឱ្យ Cursor លោតចូលប្រអប់ Search ដោយស្វ័យប្រវត្តិ ៖
 
 ```jsx
+// src/components/SearchBox.jsx
 import { useRef, useEffect } from 'react';
 
 export function SearchBox() {
+  // ១. បង្កើត Ref សម្រាប់ភ្ជាប់ទៅកាន់ DOM Node
   const searchInputRef = useRef(null);
 
-  // ចុច Cmd+K (Mac) ឬ Ctrl+K (Windows) ដើម្បី Auto-focus
+  // ២. ចាប់យក Keyboard Shortcut (Cmd+K ឬ Ctrl+K)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault(); // ការពារ shortcut default របស់ Browser
+        e.preventDefault();
+        // ⚡ ហៅ Native DOM .focus() Method ផ្ទាល់
         searchInputRef.current?.focus();
       }
     };
@@ -106,13 +115,16 @@ export function SearchBox() {
   }, []);
 
   return (
-    <div className="relative max-w-sm">
+    <div className="search-container">
+      {/* ៣. ភ្ជាប់ ref ទៅកាន់ HTML <input> */}
       <input
         ref={searchInputRef}
         type="text"
-        placeholder="ស្វែងរកឯកសារ... (ចុច Cmd+K)"
-        className="w-full px-4 py-2 border rounded-xl text-xs dark:bg-slate-800"
+        placeholder="ស្វែងរកឯកសារ... (ចុច Cmd+K / Ctrl+K)"
       />
+      <button onClick={() => searchInputRef.current?.focus()}>
+        🔍 Focus
+      </button>
     </div>
   );
 }
@@ -120,54 +132,53 @@ export function SearchBox() {
 
 ---
 
-### ករណីទី ២ ៖ Custom HTML5 Media Player Controls
+### ករណីទី ២ ៖ Custom HTML5 Media Controls (Play / Pause / Seek)
+
+HTML5 `<video>` មាន Native Methods ដូចជា `.play()`, `.pause()`, និង Property `.currentTime` ដែល React State មិនអាចបញ្ជាផ្ទាល់បានឡើយ ៖
 
 ```jsx
+// src/components/VideoPlayer.jsx
 import { useRef, useState } from 'react';
 
-export function CustomVideoPlayer() {
+export function VideoPlayer() {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // បញ្ជា Play / Pause តាមរយៈ Real DOM Node
   const togglePlay = () => {
     if (!videoRef.current) return;
 
     if (isPlaying) {
-      videoRef.current.pause(); // ហៅ Native DOM Method
+      videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play(); // ហៅ Native DOM Method
+      videoRef.current.play();
       setIsPlaying(true);
     }
   };
 
+  // កំណត់វិនាទីវីដេអូទៅចំណុចដើមវិញ (currentTime = 0)
   const handleRestart = () => {
     if (!videoRef.current) return;
-    videoRef.current.currentTime = 0; // កំណត់វិនាទីវីដេអូទៅដើមវិញ
+    videoRef.current.currentTime = 0;
     videoRef.current.play();
     setIsPlaying(true);
   };
 
   return (
-    <div className="p-4 bg-slate-900 rounded-3xl max-w-sm text-white space-y-3">
+    <div className="player-card">
+      {/* ភ្ជាប់ videoRef ទៅ <video> element */}
       <video
         ref={videoRef}
         src="https://www.w3schools.com/html/mov_bbb.mp4"
-        className="w-full rounded-2xl"
         onEnded={() => setIsPlaying(false)}
       />
 
-      <div className="flex gap-2">
-        <button
-          onClick={togglePlay}
-          className="flex-1 py-2 bg-indigo-600 rounded-xl text-xs font-bold"
-        >
+      <div className="controls">
+        <button onClick={togglePlay}>
           {isPlaying ? '⏸️ Pause' : '▶️ Play'}
         </button>
-        <button
-          onClick={handleRestart}
-          className="px-3 py-2 bg-slate-800 rounded-xl text-xs font-bold"
-        >
+        <button onClick={handleRestart}>
           🔄 Restart
         </button>
       </div>
@@ -178,58 +189,58 @@ export function CustomVideoPlayer() {
 
 ---
 
-### ករណីទី ៣ ៖ Stopwatch Timer (ផ្ទុក Timer ID ដោយមិនបាច់ Re-render)
+### ករណីទី ៣ ៖ Stopwatch Timer (ផ្ទុក Interval ID ដោយមិនបាច់ Re-render)
+
+> [!TIP]
+> **ហេតុអ្វីមិនប្រើ `useState` សម្រាប់ Timer ID?**  
+> ប្រសិនបើអ្នកប្រើ `const [timerId, setTimerId] = useState()` រាល់ពេលអ្នកចុច Start កម្មវិធីនឹង Re-render មួយដងឥតប្រយោជន៍ ព្រោះ Timer ID គ្រាន់តែជាលេខសម្គាល់ក្នុង Memory ប៉ុណ្ណោះ មិនមែនជាអ្វីដែលត្រូវគូរលើ Screen ឡើយ។ `useRef` គឺជាជម្រើសដ៏ល្អឥតខ្ចោះ!
 
 ```jsx
+// src/components/Stopwatch.jsx
 import { useState, useRef, useEffect } from 'react';
 
 export function Stopwatch() {
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
 
-  // 🛡️ ផ្ទុក Timer ID ក្នុង Ref ព្រោះការកែ Timer ID មិនគួរធ្វើឱ្យ UI Re-render ឡើយ
+  // 🛡️ ផ្ទុក Timer ID ក្នុង Ref ព្រោះការផ្លាស់ប្តូរ Timer ID មិនត្រូវបង្ក Re-render ឡើយ
   const timerRef = useRef(null);
 
-  const start = () => {
-    if (timerRef.current !== null) return;
+  const handleStart = () => {
+    if (timerRef.current !== null) return; // ការពារកុំឱ្យចុច Start ជាន់ច្រើនដង
+
     setIsRunning(true);
     timerRef.current = setInterval(() => {
       setSeconds((prev) => prev + 1);
     }, 1000);
   };
 
-  const stop = () => {
+  const handleStop = () => {
     clearInterval(timerRef.current);
     timerRef.current = null;
     setIsRunning(false);
   };
 
-  const reset = () => {
-    stop();
+  const handleReset = () => {
+    handleStop();
     setSeconds(0);
   };
 
-  // Cleanup ពេល Component Unmount ដើម្បីការពារ Memory Leak
+  // Cleanup Timer ពេល Component Unmount ដើម្បីការពារ Memory Leak
   useEffect(() => {
     return () => clearInterval(timerRef.current);
   }, []);
 
   return (
-    <div className="p-6 bg-white dark:bg-slate-900 border rounded-3xl text-center max-w-xs space-y-4">
-      <h2 className="text-3xl font-black font-mono">{seconds}s</h2>
-      <div className="flex justify-center gap-2">
+    <div className="stopwatch-box">
+      <h2>⏱️ {seconds}s</h2>
+      <div className="btn-group">
         {!isRunning ? (
-          <button onClick={start} className="px-4 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold">
-            Start
-          </button>
+          <button onClick={handleStart}>Start</button>
         ) : (
-          <button onClick={stop} className="px-4 py-1.5 bg-amber-600 text-white rounded-xl text-xs font-bold">
-            Pause
-          </button>
+          <button onClick={handleStop}>Pause</button>
         )}
-        <button onClick={reset} className="px-4 py-1.5 bg-slate-200 dark:bg-slate-800 rounded-xl text-xs font-bold">
-          Reset
-        </button>
+        <button onClick={handleReset}>Reset</button>
       </div>
     </div>
   );
@@ -240,30 +251,42 @@ export function Stopwatch() {
 
 ### ករណីទី ៤ ៖ តាមដានតម្លៃ State ចាស់ (The `usePrevious` Pattern)
 
-```jsx
-import { useState, useEffect, useRef } from 'react';
+នៅពេលអ្នកចង់ប្រៀបធៀបថាតើតម្លៃ State លើកមុន និងលើកនេះខុសគ្នាយ៉ាងណា ៖
 
-// Custom Hook សម្រាប់ចងចាំតម្លៃ Render មុន
-function usePrevious(value) {
+```jsx
+// src/hooks/usePrevious.js
+import { useRef, useEffect } from 'react';
+
+// Custom Hook សម្រាប់ចងចាំតម្លៃ Render លើកមុន
+export function usePrevious(value) {
   const ref = useRef();
+
   useEffect(() => {
-    ref.current = value; // Update ref ក្រោយពេល Render ចប់
+    // ធ្វើបច្ចុប្បន្នភាពតម្លៃ ref ក្រោយពេល Render ចប់សព្វគ្រប់
+    ref.current = value;
   }, [value]);
-  return ref.current; // Return តម្លៃពី Render មុន
+
+  // Return តម្លៃចាស់ (តម្លៃមុនពេល useEffect ដំណើរការ)
+  return ref.current;
 }
+```
+
+#### ការយកទៅប្រើប្រាស់ក្នុង Component ៖
+```jsx
+// src/components/PriceTracker.jsx
+import { useState } from 'react';
+import { usePrevious } from './usePrevious';
 
 export function PriceTracker() {
   const [price, setPrice] = useState(100);
   const prevPrice = usePrevious(price);
 
   return (
-    <div className="p-4 border rounded-2xl max-w-xs space-y-2">
-      <p className="text-xs text-slate-500">តម្លៃមុន: ${prevPrice ?? 'N/A'}</p>
-      <p className="text-base font-bold">តម្លៃបច្ចុប្បន្ន: ${price}</p>
-      <div className="flex gap-2">
-        <button onClick={() => setPrice((p) => p + 10)} className="px-2 py-1 bg-green-500 text-white rounded text-xs">+$10</button>
-        <button onClick={() => setPrice((p) => p - 10)} className="px-2 py-1 bg-red-500 text-white rounded text-xs">-$10</button>
-      </div>
+    <div className="price-card">
+      <p>តម្លៃមុន ៖ ${prevPrice ?? 'N/A'}</p>
+      <p>តម្លៃបច្ចុប្បន្ន ៖ ${price}</p>
+      <button onClick={() => setPrice((p) => p + 10)}>+$10</button>
+      <button onClick={() => setPrice((p) => p - 10)}>-$10</button>
     </div>
   );
 }
@@ -273,33 +296,83 @@ export function PriceTracker() {
 
 ## 🚀 ៤. Forwarding Refs ជាមួយ `React.forwardRef`
 
-នៅពេលអ្នកបង្កើត Reusable UI Input Component អ្នកមិនអាចបញ្ជូន `ref` ធម្មតាបានឡើយ។ អ្នកត្រូវប្រើ `forwardRef` ៖
+តាមលំនាំដើមក្នុង React (មុន React 19) Functional Component មិនអាចទទួលយក `ref` prop ពី Parent Component ដោយផ្ទាល់បានឡើយ។ យើងត្រូវប្រើ `React.forwardRef` ៖
 
 ```jsx
+// src/components/CustomInput.jsx
 import { forwardRef } from 'react';
 
-// ✅ Child Component ទទួលយក ref ពី Parent
+// ✅ Child Component ទទួលយក ref ពី Parent ហើយបញ្ជូនបន្តទៅ <input>
 export const CustomInput = forwardRef(function CustomInput(props, ref) {
   return (
-    <div className="space-y-1">
-      <label className="text-xs font-bold">{props.label}</label>
-      <input
-        ref={ref}
-        {...props}
-        className="w-full px-3 py-2 border rounded-xl text-xs"
-      />
+    <div className="input-group">
+      <label>{props.label}</label>
+      <input ref={ref} {...props} />
     </div>
   );
 });
 ```
 
+#### Parent Component ប្រើប្រាស់ CustomInput ៖
+```jsx
+// src/components/LoginForm.jsx
+import { useRef } from 'react';
+import { CustomInput } from './CustomInput';
+
+export function LoginForm() {
+  const emailInputRef = useRef(null);
+
+  const focusEmail = () => {
+    emailInputRef.current?.focus();
+  };
+
+  return (
+    <div>
+      <CustomInput ref={emailInputRef} label="Email Address" type="email" />
+      <button onClick={focusEmail}>Focus Email Input</button>
+    </div>
+  );
+}
+```
+
+> [!NOTE]
+> **React 19 Update ៖**  
+> នៅក្នុង **React 19** អ្នកមិនបាច់ប្រើ `forwardRef()` ទៀតឡើយ! `ref` អាចត្រូវបានបញ្ជូនជា `props.ref` ដូច Props ធម្មតាបានតែម្តង។
+
 ---
 
-## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
+## ⚠️ ៥. ច្បាប់មាស ៣ នៃ `useRef` (Golden Rules)
+
+1. **🚫 ហាមកែប្រែ `ref.current` ក្នុង Render Phase ៖**  
+   ```jsx
+   // ❌ ខុសធ្ងន់ធ្ងរ (Side Effect ក្នុង Render)
+   function BadComponent() {
+     const countRef = useRef(0);
+     countRef.current++; // ហាមធ្វើបែបនេះដាច់ខាត!
+     return <div>{countRef.current}</div>;
+   }
+
+   // ✅ ត្រឹមត្រូវ (កែប្រែក្នុង Event Handler ឬ useEffect)
+   function GoodComponent() {
+     const countRef = useRef(0);
+     const handleClick = () => {
+       countRef.current++; // ត្រឹមត្រូវ!
+     };
+     return <button onClick={handleClick}>Click</button>;
+   }
+   ```
+2. **🚫 កុំប្រើ `useRef` ជំនួស `useState` សម្រាប់ទិន្នន័យដែលត្រូវបង្ហាញលើ UI ៖**  
+   ប្រសិនបើតម្លៃមួយផ្លាស់ប្តូរហើយអ្នកចង់ឱ្យអេក្រង់ផ្លាស់ប្តូរតាម ត្រូវតែប្រើ `useState`។
+3. **✅ ប្រើ `useRef` សម្រាប់ Imperative Actions & Silent State ៖**  
+   Focus, Media controls, Timers, Animation frames, និង Third-party DOM libraries (D3, Leaflet Maps, Chart.js)។
+
+---
+
+## 🧠 ៦. សង្ខេប Mental Model ងាយចាំ
 
 | លក្ខណៈពិសេស | `useState` | `useRef` |
 | :--- | :--- | :--- |
-| **ការ Re-render** | បង្ក Re-render រាល់ពេលផ្លាស់ប្តូរ | **មិនបង្ក Re-render ឡើយ** (Zero Overhead) |
+| **ការ Re-render** | បង្ក Re-render រាល់ពេលតម្លៃផ្លាស់ប្តូរ | **មិនបង្ក Re-render ឡើយ** (Zero Overhead) |
 | **ការផ្ទុកតម្លៃ** | អានបានក្នុង JSX ដោយផ្ទាល់ | ផ្ទុកក្នុង `.current` property |
-| **ពេលវេលាប្រើប្រាស់** | UI Data, Toggle, Form inputs, Lists | DOM references, Timer IDs, Previous state |
-| **ការកែប្រែតម្លៃ** | ហាម mutate ត្រូវប្រើ `setState(newVal)` | អាច mutate ផ្ទាល់បាន `ref.current = newVal` |
+| **គោលបំណងចម្បង** | UI State, Forms, Toggles, Lists | DOM references, Timer IDs, Previous state |
+| **វិធីកែប្រែតម្លៃ** | ហាម mutate ផ្ទាល់ (ប្រើ `setState`) | អាច mutate ផ្ទាល់បាន (`ref.current = newVal`) |
