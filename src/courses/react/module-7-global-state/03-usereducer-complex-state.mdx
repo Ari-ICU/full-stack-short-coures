@@ -92,43 +92,256 @@ const [state, dispatch] = useReducer(reducer, initialState, init);
 
 ---
 
-## 💻 ៤. ការអនុវត្តជាក់ស្តែង ៖ Shopping Cart & Order Manager
+## 💻 ៤. ការអនុវត្តជាក់ស្តែង ៖ Shopping Cart State Management
 
-ខាងក្រោមនេះជាកូដជាក់ស្តែងនៃការគ្រប់គ្រង Cart ដែលមានមុខងារ៖ បន្ថែមទំនិញ, កែសម្រួលចំនួន (Quantity), លុបទំនិញ, ដាក់លេខកូដបញ្ចុះតម្លៃ (Discount), និងគណនាតម្លៃសរុបស្វ័យប្រវត្ត៖
+ដើម្បីងាយស្រួលយល់ និងរៀបចំកូដឱ្យមានរបៀប យើងបំបែកការអនុវត្ត `useReducer` ជាជំហានៗ ដោយភ្ជាប់ Logic នីមួយៗជាមួយ HTML/JSX ជាក់ស្តែង ៖
 
-```jsx
-// src/components/AdvancedCartApp.jsx
-import { useReducer } from 'react';
+### ជំហានទី ១ ៖ កំណត់ Initial State & ការ Render ទិន្នន័យក្នុង HTML/JSX
+កំណត់រចនាសម្ព័ន្ធ State ដំបូង និងរបៀបយកបញ្ជីទំនិញមកបង្ហាញ (Render) លើ HTML ៖
 
-// ── ១. INITIAL STATE ──
+```javascript
+// 1. Initial State Definition
 const initialCartState = {
   items: [
     { id: 1, name: 'Mechanical Keyboard RGB', price: 85, quantity: 1 },
     { id: 2, name: 'Wireless Gaming Mouse', price: 45, quantity: 2 },
   ],
   discountCode: '',
-  discountPercent: 0, // ឧ. 10 = 10%
+  discountPercent: 0, // ឧទាហរណ៍: 10 = 10%
 };
+```
 
-// ── ២. PURE REDUCER FUNCTION ──
+```jsx
+// 2. HTML/JSX Rendering for initialCartState
+<ul>
+  {cart.items.map((item) => (
+    <li key={item.id}>
+      <span>{item.name}</span>
+      <span>${item.price} × {item.quantity} = ${item.price * item.quantity}</span>
+    </li>
+  ))}
+</ul>
+```
+
+---
+
+### ជំហានទី ២ ៖ បង្កើត Pure Reducer Function & Action Handlers
+
+មុននឹងសរសេរ Logic នៃ Action នីមួយៗ យើងត្រូវបង្កើតទម្រង់ **Reducer Function Signature** ជាមុនសិន ៖
+
+```javascript
+// ⚙️ រចនាសម្ព័ន្ធ Function របស់ Reducer
+function cartReducer(state, action) {
+  switch (action.type) {
+    // ករណី Action Cases នីមួយៗនឹងត្រូវសរសេរនៅខាងក្រោមនេះ...
+    default:
+      return state;
+  }
+}
+```
+
+---
+
+#### ២.១ — បន្ថែមទំនិញថ្មីចូលកន្ត្រក (`ADD_ITEM`)
+
+- **១. Reducer Logic (ក្នុង `cartReducer` function) ៖**
+```javascript
+case 'ADD_ITEM': {
+  const existingItem = state.items.find((item) => item.id === action.payload.id);
+
+  // បើមានរួចហើយ ➔ បង្កើនចំនួន quantity + 1
+  if (existingItem) {
+    return {
+      ...state,
+      items: state.items.map((item) =>
+        item.id === action.payload.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ),
+    };
+  }
+
+  // បើជាទំនិញថ្មី ➔ បន្ថែមចូល Array
+  return {
+    ...state,
+    items: [...state.items, { ...action.payload, quantity: 1 }],
+  };
+}
+```
+
+- **២. Handler Function (ក្នុង Component) ៖**
+```javascript
+const handleAddItem = (product) => {
+  dispatch({
+    type: 'ADD_ITEM',
+    payload: product,
+  });
+};
+```
+
+- **៣. HTML / JSX Trigger ៖**
+```jsx
+<button onClick={() => handleAddItem({ id: 3, name: 'USB-C Fast Charger', price: 30 })}>
+  + ថែម Fast Charger ($30)
+</button>
+```
+
+---
+
+#### ២.២ — កែសម្រួលចំនួនទំនិញ (`UPDATE_QUANTITY`)
+
+- **១. Reducer Logic (ក្នុង `cartReducer` function) ៖**
+```javascript
+case 'UPDATE_QUANTITY': {
+  const { id, quantity } = action.payload;
+
+  // បើចំនួនធ្លាក់ដល់ <= 0 ➔ លុប item នោះចេញដោយស្វ័យប្រវត្តិ
+  if (quantity <= 0) {
+    return {
+      ...state,
+      items: state.items.filter((item) => item.id !== id),
+    };
+  }
+
+  return {
+    ...state,
+    items: state.items.map((item) =>
+      item.id === id ? { ...item, quantity } : item
+    ),
+  };
+}
+```
+
+- **២. Handler Function (ក្នុង Component) ៖**
+```javascript
+const handleUpdateQuantity = (id, newQuantity) => {
+  dispatch({
+    type: 'UPDATE_QUANTITY',
+    payload: { id, quantity: newQuantity },
+  });
+};
+```
+
+- **៣. HTML / JSX Trigger ៖**
+```jsx
+<div>
+  <button onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}>-</button>
+  <span>{item.quantity}</span>
+  <button onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}>+</button>
+</div>
+```
+
+---
+
+#### ២.៣ — លុបទំនិញចេញពីកន្ត្រក (`REMOVE_ITEM`)
+
+- **១. Reducer Logic (ក្នុង `cartReducer` function) ៖**
+```javascript
+case 'REMOVE_ITEM':
+  return {
+    ...state,
+    items: state.items.filter((item) => item.id !== action.payload.id),
+  };
+```
+
+- **២. Handler Function (ក្នុង Component) ៖**
+```javascript
+const handleRemoveItem = (id) => {
+  dispatch({
+    type: 'REMOVE_ITEM',
+    payload: { id },
+  });
+};
+```
+
+- **៣. HTML / JSX Trigger ៖**
+```jsx
+<button onClick={() => handleRemoveItem(item.id)}>
+  🗑️ លុបទំនិញ
+</button>
+```
+
+---
+
+#### ២.៤ — ប្រើប្រាស់កូដបញ្ចុះតម្លៃ (`APPLY_COUPON`)
+
+- **១. Reducer Logic (ក្នុង `cartReducer` function) ៖**
+```javascript
+case 'APPLY_COUPON': {
+  const code = action.payload.trim().toUpperCase();
+  const discounts = { DISCOUNT10: 10, VIP20: 20 };
+
+  return {
+    ...state,
+    discountCode: code,
+    discountPercent: discounts[code] || 0,
+  };
+}
+```
+
+- **២. Handler Function (ក្នុង Component) ៖**
+```javascript
+const handleApplyCoupon = (code) => {
+  dispatch({
+    type: 'APPLY_COUPON',
+    payload: code,
+  });
+};
+```
+
+- **៣. HTML / JSX Trigger ៖**
+```jsx
+<button onClick={() => handleApplyCoupon('DISCOUNT10')}>
+  ប្រើកូដ DISCOUNT10 (-10%)
+</button>
+```
+
+---
+
+#### ២.៥ — សំអាតកន្ត្រកទាំងមូល (`CLEAR_CART`)
+
+- **១. Reducer Logic (ក្នុង `cartReducer` function) ៖**
+```javascript
+case 'CLEAR_CART':
+  return {
+    ...state,
+    items: [],
+    discountCode: '',
+    discountPercent: 0,
+  };
+```
+
+- **២. Handler Function (ក្នុង Component) ៖**
+```javascript
+const handleClearCart = () => {
+  dispatch({ type: 'CLEAR_CART' });
+};
+```
+
+- **៣. HTML / JSX Trigger ៖**
+```jsx
+<button onClick={handleClearCart}>
+  សំអាតកន្ត្រក
+</button>
+```
+
+---
+
+### ជំហានទី ៣ ៖ ផ្គុំចូលជា Pure Reducer Function ពេញលេញ
+
+```javascript
 function cartReducer(state, action) {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const existingIndex = state.items.findIndex(
-        (item) => item.id === action.payload.id
-      );
-
-      // ប្រសិនបើមានក្នុង Cart រួចហើយ បង្កើនចំនួន quantity + 1
-      if (existingIndex > -1) {
-        const updatedItems = state.items.map((item, index) =>
-          index === existingIndex
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-        return { ...state, items: updatedItems };
+      const existingItem = state.items.find((item) => item.id === action.payload.id);
+      if (existingItem) {
+        return {
+          ...state,
+          items: state.items.map((item) =>
+            item.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item
+          ),
+        };
       }
-
-      // ប្រសិនបើតំណាងឱ្យ item ថ្មី បន្ថែមចូលក្នុង items array
       return {
         ...state,
         items: [...state.items, { ...action.payload, quantity: 1 }],
@@ -137,15 +350,9 @@ function cartReducer(state, action) {
 
     case 'UPDATE_QUANTITY': {
       const { id, quantity } = action.payload;
-
-      // បើ quantity ធ្លាក់ដល់ 0 ត្រូវលុប item នោះចេញ
       if (quantity <= 0) {
-        return {
-          ...state,
-          items: state.items.filter((item) => item.id !== id),
-        };
+        return { ...state, items: state.items.filter((item) => item.id !== id) };
       }
-
       return {
         ...state,
         items: state.items.map((item) =>
@@ -154,37 +361,48 @@ function cartReducer(state, action) {
       };
     }
 
-    case 'REMOVE_ITEM': {
+    case 'REMOVE_ITEM':
       return {
         ...state,
         items: state.items.filter((item) => item.id !== action.payload.id),
       };
-    }
 
     case 'APPLY_COUPON': {
       const code = action.payload.trim().toUpperCase();
-      if (code === 'DISCOUNT10') {
-        return { ...state, discountCode: code, discountPercent: 10 };
-      }
-      if (code === 'VIP20') {
-        return { ...state, discountCode: code, discountPercent: 20 };
-      }
-      return { ...state, discountCode: code, discountPercent: 0 };
+      const discounts = { DISCOUNT10: 10, VIP20: 20 };
+      return {
+        ...state,
+        discountCode: code,
+        discountPercent: discounts[code] || 0,
+      };
     }
 
     case 'CLEAR_CART':
-      return { ...state, items: [], discountCode: '', discountPercent: 0 };
+      return {
+        ...state,
+        items: [],
+        discountCode: '',
+        discountPercent: 0,
+      };
 
     default:
       return state;
   }
 }
+```
 
-// ── ៣. COMPONENT UI ──
-export default function AdvancedCartApp() {
+---
+
+### ជំហានទី ៤ ៖ ភ្ជាប់ `useReducer` & Render Derived State ក្នុង HTML
+ហៅប្រើ Hook `useReducer` និងគណនាតម្លៃសរុបចេញពី State ដោយផ្ទាល់ រួចបង្ហាញក្នុង HTML Summary ៖
+
+```jsx
+import { useReducer } from 'react';
+
+export default function CartManager() {
   const [cart, dispatch] = useReducer(cartReducer, initialCartState);
 
-  // 🧮 គណនាតម្លៃចេញពី State (Derived State)
+  // 🧮 Derived State: គណនាតម្លៃចេញពី cart.items ដោយផ្ទាល់
   const subtotal = cart.items.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -192,135 +410,65 @@ export default function AdvancedCartApp() {
   const discountAmount = (subtotal * cart.discountPercent) / 100;
   const grandTotal = Math.max(0, subtotal - discountAmount);
 
+  // HTML / JSX Rendering for Derived Totals
   return (
-    <div className="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-5">
-      <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
-        <div>
-          <h2 className="text-base font-bold text-slate-800 dark:text-white">
-            🛒 កន្ត្រកទំនិញ
-          </h2>
-          <span className="text-xs text-slate-500">
-            {cart.items.length} មុខទំនិញ
-          </span>
-        </div>
+    <div className="cart-summary">
+      <p>តម្លៃដើម (Subtotal): ${subtotal.toFixed(2)}</p>
+      {cart.discountPercent > 0 && (
+        <p>បញ្ចុះតម្លៃ ({cart.discountPercent}%): -${discountAmount.toFixed(2)}</p>
+      )}
+      <h3>សរុបត្រូវទូទាត់: ${grandTotal.toFixed(2)}</h3>
+    </div>
+  );
+}
+```
 
-        <button
-          onClick={() => dispatch({ type: 'CLEAR_CART' })}
-          className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition"
-        >
-          សំអាតកន្ត្រក
-        </button>
-      </div>
+---
 
-      {/* ITEM LIST */}
-      <ul className="divide-y divide-slate-100 dark:divide-slate-800 max-h-56 overflow-y-auto pr-1">
-        {cart.items.length === 0 ? (
-          <li className="py-8 text-center text-xs text-slate-400">
-            កន្ត្រកទំនិញនៅទទេស្អាត!
+### ជំហានទី ៥ ៖ Component ពេញលេញ (Clean & Semantic JSX)
+ការផ្គុំបញ្ចូលគ្នារវាង State, Reducer, Dispatch, និង HTML/JSX ទាំងអស់ ៖
+
+```jsx
+export default function CartApp() {
+  const [cart, dispatch] = useReducer(cartReducer, initialCartState);
+
+  const subtotal = cart.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountAmount = (subtotal * cart.discountPercent) / 100;
+  const grandTotal = Math.max(0, subtotal - discountAmount);
+
+  return (
+    <div className="cart-container">
+      <h2>🛒 កន្ត្រកទំនិញ ({cart.items.length})</h2>
+
+      {/* បញ្ជីទំនិញ */}
+      <ul>
+        {cart.items.map((item) => (
+          <li key={item.id}>
+            <span>{item.name} (${item.price})</span>
+            <button onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { id: item.id, quantity: item.quantity - 1 } })}>-</button>
+            <span>{item.quantity}</span>
+            <button onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { id: item.id, quantity: item.quantity + 1 } })}>+</button>
+            <button onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })}>🗑️</button>
           </li>
-        ) : (
-          cart.items.map((item) => (
-            <li
-              key={item.id}
-              className="py-3 flex justify-between items-center text-xs"
-            >
-              <div>
-                <p className="font-bold text-slate-800 dark:text-slate-200">
-                  {item.name}
-                </p>
-                <p className="text-indigo-600 dark:text-indigo-400 font-semibold mt-0.5">
-                  ${item.price} × {item.quantity} = ${item.price * item.quantity}
-                </p>
-              </div>
-
-              {/* QUANTITY CONTROLS */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() =>
-                    dispatch({
-                      type: 'UPDATE_QUANTITY',
-                      payload: { id: item.id, quantity: item.quantity - 1 },
-                    })
-                  }
-                  className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 flex items-center justify-center transition"
-                >
-                  -
-                </button>
-                <span className="w-4 text-center font-bold">{item.quantity}</span>
-                <button
-                  onClick={() =>
-                    dispatch({
-                      type: 'UPDATE_QUANTITY',
-                      payload: { id: item.id, quantity: item.quantity + 1 },
-                    })
-                  }
-                  className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 flex items-center justify-center transition"
-                >
-                  +
-                </button>
-                <button
-                  onClick={() =>
-                    dispatch({ type: 'REMOVE_ITEM', payload: { id: item.id } })
-                  }
-                  className="text-rose-500 hover:text-rose-700 ml-2 font-bold"
-                >
-                  ✕
-                </button>
-              </div>
-            </li>
-          ))
-        )}
+        ))}
       </ul>
 
-      {/* QUICK ADD BUTTON */}
-      <button
-        onClick={() =>
-          dispatch({
-            type: 'ADD_ITEM',
-            payload: { id: 3, name: 'USB-C Fast Charger 65W', price: 30 },
-          })
-        }
-        className="w-full py-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold hover:bg-indigo-100 transition"
-      >
-        + ថែម Fast Charger ($30)
+      {/* Actions */}
+      <button onClick={() => dispatch({ type: 'ADD_ITEM', payload: { id: 3, name: 'Charger', price: 30 } })}>
+        + ថែម Charger ($30)
+      </button>
+      <button onClick={() => dispatch({ type: 'APPLY_COUPON', payload: 'DISCOUNT10' })}>
+        កូដ: DISCOUNT10
+      </button>
+      <button onClick={() => dispatch({ type: 'CLEAR_CART' })}>
+        សំអាតកន្ត្រក
       </button>
 
-      {/* COUPON SECTION */}
-      <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-2">
-        <div className="flex gap-2">
-          <button
-            onClick={() =>
-              dispatch({ type: 'APPLY_COUPON', payload: 'DISCOUNT10' })
-            }
-            className="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-semibold"
-          >
-            ប្រើកូដ: DISCOUNT10 (-10%)
-          </button>
-          <button
-            onClick={() => dispatch({ type: 'APPLY_COUPON', payload: 'VIP20' })}
-            className="flex-1 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg text-xs font-semibold"
-          >
-            ប្រើកូដ: VIP20 (-20%)
-          </button>
-        </div>
-      </div>
-
-      {/* SUMMARY */}
-      <div className="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl space-y-1.5 text-xs">
-        <div className="flex justify-between text-slate-600 dark:text-slate-400">
-          <span>តម្លៃដើម (Subtotal):</span>
-          <span>${subtotal.toFixed(2)}</span>
-        </div>
-        {cart.discountPercent > 0 && (
-          <div className="flex justify-between text-emerald-600 font-semibold">
-            <span>បញ្ចុះតម្លៃ ({cart.discountPercent}%):</span>
-            <span>-${discountAmount.toFixed(2)}</span>
-          </div>
-        )}
-        <div className="flex justify-between font-black text-sm text-slate-800 dark:text-white pt-2 border-t border-slate-200 dark:border-slate-700">
-          <span>សរុបត្រូវទូទាត់:</span>
-          <span>${grandTotal.toFixed(2)}</span>
-        </div>
+      {/* Summary */}
+      <div className="summary">
+        <p>Subtotal: ${subtotal.toFixed(2)}</p>
+        {cart.discountPercent > 0 && <p>បញ្ចុះតម្លៃ: -${discountAmount.toFixed(2)}</p>}
+        <h3>សរុប: ${grandTotal.toFixed(2)}</h3>
       </div>
     </div>
   );
@@ -329,7 +477,33 @@ export default function AdvancedCartApp() {
 
 ---
 
-## 🔍 ៥. ការវិភាគចំណុចគន្លឹះនៃ Reducer Logic
+## ⚡ ៥. Lazy Initialization ជាមួយ `init` Argument
+
+នៅពេលដែល Initial State ត្រូវទាញយកពីប្រភពខាងក្រៅ (ដូចជា `localStorage`) ឬត្រូវការការគណនាធ្ងន់ធ្ងរ យើងគួរប្រើ **Lazy Initializer (Argument ទី ៣)** ដើម្បីកុំឱ្យដំណើរការគណនានោះម្តងទៀតរាល់ពេល Re-render ៖
+
+```javascript
+// Function សម្រាប់ Initialize State តែម្តងគត់នៅពេល Mount
+function initCartState(initialArg) {
+  try {
+    const savedCart = localStorage.getItem('shopping_cart');
+    return savedCart ? JSON.parse(savedCart) : initialArg;
+  } catch (error) {
+    return initialArg;
+  }
+}
+
+// ការហៅប្រើប្រាស់ក្នុង Component
+function CartApp() {
+  // useReducer(reducer, initialArg, initFunction)
+  const [cart, dispatch] = useReducer(cartReducer, initialCartState, initCartState);
+  
+  // ...
+}
+```
+
+---
+
+## 🔍 ៦. ការវិភាគចំណុចគន្លឹះនៃ Reducer Logic
 
 1. **ការចៀសវាង Array Mutation ពេល Update Quantity:**  
    យើងប្រើ `state.items.map(...)` ដើម្បីបង្កើត Object Item ថ្មីសម្រាប់តែ item ដែលត្រូវ update `{ ...item, quantity }` និងរក្សាទុក items ផ្សេងទៀតដដែល។
@@ -340,7 +514,7 @@ export default function AdvancedCartApp() {
 
 ---
 
-## ⚖️ ៦. តារាងប្រៀបធៀប ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
+## ⚖️ ៧. តារាងប្រៀបធៀប ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
 
 | លក្ខណៈវិនិច្ឆ័យ | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
 | :--- | :--- | :--- |
@@ -352,8 +526,9 @@ export default function AdvancedCartApp() {
 
 ---
 
-## 📋 ៧. សង្ខេបចំណុចសំខាន់ៗ (Key Takeaways)
+## 📋 ៨. សង្ខេបចំណុចសំខាន់ៗ (Key Takeaways)
 
 - `useReducer` គឺជាជម្រើសដ៏ល្អបំផុតសម្រាប់ State ដែលមានភាពស្មុគស្មាញ និងមាន State Transitions ច្រើន។
 - Reducer Function ត្រូវតែជា **Pure Function** ជានិច្ច (គ្មាន side-effects និងគោរព Immutability ១០០%)។
 - `dispatch(action)` ផ្តល់ភាពងាយស្រួលក្នុងការបញ្ជូនសារពី UI ទៅកាន់ Reducer ដោយមិនចាំបាច់ដឹងពីរបៀបគណនា State ខាងក្នុងឡើយ។
+- ប្រើ `init` function (Lazy Initialization) នៅពេលត្រូវការទាញយក State ដំបូងពី `localStorage` ឬគណនាទិន្នន័យធ្ងន់ធ្ងរ។
