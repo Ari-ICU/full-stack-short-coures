@@ -38,55 +38,75 @@ quiz:
     explanation: "ការបង្កើត Component ដូចជា `<AppProviders>` ឬការប្រើ Array Reduce Pattern ជួយចងក្រង Providers ជាច្រើនជាន់ឱ្យនៅសល់តែ Wrapper តែមួយគត់យ៉ាងស្រស់ស្អាត។"
 ---
 
-## 🏛️ ១. ស្ថាបត្យកម្ម Dedicated Context Module (Clean Architecture)
+## 💡 ១. ហេតុអ្វីបានជាត្រូវរៀនមេរៀននេះ? (The Big Picture)
 
-ជំនួសឱ្យការសរសេរកូដ Context ច្របូកច្របល់នៅខាងក្នុង `App.jsx` យើងរៀបចំវាជា **Dedicated Context Module** មួយក្នុង Folder `src/context/` ៖
+នៅក្នុងមេរៀនមុនៗ យើងបានសិក្សាឧបករណ៍សំខាន់ៗចំនួនពីររួចមកហើយ ៖
+1. **Context API (មេរៀនទី ២) ៖** ជួយចែករំលែកទិន្នន័យពីលើចុះក្រោម ដោយមិនបាច់ឆ្លងកាត់ Prop Drilling។
+2. **useReducer (មេរៀនទី ៣) ៖** ជួយគ្រប់គ្រង Business Logic ស្មុគស្មាញឱ្យមានរបៀបរៀបរយតាមរយៈ Actions & Reducer Function។
+
+> [!IMPORTANT]
+> **សំណួរគន្លឹះ ៖**  
+> ចុះប្រសិនបើនៅក្នុង Real-world App យើងមាន State ស្មុគស្មាញ (ដូចជា **User Authentication** ឬ **Shopping Cart**) ហើយយើងចង់ចែករំលែកទិន្នន័យនោះទៅកាន់គ្រប់ Component ពេញមួយ App តើយើងគួរធ្វើដូចម្តេច?  
+> 👉 **ដំណោះស្រាយដ៏ពេញនិយមបំផុត ៖** គឺការដាក់ **`useReducer` ចូលទៅខាងក្នុង `Context Provider`!** វិធីនេះផ្តល់ឱ្យយើងនូវ Global State Architecture មួយកម្រិតស្មើនឹង Redux ដោយមិនចាំបាច់ Install Library បន្ថែមឡើយ។
+
+---
+
+## 🏛️ ២. បញ្ហាធំៗ ២ ដែលយើងត្រូវដោះស្រាយក្នុងមេរៀននេះ
+
+```
+┌──────────────────────────────────────────────┐
+│  បញ្ហាទី ១: Spaghetti Code ក្នុង App.jsx      │ ➔ ដំណោះស្រាយ: Dedicated Context Module
+├──────────────────────────────────────────────┤
+│  បញ្ហាទី ២: ប៊ូតុងចុច Re-render ឥតប្រយោជន៍   │ ➔ ដំណោះស្រាយ: The Split Context Pattern
+└──────────────────────────────────────────────┘
+```
+
+### បញ្ហាទី ១ ៖ Spaghetti Code ក្នុង `App.jsx`
+ប្រសិនបើយើងសរសេរ `createContext`, `useReducer`, `useEffect`, និង Function Handlers ទាំងអស់ញាត់ចូលក្នុង `App.jsx` នោះ `App.jsx` នឹងរីកទំហំរាប់រយបន្ទាត់ ពិបាកអាន និងពិបាកថែទាំ។  
+👉 **ដំណោះស្រាយ ៖** បង្កើត **Dedicated Context Module** មួយដាច់ដោយឡែកក្នុង Folder `src/context/` (ឧទាហរណ៍ ៖ `src/context/AuthContext.jsx`)។
 
 ```
 src/
 ├── context/
-│   ├── AuthContext.jsx      # 🔐 User Session & Authentication
-│   ├── ThemeContext.jsx     # 🎨 Theme Mode (Light / Dark)
-│   ├── CartContext.jsx      # 🛒 E-Commerce Cart + useReducer
-│   └── AppProviders.jsx     # 🧩 Provider Combiner
-```
-
-```mermaid
-flowchart TD
-    subgraph ContextModule["Dedicated Context Module (src/context/AuthContext.jsx)"]
-        direction TB
-        Ctx["1. Private Context Instances<br/>(AuthStateCtx & AuthDispatchCtx)"]
-        Reducer["2. Auth Reducer Function<br/>(LOGIN_START, LOGIN_SUCCESS, LOGOUT)"]
-        Prov["3. <AuthProvider> Component<br/>(ផ្គត់ផ្គង់ State & Dispatch)"]
-        Hooks["4. Export Custom Hooks<br/>(useAuth, useAuthDispatch)"]
-        Ctx --- Reducer --- Prov --- Hooks
-    end
-
-    subgraph CleanConsumers["ការហៅប្រើប្រាស់ក្នុង Components"]
-        direction TB
-        AppWrap["<AuthProvider><App /></AuthProvider>"]
-        NavComp["const { user, isAuthenticated } = useAuth();"]
-        BtnComp["const dispatch = useAuthDispatch();"]
-    end
-
-    ContextModule --> CleanConsumers
-
-    style ContextModule fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
-    style CleanConsumers fill:#f0fff4,stroke:#38a169,stroke-width:2px
+│   ├── AuthContext.jsx      # 🔐 គ្រប់គ្រង Login/Logout, Token, User Session
+│   ├── ThemeContext.jsx     # 🎨 គ្រប់គ្រង Dark/Light Mode
+│   ├── CartContext.jsx      # 🛒 គ្រប់គ្រង Shopping Cart + useReducer
+│   └── AppProviders.jsx     # 🧩 Provider Combiner (កន្លែងប្រមូលផ្តុំ Providers)
 ```
 
 ---
 
-## ⚡ ២. The Split Context Pattern (បំបែក State និង Dispatch សម្រាប់ High-Performance)
+### បញ្ហាទី ២ ៖ ប៊ូតុងចុច Re-render ដោយឥតប្រយោជន៍ (The Split Context Solution)
+
+ដើម្បីយល់ពីបញ្ហានេះ សូមស្រមៃមើល **«កញ្ចក់ទូរទស្សន៍»** និង **«តេឡេបញ្ជា»** 📺៖
+- **កញ្ចក់ទូរទស្សន៍ (State):** ត្រូវបង្ហាញរូបភាព និងសំឡេង (ដូចជា ProfileCard / UserAvatar) ➔ ត្រូវតែផ្លាស់ប្តូររូបភាព (Re-render) រាល់ពេលដែល State ប្តូរ។
+- **តេឡេបញ្ជា (Dispatch):** មានតែប៊ូតុងចុចបញ្ជា (ដូចជា Logout Button) ➔ តេឡេខ្លួនឯង **មិនគួរត្រូវ Re-render ឬកន្ត្រាក់ឡើយ** នៅពេលដែលទូរទស្សន៍ផ្លាស់ប្តូររូបភាព!
+
+```mermaid
+flowchart TD
+    subgraph Problem["❌ របៀបធម្មតា: ដាក់រួមគ្នា (Slow Re-renders)"]
+        direction TB
+        UnifiedCtx["<AuthContext.Provider value={{ state, dispatch }}>"]
+        UnifiedCtx --> CompA["<UserProfile> (អាន state) 🔄 Re-render"]
+        UnifiedCtx --> CompB["<LogoutButton> (ត្រូវការតែ dispatch) ⚠️ Re-render តាមដែរ!"]
+    end
+
+    subgraph Solution["✅ ដំណោះស្រាយ: Split Context Pattern (High Performance)"]
+        direction TB
+        StateCtx["<AuthStateContext.Provider value={state}>"]
+        DispatchCtx["<AuthDispatchContext.Provider value={dispatch}>"]
+        StateCtx --> Comp1["<UserProfile> (useAuth) 🔄 Re-render ពេល State ប្តូរ"]
+        DispatchCtx --> Comp2["<LogoutButton> (useAuthDispatch) ⚡ មិន Re-render ឡើយ!"]
+    end
+
+    style Problem fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
+    style Solution fill:#f0fff4,stroke:#38a169,stroke-width:2px
+```
 
 > [!TIP]
-> **ហេតុអ្វីបានជាត្រូវបំបែក State និង Dispatch?**  
-> នៅក្នុង React `dispatch` function ពី `useReducer` ត្រូវបានធានាថាមាន **Stable Identity** (មិនដែលផ្លាស់ប្តូរ reference ឡើយរវាង render)។  
-> ប្រសិនបើយើងបំបែក Context ជាពីរ៖
-> 1. `AuthStateContext` ➔ សម្រាប់ Components ដែលត្រូវការបង្ហាញទិន្នន័យ (User Profile, Avatar)
-> 2. `AuthDispatchContext` ➔ សម្រាប់ Components ដែលត្រូវការតែ Action (Logout Button, Login Form)
-> 
-> នៅពេល User Login ឬ Logout សមាសភាគដែលមានតែប៊ូតុង **នឹងមិនត្រូវ Re-render ឡើងវិញជាដាច់ខាត!**
+> **ច្បាប់នៃ Stable Identity ក្នុង React ៖**  
+> `dispatch` function ពី `useReducer` មិនដែលផ្លាស់ប្តូរ Reference ឡើយរវាង Render។  
+> នៅពេលយើងបំបែកវាជា `AuthStateContext` និង `AuthDispatchContext` នោះ Components ណាដែលត្រូវការត្រឹមតែ `dispatch` (ដូចជាប៊ូតុង Logout) នឹង **មិនត្រូវ Re-render ឡើងវិញជាដាច់ខាត** ទោះបី User Data ផ្លាស់ប្តូររាប់ពាន់ដងក៏ដោយ!
 
 ---
 
