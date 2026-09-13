@@ -89,115 +89,138 @@ flowchart TD
 
 ---
 
-## 💻 ៣. កូដអនុវត្តជាក់ស្តែង ៖ Dashboard ជាមួយ Heavy Filter & Chart
+## 💻 ៣. ការអនុវត្តជាក់ស្តែង ៖ Dashboard Performance Optimization (បំបែកមួយជំហានម្តងៗ)
 
-ខាងក្រោមនេះជាឧទាហរណ៍ជាក់ស្តែងដែលរួមបញ្ចូល `React.memo`, `useMemo`, និង `useCallback` ដំណើរការជាមួយគ្នា៖
+ដើម្បីងាយស្រួលយល់ និងរៀបចំកូដឱ្យមានរបៀប យើងបំបែកការអនុវត្ត `React.memo`, `useMemo`, និង `useCallback` ជាជំហានៗ ដោយភ្ជាប់ Logic ជាមួយ HTML/JSX ជាក់ស្តែង ៖
+
+### ជំហានទី ១ ៖ ការពារ Child Component ដោយ `React.memo`
+រុំព័ទ្ធ Child Component ជាមួយ `memo()` ដើម្បីកុំឱ្យវា Re-render នៅពេល State របស់ Parent ផ្លាស់ប្តូរ (ដរាបណា Props `items` និង `onExport` នៅដដែល) ៖
 
 ```jsx
-// src/components/OptimizedDashboard.jsx
-import { useState, useMemo, useCallback, memo } from 'react';
+// 1. Memoized Child Component
+import { memo } from 'react';
 
-// ── ១. MEMOIZED EXPENSIVE CHILD COMPONENT ──
-// រុំដោយ React.memo ដើម្បីកុំឱ្យ Re-render ពេល Parent update state ផ្សេង
-const HeavyChart = memo(function HeavyChart({ items, onExport }) {
+export const HeavyChart = memo(function HeavyChart({ items, onExport }) {
   console.log('🎨 HeavyChart Rendered! (ប្រតិបត្តិការគូរ Chart ធ្ងន់)');
 
   return (
-    <div className="p-5 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 shadow-sm space-y-3">
-      <div className="flex justify-between items-center">
-        <h3 className="font-bold text-sm text-slate-800 dark:text-white">
-          📊 ក្រាហ្វិកស្ថិតិ (រក្សាទុកក្នុង Cache)
-        </h3>
-        <span className="text-xs px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-bold rounded-full">
-          {items.length} ទិន្នន័យ
-        </span>
+    <div className="chart-card">
+      <div className="chart-header">
+        <h3>📊 ក្រាហ្វិកស្ថិតិ (រក្សាទុកក្នុង Cache)</h3>
+        <span>{items.length} ទិន្នន័យ</span>
       </div>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        Component នេះនឹងមិន Re-render ឡើយនៅពេលអ្នកចុច Counter ខាងលើ!
-      </p>
+      <p>Component នេះនឹងមិន Re-render ឡើយនៅពេលអ្នកចុច Counter ក្នុង Parent!</p>
 
-      <button
-        onClick={onExport}
-        className="px-3.5 py-1.5 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition shadow"
-      >
+      {/* ប៊ូតុងទទួល Callback Handler */}
+      <button onClick={onExport}>
         📥 Export Data
       </button>
     </div>
   );
 });
+```
 
-// ── ២. PARENT COMPONENT ──
+---
+
+### ជំហានទី ២ ៖ Cache ការគណនាធ្ងន់ៗដោយ `useMemo`
+ប្រើ `useMemo` ដើម្បីការពារការច្រោះ (Filter) ទិន្នន័យ ៥,០០០ ជួរឡើងវិញ នៅពេល Parent Re-render ដោយសារ State ផ្សេង ៖
+
+```javascript
+// 2. Heavy Data Filtering Logic
+const filteredRecords = useMemo(() => {
+  console.log('⏳ កំពុង Filter ទិន្នន័យ 5,000 items ក្នុង Memory...');
+  const dummyData = Array.from({ length: 5000 }, (_, index) => ({
+    id: index + 1,
+    title: `គម្រោងអភិវឌ្ឍន៍ #${index + 1} - System Architecture`,
+    category: index % 2 === 0 ? 'Frontend' : 'Backend',
+  }));
+
+  if (!searchQuery.trim()) return dummyData;
+
+  return dummyData.filter((item) =>
+    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+}, [searchQuery]); // 👈 ដំណើរការគណនាតែពេល searchQuery ផ្លាស់ប្តូរ
+```
+
+```jsx
+{/* HTML / JSX Input សម្រាប់បញ្ជូន searchQuery ទៅកាន់ useMemo */}
+<input
+  type="text"
+  placeholder="ស្វែងរកក្នុងទិន្នន័យ 5,000 ជួរ..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
+```
+
+---
+
+### ជំហានទី ៣ ៖ រក្សា Function Reference ឱ្យនៅដដែលដោយ `useCallback`
+ប្រើ `useCallback` ដើម្បីកុំឱ្យ Parent បង្កើត Function Reference ថ្មីរាល់ Render (ការពារកុំឱ្យ `React.memo` លើ `HeavyChart` ច្រឡំថា Prop ផ្លាស់ប្តូរ) ៖
+
+```javascript
+// 3. Stable Function Reference
+const handleExportData = useCallback(() => {
+  alert(`បាន Export ទិន្នន័យចំនួន ${filteredRecords.length} ជោគជ័យ!`);
+}, [filteredRecords.length]);
+```
+
+```jsx
+{/* HTML / JSX: បញ្ជូន Stable Reference ទៅកាន់ Memoized Component */}
+<HeavyChart items={filteredRecords} onExport={handleExportData} />
+```
+
+---
+
+### ជំហានទី ៤ ៖ Component ពេញលេញ (Clean & Semantic JSX)
+ការផ្គុំបញ្ចូលគ្នារវាង `useState`, `useMemo`, `useCallback`, និង `HeavyChart` ៖
+
+```jsx
+// src/components/OptimizedDashboard.jsx
+import { useState, useMemo, useCallback } from 'react';
+import { HeavyChart } from './HeavyChart';
+
 export default function OptimizedDashboard() {
   const [count, setCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // ── ៣. useMemo: CACHE EXPENSIVE CALCULATION ──
-  // ការច្រោះទិន្នន័យ ៥,០០០ items នឹងដំណើរការតែពេល searchQuery ផ្លាស់ប្តូរប៉ុណ្ណោះ!
+  // 1. Cache Filtered Results
   const filteredRecords = useMemo(() => {
-    console.log('⏳ កំពុង Filter ទិន្នន័យ 5,000 items ក្នុង Memory...');
-    const dummyData = Array.from({ length: 5000 }, (_, index) => ({
-      id: index + 1,
-      title: `គម្រោងអភិវឌ្ឍន៍ #${index + 1} - System Architecture`,
-      category: index % 2 === 0 ? 'Frontend' : 'Backend',
+    const dummyData = Array.from({ length: 5000 }, (_, i) => ({
+      id: i + 1,
+      title: `គម្រោង #${i + 1}`,
     }));
 
     if (!searchQuery.trim()) return dummyData;
-
     return dummyData.filter((item) =>
       item.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]); // 👈 ដំណើរការតែពេល searchQuery ដូរ
+  }, [searchQuery]);
 
-  // ── ៤. useCallback: CACHE FUNCTION REFERENCE ──
-  // រក្សា Function Reference ឱ្យនៅដដែល ដើម្បីកុំឱ្យ HeavyChart ច្រឡំថា prop ដូរ
+  // 2. Cache Function Reference
   const handleExportData = useCallback(() => {
-    alert(`បាន Export ទិន្នន័យចំនួន ${filteredRecords.length} ជោគជ័យ!`);
+    alert(`Exported ${filteredRecords.length} items!`);
   }, [filteredRecords.length]);
 
   return (
-    <div className={`p-6 max-w-lg mx-auto rounded-3xl border transition-all ${
-      isDarkMode ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-800'
-    }`}>
-      {/* HEADER & COUNTER */}
-      <div className="flex justify-between items-center pb-4 border-b border-slate-200 dark:border-slate-800 mb-5">
-        <div>
-          <h2 className="font-bold text-base">⚡ Performance Optimizer</h2>
-          <p className="text-xs opacity-60">ពិសោធន៍ Render Optimization</p>
-        </div>
+    <div className="dashboard">
+      <header>
+        <h2>⚡ Performance Dashboard</h2>
+        {/* ⚡ ការចុចប៊ូតុង Counter នេះ នឹងមិនបង្កឱ្យ HeavyChart Re-render ឡើយ! */}
+        <button onClick={() => setCount((c) => c + 1)}>
+          Counter: {count}
+        </button>
+      </header>
 
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCount((c) => c + 1)}
-            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow"
-          >
-            Counter: {count}
-          </button>
-          <button
-            onClick={() => setIsDarkMode((d) => !d)}
-            className="p-1.5 bg-slate-200 dark:bg-slate-800 rounded-xl text-xs"
-          >
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
-        </div>
-      </div>
+      <input
+        type="text"
+        placeholder="ស្វែងរក..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
 
-      {/* SEARCH INPUT FIELD */}
-      <div className="space-y-2 mb-4">
-        <label className="block text-xs font-bold opacity-75">
-          ស្វែងរកក្នុងទិន្នន័យ ៥,០០០ ជួរ (សាកល្បងវាយអក្សរ):
-        </label>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="វាយពាក្យស្វែងរក..."
-          className="w-full px-3.5 py-2 rounded-xl border text-xs bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
-
-      {/* OPTIMIZED CHILD CHART */}
+      {/* Memoized Component */}
       <HeavyChart items={filteredRecords} onExport={handleExportData} />
     </div>
   );

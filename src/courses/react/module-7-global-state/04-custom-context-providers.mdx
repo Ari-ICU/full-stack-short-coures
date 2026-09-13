@@ -90,26 +90,203 @@ flowchart TD
 
 ---
 
-## 💻 ៣. កូដគំរូកម្រិត Enterprise ៖ `AuthContext.jsx` ពេញលេញ
+## 💻 ៣. ការអនុវត្ត Dedicated AuthContext Module (បំបែកមួយជំហានម្តងៗ)
 
-```jsx
+ដើម្បីឱ្យកូដមានរបៀបរៀបរយតាមស្តង់ដារ Enterprise យើងបំបែកការបង្កើត `AuthContext.jsx` ជាជំហានៗ ៖
+
+### ជំហានទី ១ ៖ បង្កើត Split Context Objects & Initial State
+បង្កើត Private Context ចំនួន ២ (State & Dispatch) រួមជាមួយ Initial State ៖
+
+```javascript
 // src/context/AuthContext.jsx
-import { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext } from 'react';
 
-// ── ១. បង្កើត PRIVATE CONTEXT OBJECTS ──
+// ១. Private Context Instances (មិន Export ទៅក្រៅទេ)
 const AuthStateContext = createContext(null);
 const AuthDispatchContext = createContext(null);
 
-// ── ២. INITIAL STATE ──
+// ២. Initial Auth State Shape
 const initialAuthState = {
   user: null,
   token: null,
   isAuthenticated: false,
-  isLoading: true, // សម្រាប់ពិនិត្យមើល Token ដំបូង
+  isLoading: true, // សម្រាប់ត្រួតពិនិត្យ Token ដំបូង
   error: null,
 };
+```
 
-// ── ៣. AUTH REDUCER ──
+---
+
+### ជំហានទី ២ ៖ បង្កើត Auth Reducer Logic និង Action Handlers (បំបែកតាមសកម្មភាព)
+
+មុននឹងសរសេរ Logic នៃ Action នីមួយៗ យើងកំណត់ទម្រង់ **Reducer Function Signature** ជាមុនសិន ៖
+
+```javascript
+// ⚙️ Auth Reducer Function Signature
+function authReducer(state, action) {
+  switch (action.type) {
+    // ករណី Action Cases នីមួយៗនឹងត្រូវសរសេរនៅខាងក្រោមនេះ...
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+}
+```
+
+---
+
+#### ២.១ — ចាប់ផ្តើមដំណើរការ Login (`LOGIN_START`)
+- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
+```javascript
+case 'LOGIN_START':
+  return { ...state, isLoading: true, error: null };
+```
+
+- **២. Dispatch Trigger (ក្នុង Handler) ៖**
+```javascript
+dispatch({ type: 'LOGIN_START' });
+```
+
+- **៣. HTML / JSX (Loading State Button) ៖**
+```jsx
+<button type="submit" disabled={isLoading}>
+  {isLoading ? 'កំពុងផ្ទៀងផ្ទាត់...' : 'Login ចូលគណនី'}
+</button>
+```
+
+---
+
+#### ២.២ — Login ជោគជ័យ (`LOGIN_SUCCESS`)
+- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
+```javascript
+case 'LOGIN_SUCCESS':
+  return {
+    ...state,
+    isLoading: false,
+    isAuthenticated: true,
+    user: action.payload.user,
+    token: action.payload.token,
+    error: null,
+  };
+```
+
+- **២. Dispatch Trigger (ក្នុង Handler) ៖**
+```javascript
+dispatch({
+  type: 'LOGIN_SUCCESS',
+  payload: { user: dummyUser, token: dummyToken },
+});
+```
+
+- **៣. HTML / JSX (បង្ហាញឈ្មោះអ្នកប្រើប្រាស់) ៖**
+```jsx
+<div>
+  <span>សួស្តី, {user.name} ({user.role})</span>
+</div>
+```
+
+---
+
+#### ២.៣ — Login បរាជ័យ (`LOGIN_FAILURE`)
+- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
+```javascript
+case 'LOGIN_FAILURE':
+  return {
+    ...state,
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    token: null,
+    error: action.payload,
+  };
+```
+
+- **២. Dispatch Trigger (ក្នុង Handler) ៖**
+```javascript
+dispatch({
+  type: 'LOGIN_FAILURE',
+  payload: 'Email ឬ Password មិនត្រឹមត្រូវឡើយ!',
+});
+```
+
+- **៣. HTML / JSX (បង្ហាញសារ Error) ៖**
+```jsx
+{error && <p className="error-message">⚠️ {error}</p>}
+```
+
+---
+
+#### ២.៤ — ចាកចេញពីគណនី (`LOGOUT`)
+- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
+```javascript
+case 'LOGOUT':
+  return {
+    ...state,
+    isLoading: false,
+    isAuthenticated: false,
+    user: null,
+    token: null,
+    error: null,
+  };
+```
+
+- **២. Handler Function ៖**
+```javascript
+const handleLogout = () => {
+  localStorage.removeItem('auth_user');
+  localStorage.removeItem('auth_token');
+  dispatch({ type: 'LOGOUT' });
+};
+```
+
+- **៣. HTML / JSX (Logout Button) ៖**
+```jsx
+<button onClick={handleLogout}>
+  ចាកចេញ (Logout)
+</button>
+```
+
+---
+
+#### ២.៥ — ស្ដារ Session ឡើងវិញពេល Refresh (`RESTORE_SESSION`)
+- **១. Reducer Logic (ក្នុង `authReducer`) ៖**
+```javascript
+case 'RESTORE_SESSION':
+  return {
+    ...state,
+    isLoading: false,
+    isAuthenticated: !!action.payload.user,
+    user: action.payload.user,
+    token: action.payload.token,
+  };
+```
+
+- **២. Dispatch Trigger (ក្នុង `useEffect`) ៖**
+```javascript
+useEffect(() => {
+  const savedUser = localStorage.getItem('auth_user');
+  const savedToken = localStorage.getItem('auth_token');
+
+  if (savedUser && savedToken) {
+    dispatch({
+      type: 'RESTORE_SESSION',
+      payload: { user: JSON.parse(savedUser), token: savedToken },
+    });
+  } else {
+    dispatch({ type: 'RESTORE_SESSION', payload: { user: null, token: null } });
+  }
+}, []);
+```
+
+- **៣. HTML / JSX (Session Loading Indicator) ៖**
+```jsx
+if (isLoading) return <header>កំពុងផ្ទុក Session...</header>;
+```
+
+---
+
+#### ២.៦ — ផ្គុំចូលជា Pure Auth Reducer Function ពេញលេញ
+
+```javascript
 function authReducer(state, action) {
   switch (action.type) {
     case 'LOGIN_START':
@@ -158,17 +335,25 @@ function authReducer(state, action) {
       throw new Error(`Unhandled action type: ${action.type}`);
   }
 }
+```
 
-// ── ៤. PROVIDER COMPONENT ──
+---
+
+### ជំហានទី ៣ ៖ បង្កើត `<AuthProvider>` Component
+ផ្គត់ផ្គង់ State និង Dispatch ដាច់ដោយឡែកពីគ្នា (Split Provider) ៖
+
+```jsx
+// src/context/AuthContext.jsx
+import { useReducer, useEffect } from 'react';
+
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  // 🔄 ពិនិត្យមើល LocalStorage ពេល App ចាប់ផ្តើមដំណើរការដំបូង
+  // 🔄 Restore session ពី localStorage ពេល Mount
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('auth_user');
       const savedToken = localStorage.getItem('auth_token');
-
       if (savedUser && savedToken) {
         dispatch({
           type: 'RESTORE_SESSION',
@@ -182,6 +367,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  // HTML / JSX Provider Wrapper ជាមួយ Split Context
   return (
     <AuthStateContext.Provider value={state}>
       <AuthDispatchContext.Provider value={dispatch}>
@@ -190,46 +376,47 @@ export function AuthProvider({ children }) {
     </AuthStateContext.Provider>
   );
 }
+```
 
-// ── ៥. CUSTOM HOOKS WITH FAIL-SAFE GUARDS ──
+---
 
-// Hook សម្រាប់អាន State (User, Auth status, Loading)
+### ជំហានទី ៤ ៖ បង្កើត Custom Hooks ជាមួយ Fail-Safe Guards
+
+```javascript
+// src/context/AuthContext.jsx
+import { useContext } from 'react';
+
+// ៤.១ Hook សម្រាប់អាន State (User Profile, Auth Status)
 export function useAuth() {
   const context = useContext(AuthStateContext);
   if (!context) {
-    throw new Error('useAuth() ត្រូវតែប្រើប្រាស់នៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
+    throw new Error('useAuth() ត្រូវតែប្រើនៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
   }
   return context;
 }
 
-// Hook សម្រាប់ទាញយក Dispatch Function (Login, Logout actions)
+// ៤.២ Hook សម្រាប់ទាញយក Dispatch Function តែមួយគត់
 export function useAuthDispatch() {
   const context = useContext(AuthDispatchContext);
   if (!context) {
-    throw new Error('useAuthDispatch() ត្រូវតែប្រើប្រាស់នៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
+    throw new Error('useAuthDispatch() ត្រូវតែប្រើនៅខាងក្នុង <AuthProvider> ប៉ុណ្ណោះ!');
   }
   return context;
 }
 
-// Helper Functions សម្រាប់ Login / Logout ដោយស្វ័យប្រវត្តិ
+// ៤.៣ Helper Actions Hook សម្រាប់ Login / Logout
 export function useAuthActions() {
   const dispatch = useAuthDispatch();
 
   const login = async (email, password) => {
     dispatch({ type: 'LOGIN_START' });
     try {
-      // ក្លែងធ្វើ API Request
       if (email === 'admin@gmail.com' && password === '123456') {
         const dummyUser = { id: 1, name: 'Sok Dara', email, role: 'Admin' };
         const dummyToken = 'jwt-token-sample-xyz';
-
         localStorage.setItem('auth_user', JSON.stringify(dummyUser));
         localStorage.setItem('auth_token', dummyToken);
-
-        dispatch({
-          type: 'LOGIN_SUCCESS',
-          payload: { user: dummyUser, token: dummyToken },
-        });
+        dispatch({ type: 'LOGIN_SUCCESS', payload: { user: dummyUser, token: dummyToken } });
       } else {
         throw new Error('Email ឬ Password មិនត្រឹមត្រូវឡើយ!');
       }
@@ -250,58 +437,58 @@ export function useAuthActions() {
 
 ---
 
-## 🚀 ៤. ការប្រើប្រាស់ក្នុង Application UI
+## 🚀 ៤. ការប្រើប្រាស់ក្នុង Application Components & HTML
 
+ខាងក្រោមនេះជាការហៅប្រើប្រាស់ `useAuth` និង `useAuthActions` ក្នុង Component UI ជាក់ស្តែង ៖
+
+### ៤.១ — User Navigation Bar (`Navbar.jsx`)
+- **Logic & Hook:** ទាញយក `user`, `isAuthenticated` និង `logout`
+- **HTML / JSX UI:**
 ```jsx
-// src/App.jsx
-import { useState } from 'react';
-import { AuthProvider, useAuth, useAuthActions } from './context/AuthContext';
+// src/components/Navbar.jsx
+import { useAuth, useAuthActions } from '../context/AuthContext';
 
-function Navbar() {
+export function Navbar() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const { logout } = useAuthActions();
 
-  if (isLoading) {
-    return <header className="p-4 text-xs text-slate-400">កំពុងផ្ទុក Session...</header>;
-  }
+  if (isLoading) return <header>កំពុងផ្ទុក Session...</header>;
 
   return (
-    <header className="p-4 border-b flex justify-between items-center bg-white dark:bg-slate-900">
-      <div className="font-bold text-sm text-slate-800 dark:text-white">
-        🛡️ Enterprise Auth Portal
-      </div>
+    <header className="navbar">
+      <span>🛡️ Enterprise Portal</span>
 
       {isAuthenticated ? (
-        <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-            សួស្តី, {user.name} ({user.role})
-          </span>
-          <button
-            onClick={logout}
-            className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition shadow"
-          >
-            ចាកចេញ (Logout)
-          </button>
+        <div>
+          <span>សួស្តី, {user.name} ({user.role})</span>
+          <button onClick={logout}>ចាកចេញ (Logout)</button>
         </div>
       ) : (
-        <span className="text-xs text-slate-400">មិនទាន់ Login ទេ</span>
+        <span>មិនទាន់ Login ទេ</span>
       )}
     </header>
   );
 }
+```
 
-function LoginForm() {
+---
+
+### ៤.២ — Login Form Component (`LoginForm.jsx`)
+- **Logic & Hook:** ហៅ `login(email, password)` និងបង្ហាញ Error
+- **HTML / JSX UI:**
+```jsx
+// src/components/LoginForm.jsx
+import { useState } from 'react';
+import { useAuth, useAuthActions } from '../context/AuthContext';
+
+export function LoginForm() {
   const { isAuthenticated, error, isLoading } = useAuth();
   const { login } = useAuthActions();
   const [email, setEmail] = useState('admin@gmail.com');
   const [password, setPassword] = useState('123456');
 
   if (isAuthenticated) {
-    return (
-      <div className="p-6 text-center text-emerald-600 font-bold text-sm">
-        🎉 អ្នកបាន Login រួចរាល់ហើយ!
-      </div>
-    );
+    return <div className="success">🎉 អ្នកបាន Login រួចរាល់ហើយ!</div>;
   }
 
   const handleSubmit = (e) => {
@@ -310,54 +497,47 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-4 max-w-sm mx-auto">
-      <h3 className="font-bold text-base text-slate-800 dark:text-white">ចូលប្រើប្រាស់គណនី</h3>
-      
-      {error && (
-        <div className="p-3 bg-rose-50 border border-rose-200 text-rose-600 rounded-xl text-xs font-medium">
-          ⚠️ {error}
-        </div>
-      )}
+    <form onSubmit={handleSubmit} className="login-form">
+      <h3>ចូលប្រើប្រាស់គណនី</h3>
+      {error && <p className="error">⚠️ {error}</p>}
 
-      <div>
-        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-          Email (ប្រើ: admin@gmail.com)
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border rounded-xl text-xs dark:bg-slate-800 dark:text-white"
-        />
-      </div>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
 
-      <div>
-        <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-          Password (ប្រើ: 123456)
-        </label>
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border rounded-xl text-xs dark:bg-slate-800 dark:text-white"
-        />
-      </div>
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
 
-      <button
-        type="submit"
-        disabled={isLoading}
-        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow"
-      >
+      <button type="submit" disabled={isLoading}>
         {isLoading ? 'កំពុងផ្ទៀងផ្ទាត់...' : 'Login ចូលគណនី'}
       </button>
     </form>
   );
 }
+```
+
+---
+
+### ៤.៣ — Root App Wrapper (`App.jsx`)
+រុំព័ទ្ធ Top-Level Component ជាមួយ `<AuthProvider>` ៖
+
+```jsx
+// src/App.jsx
+import { AuthProvider } from './context/AuthContext';
+import { Navbar } from './components/Navbar';
+import { LoginForm } from './components/LoginForm';
 
 export default function App() {
   return (
     <AuthProvider>
-      <div className="min-h-[420px] max-w-md mx-auto my-8 bg-white dark:bg-slate-900 rounded-3xl border shadow-xl overflow-hidden">
+      <div className="app-container">
         <Navbar />
         <LoginForm />
       </div>

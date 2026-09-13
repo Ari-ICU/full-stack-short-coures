@@ -80,77 +80,102 @@ ContextAPI
 
 ## 💻 ៣. ឧទាហរណ៍កូដ Prop Drilling និងផលប៉ះពាល់ជាក់ស្តែង
 
-### ❌ កូដដែលមានបញ្ហា Prop Drilling (៤ ជាន់):
+ដើម្បីយល់ច្បាស់ពីរបៀបដែលទិន្នន័យត្រូវហុចកាត់ Intermediate Components យើងបំបែកកូដជា Components នីមួយៗ ៖
+
+### ៣.១ — Top Component (`App.jsx`)
+កន្លែងដែលកាន់កាប់ State `user` និងបង្កើត Handler ៖
 
 ```jsx
-// 1. App.jsx (Top Component — កន្លែងបង្កើត State)
+// 1. App.jsx (State Holder)
 import { useState } from 'react';
 
 export default function App() {
   const [user, setUser] = useState({
     name: 'Sok Dara',
     role: 'Frontend Developer',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100',
   });
 
-  // ⚠️ ត្រូវបាញ់ user និង onLogout ទៅកាន់ Layout
-  return <AppLayout user={user} onLogout={() => setUser(null)} />;
-}
+  const handleLogout = () => setUser(null);
 
-// 2. AppLayout.jsx (Intermediate Component ១)
+  // ⚠️ ត្រូវបាញ់ user និង handleLogout ទៅកាន់ AppLayout
+  return <AppLayout user={user} onLogout={handleLogout} />;
+}
+```
+
+---
+
+### ៣.២ — Intermediate Component ១ (`AppLayout.jsx`)
+ស្ពានចម្លងទី ១ (មិនបានប្រើ `user` ទេ តែត្រូវ forward បន្ត) ៖
+
+```jsx
+// 2. AppLayout.jsx (Bridge Component 1)
 function AppLayout({ user, onLogout }) {
-  // ⚠️ Layout ខ្លួនឯងមិនត្រូវការ user ទេ ប៉ុន្តែត្រូវទទួលបន្តដើម្បីហុចទៅ Sidebar
   return (
-    <div className="flex h-screen bg-slate-100">
+    <div className="layout">
+      {/* ⚠️ ហុច user និង onLogout បន្តទៅកាន់ Sidebar */}
       <Sidebar user={user} onLogout={onLogout} />
-      <main className="flex-1 p-6">Main Content Area</main>
-    </div>
-  );
-}
-
-// 3. Sidebar.jsx (Intermediate Component ២)
-function Sidebar({ user, onLogout }) {
-  // ⚠️ Sidebar ក៏មិនត្រូវការ user ដែរ តែត្រូវហុចទៅ NavProfile
-  return (
-    <aside className="w-64 bg-white border-r p-4 flex flex-col justify-between">
-      <nav>Sidebar Navigation Links</nav>
-      <NavProfile user={user} onLogout={onLogout} />
-    </aside>
-  );
-}
-
-// 4. NavProfile.jsx (Intermediate Component ៣)
-function NavProfile({ user, onLogout }) {
-  // ⚠️ NavProfile ក៏គ្រាន់តែជា Container ហុចបន្ត
-  return (
-    <div className="border-t pt-4">
-      <UserAvatar user={user} />
-      <button onClick={onLogout} className="text-xs text-rose-500 mt-2">
-        Logout
-      </button>
-    </div>
-  );
-}
-
-// 5. UserAvatar.jsx (Target Component — ត្រូវការទិន្នន័យ user ពិតប្រាកដ)
-function UserAvatar({ user }) {
-  if (!user) return <div className="text-xs text-slate-400">Guest User</div>;
-
-  return (
-    <div className="flex items-center gap-3">
-      <img
-        src={user.avatar}
-        alt={user.name}
-        className="w-10 h-10 rounded-full object-cover border-2 border-blue-500"
-      />
-      <div>
-        <p className="text-sm font-bold text-slate-800">{user.name}</p>
-        <p className="text-xs text-slate-500">{user.role}</p>
-      </div>
+      <main>Main Content Area</main>
     </div>
   );
 }
 ```
+
+---
+
+### ៣.៣ — Intermediate Component ២ (`Sidebar.jsx`)
+ស្ពានចម្លងទី ២ ៖
+
+```jsx
+// 3. Sidebar.jsx (Bridge Component 2)
+function Sidebar({ user, onLogout }) {
+  return (
+    <aside className="sidebar">
+      <nav>Sidebar Navigation Links</nav>
+      {/* ⚠️ ហុច user និង onLogout បន្តទៅកាន់ NavProfile */}
+      <NavProfile user={user} onLogout={onLogout} />
+    </aside>
+  );
+}
+```
+
+---
+
+### ៣.៤ — Intermediate Component ៣ (`NavProfile.jsx`)
+ស្ពានចម្លងទី ៣ ៖
+
+```jsx
+// 4. NavProfile.jsx (Bridge Component 3)
+function NavProfile({ user, onLogout }) {
+  return (
+    <div className="nav-profile">
+      {/* ⚠️ ហុច user បន្តទៅកាន់ UserAvatar */}
+      <UserAvatar user={user} />
+      <button onClick={onLogout}>Logout</button>
+    </div>
+  );
+}
+```
+
+---
+
+### ៣.៥ — Target Consumer Component (`UserAvatar.jsx`)
+Component ខាងក្នុងបំផុតដែលត្រូវការប្រើទិន្នន័យ `user` ពិតប្រាកដ ៖
+
+```jsx
+// 5. UserAvatar.jsx (Actual Consumer)
+function UserAvatar({ user }) {
+  if (!user) return <span>Guest User</span>;
+
+  return (
+    <div className="user-avatar">
+      <strong>{user.name}</strong>
+      <p>{user.role}</p>
+    </div>
+  );
+}
+```
+
+---
 
 ### 💣 ហេតុអ្វីបានជា Prop Drilling បង្កជាបញ្ហាធ្ងន់ធ្ងរ?
 
@@ -165,40 +190,49 @@ function UserAvatar({ user }) {
 
 មុននឹងប្រញាប់ប្រញាល់បង្កើត Global State ឬ Context API ជានិច្ច សូមចងចាំថា **Component Composition** គឺជាដំណោះស្រាយស្អាតបំផុតក្នុង React!
 
-ជំនួសឱ្យការបញ្ជូន data កាត់ intermediate components យើងអាចបញ្ជូន **JSX Component ផ្ទាល់** តាមរយៈ `children` prop៖
+ជំនួសឱ្យការបញ្ជូន data កាត់ intermediate components យើងអាចបញ្ជូន **JSX Component ផ្ទាល់** តាមរយៈ `children` / JSX Slots ៖
+
+### ៤.១ — Top Component (`App.jsx` ជាមួយ Composition)
+`UserAvatar` ទទួល `user` ដោយផ្ទាល់ពី Top Level ៖
 
 ```jsx
 // App.jsx (Top Component)
 export default function App() {
-  const [user, setUser] = useState({ name: 'Sok Dara', avatar: '/dara.jpg' });
+  const [user, setUser] = useState({ name: 'Sok Dara', role: 'Developer' });
 
   return (
     <AppLayout
       sidebar={
         <Sidebar>
-          {/* ✅ UserAvatar ទទួល user ដោយផ្ទាល់ពី App! */}
+          {/* ✅ UserAvatar ទទួល user ដោយផ្ទាល់ពី App មិនបាច់ឆ្លងកាត់ Layout ឬ Sidebar */}
           <UserAvatar user={user} onLogout={() => setUser(null)} />
         </Sidebar>
       }
     >
-      <main>Content</main>
+      <main>Main Content</main>
     </AppLayout>
   );
 }
+```
 
+---
+
+### ៤.២ — Intermediate Components ស្អាតគ្មាន Props (`AppLayout` & `Sidebar`)
+
+```jsx
 // AppLayout.jsx — មិនបាច់ស្គាល់ user prop ឡើយ!
 function AppLayout({ sidebar, children }) {
   return (
-    <div className="flex">
+    <div className="layout">
       {sidebar}
       {children}
     </div>
   );
 }
 
-// Sidebar.jsx — គ្រាន់តែ render children
+// Sidebar.jsx — គ្រាន់តែ Render children
 function Sidebar({ children }) {
-  return <aside>{children}</aside>;
+  return <aside className="sidebar">{children}</aside>;
 }
 ```
 
