@@ -22,6 +22,10 @@ quiz:
 
 ## 📝 1. Two-Way Data Binding Loop
 
+> [!IMPORTANT]
+> **និយមន័យ Controlled Component (Definition) ៖**  
+> **Controlled Component** គឺជា Form Element (ដូចជា `<input>`, `<textarea>`, `<select>`) ដែលតម្លៃរបស់វា (Value) ត្រូវបានគ្រប់គ្រងដោយផ្ទាល់ដោយ React State។ State គឺជា **Single Source of Truth** — រាល់ពេលអ្នកប្រើប្រាស់វាយបញ្ចូលអក្សរ Event `onChange` នឹងធ្វើបច្ចុប្បន្នភាព State ហើយ State នឹងបញ្ជូនតម្លៃថ្មីត្រឡប់មកកាន់ Input Value វិញ។
+
 ```mermaid
 flowchart TD
     subgraph ControlledLoop["Controlled Component Loop (Single Source of Truth)"]

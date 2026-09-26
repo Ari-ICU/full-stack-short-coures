@@ -21,6 +21,10 @@ quiz:
 
 ## 📍 1. Dynamic Route Matching
 
+> [!IMPORTANT]
+> **និយមន័យ Dynamic Routing & URL Parameters (Definition) ៖**  
+> **Dynamic Routing** គឺជាការកំណត់ Route Path ដែលមាន Dynamic Segments (ដូចជា `/courses/:courseId`)។ React Router ផ្តល់ Hook `useParams()` ដើម្បីទាញយកតម្លៃ Parameter ពី URL មកប្រើក្នុង Component និង `useNavigate()` សម្រាប់ការរុករកតាមបែប Programmatic (ដូចជា Navigate ក្រោយពេល Submit Form ឬ Login ជោគជ័យ)។
+
 ```mermaid
 graph LR
     URL["Browser URL: /courses/react-101"] --> Router["React Router Pattern: /courses/:courseSlug"]

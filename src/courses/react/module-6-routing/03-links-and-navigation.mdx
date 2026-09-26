@@ -20,6 +20,10 @@ quiz:
 
 ## 🔗 1. ហេតុអ្វីត្រូវប្រើ `<Link>` ជំនួស `<a href>`?
 
+> [!IMPORTANT]
+> **និយមន័យ Declarative Navigation (Definition) ៖**  
+> **Declarative Navigation** ក្នុង React Router ប្រើប្រាស់ Component `<Link>` និង `<NavLink>` ដើម្បីរុករកទំព័រក្នុង SPA។ វាចាប់យក (Intercept) Click Event របស់អ្នកប្រើប្រាស់ដើម្បីទប់ស្កាត់ Full Page Browser Reload ហើយប្រើ HTML5 History API ដើម្បីផ្លាស់ប្តូរ URL ដោយរលូន។ `<NavLink>` ផ្តល់បន្ថែមនូវសមត្ថភាពសម្គាល់ទំព័រសកម្មតាមរយៈ `isActive` boolean។
+
 - **`<a href="/about">`:** បង្ខំឱ្យ Browser ធ្វើ **Full Page Reload 🔄** (បាត់បង់ State ក្នុង Memory និងដើរយឺត)។
 - **`<Link to="/about">`:** ផ្លាស់ប្តូរ URL ក្នុង Browser Address Bar និង update React Components ភ្លាមៗ **ដោយគ្មានការ Reload ⚡**។
 

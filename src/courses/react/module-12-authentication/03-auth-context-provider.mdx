@@ -40,6 +40,10 @@ quiz:
 
 ## 🏗️ ១. ស្ថាបត្យកម្ម AuthContext & Session Rehydration Lifecycle
 
+> [!IMPORTANT]
+> **និយមន័យ Session Rehydration (Definition) ៖**  
+> **Session Rehydration** គឺជាដំណើរការនៃការស្តារឡើងវិញនូវ Authentication State របស់ User នៅពេលដែល Browser ត្រូវបាន Refresh ឬបើកចូលកម្មវិធីដំបូង ដោយទាញយក Token ដែលបានរក្សាទុកក្នុង Storage ឬសួរទៅកាន់ `/api/auth/me` endpoint ដើម្បីផ្ទៀងផ្ទាត់ថា Session នៅមានសុពលភាពមុននឹង Render UI។
+
 ```mermaid
 sequenceDiagram
     autonumber

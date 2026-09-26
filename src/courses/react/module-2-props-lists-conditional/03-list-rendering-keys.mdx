@@ -20,6 +20,10 @@ quiz:
 
 ## 📋 1. ការប្រើប្រាស់ `Array.prototype.map()`
 
+> [!IMPORTANT]
+> **និយមន័យ List Rendering & Key Prop (Definition) ៖**  
+> **List Rendering** គឺជាការបម្លែង Array នៃទិន្នន័យឱ្យទៅជា JSX Elements ដោយប្រើ `.map()`។ **`key` Prop** គឺជា Unique Identifier ដែល React Diffing Algorithm ប្រើប្រាស់ដើម្បីសម្គាល់ថាតើ Item ណាខ្លះត្រូវបាន Added, Updated, ឬ Removed ដើម្បីធ្វើបច្ចុប្បន្នភាព Real DOM ដោយចំគោលដៅ និងមិនបាច់ Render List ទាំងមូលឡើងវិញ។
+
 នៅក្នុង React យើងមិនប្រើ `for` ឬ `while` loops ក្នុង JSX ទេ ប៉ុន្តែយើងប្រើ **`.map()`** ដើម្បី transform items ក្នុង array ឱ្យទៅជា JSX Elements៖
 
 ```jsx

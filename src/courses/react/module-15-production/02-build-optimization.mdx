@@ -40,6 +40,10 @@ quiz:
 
 ## ⚡ ១. ស្ថាបត្យកម្ម Monolithic Bundle vs Optimized Split Chunks
 
+> [!IMPORTANT]
+> **និយមន័យ Production Build Optimization & Tree Shaking (Definition) ៖**  
+> **Production Build Optimization** គឺជាដំណើរការបម្លែង Source Code ឱ្យទៅជា Static Assets ដែលមានទំហំតូចបំផុត និងមានប្រសិទ្ធភាពខ្ពស់សម្រាប់ Production។ **Tree Shaking** គឺជាបច្ចេកទេសរបស់ Bundler ដែលលុបបំបាត់ចោលកូដដែលមិនដែលត្រូវបានប្រើប្រាស់ (Dead Code Elimination) ចេញពី Final Bundle ដោយស្វ័យប្រវត្តិតាមរយៈ static ES Modules analysis។
+
 ```mermaid
 flowchart TD
     subgraph Bad["❌ Monolithic Bundle (គ្មាន Code Splitting)"]

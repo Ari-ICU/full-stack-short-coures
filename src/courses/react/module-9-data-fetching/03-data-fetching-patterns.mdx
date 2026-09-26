@@ -40,6 +40,10 @@ quiz:
 
 ## 🏃‍♂️ ១. បញ្ហា Race Condition (The Race Condition Problem)
 
+> [!IMPORTANT]
+> **និយមន័យ Race Condition ក្នុង Data Fetching (Definition) ៖**  
+> **Race Condition** គឺជាកំហុសបច្ចេកទេសដែលកើតឡើងនៅពេលសំណើ Asynchronous ពីរឬច្រើនត្រូវបានបាញ់ចេញជាបន្តបន្ទាប់គ្នា (ដូចជាពេល User វាយ Search រហ័ស) ហើយ Response នៃសំណើចាស់ត្រឡប់មកដល់ក្រោយ Response នៃសំណើថ្មី បណ្តាលឱ្យ State បង្ហាញទិន្នន័យហួសសម័យ (Stale Data)។ ដំណោះស្រាយគឺការប្រើ `AbortController` ឬ Ignore Flag ក្នុង Cleanup Function។
+
 នៅក្នុង Single Page Application (SPA) នៅពេលដែល User វាយអក្សរស្វែងរក ឬចុចប្តូរ Tab យ៉ាងរហ័ស Network Requests ជាច្រើននឹងត្រូវបាញ់ចេញជាបន្តបន្ទាប់។
 
 ដោយសារ **Network Latency មិនស្មើគ្នា** Request ដែលបាញ់ចេញមុន អាចត្រឡប់មកដល់ក្រោយគេបង្អស់ ធ្វើឱ្យទិន្នន័យចាស់មកសរសេរជាន់លើទិន្នន័យថ្មី ៖

@@ -219,7 +219,7 @@ export function getCourse(courseSlug: string): Course | null {
       order: getModuleOrder(moduleSlug),
       lessons,
     };
-  });
+  }).filter((m) => m.lessons.length > 0);
 
   return {
     slug: courseSlug,

@@ -20,6 +20,10 @@ quiz:
 
 ## 🚦 1. យន្តការនៃ `useState`
 
+> [!IMPORTANT]
+> **និយមន័យ React State & useState (Definition) ៖**  
+> **React State** គឺជាអង្គចងចាំខាងក្នុង (Internal Memory) របស់ Component សម្រាប់រក្សាទុកទិន្នន័យដែលអាចផ្លាស់ប្តូរបានទៅតាមពេលវេលា ឬតាមសកម្មភាពរបស់អ្នកប្រើប្រាស់។ `useState` គឺជា React Hook គ្រឹះដែលផ្តល់នូវ Array មាន ២ ធាតុគឺ `[stateValue, setterFunction]` — នៅពេលដែល setter function ត្រូវបានហៅ React នឹងកំណត់ពេល Re-render Component ដើម្បីឆ្លុះបញ្ចាំង UI ថ្មី។
+
 React មិនតាមដានការប្រែប្រួលរបស់ regular variable `let x = 0` ឡើយ។ ដើម្បីឱ្យ UI ធ្វើការ **Re-render** យើងត្រូវប្រើប្រាស់ **State** តាមរយៈ Hook `useState`៖
 
 ```mermaid

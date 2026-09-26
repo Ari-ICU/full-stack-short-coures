@@ -20,6 +20,10 @@ quiz:
 
 ## ⬆️ 1. អ្វីទៅជា Lifting State Up?
 
+> [!IMPORTANT]
+> **និយមន័យ Lifting State Up (Definition) ៖**  
+> **Lifting State Up** គឺជា React Pattern ដែលយើងផ្លាស់ទី State ចេញពី Child Component នីមួយៗឡើងទៅកាន់ Parent Component រួមដែលនៅជិតបំផុត (Closest Common Ancestor)។ វិធីនេះអនុញ្ញាតឱ្យ Sibling Components អាចចែករំលែកទិន្នន័យដូចគ្នា (Single Source of Truth) ដោយ Parent បញ្ជូន State ចុះក្រោមតាម Props និងបញ្ជូន Callback Functions ឱ្យ Child ហៅមកវិញនៅពេលចង់ Update State។
+
 នៅពេល Component ពីរ ឬច្រើនត្រូវការ State តែមួយ ដំណោះស្រាយរបស់ React គឺ **"លើក State នោះឡើងទៅកាន់ Parent រួមដែលនៅជិតបំផុត (Closest Common Ancestor)"**។
 
 ```mermaid

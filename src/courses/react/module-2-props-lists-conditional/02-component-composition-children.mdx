@@ -20,6 +20,10 @@ quiz:
 
 ## 📦 1. អ្វីទៅជា `children` Prop?
 
+> [!IMPORTANT]
+> **និយមន័យ Component Composition & `children` Prop (Definition) ៖**  
+> **Component Composition** គឺជាទស្សនវិជ្ជារចនា Component ក្នុង React ដែលផ្គុំផ្សំ Components តូចៗបញ្ចូលគ្នាដើម្បីបង្កើតជា UI ស្មុគស្មាញ (Composition over Inheritance)។ **\`children\` Prop** គឺជា Prop ពិសេសដែល React បញ្ជូនដោយស្វ័យប្រវត្តិនូវរាល់ JSX Elements ឬ Text ណាដែលត្រូវបានសរសេរនៅចន្លោះ Opening និង Closing Tags នៃ Component (\`<Wrapper>...children...</Wrapper>\`) ដែលអនុញ្ញាតឱ្យបង្កើត Layouts និង Generic Containers (ដូចជា Cards, Modals, Drawers) ដ៏មានភាពបត់បែនខ្ពស់។
+
 នៅក្នុង React យើងមិនប្រើប្រាស់ Class Inheritance ទេ ប៉ុន្តែយើងប្រើ **Component Composition** (ផ្គុំ Component មួយចូលក្នុង Component មួយទៀត)។
 
 `children` គឺជា prop ពិសេសមួយដែលតំណាងឱ្យអ្វីៗទាំងអស់ដែលអ្នកសរសេរនៅចន្លោះ `<Wrapper>...</Wrapper>`។

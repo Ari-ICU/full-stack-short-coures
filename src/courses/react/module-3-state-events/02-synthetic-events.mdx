@@ -20,6 +20,10 @@ quiz:
 
 ## 🖱️ 1. React SyntheticEvent Engine
 
+> [!IMPORTANT]
+> **និយមន័យ SyntheticEvent (Definition) ៖**  
+> **SyntheticEvent** គឺជា Cross-browser Wrapper របស់ React ជុំវិញ Native DOM Event របស់ Browser។ វាផ្តល់ Interface ដូចគ្នាទាំងស្រុងទៅនឹង Native Events (ដូចជា `stopPropagation()`, `preventDefault()`) ប៉ុន្តែដំណើរការដូចគ្នានៅលើគ្រប់ Browser ទាំងអស់ និងប្រើប្រាស់ Event Delegation នៅកម្រិត Root DOM Container ដើម្បីបង្កើនល្បឿន និងសន្សំសំចៃ Memory។
+
 React មិនភ្ជាប់ Event Listener ទៅលើ DOM Node នីមួយៗដោយផ្ទាល់ទេ ប៉ុន្តែវាប្រើប្រាស់ **Top-Level Event Delegation** និង wrap Native Event ទៅជា **`SyntheticEvent`** ដើម្បីធានាភាពស៊ីសង្វាក់គ្នានៅលើគ្រប់ Browser ទាំងអស់។
 
 ```mermaid

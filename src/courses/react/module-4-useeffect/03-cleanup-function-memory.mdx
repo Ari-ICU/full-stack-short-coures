@@ -40,6 +40,10 @@ quiz:
 
 ## 🏨 ១. ឧទាហរណ៍ជីវិតពិត ៖ ការជួលបន្ទប់សណ្ឋាគារ
 
+> [!IMPORTANT]
+> **និយមន័យ Cleanup Function & Memory Leak (Definition) ៖**  
+> **Cleanup Function** គឺជា Function ដែលយើង Return ចេញពីខាងក្នុង `useEffect`។ React នឹងដំណើរការ Function នេះនៅពេលដែល Component ត្រូវបាន Unmount (ដកចេញពីអេក្រង់) ឬមុនពេលដែល Effect នោះរត់ឡើងវិញជាមួយ Dependencies ថ្មី។ វាមានតួនាទីសម្អាត Ongoing Subscriptions, Timers (`clearInterval`), Event Listeners, និង Network Requests ដើម្បីការពារកុំឱ្យកើតមាន **Memory Leak**។
+
 ស្រមៃថាអ្នកទៅស្នាក់នៅសណ្ឋាគារមួយ៖
 - **Setup (ចាប់ផ្តើម):** អ្នកចូលបន្ទប់ បើកម៉ាស៊ីនត្រជាក់ បើកភ្លើង និងរៀបចំឥវ៉ាន់ប្រើប្រាស់។
 - **Cleanup (សម្អាត):** ពេលអ្នករៀបចំចាកចេញ (Checkout) អ្នកត្រូវតែ **បិទភ្លើង បិទម៉ាស៊ីនត្រជាក់ និងប្រគល់កូនសោ**។

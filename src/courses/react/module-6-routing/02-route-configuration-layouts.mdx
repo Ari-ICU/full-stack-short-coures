@@ -20,6 +20,10 @@ quiz:
 
 ## 🏛️ 1. Layout Routes Architecture
 
+> [!IMPORTANT]
+> **និយមន័យ Nested Routes & Outlet (Definition) ៖**  
+> **Nested Routes** គឺជាបច្ចេកទេសរៀបចំ Route Hierarchy ដែលអនុញ្ញាតឱ្យ Child Routes បង្ហាញខ្លួននៅខាងក្នុង Parent Layout Component។ Component **`<Outlet />`** របស់ React Router ដើរតួជា Placeholder កន្លែងដែល Child Component ត្រូវយកមកដោតបង្ហាញ (Inject) ដោយមិនចាំបាច់ Render Header ឬ Sidebar សារជាថ្មីឡើយ។
+
 ```mermaid
 flowchart TD
     subgraph SharedLayout["Shared MainLayout (&lt;MainLayout /&gt;)"]

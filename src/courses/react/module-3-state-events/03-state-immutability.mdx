@@ -20,6 +20,10 @@ quiz:
 
 ## 🛡️ 1. ហេតុអ្វីត្រូវតែ Immutable?
 
+> [!IMPORTANT]
+> **និយមន័យ State Immutability (Definition) ៖**  
+> **State Immutability** គឺជាគោលការណ៍គ្រឹះក្នុង React ដែលចែងថា State មិនត្រូវកែប្រែដោយផ្ទាល់ (Never Mutate Directly) លើ Object ឬ Array ដែលមានស្រាប់ឡើយ។ រាល់ពេលធ្វើបច្ចុប្បន្នភាព State យើងត្រូវតែបង្កើត Copy ថ្មីមួយ (Shallow Copy តាមរយៈ Spread Operator `...` ឬ Non-mutating Methods ដូចជា `.map()`, `.filter()`) ដើម្បីឱ្យ React ដឹងថា Memory Reference បានផ្លាស់ប្តូរ និង Trigger Re-render បានត្រឹមត្រូវ។
+
 នៅក្នុង JavaScript, Objects និង Arrays ត្រូវបានរក្សាទុកតាមរយៈ **Memory Reference**។ 
 
 ប្រសិនបើអ្នក mutate properties របស់វាក្នុង memory ចាស់ (`user.name = "ថ្មី"`) នោះ `oldState === newState` នឹងនៅតែស្មើ `true` ជានិច្ច ដែលធ្វើឱ្យ React **មិនដឹងថាទិន្នន័យបានផ្លាស់ប្តូរឡើយ**។

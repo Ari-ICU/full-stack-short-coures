@@ -40,6 +40,10 @@ quiz:
 
 ## 🗺️ ១. ស្ថាបត្យកម្ម Form Submission & Validation Lifecycle
 
+> [!IMPORTANT]
+> **និយមន័យ Authentication Flow (Definition) ៖**  
+> **Authentication Flow** គឺជាលំហូរពេញលេញនៃការផ្ទៀងផ្ទាត់ចូលប្រើប្រាស់ប្រព័ន្ធ៖ ចាប់ផ្តើមពីការប្រមូលទិន្នន័យ Credentials លើ Client Form, ផ្ទៀងផ្ទាត់តាម Client-side Schema, បាញ់សំណើ POST ទៅកាន់ Auth API, ទទួលយក JWT Access Token & Refresh Token, និងរក្សាទុក Session ក្នុង Global Auth Context។
+
 ```mermaid
 flowchart TD
     A["User បញ្ចូលទិន្នន័យក្នុង Input Fields"] --> B["onChange Event ធ្វើបច្ចុប្បន្នភាព React State"]

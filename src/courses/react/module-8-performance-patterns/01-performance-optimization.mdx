@@ -40,6 +40,10 @@ quiz:
 
 ## 🏎️ ១. The React Re-render Waterfall (បញ្ហាដែលត្រូវដោះស្រាយ)
 
+> [!IMPORTANT]
+> **និយមន័យ Memoization (Definition) ៖**  
+> **Memoization** គឺជាបច្ចេកទេស Optimization មួយក្នុងវិទ្យាសាស្ត្រកុំព្យូទ័រ ដែលរក្សាទុក (Cache) លទ្ធផលនៃការគណនាធ្ងន់ៗ ឬ Output នៃ Function។ នៅពេល Function ត្រូវបានហៅជាមួយ Inputs (Props/Arguments) ដដែលៗ ប្រព័ន្ធនឹងទាញយកលទ្ធផលដែលបាន Cache មកប្រើភ្លាមៗ ដោយមិនបាច់គណនាឡើងវិញឡើយ។ ក្នុង React បច្ចេកទេសនេះត្រូវបានអនុវត្តតាមរយៈ `React.memo`, `useMemo`, និង `useCallback`។
+
 នៅក្នុង React លំនាំដើម (Default Behavior) គឺ៖  
 **«នៅពេល Parent Component ធ្វើបច្ចុប្បន្នភាព State នោះគ្រប់ Child Components ទាំងអស់ដែលនៅខាងក្រោមវានឹងត្រូវ Re-render ឡើងវិញដោយស្វ័យប្រវត្តិ!»**
 

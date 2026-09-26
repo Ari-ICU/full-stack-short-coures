@@ -39,6 +39,10 @@ quiz:
 
 ## 💥 ១. The Context Re-render Problem (បញ្ហាដែលត្រូវដោះស្រាយ)
 
+> [!IMPORTANT]
+> **និយមន័យ Context Re-render Bottleneck (Definition) ៖**  
+> **Context Re-render Bottleneck** គឺជាកម្រិតកំណត់ខាងស្ថាបត្យកម្មនៃ Context API៖ នៅពេលដែលតម្លៃ `value` នៃ Provider ផ្លាស់ប្តូរ **គ្រប់ Consumer Components ទាំងអស់ដែលហៅ `useContext` នឹងត្រូវ Re-render ឡើងវិញដោយស្វ័យប្រវត្តិ** ទោះបីជា Component នោះត្រូវការតែ Field មួយដែលមិនបានផ្លាស់ប្តូរក៏ដោយ ព្រោះ Context API គ្មានយន្តការ Granular Subscriptions/Selectors ដូច External State Libraries ឡើយ។
+
 React Context API គឺជាឧបករណ៍ដ៏អស្ចារ្យសម្រាប់ចៀសវាង Prop Drilling។ ក៏ប៉ុន្តែ នៅពេលដែល Application របស់អ្នករីកធំឡើង Context API មានដែនកំណត់ធំមួយ ៖  
 **«Context API មិនមានយន្តការ Selective Subscription ឡើយ!»**
 

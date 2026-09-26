@@ -39,6 +39,10 @@ quiz:
 
 ## 🎯 ១. ទម្រង់ទាំង ៣ នៃ Dependency Array
 
+> [!IMPORTANT]
+> **និយមន័យ Dependency Array (Definition) ៖**  
+> **Dependency Array** គឺជា Array នៃ Reactive Values (Props, State, ឬ Variables/Functions ដែលប្រកាសក្នុង Component Body) ដែលត្រូវបានបញ្ជូនជាអាគុយម៉ង់ទីពីរទៅកាន់ `useEffect`។ React ប្រើប្រាស់ Shallow Comparison (`Object.is`) ដើម្បីប្រៀបធៀបតម្លៃនីមួយៗរវាង Render មុន និង Render ក្រោយ — Effect នឹងរត់ឡើងវិញតែនៅពេលដែលមានតម្លៃយ៉ាងតិចមួយក្នុង Dependency Array បានផ្លាស់ប្តូរប៉ុណ្ណោះ។
+
 នៅក្នុង `useEffect(setupFunction, dependencies)` តម្លៃ **Dependency Array (អាគុយម៉ង់ទី ២)** ជាអ្នកកំណត់ថា៖ **«តើពេលណាទើប Effect គួររត់ឡើងវិញ?»**
 
 ```mermaid

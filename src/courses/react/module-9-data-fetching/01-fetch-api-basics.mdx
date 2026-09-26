@@ -40,6 +40,10 @@ quiz:
 
 ## 🌐 ១. ដំណើរការ Asynchronous Data Flow ក្នុង React
 
+> [!IMPORTANT]
+> **និយមន័យ Tri-State Pattern (Definition) ៖**  
+> **Tri-State Pattern** គឺជាស្ថាបត្យកម្មគ្រឹះក្នុងការគ្រប់គ្រង Asynchronous Data Fetching ក្នុង React ដោយបែងចែក State របស់ Component ជា ៣ ដំណាក់កាលដាច់ដោយឡែកពីគ្នា គឺ៖ (1) **Loading State** (ពេលកំពុងរង់ចាំ Response), (2) **Success State** (ពេលទទួលបានទិន្នន័យត្រឹមត្រូវ និង Render UI), និង (3) **Error State** (ពេលមានបញ្ហា Network ឬ Server Error និងបង្ហាញសារជូនដំណឹង)។
+
 នៅក្នុង Web Application ការទាញយកទិន្នន័យពី Backend API គឺជាដំណើរការ **Asynchronous (មិនទាន់ពេលភ្លាមៗ)**។ React Component នឹងត្រូវឆ្លងកាត់ **៣ ដំណាក់កាលស្នូល (Tri-State Architecture)** ៖
 
 ```mermaid

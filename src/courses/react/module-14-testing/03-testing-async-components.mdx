@@ -40,6 +40,10 @@ quiz:
 
 ## 🎭 ១. ស្ថាបត្យកម្ម Async Testing Lifecycle
 
+> [!IMPORTANT]
+> **និយមន័យ API Mocking ក្នុងការធ្វើតេស្ត (Definition) ៖**  
+> **Mocking** គឺជាបច្ចេកទេសបង្កើត Dummy/Fake Implementation ជំនួសឱ្យ Real External Dependencies (ដូចជា Backend HTTP API) ក្នុងអំឡុងពេល Run Automated Tests។ វិធីនេះជួយឱ្យ Tests ដំណើរការបានលឿន មិនពឹងផ្អែកលើ Internet Connection និងអាចធ្វើតេស្តករណី Edge Cases (ដូចជា Server Error 500 ឬ Network Timeout) បានយ៉ាងងាយស្រួល។
+
 ```mermaid
 sequenceDiagram
     autonumber

@@ -21,6 +21,10 @@ quiz:
 
 ## 💥 1. Global CSS Collision vs CSS Modules
 
+> [!IMPORTANT]
+> **និយមន័យ CSS Modules (Definition) ៖**  
+> **CSS Modules** គឺជាឯកសារ CSS (`*.module.css`) ដែល Class Names ទាំងអស់ត្រូវបាន Scope ជាលក្ខណៈ Local សម្រាប់តែ Component នោះដោយស្វ័យប្រវត្តិតាមរយៈ Build Tool។ វាក្លែងបន្លំ Class Names ឱ្យទៅជា Unique Hash Strings (ដូចជា `btn__header_x9a`) ដើម្បីការពារកុំឱ្យមានការជាន់ឈ្មោះ Class គ្នាជាលក្ខណៈសកល (Global Namespace Collision)។
+
 ```mermaid
 graph TD
     subgraph GlobalCSS["Global CSS Problem ❌"]

@@ -41,6 +41,10 @@ quiz:
 
 ## ⚙️ ១. គោលការណ៍នៃ Reducer Pattern (Mental Model)
 
+> [!IMPORTANT]
+> **និយមន័យ Reducer Pattern (Definition) ៖**  
+> **The Reducer Pattern** គឺជា Design Pattern មួយសម្រាប់ការគ្រប់គ្រង State Transitions តាមរយៈ **Pure Function** (ហៅថា *Reducer*)។ State មិនអាចកែប្រែដោយផ្ទាល់ (Direct Mutation) បានឡើយ ប៉ុន្តែត្រូវធ្វើឡើងតាមរយៈការបញ្ជូន **Action Object** (តាមរយៈ `dispatch`) រួច Reducer នឹងទទួលយក `(currentState, action)` ដើម្បីគណនា និង return នូវ `newState` (Immutable State Update) ដែលធ្វើឱ្យលំហូរទិន្នន័យមានលក្ខណៈ Predictable, Maintainable និងងាយស្រួលសរសេរ Unit Test។
+
 ដើម្បីយល់ពី `useReducer` សូមស្រមៃមើល **«តុបញ្ជរធនាគារ»** 🏦៖
 1. **អ្នក (User / UI Component):** ដើរទៅកាន់តុបញ្ជរហើយប្រាប់បុគ្គលិកថា៖ *«ខ្ញុំចង់ដកប្រាក់ $50»* (`dispatch({ type: 'WITHDRAW', payload: 50 })`)។ អ្នកមិនមានសិទ្ធិដើរចូលទៅបើកទូដែកដកលុយដោយខ្លួនឯងទេ!
 2. **បុគ្គលិកធនាគារ (Reducer Function):** ពិនិត្យមើលច្បាប់ធនាគារ ពិនិត្យសមតុល្យក្នុងគណនីរបស់អ្នក រួចកាត់ប្រាក់តាមរូបមន្តច្បាស់លាស់ (`(state, action) => newState`)។
@@ -67,6 +71,10 @@ flowchart TD
 ---
 
 ## 🧩 ២. ធាតុផ្សំទាំង ៤ នៃ `useReducer`
+
+> [!NOTE]
+> **និយមន័យ useReducer Hook ៖**  
+> `useReducer` គឺជា React Built-in Hook ជំនួសឱ្យ `useState` សម្រាប់ State ដែលមាន Logic ស្មុគស្មាញ ឬពាក់ព័ន្ធនឹង Sub-values ច្រើន។ វាភ្ជាប់ Component ទៅនឹង Reducer Function និងផ្តល់ត្រឡប់មកវិញនូវ Tuple `[state, dispatch]`។
 
 ```jsx
 const [state, dispatch] = useReducer(reducer, initialState, init);

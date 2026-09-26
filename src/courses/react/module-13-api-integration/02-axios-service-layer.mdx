@@ -40,6 +40,10 @@ quiz:
 
 ## 🏗️ ១. ស្ថាបត្យកម្ម Service Layer Pattern
 
+> [!IMPORTANT]
+> **និយមន័យ Service Layer Pattern (Definition) ៖**  
+> **Service Layer Pattern** គឺជាស្ថាបត្យកម្មបំបែកកូដដែលប្រមូលផ្តុំរាល់ការហៅ API Network Calls ទាំងអស់ឱ្យនៅដាច់ដោយឡែកក្នុង Dedicated Service Files (ដូចជា `userService.js`, `productService.js`)។ UI Components គ្រាន់តែហៅ Service Functions ទាំងនេះមកប្រើប្រាស់ដោយផ្ទាល់ ដោយមិនចាំបាច់ដឹងពី URL Endpoints, HTTP Headers, ឬ Axios Configurations ឡើយ។
+
 ```mermaid
 flowchart TD
     subgraph UI_Layer["១. React UI Layer"]

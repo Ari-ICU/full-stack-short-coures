@@ -40,6 +40,10 @@ quiz:
 
 ## 💡 ១. ហេតុអ្វីបានជាត្រូវរៀនមេរៀននេះ? (The Big Picture)
 
+> [!IMPORTANT]
+> **និយមន័យ Custom Context Provider Pattern (Definition) ៖**  
+> **Custom Context Provider Pattern** គឺជាស្ថាបត្យកម្មកម្រិតខ្ពស់ដែលវេចខ្ចប់ (Encapsulate) ការបង្កើត `createContext`, State Logic (`useState` ឬ `useReducer`), និង Actions ទាំងអស់ឱ្យនៅដាច់ដោយឡែកក្នុង File តែមួយ រួច Export ត្រឡប់មកវិញនូវ Provider Component (ដូចជា `<CartProvider>`) និង Custom Consumer Hook (ដូចជា `useCart()`) ដែលមាន Runtime Safety Guard ដើម្បីការពារកុំឱ្យហៅនៅក្រៅ Provider ព្រំដែន។
+
 នៅក្នុងមេរៀនមុនៗ យើងបានសិក្សាឧបករណ៍សំខាន់ៗចំនួនពីររួចមកហើយ ៖
 1. **Context API (មេរៀនទី ២) ៖** ជួយចែករំលែកទិន្នន័យពីលើចុះក្រោម ដោយមិនបាច់ឆ្លងកាត់ Prop Drilling។
 2. **useReducer (មេរៀនទី ៣) ៖** ជួយគ្រប់គ្រង Business Logic ស្មុគស្មាញឱ្យមានរបៀបរៀបរយតាមរយៈ Actions & Reducer Function។

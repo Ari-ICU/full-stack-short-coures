@@ -20,6 +20,10 @@ quiz:
 
 ## 🛡️ 1. Protected Route Guard Architecture
 
+> [!IMPORTANT]
+> **និយមន័យ Protected Routes / Route Guards (Definition) ៖**  
+> **Protected Routes (ឬ Route Guards)** គឺជា Wrapper Components ដែលត្រួតពិនិត្យលក្ខខណ្ឌសុវត្ថិភាព (ដូចជា Authentication Status ឬ User Roles) មុននឹងអនុញ្ញាតឱ្យចូលមើលទំព័រណាមួយ។ ប្រសិនបើលក្ខខណ្ឌមិនត្រូវទេ វានឹង Redirect អ្នកប្រើប្រាស់ទៅកាន់ទំព័រ Login ឬបង្ហាញ Error 403 Forbidden ភ្លាមៗ។
+
 ```mermaid
 flowchart TD
     subgraph RouteGuard["Protected Route Guard Decision Tree"]

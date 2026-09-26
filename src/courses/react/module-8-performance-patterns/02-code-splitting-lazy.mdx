@@ -40,6 +40,10 @@ quiz:
 
 ## 🍕 ១. ស្វែងយល់ពីបញ្ហា Monolithic Bundle (ការប្រៀបធៀបជាក់ស្តែង)
 
+> [!IMPORTANT]
+> **និយមន័យ Code Splitting & Lazy Loading (Definition) ៖**  
+> **Code Splitting** គឺជាបច្ចេកទេសបំបែក JavaScript Bundle ធំតែមួយឱ្យទៅជា Chunks តូចៗជាច្រើន។ **Lazy Loading** គឺជាការទាញយក Chunks ទាំងនោះមកកាន់ Browser តែនៅពេលដែលអ្នកប្រើប្រាស់ត្រូវការប្រើប្រាស់វាជាក់ស្តែងប៉ុណ្ណោះ (On-demand) តាមរយៈ `React.lazy()` និង `<Suspense>` ដែលជួយកាត់បន្ថយ Initial Load Time យ៉ាងសម្បើម។
+
 សាកស្រមៃថាអ្នកចូលហាងអាហារដើម្បី **ផឹកទឹកតែមួយកែវ** ប៉ុន្តែអ្នករត់តុបង្ខំឱ្យអ្នករង់ចាំចុងភៅចម្អិនម្ហូប ១០០ មុខឱ្យឆ្អិនរួចរាល់ទាំងអស់សិន ទើបលើកទឹកមកឱ្យអ្នកផឹក! នេះហើយគឺជាអ្វីដែលកើតឡើងប្រសិនបើ **គ្មាន Code Splitting** ៖
 
 * **❌ គ្មាន Code Splitting (Monolithic Bundle) ៖** នៅពេល User គ្រាន់តែបើកមើល Homepage ដំបូង Browser ត្រូវបង្ខំចិត្តទាញយក JavaScript ទាំងមូលរបស់ Website (Home + Admin Dashboard + Analytics Charts + PDF Viewer + Settings) ដែលមានទំហំ 3MB–5MB+។ លទ្ធផលគឺ User ឃើញអេក្រង់សស្អាត (White Screen) រង់ចាំយូររហូតធុញទ្រាន់ហើយចាកចេញ (High Bounce Rate)។

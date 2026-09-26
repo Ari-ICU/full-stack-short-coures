@@ -40,6 +40,10 @@ quiz:
 
 ## 🛡️ ១. ស្ថាបត្យកម្ម Route Guard Decision Tree
 
+> [!IMPORTANT]
+> **និយមន័យ Role-Based Access Control (RBAC) (Definition) ៖**  
+> **Role-Based Access Control (RBAC)** គឺជាយន្តការគ្រប់គ្រងសិទ្ធិប្រើប្រាស់ប្រព័ន្ធដែលផ្អែកលើ **តួនាទី (Roles)** របស់អ្នកប្រើប្រាស់ (ដូចជា Admin, Manager, Member)។ នៅក្នុង Frontend Routes, RBAC អនុញ្ញាតឱ្យបង្ហាញ ឬរារាំងការចូលទៅកាន់ Pages និង Features ផ្សេងៗអាស្រ័យលើ Role របស់ User។
+
 ```mermaid
 flowchart TD
     A["User ព្យាយាមចូលទៅកាន់ Route ណាមួយ (ឧ. /admin/analytics)"] --> B{"តើ AuthContext កំពុង isLoading?"}

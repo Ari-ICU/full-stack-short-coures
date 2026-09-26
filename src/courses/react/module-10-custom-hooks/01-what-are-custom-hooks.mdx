@@ -39,6 +39,10 @@ quiz:
 
 ## 🎯 ១. តើអ្វីទៅជា Custom Hook? (Mental Model)
 
+> [!IMPORTANT]
+> **និយមន័យ Custom Hook (Definition) ៖**  
+> **Custom Hook** គឺជា JavaScript Function ដែលមានឈ្មោះចាប់ផ្តើមដោយបុព្វបទ `use` (ឧ. `useFetch`, `useAuth`) និងអាចហៅ React Built-in Hooks ផ្សេងទៀតនៅខាងក្នុងវាបាន។ វាត្រូវបានប្រើដើម្បីស្រង់យក (Extract) និងចែករំលែក **Stateful Logic** ដែលអាចប្រើឡើងវិញបាន (Reusable) រវាង Components ច្រើន ដោយមិនចាំបាច់ Copy/Paste កូដ ឬផ្លាស់ប្តូរ Component Hierarchy ឡើយ។
+
 នៅក្នុង React Component យើងតែងតែសរសេរ UI (JSX) និង Logic (State, Effects, Event Handlers)។ នៅពេលដែល Components ផ្សេងៗគ្នាត្រូវការ Logic ដដែលៗ (ដូចជា ពិនិត្យទំហំ Screen, ទាញយក Data, ឬ Save ទៅ Storage) យើងមិនត្រូវ Copy/Paste កូដឡើយ។
 
 **Custom Hook** គឺជា JavaScript Function ធម្មតាមួយដែល៖

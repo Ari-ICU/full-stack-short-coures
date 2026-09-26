@@ -40,6 +40,10 @@ quiz:
 
 ## 💡 ១. Mental Model: `useState` vs `useRef` (ការប្រៀបធៀបងាយយល់)
 
+> [!IMPORTANT]
+> **និយមន័យ useRef Hook (Definition) ៖**  
+> **`useRef`** គឺជា React Hook ដែលផ្តល់ត្រឡប់មកវិញនូវ Mutable Object មួយ `{ current: initialValue }` ដែលមានតម្លៃស្ថិតស្ថេរពេញមួយ Lifecycle របស់ Component។ ការផ្លាស់ប្តូរតម្លៃ `.current` **មិនបង្កឱ្យមានការ Re-render** ឡើយ។ `useRef` ត្រូវបានប្រើប្រាស់ក្នុងករណីសំខាន់ពីរគឺ៖ (1) ការចាប់យក Reference ទៅកាន់ Real DOM Node ដោយផ្ទាល់ (DOM Access) និង (2) ការរក្សាទុកតម្លៃ Mutable Data ណាមួយដែលមិនប៉ះពាល់ដល់ការ Render UI (ដូចជា Timer IDs ឬ Previous Values)។
+
 ដើម្បីយល់ពី `useRef` សូមស្រមៃមើលភាពខុសគ្នារវាង **ក្តារខៀនសាធារណៈ** និង **សៀវភៅកត់ត្រាក្នុងហោប៉ៅ** ៖
 
 * **📢 `useState` (ក្តារខៀនសាធារណៈ ៖ UI State) ៖**  

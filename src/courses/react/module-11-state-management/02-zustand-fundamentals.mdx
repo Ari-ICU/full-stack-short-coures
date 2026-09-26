@@ -31,6 +31,10 @@ quiz:
 
 ## 🐻 ១. ហេតុអ្វីត្រូវជ្រើសរើស Zustand? (Why Zustand?)
 
+> [!IMPORTANT]
+> **និយមន័យ Zustand (Definition) ៖**  
+> **Zustand** (ពាក្យអាល្លឺម៉ង់មានន័យថា «State») គឺជាបណ្ណាល័យគ្រប់គ្រង Global State ដ៏តូច (~1KB) និងលឿនបំផុតសម្រាប់ React ដែលដំណើរការលើគោលការណ៍ External Store និង Publish/Subscribe Pattern។ វាអនុញ្ញាតឱ្យ Component ជ្រើសរើសទាញយកតែ Slice នៃ State ណាដែលខ្លួនត្រូវការ (Granular Atomic Selectors) ដោយមិនចាំបាច់ប្រើ Context Providers និងលុបបំបាត់បញ្ហា Unnecessary Re-renders ទាំងស្រុង។
+
 Zustand (ភាសាអាល្លឺម៉ង់មានន័យថា "State") គឺជា Global State Management Library ដ៏ពេញនិយមបំផុតក្នុង React Ecosystem បច្ចុប្បន្ន ៖
 1. **Zero Provider Hell:** មិនចាំបាច់រុំព័ទ្ធ `<App>` ដោយ `<Provider>` ច្រើនជាន់ឡើយ។
 2. **Tiny Bundle Size:** មានទំហំត្រឹមតែ **~1KB** ប៉ុណ្ណោះ។

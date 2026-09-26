@@ -31,6 +31,10 @@ quiz:
 
 ## 🏗️ ១. ស្ថាបត្យកម្មនៃ `useFetch` Custom Hook
 
+> [!IMPORTANT]
+> **និយមន័យ Custom Data Fetching Hook (Definition) ៖**  
+> **useFetch Hook Pattern** គឺជាការវេចខ្ចប់ Logic ស្មុគស្មាញនៃ Network Requests (រួមមាន Tri-State: `data`, `isLoading`, `error`, ការ Cancel Request តាម `AbortController`, និង Cache In-memory) ឱ្យនៅខាងក្នុង Custom Hook តែមួយ ដែលធ្វើឱ្យ UI Components អាចទាញយកទិន្នន័យមកប្រើដោយសរសេរកូដត្រឹមតែមួយបន្ទាត់។
+
 ```mermaid
 flowchart TD
     subgraph HookCore["Custom Hook: useFetch(url, options)"]

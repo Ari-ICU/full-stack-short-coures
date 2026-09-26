@@ -31,6 +31,10 @@ quiz:
 
 ## 🗄️ ១. បញ្ហានៃ Native `localStorage` ធៀបនឹង React State
 
+> [!IMPORTANT]
+> **និយមន័យ Persistent State Hook (Definition) ៖**  
+> **useLocalStorage Hook Pattern** គឺជា Custom Hook ដែលផ្សារភ្ជាប់ React State ទៅនឹង Web Storage API (`localStorage`) ដោយស្វ័យប្រវត្តិ។ រាល់ពេល State ផ្លាស់ប្តូរ វាធ្វើការ Serialize ទៅជា JSON និង Save ចូល Storage ហើយនៅពេល Browser Reload ឬបើក Tab ថ្មី វានឹងទាញយកតម្លៃមក Restore ឡើងវិញភ្លាមៗ (Storage Hydration)។
+
 នៅក្នុង React ៖
 - `useState` ➔ ធ្វើឱ្យ UI Re-render ពេល State ប្តូរ ប៉ុន្តែ **បាត់បង់ទិន្នន័យពេល Refresh (F5)**។
 - `localStorage` ➔ រក្សាទុកទិន្នន័យជាប់រហូតលើ Browser ប៉ុន្តែ **មិនបង្កឱ្យ UI Re-render ឡើយ** ពេលកែប្រែតម្លៃ។

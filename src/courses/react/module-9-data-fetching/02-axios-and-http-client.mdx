@@ -40,6 +40,10 @@ quiz:
 
 ## 🆚 ១. តារាងប្រៀបធៀបលម្អិត ៖ Native `fetch()` vs `axios`
 
+> [!IMPORTANT]
+> **និយមន័យ HTTP Client & Axios (Definition) ៖**  
+> **Axios** គឺជា Promise-based HTTP Client ដ៏ពេញនិយមសម្រាប់ JavaScript និង Node.js។ បើធៀបនឹង Native `fetch()`, Axios ផ្តល់នូវអត្ថប្រយោជន៍ស្វ័យប្រវត្តិជាច្រើនដូចជា៖ Auto JSON Transformation, Request & Response Interceptors (សម្រាប់ចាក់ JWT Header និង Global Error Catching), Auto HTTP Error Throwing (សម្រាប់ status codes ក្រៅពី 2xx), និង Request Timeout Protection។
+
 | លក្ខណៈពិសេស (Feature) | Native `fetch()` | `axios` |
 | :--- | :--- | :--- |
 | **JSON Data Parsing** | ត្រូវហៅ `await res.json()` ដោយដៃ | **Auto-parse JSON** (ស្ថិតក្នុង `response.data`) |

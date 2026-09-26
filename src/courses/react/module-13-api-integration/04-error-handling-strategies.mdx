@@ -40,6 +40,10 @@ quiz:
 
 ## 🏛️ ១. ឋានានុក្រមនៃ Error Handling ក្នុង Frontend (Error Hierarchy)
 
+> [!IMPORTANT]
+> **និយមន័យ Error Boundary (Definition) ៖**  
+> **React Error Boundary** គឺជា Component ពិសេសដែលចាប់យក (Catch) JavaScript Errors គ្រប់ទីកន្លែងនៅក្នុង Child Component Tree របស់វាអំឡុងពេល Rendering, Lifecycle Methods, និង Constructors ដើម្បីទប់ស្កាត់កុំឱ្យ Error នោះបណ្តាលឱ្យទំព័រទាំងមូល Crash (White Screen of Death) និងបង្ហាញ Fallback UI ជំនួសវិញ។
+
 ```mermaid
 flowchart TD
     A["កំហុសកើតឡើងក្នុង React App (Errors Occur)"] --> B{"តើជាកំហុសប្រភេទណា?"}
