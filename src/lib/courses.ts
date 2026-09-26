@@ -314,3 +314,5 @@ export function getAdjacentLessons(
     next: idx < allLessons.length - 1 ? allLessons[idx + 1] : null,
   };
 }
+
+export { slugifyHeading } from "./slugify";

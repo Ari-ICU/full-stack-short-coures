@@ -67,7 +67,7 @@ graph TD
 
 ---
 
-## 🛠️ ២. សសរស្តម្ភទាំង ៣ នៃ Context API (The 3 Core Pillars)
+## 🛠️ ២. The 3 Core Pillars នៃ Context API
 
 ```
 [ជំហាន ១: createContext] ➔ [ជំហាន ២: Context.Provider] ➔ [ជំហាន ៣: useContext]
@@ -262,9 +262,9 @@ export default function App() {
 
 ## 🧠 ៧. សង្ខេប Mental Model ងាយចាំ (Quick Reference)
 
-| ធាតុផ្សំ | កូដសរសេរ | តួនាទីជាក់ស្តែង |
+| Core Element | Code / Syntax | Role & Functionality |
 | :--- | :--- | :--- |
-| **Context Instance** | `const Ctx = createContext(null)` | បំពង់បង្ហូរទិន្នន័យ (Data Channel) |
-| **Provider** | `<Ctx.Provider value={value}>` | អ្នកផ្សាយ និងគ្រប់គ្រង State ទៅកាន់ Subtree |
-| **Consumer Hook** | `const data = useContext(Ctx)` | អ្នកចាប់សញ្ញា និង Subscribe យក State |
-| **Custom Hook Guard** | `export function useMyCtx() { ... }` | ផ្តល់ Developer Experience ល្អ និងសុវត្ថិភាពខ្ពស់ |
+| **Context Instance** | `const Ctx = createContext(null)` | Data Channel សម្រាប់ផ្ទុក State |
+| **Provider** | `<Ctx.Provider value={value}>` | Component សម្រាប់គ្រប់គ្រង និង Broadcast State ទៅកាន់ Subtree |
+| **Consumer Hook** | `const data = useContext(Ctx)` | Hook សម្រាប់ Subscribe និងទាញយក State មកប្រើ |
+| **Custom Hook Guard** | `export function useMyCtx() { ... }` | Hook Wrapper សម្រាប់ Error Handling និង Developer Experience |

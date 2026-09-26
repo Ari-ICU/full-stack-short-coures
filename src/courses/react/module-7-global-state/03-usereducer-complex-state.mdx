@@ -39,7 +39,7 @@ quiz:
     explanation: "React State ត្រូវតែ Immutable។ ការធ្វើ Direct Mutation ដូចជា `state.push()` នឹងមិនបង្កើត Object Reference ថ្មីទេ ដែលធ្វើឱ្យ React មិនដឹងថា State បានផ្លាស់ប្តូរ ហើយបដិសេធមិនព្រម Re-render UI!"
 ---
 
-## ⚙️ ១. គោលការណ៍នៃ Reducer Pattern (Mental Model)
+## ⚙️ ១. The Reducer Pattern & Mental Model
 
 > [!IMPORTANT]
 > **និយមន័យ Reducer Pattern (Definition) ៖**  
@@ -70,7 +70,7 @@ flowchart TD
 
 ---
 
-## 🧩 ២. ធាតុផ្សំទាំង ៤ នៃ `useReducer`
+## 🧩 ២. The 4 Core Elements នៃ `useReducer`
 
 > [!NOTE]
 > **និយមន័យ useReducer Hook ៖**  
@@ -80,7 +80,7 @@ flowchart TD
 const [state, dispatch] = useReducer(reducer, initialState, init);
 ```
 
-| ធាតុផ្សំ | តួនាទីជាក់ស្តែង | ឧទាហរណ៍ |
+| Core Element | Role & Functionality | Example |
 | :--- | :--- | :--- |
 | **`state`** | ទិន្នន័យបច្ចុប្បន្នដែលផ្ទុកក្នុង Component | `{ items: [], discount: 0, total: 0 }` |
 | **`dispatch`** | Function សម្រាប់បញ្ជូន Action ទៅកាន់ Reducer | `dispatch({ type: 'ADD_ITEM', payload: item })` |
@@ -90,21 +90,21 @@ const [state, dispatch] = useReducer(reducer, initialState, init);
 
 ---
 
-## 📜 ៣. ច្បាប់មាស ៣ យ៉ាងនៃ Reducer Function
+## 📜 ៣. The 3 Golden Rules នៃ Reducer Function
 
 > [!IMPORTANT]
-> **ច្បាប់មាសទាំង ៣ (Golden Rules):**
+> **The 3 Golden Rules:**
 > 1. **Immutable State:** ហាមកែប្រែ (`mutate`) `state` parameter ដើមជាដាច់ខាត។ ត្រូវបង្កើត Object/Array ថ្មីតាមរយៈ Spread Operator (`...`) ឬ Immutable methods (`.filter()`, `.map()`)។
 > 2. **Deterministic (Predictable):** បញ្ជូន State ដដែល និង Action ដដែល ត្រូវតែទទួលបាន New State ដូចគ្នាជានិច្ច។
 > 3. **No Side-Effects:** ហាមសរសេរ API calls (`fetch`), ហាមហៅ `setTimeout`, និងហាមប្រើ Non-deterministic functions ដូចជា `Math.random()` ឬ `Date.now()` នៅខាងក្នុង Reducer។
 
 ---
 
-## 💻 ៤. ការអនុវត្តជាក់ស្តែង ៖ Shopping Cart State Management
+## 💻 ៤. Practical Implementation ៖ Shopping Cart State Management
 
 ដើម្បីងាយស្រួលយល់ និងរៀបចំកូដឱ្យមានរបៀប យើងបំបែកការអនុវត្ត `useReducer` ជាជំហានៗ ដោយភ្ជាប់ Logic នីមួយៗជាមួយ HTML/JSX ជាក់ស្តែង ៖
 
-### ជំហានទី ១ ៖ កំណត់ Initial State & ការ Render ទិន្នន័យក្នុង HTML/JSX
+### Step 1 ៖ Initial State Definition & HTML/JSX Rendering
 កំណត់រចនាសម្ព័ន្ធ State ដំបូង និងរបៀបយកបញ្ជីទំនិញមកបង្ហាញ (Render) លើ HTML ៖
 
 ```javascript
@@ -133,7 +133,7 @@ const initialCartState = {
 
 ---
 
-### ជំហានទី ២ ៖ បង្កើត Pure Reducer Function & Action Handlers
+### Step 2 ៖ Pure Reducer Function & Action Handlers
 
 មុននឹងសរសេរ Logic នៃ Action នីមួយៗ យើងត្រូវបង្កើតទម្រង់ **Reducer Function Signature** ជាមុនសិន ៖
 
@@ -335,7 +335,7 @@ const handleClearCart = () => {
 
 ---
 
-### ជំហានទី ៣ ៖ ផ្គុំចូលជា Pure Reducer Function ពេញលេញ
+### Step 3 ៖ Complete Pure Reducer Function
 
 ```javascript
 function cartReducer(state, action) {
@@ -401,7 +401,7 @@ function cartReducer(state, action) {
 
 ---
 
-### ជំហានទី ៤ ៖ ភ្ជាប់ `useReducer` & Render Derived State ក្នុង HTML
+### Step 4 ៖ Connecting `useReducer` & Rendering Derived State ក្នុង HTML
 ហៅប្រើ Hook `useReducer` និងគណនាតម្លៃសរុបចេញពី State ដោយផ្ទាល់ រួចបង្ហាញក្នុង HTML Summary ៖
 
 ```jsx
@@ -433,7 +433,7 @@ export default function CartManager() {
 
 ---
 
-### ជំហានទី ៥ ៖ Component ពេញលេញ (Clean & Semantic JSX)
+### Step 5 ៖ Complete Component (Clean & Semantic JSX)
 ការផ្គុំបញ្ចូលគ្នារវាង State, Reducer, Dispatch, និង HTML/JSX ទាំងអស់ ៖
 
 ```jsx
@@ -485,7 +485,7 @@ export default function CartApp() {
 
 ---
 
-## ⚡ ៥. Lazy Initialization ជាមួយ `init` Argument
+## ⚡ ៥. Lazy Initialization with `init` Argument
 
 នៅពេលដែល Initial State ត្រូវទាញយកពីប្រភពខាងក្រៅ (ដូចជា `localStorage`) ឬត្រូវការការគណនាធ្ងន់ធ្ងរ យើងគួរប្រើ **Lazy Initializer (Argument ទី ៣)** ដើម្បីកុំឱ្យដំណើរការគណនានោះម្តងទៀតរាល់ពេល Re-render ៖
 
@@ -511,7 +511,7 @@ function CartApp() {
 
 ---
 
-## 🔍 ៦. ការវិភាគចំណុចគន្លឹះនៃ Reducer Logic
+## 🔍 ៦. Key Architectural Insights នៃ Reducer Logic
 
 1. **ការចៀសវាង Array Mutation ពេល Update Quantity:**  
    យើងប្រើ `state.items.map(...)` ដើម្បីបង្កើត Object Item ថ្មីសម្រាប់តែ item ដែលត្រូវ update `{ ...item, quantity }` និងរក្សាទុក items ផ្សេងទៀតដដែល។
@@ -522,21 +522,21 @@ function CartApp() {
 
 ---
 
-## ⚖️ ៧. តារាងប្រៀបធៀប ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
+## ⚖️ ៧. Comparison ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
 
-| លក្ខណៈវិនិច្ឆ័យ | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
+| Criteria | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
 | :--- | :--- | :--- |
-| **ទម្រង់ State** | Primitive values (String, Number, Boolean) | Objects, Arrays, ឬ Nested Data Structures |
-| **ភាពស្មុគស្មាញនៃ Logic** | ១ ទៅ ២ សកម្មភាពសាមញ្ញ (Toggle, Increment) | ច្រើន Actions ដែលមានច្បាប់ Business Logic ស្មុគស្មាញ |
-| **ទំនាក់ទំនងរវាង State** | State fields ដំណើរការឯករាជ្យពីគ្នា | ការផ្លាស់ប្តូរ field មួយជះឥទ្ធិពលលើ field ផ្សេងទៀត |
-| **ការធ្វើ Unit Test** | ពិបាក Test logic ដោយគ្មាន UI component | ងាយស្រួល Test ព្រោះ Reducer ជា Pure Function ដាច់ដោយឡែក |
+| **State Structure** | Primitive values (String, Number, Boolean) | Objects, Arrays, ឬ Nested Data Structures |
+| **Logic Complexity** | ១ ទៅ ២ Actions សាមញ្ញ (Toggle, Increment) | ច្រើន Actions ដែលមានច្បាប់ Business Logic ស្មុគស្មាញ |
+| **State Dependencies** | State fields ដំណើរការឯករាជ្យពីគ្នា | ការផ្លាស់ប្តូរ field មួយជះឥទ្ធិពលលើ field ផ្សេងទៀត |
+| **Unit Testing** | ពិបាក Test logic ដោយគ្មាន UI component | ងាយស្រួល Test ព្រោះ Reducer ជា Pure Function ដាច់ដោយឡែក |
 | **Refactoring & Debugging** | Event Handlers រាយប៉ាយពេញ JSX | Logic ទាំងអស់ប្រមូលផ្តុំនៅកន្លែងតែមួយក្នុង Reducer |
 
 ---
 
-## 📋 ៨. សង្ខេបចំណុចសំខាន់ៗ (Key Takeaways)
+## 📋 ៨. Key Takeaways & Summary
 
 - `useReducer` គឺជាជម្រើសដ៏ល្អបំផុតសម្រាប់ State ដែលមានភាពស្មុគស្មាញ និងមាន State Transitions ច្រើន។
 - Reducer Function ត្រូវតែជា **Pure Function** ជានិច្ច (គ្មាន side-effects និងគោរព Immutability ១០០%)។
-- `dispatch(action)` ផ្តល់ភាពងាយស្រួលក្នុងការបញ្ជូនសារពី UI ទៅកាន់ Reducer ដោយមិនចាំបាច់ដឹងពីរបៀបគណនា State ខាងក្នុងឡើយ។
+- `dispatch(action)` ផ្តល់ភាពងាយស្រួលក្នុងការបញ្ជូន Action Object ពី UI ទៅកាន់ Reducer ដោយមិនចាំបាច់ដឹងពីរបៀបគណនា State ខាងក្នុងឡើយ។
 - ប្រើ `init` function (Lazy Initialization) នៅពេលត្រូវការទាញយក State ដំបូងពី `localStorage` ឬគណនាទិន្នន័យធ្ងន់ធ្ងរ។
