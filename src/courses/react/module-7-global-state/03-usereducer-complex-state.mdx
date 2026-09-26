@@ -511,6 +511,22 @@ export default function CartApp() {
 }
 ```
 
+#### 📋 តារាងពន្យល់កូដ `CartApp` និង `cartReducer` មួយជួរៗ (Line-by-Line Breakdown)
+
+| ផ្នែកនៃកូដ (Code Section) | បន្ទាត់កូដគន្លឹះ (Key Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **Initial State** | `const initialCartState = { items: [...], ... }` | កំណត់ Data Structure ដំបូងនៃ Cart ដែលផ្ទុក items array, discountCode, និង discountPercent។ |
+| **Reducer Function** | `function cartReducer(state, action) {` | Pure Function ដែលទទួល State បច្ចុប្បន្ន និង Action រួចគណនា New State។ ហាមមាន Side Effects ដាច់ខាត។ |
+| **ADD_ITEM Case** | `const existing = state.items.find(...)` | ត្រួតពិនិត្យថាទំនិញមានក្នុងកន្ត្រករួចហើយឬនៅ៖ បើមាន បូកបន្ថែម `quantity + 1` បើគ្មាន បញ្ចូល Object ថ្មីជាមួយ `quantity: 1` ដោយប្រើ `[...state.items, newItem]` (Immutability)។ |
+| **UPDATE_QUANTITY Case** | `if (quantity <= 0) return { ...filter(...) }` | ប្រសិនបើ Quantity ធ្លាក់ដល់ 0 ឬអវិជ្ជមាន ដក item ចេញពី array ភ្លាមៗ។ បើ > 0 ប្រើ `.map()` បង្កើត object copy ថ្មីដែលមាន quantity ថ្មី។ |
+| **REMOVE_ITEM Case** | `items: state.items.filter(i => i.id !== id)` | ប្រើ `.filter()` ដើម្បីបង្កើត Array ថ្មីដោយមិនរាប់បញ្ចូល item ដែលត្រូវលុប (Pure Immutable Operation)។ |
+| **APPLY_COUPON Case** | `discountPercent: discounts[code] || 0` | ផ្ទៀងផ្ទាត់ Promo Code ជាមួយ Lookup Object និងកំណត់ភាគរយបញ្ចុះតម្លៃទៅក្នុង State។ |
+| **CLEAR_CART Case** | `return { ...state, items: [], discountCode: '', ... }` | សម្អាតកន្ត្រកឱ្យត្រឡប់ទៅសភាពទទេស្អាតវិញ។ |
+| **Default Fallback** | `default: return state;` | **Golden Rule** ៖ ប្រសិនបើ action type មិនត្រូវនឹង case ណាទាំងអស់ ត្រូវតែ return state ចាស់មកវិញ ដើម្បីកុំឱ្យ state ក្លាយជា `undefined`។ |
+| **Hook Initialization** | `const [cart, dispatch] = useReducer(...)` | ចុះឈ្មោះ Reducer ក្នុង Component ៖ ទទួលបាន `cart` (State snapshot) និង `dispatch` (Function សម្រាប់បាញ់ Action)។ |
+| **Derived State** | `const subtotal = cart.items.reduce(...)` | គណនាតម្លៃសរុបចេញពី State ដោយផ្ទាល់ក្នុង Render cycle ដោយមិនចាំបាច់បង្កើត State ស្ទួនឡើយ (Avoid Redundant State)។ |
+| **Dispatch in UI** | `onClick={() => dispatch({ type: 'ADD_ITEM', ... })}` | Event Handler គ្រាន់តែប្រាប់ពី **"ចេតនារបស់ User (Intent)"** តាមរយៈ Action Object ដោយមិនបាច់ខ្វល់ពី Logic នៃការ Update ឡើយ។ |
+
 ---
 
 ## ⚡ ៥. Lazy Initialization with `init` Argument

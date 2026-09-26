@@ -254,6 +254,16 @@ export default function DependencyMastery() {
 }
 ```
 
+### 🔍 ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+| ផ្នែកនៃកូដ (Code Section) | បន្ទាត់កូដគន្លឹះ (Key Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **State Definitions** | `const [count, setCount] = useState(0);`<br/>`const [search, setSearch] = useState('');` | បង្កើត State ចំនួនពីរដាច់ដោយឡែកពីគ្នា ៖ `count` (លេខ) និង `search` (អក្សរស្វែងរក) ដើម្បីតេស្តភាពប្រែប្រួលនៃ Dependencies។ |
+| **Log Helper** | `const addLog = (text) => { setLogs(prev => [...]); };` | ប្រើ **Functional Update** ក្នុង `setLogs` ដើម្បីកុំឱ្យ `addLog` ពឹងផ្អែកលើ State `logs` ផ្ទាល់ ដែលជួយការពារបញ្ហា Dependency Stale Closure។ |
+| **Empty Array `[]` Effect** | `useEffect(() => { addLog('Mount'); }, []);` | **Mount Effect ៖** ដោយសារ dependency array គឺ `[]` (ទទេ) React នឹង execute setup function នេះ **តែម្តងគត់** នៅពេល Component បង្ហាញលើ DOM ដំបូង។ ទោះបីជា `count` ឬ `search` ប្តូរក៏ Effect នេះមិនរត់ទៀតឡើយ។ |
+| **Targeted Dependency `[count]`** | `useEffect(() => { ... }, [count]);` | **Selective Effect ៖** React នឹងធ្វើ Shallow Comparison (`Object.is`) លើតម្លៃ `count`។ Effect នេះរត់តែពេលដែល `count` ប្រែប្រួលប៉ុណ្ណោះ។ នៅពេលដែលអ្នកប្រើប្រាស់វាយអក្សរក្នុង `search` input (នាំឱ្យ Re-render) React ឃើញថា `count` នៅដដែល ដូច្នេះវា **Skip Effect នេះទាំងស្រុង**! |
+| **Clean UI Display** | `<input value={search} onChange={...} />` | Controlled Input ដែលកេះ Re-render រាល់ពេលវាយអក្សរ ដើម្បីបញ្ជាក់ថា Effect ដែលមាន `[count]` មិនរត់តាមនោះទេ។ |
+
 ---
 
 ## 🧠 ៧. Dependency Array Golden Rules (Summary Cheat Sheet)
