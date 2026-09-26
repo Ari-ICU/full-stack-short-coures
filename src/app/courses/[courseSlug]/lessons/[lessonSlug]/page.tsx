@@ -129,9 +129,9 @@ export default async function LessonPage({
           activeLesson={lesson}
         />
 
-        {/* ── Content (fills remaining width with optimal reading measure) ── */}
+        {/* ── Content (fills remaining width) ── */}
         <main className="flex-1 min-w-0">
-          <div className="max-w-4xl xl:max-w-5xl mx-auto px-5 sm:px-8 lg:px-12 py-8 lg:py-12">
+          <div className="w-full px-5 sm:px-8 lg:px-12 py-8 lg:py-12">
 
             {/* Breadcrumb Navigation */}
             <nav aria-label="Breadcrumb" className="mb-6">
@@ -152,7 +152,7 @@ export default async function LessonPage({
                   </Link>
                 </li>
                 <li aria-hidden="true" className="text-gray-300 dark:text-gray-700">/</li>
-                <li className="text-gray-900 dark:text-gray-200 font-semibold truncate max-w-[200px] sm:max-w-sm">
+                <li className="text-gray-900 dark:text-gray-200 font-semibold truncate max-w-[200px] sm:max-w-md lg:max-w-none">
                   {lesson.title}
                 </li>
               </ol>
