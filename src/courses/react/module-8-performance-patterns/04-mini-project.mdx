@@ -31,6 +31,15 @@ quiz:
 
 ## 🏗️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Performance Architecture)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង High-Performance Data Grid Mini Project នេះអនុវត្តតាមស្តង់ដារ **React Performance Optimization** (យោងតាម react.dev):
+> 1. **Component Memoization ៖** ប្រើ `React.memo` លើ `<GridRow>` ដើម្បី Skip Re-render ចំពោះ Rows ណាដែលមិនបានផ្លាស់ប្តូរ Props (រក្សា 60 FPS UX)។
+> 2. **Stable References ៖** ប្រើ `useCallback` សម្រាប់ Event Handlers (`handleToggleSelect`) ដើម្បីកុំឱ្យបំបែក Shallow Equality Check របស់ Child Components។
+> 3. **Heavy Computation Caching ៖** ប្រើ `useMemo` សម្រាប់ Search & Sort Algorithm លើ 1,000+ Records។
+> 4. **Direct DOM Focus ៖** ប្រើ `useRef` សម្រាប់ Global Shortcut (`Cmd+K` / `Ctrl+K`) Search Input Focus។
+
+
 ក្នុងគម្រោងនេះ យើងនឹងបង្កើត Data Grid ខ្នាតធំមួយដែលមាន **1,000 ទិន្នន័យ**។ ដើម្បីកុំឱ្យមានការទាក់ (Lag) យើងផ្គុំបច្ចេកទេស Optimization ទាំងអស់ចូលគ្នា ៖
 
 ```mermaid

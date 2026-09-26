@@ -38,11 +38,11 @@ quiz:
     explanation: "ការផ្តល់ `key` ថ្មី (ដូចជា `key={userId}`) ប្រាប់ React ថាវាជា Component ថ្មីទាំងស្រុង។ React នឹងបំផ្លាញ State ចាស់ចោល ហើយបង្កើត State ដើមឡើងវិញដោយស្វ័យប្រវត្តិ មិនចាំបាច់សរសេរ useEffect សូម្បីមួយបន្ទាត់!"
 ---
 
-## 🧭 ១. សំណួរធំបំផុត ៖ ពេលណាគួរប្រើ ហើយពេលណាដែលមិនគួរប្រើ?
+## 🧭 ១. The Big Question ៖ You Might Not Need an Effect (react.dev Guide)
 
 > [!IMPORTANT]
 > **និយមន័យ Rules of Hooks (Definition) ៖**  
-> **Rules of Hooks** គឺជាច្បាប់មាស ២ របស់ React៖ (1) ហៅ Hooks តែនៅ **Top Level** នៃ Component ប៉ុណ្ណោះ (មិនត្រូវហៅខាងក្នុង Loops, Conditions, ឬ Nested Functions ឡើយ) ដើម្បីរក្សាលំដាប់នៃការហៅឱ្យនៅដដែលគ្រប់ Render និង (2) ហៅ Hooks តែពីខាងក្នុង **React Function Components** ឬ **Custom Hooks** ប៉ុណ្ណោះ។
+> យោងតាមគេហទំព័រផ្លូវការរបស់ React (**react.dev**), **The 2 Golden Rules of Hooks** គឺជាគោលការណ៍កាតព្វកិច្ច ២ យ៉ាង៖ (1) ហៅ Hooks តែនៅ **Top Level** នៃ Component ប៉ុណ្ណោះ (មិនត្រូវហៅខាងក្នុង Loops, Conditions, ឬ Nested Functions ឡើយ) ដើម្បីធានាថាលំដាប់នៃការហៅ Hooks (Execution Order) នៅដដែលគ្រប់ Re-render និង (2) ហៅ Hooks តែពីខាងក្នុង **React Function Components** ឬ **Custom Hooks** ប៉ុណ្ណោះ។
 
 មនុស្សជាច្រើនបន្ទាប់ពីរៀន `useEffect` ចប់ តែងតែយកវាទៅប្រើលើ **គ្រប់រឿងទាំងអស់** — នេះជាកំហុសដ៏ធំបំផុត!
 
@@ -81,7 +81,7 @@ Pitfalls
 
 ---
 
-## 🧮 ៣. កំហុសទី ១ ៖ ប្រើ useEffect ដើម្បីបូកទិន្នន័យ (Derived State Trap)
+## 🧮 ៣. Anti-Pattern 1 ៖ Transforming Data for Rendering (Derived State Trap)
 
 ស្រមៃថាអ្នកមាន `firstName` និង `lastName` ហើយចង់បាន `fullName`៖
 
@@ -116,7 +116,7 @@ function UserProfile() {
 
 ---
 
-## 🔍 ៤. កំហុសទី ២ ៖ Filter បញ្ជីទិន្នន័យពេល User Search
+## 🔍 ៤. Anti-Pattern 2 ៖ Filtering a List in `useEffect`
 
 ### ❌ របៀបខុស:
 ```jsx
@@ -150,7 +150,7 @@ function ProductList({ products }) {
 
 ---
 
-## 🛒 ៥. កំហុសទី ៣ ៖ ដាក់កូដ User Actions ចូលក្នុង `useEffect`
+## 🛒 ៥. Anti-Pattern 3 ៖ Handling User Events in `useEffect`
 
 ស្រមៃថា User ចុចប៊ូតុង **«ទិញឥឡូវនេះ (Buy Now)»**៖
 
@@ -184,7 +184,7 @@ function Checkout() {
 
 ---
 
-## 🔄 ៦. កំហុសទី ៤ ៖ Reset Form State តាមរយៈ `useEffect`
+## 🔄 ៦. Anti-Pattern 4 ៖ Resetting State on Prop Change (Key Prop Solution)
 
 ចុះបើអ្នកចង់ Reset ប្រអប់ Comment ឱ្យទទេស្អាត នៅពេល User ប្តូរទៅមើល Profile របស់មនុស្សម្នាក់ទៀត (`userId` ប្រែប្រួល)?
 
@@ -216,7 +216,7 @@ export default function App() {
 
 ---
 
-## 🛑 ៧. កំហុសទី ៥ ៖ Infinite Re-render Loop
+## 🛑 ៧. Anti-Pattern 5 ៖ Infinite Re-render Loop
 
 ```jsx
 // ❌ គ្រោះថ្នាក់បំផុត
@@ -236,7 +236,7 @@ function InfiniteCounter() {
 
 ---
 
-## 🧠 ៨. តារាងវិនិច្ឆ័យ "តើខ្ញុំគួរប្រើ useEffect ដែរឬទេ?"
+## 🧠 ៨. Decision Matrix ៖ Do You Need an Effect? (react.dev Checklist)
 
 | ស្ថានភាព / ការងារ | ដំណោះស្រាយត្រឹមត្រូវ | ហេតុផល |
 | :--- | :--- | :--- |

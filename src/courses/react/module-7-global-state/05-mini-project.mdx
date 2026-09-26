@@ -31,6 +31,11 @@ quiz:
 
 ## 🛍️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ Multi-Context (Architecture Blueprint)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Mini Project នេះអនុវត្តតាមស្តង់ដារ **Enterprise React State Architecture** ដោយបំបែក Concerns រវាង Business State (`CartContext` គ្រប់គ្រងដោយ `useReducer`) និង UI Notification State (`ToastContext` គ្រប់គ្រងដោយ `useState`)។ យុទ្ធសាស្ត្រនេះជួយលុបបំបាត់ Prop Drilling ទាំងស្រុង និងទប់ស្កាត់បញ្ហា Unnecessary Re-renders នៅទូទាំង Component Tree។
+
+
 នៅក្នុងគម្រោងខ្នាតធំ យើងមិនត្រូវច្របល់ State ទាំងអស់ចូលក្នុង Global Container តែមួយឡើយ។ យើងបែងចែកវាជា **២ Dedicated Contexts** ៖
 1. **`CartContext` (គ្រប់គ្រងដោយ `useReducer`):** ផ្ទុកទិន្នន័យទំនិញ, ចំនួន (Quantity), ការបញ្ចុះតម្លៃ (Promo Code), និងការគណនាតម្លៃសរុប។
 2. **`ToastContext` (គ្រប់គ្រងដោយ `useState` + Timer):** បង្ហាញ Floating Notification Message នៅជ្រុងខាងក្រោម និងបិទទៅវិញដោយស្វ័យប្រវត្តិក្នងរយៈពេល ២.៥ វិនាទី។

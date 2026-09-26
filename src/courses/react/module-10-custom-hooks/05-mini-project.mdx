@@ -31,6 +31,14 @@ quiz:
 
 ## 🛍️ ១. ស្ថាបត្យកម្ម Hook Composition Blueprint
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង E-Commerce Product Explorer Mini Project នេះអនុវត្តតាមគោលការណ៍ **Custom Hook Composition Pattern** ផ្លូវការរបស់ React (**react.dev**):
+> 1. **Logic Decomposition ៖** បំបែក Stateful Logic ចេញពី UI ដោយប្រើ Custom Hooks ឯករាជ្យចំនួន ៤ (`useFetch`, `useDebounce`, `useLocalStorage`, `useWindowSize`)។
+> 2. **Orchestration Layer ៖** Component ដើរតួជា Orchestrator សុទ្ធសាធ (UI View) ដោយគ្រាន់តែប្រើប្រាស់ Returned State & Actions ពី Hooks។
+> 3. **Isolated State Lifecycles ៖** ធានាថា Logic នីមួយៗអាចយកទៅ Test និង Reuse បានគ្រប់កន្លែងក្នុងកម្មវិធី។
+
+
 នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **E-Commerce Product Explorer** ដោយផ្គុំ Custom Hooks ចំនួន ៤ ដំណើរការជាមួយគ្នា ៖
 
 ```mermaid

@@ -82,7 +82,7 @@ FormValidation
 
 ---
 
-## 🛡️ ៣. ជំហានទី ១ — បង្កើត Pure Validation Function
+## 🛡️ ៣. Step 1 — Pure Validation Function
 
 ក្បួនច្បាប់ដំបូងគេ៖ **កុំច្របល់កូដផ្ទៀងផ្ទាត់ (Validation) ជាមួយ UI JSX ឡើយ!**  
 យើងគួរបង្កើត **Pure JavaScript Function** មួយនៅក្រៅ Component ដែលទទួល `values` ហើយ Return ត្រឡប់មកវិញនូវ `errors` Object៖
@@ -130,7 +130,7 @@ function validate(values) {
 
 ---
 
-## 👆 ៤. ជំហានទី ២ — Touched Pattern & ព្រឹត្តិការណ៍ `onBlur`
+## 👆 ៤. Step 2 — The Touched Pattern & `onBlur` Event
 
 នេះជាចំណុចដែល **មនុស្សជាច្រើនយល់ច្រឡំបំផុត**!
 
@@ -193,7 +193,7 @@ return (
 
 ---
 
-## 💡 ៥. ជំហានទី ៣ — ហេតុអ្វី Errors គួរតែជា Derived State?
+## 💡 ៥. Step 3 — Why Errors Should Be Derived State (react.dev Best Practice)
 
 នេះជាកំហុសដ៏ធំបំផុតមួយដែលអ្នករៀនថ្មីៗតែងតែជួបប្រទះ៖
 
@@ -226,7 +226,7 @@ const isFormValid = Object.keys(errors).length === 0;
 
 ---
 
-## ⏳ ៦. ជំហានទី ៤ — Submit State Machine & ការពារ Double-Click
+## ⏳ ៦. Step 4 — Form Submission State Machine & Double-Click Protection
 
 ស្រមៃមើលថាអ្នកកំពុងទិញទំនិញតម្លៃ $500។ នៅពេលអ្នកចុចប៊ូតុង **«ទូទាត់ប្រាក់»** ប្រព័ន្ធអ៊ីនធឺណិតដើរយឺតបន្តិច។ ប្រសិនបើប៊ូតុងមិន Disable ទេ អ្នកប្រហែលជាចុចប៊ូតុងនោះ ៣ ទៅ ៤ ដងជាប់ៗគ្នា — ជាលទ្ធផល លុយរបស់អ្នកអាចនឹងត្រូវកាត់ $2,000!
 

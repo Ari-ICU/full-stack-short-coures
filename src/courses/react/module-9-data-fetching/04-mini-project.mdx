@@ -30,6 +30,15 @@ quiz:
 
 ## 🐙 ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Architecture Blueprint)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង GitHub Explorer Mini Project នេះអនុវត្តតាមស្តង់ដារ **Asynchronous Data Fetching Architecture**:
+> 1. **Tri-State Lifecycle ៖** គ្រប់គ្រង `data`, `loading`, និង `error` states យ៉ាងហ្មត់ចត់ជាមួយ UI Skeleton និង Error Feedback។
+> 2. **Rate Limit Protection with Debouncing ៖** ប្រើ `useDebounce` (500ms delay) ដើម្បីការពារ API Rate Limit (60 requests/hour របស់ GitHub)។
+> 3. **Race Condition Prevention ៖** ប្រើ `AbortController` ក្នុង `useEffect` Cleanup ដើម្បី Cancel stale network requests។
+> 4. **Parallel Fetching ៖** ប្រើ `Promise.all()` ដើម្បី Fetch User Profile និង Repository List ក្នុងពេលដំណាលគ្នា (Zero Request Waterfall)។
+
+
 នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **GitHub Explorer & Repo Inspector** ដែលមានសមត្ថភាពទាញយក Profile និង Top Repositories ពី GitHub Public API ៖
 
 ```mermaid

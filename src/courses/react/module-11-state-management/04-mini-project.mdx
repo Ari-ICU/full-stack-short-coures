@@ -30,6 +30,14 @@ quiz:
 
 ## 🛍️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ (Architecture Blueprint)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Enterprise E-Commerce Store Mini Project នេះអនុវត្តតាមស្តង់ដារ **Zustand Slices & Middleware Architecture**:
+> 1. **Granular Store Slices ៖** បំបែក Central Store ជា ៣ Slices ឯករាជ្យ (`cartSlice`, `couponSlice`, `toastSlice`) សម្រាប់ Clean Codebase។
+> 2. **Session Persistence ៖** ប្រើប្រាស់ `persist` middleware ដើម្បី Sync State ជាមួយ `localStorage` ដោយស្វ័យប្រវត្តិតាមរយៈ Whitelist Strategy។
+> 3. **Selective Subscriptions ៖** Components subscribe យកតែ State Slice ដែលខ្លួនត្រូវការ (`useStore(state => state.items)`) ដើម្បីលុបបំបាត់ Unnecessary Re-renders ទាំងស្រុង។
+
+
 នៅក្នុងគម្រោងនេះ យើងនឹងបង្កើត **Enterprise E-Commerce Store** ដោយប្រើប្រាស់ **Zustand Sliced Store** ៖
 
 ```mermaid

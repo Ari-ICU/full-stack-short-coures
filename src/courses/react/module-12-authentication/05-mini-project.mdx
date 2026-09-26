@@ -31,6 +31,14 @@ quiz:
 
 ## 🏛️ ១. ស្ថាបត្យកម្មប្រព័ន្ធនៃ Mini Project (System Architecture)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Enterprise Auth Portal Mini Project នេះអនុវត្តតាមស្តង់ដារ **Frontend Authentication & RBAC Architecture**:
+> 1. **Complete Authentication Flow ៖** គ្រប់គ្រង Login, Register, Logout, និង Form Validation ជាមួយ LocalStorage Mock DB។
+> 2. **Session Rehydration ៖** ស្ដារ Auth State ឡើងវិញដោយស្វ័យប្រវត្តិក្នង Render ដំបូងពេលអ្នកប្រើប្រាស់ Refresh ទំព័រ (F5)។
+> 3. **Role-Based Access Control (RBAC) ៖** ការពារទំព័រ Sensitive តាមរយៈ `<ProtectedRoute allowedRoles={['admin']}>` និង Redirect unauthorized requests។
+
+
 ```mermaid
 graph TD
     subgraph StorageLayer["Browser LocalStorage"]

@@ -43,18 +43,36 @@ quiz:
 
 > [!IMPORTANT]
 > **និយមន័យ Reducer Pattern (Definition) ៖**  
-> **The Reducer Pattern** គឺជា Design Pattern មួយសម្រាប់ការគ្រប់គ្រង State Transitions តាមរយៈ **Pure Function** (ហៅថា *Reducer*)។ State មិនអាចកែប្រែដោយផ្ទាល់ (Direct Mutation) បានឡើយ ប៉ុន្តែត្រូវធ្វើឡើងតាមរយៈការបញ្ជូន **Action Object** (តាមរយៈ `dispatch`) រួច Reducer នឹងទទួលយក `(currentState, action)` ដើម្បីគណនា និង return នូវ `newState` (Immutable State Update) ដែលធ្វើឱ្យលំហូរទិន្នន័យមានលក្ខណៈ Predictable, Maintainable និងងាយស្រួលសរសេរ Unit Test។
+> យោងតាមគេហទំព័រផ្លូវការរបស់ React (**react.dev**), នៅពេល Component មាន State Updates ច្រើនរាយប៉ាយតាម Event Handlers ផ្សេងៗ កូដនឹងក្លាយជាពិបាកគ្រប់គ្រង (Overwhelming)។ **The Reducer Pattern** គឺជាដំណោះស្រាយផ្លូវការដែលអនុញ្ញាតឱ្យយើងប្រមូលផ្តុំ (Consolidate) រាល់ State Update Logic ទាំងអស់យកទៅដាក់នៅក្រៅ Component ក្នុង Function តែមួយហៅថា **Reducer**។
+> 
+> State មិនអាចកែប្រែដោយផ្ទាល់ (Direct Mutation) បានឡើយ ប៉ុន្តែត្រូវធ្វើឡើងតាមរយៈការបញ្ជូន **Action Object** (តាមរយៈ `dispatch`) រួច Reducer នឹងទទួលយក `(currentState, action)` ដើម្បីគណនា និង return នូវ `newState` (Immutable State Update)។
 
-ដើម្បីយល់ពី `useReducer` សូមស្រមៃមើល **«តុបញ្ជរធនាគារ»** 🏦៖
+### 💡 តើឈ្មោះ "Reducer" កើតចេញពីណា? (The Array `.reduce()` Connection)
+React ដាក់ឈ្មោះ Hook នេះតាមវិធីសាស្ត្រ **`Array.prototype.reduce()`** ក្នុង JavaScript ៖
+```javascript
+// 1. JavaScript Array reduce: ទទួលយក (តម្លៃសរុបបច្ចុប្បន្ន, ធាតុថ្មី) => តម្លៃសរុបបន្ទាប់
+const numbers = [1, 2, 3];
+const sum = numbers.reduce((total, num) => total + num, 0); // ➔ 6
+
+// 2. React useReducer: ទទួលយក (State បច្ចុប្បន្ន, Action ថ្មី) => State បន្ទាប់
+function cartReducer(state, action) {
+  // (currentState, action) => newState
+}
+```
+
+---
+
+### 🏦 ឧទាហរណ៍ជាក់ស្តែង ៖ «តុបញ្ជរធនាគារ» (The Bank Teller Analogy)
+ដើម្បីយល់ពីលំហូរការងារ សូមស្រមៃមើលធនាគារមួយ ៖
 1. **អ្នក (User / UI Component):** ដើរទៅកាន់តុបញ្ជរហើយប្រាប់បុគ្គលិកថា៖ *«ខ្ញុំចង់ដកប្រាក់ $50»* (`dispatch({ type: 'WITHDRAW', payload: 50 })`)។ អ្នកមិនមានសិទ្ធិដើរចូលទៅបើកទូដែកដកលុយដោយខ្លួនឯងទេ!
 2. **បុគ្គលិកធនាគារ (Reducer Function):** ពិនិត្យមើលច្បាប់ធនាគារ ពិនិត្យសមតុល្យក្នុងគណនីរបស់អ្នក រួចកាត់ប្រាក់តាមរូបមន្តច្បាស់លាស់ (`(state, action) => newState`)។
 3. **សមតុល្យគណនីថ្មី (New State):** គណនីរបស់អ្នកត្រូវបានកត់ត្រាតម្លៃថ្មី ហើយធនាគារចេញបង្កាន់ដៃជូនអ្នក (UI Re-render)។
 
 ```mermaid
 flowchart TD
-    subgraph ReducerLoop["The Reducer Pattern State Loop"]
+    subgraph ReducerLoop["The Reducer Pattern State Loop (Uni-directional Data Flow)"]
         direction TB
-        UI["1. User Interaction 👆<br/>(ចុចប៊ូតុង 'Add to Cart')"] --> Dispatch["2. dispatch({ type: 'ADD_ITEM', payload: product }) 📨"]
+        UI["1. User Interaction 👆<br/>(User ចុចប៊ូតុង 'Add to Cart')"] --> Dispatch["2. dispatch({ type: 'ADD_ITEM', payload: product }) 📨"]
         Dispatch --> Reducer["3. Pure Reducer Function ⚙️<br/>(state, action) => newState"]
         Reducer --> NewState["4. គណនា New State (Immutable Copy) 📦"]
         NewState --> Store["5. Central State ត្រូវបានធ្វើបច្ចុប្បន្នភាព"]
@@ -73,19 +91,29 @@ flowchart TD
 ## 🧩 ២. The 4 Core Elements នៃ `useReducer`
 
 > [!NOTE]
-> **និយមន័យ useReducer Hook ៖**  
-> `useReducer` គឺជា React Built-in Hook ជំនួសឱ្យ `useState` សម្រាប់ State ដែលមាន Logic ស្មុគស្មាញ ឬពាក់ព័ន្ធនឹង Sub-values ច្រើន។ វាភ្ជាប់ Component ទៅនឹង Reducer Function និងផ្តល់ត្រឡប់មកវិញនូវ Tuple `[state, dispatch]`។
+> **រូបមន្តផ្លូវការ (Official Hook Signature ពី react.dev) ៖**  
+> ```jsx
+> const [state, dispatch] = useReducer(reducer, initialArg, init?);
+> ```
 
-```jsx
-const [state, dispatch] = useReducer(reducer, initialState, init);
-```
+### 🔄 ជំហានទាំង ៣ ក្នុងការប្តូរពី `useState` ទៅ `useReducer` (Official React Migration)
+
+| ជំហាន (Step) | របៀបចាស់ជាមួយ `useState` | របៀបថ្មីជាមួយ `useReducer` (Best Practice) |
+| :--- | :--- | :--- |
+| **Step 1: បញ្ជូន Action** | `setItems([...items, newItem])` *(ប្រាប់ React ពីរបៀបកែប្រែ)* | `dispatch({ type: 'ADD_ITEM', payload: newItem })` *(ប្រាប់ពីអ្វីដែល User បានធ្វើ)* |
+| **Step 2: សរសេរ Reducer** | Logic រាយប៉ាយតាម `onClick` handlers ក្នុង JSX | ប្រមូលផ្តុំ Logic ទាំងអស់ក្នុង `function cartReducer(state, action)` |
+| **Step 3: ភ្ជាប់ក្នុង Component** | `const [items, setItems] = useState([])` | `const [state, dispatch] = useReducer(cartReducer, initialState)` |
+
+---
+
+### 📋 តារាង The 4 Core Elements នៃ useReducer
 
 | Core Element | Role & Functionality | Example |
 | :--- | :--- | :--- |
 | **`state`** | ទិន្នន័យបច្ចុប្បន្នដែលផ្ទុកក្នុង Component | `{ items: [], discount: 0, total: 0 }` |
-| **`dispatch`** | Function សម្រាប់បញ្ជូន Action ទៅកាន់ Reducer | `dispatch({ type: 'ADD_ITEM', payload: item })` |
-| **`reducer`** | Pure Function សម្រាប់គណនា State ថ្មី | `function cartReducer(state, action) { ... }` |
-| **`action`** | Object ដែលពិពណ៌នាពីអ្វីដែលបានកើតឡើង | `{ type: 'REMOVE_ITEM', payload: { id: 101 } }` |
+| **`dispatch`** | Function សម្រាប់បញ្ជូន Action Object ទៅកាន់ Reducer | `dispatch({ type: 'ADD_ITEM', payload: item })` |
+| **`reducer`** | Pure Function សម្រាប់គណនា State ថ្មី `(state, action) => newState` | `function cartReducer(state, action) { ... }` |
+| **`action`** | Object ដែលពណ៌នាពីព្រឹត្តិការណ៍ដែលបានកើតឡើង | `{ type: 'REMOVE_ITEM', payload: { id: 101 } }` |
 | **`init` (Optional)** | Function សម្រាប់ Lazy Initialize State ដំបូង | `(initialArgs) => ({ ...initialArgs })` |
 
 ---
@@ -93,10 +121,10 @@ const [state, dispatch] = useReducer(reducer, initialState, init);
 ## 📜 ៣. The 3 Golden Rules នៃ Reducer Function
 
 > [!IMPORTANT]
-> **The 3 Golden Rules:**
-> 1. **Immutable State:** ហាមកែប្រែ (`mutate`) `state` parameter ដើមជាដាច់ខាត។ ត្រូវបង្កើត Object/Array ថ្មីតាមរយៈ Spread Operator (`...`) ឬ Immutable methods (`.filter()`, `.map()`)។
-> 2. **Deterministic (Predictable):** បញ្ជូន State ដដែល និង Action ដដែល ត្រូវតែទទួលបាន New State ដូចគ្នាជានិច្ច។
-> 3. **No Side-Effects:** ហាមសរសេរ API calls (`fetch`), ហាមហៅ `setTimeout`, និងហាមប្រើ Non-deterministic functions ដូចជា `Math.random()` ឬ `Date.now()` នៅខាងក្នុង Reducer។
+> **The 3 Golden Rules យោងតាមគោលការណ៍ផ្លូវការរបស់ React (react.dev) ៖**
+> 1. **Reducers must be pure (Immutability & Predictability) ៖** ហាមកែប្រែ (`mutate`) `state` parameter ដើមជាដាច់ខាត។ បញ្ជូន State និង Action ដដែល ត្រូវតែទទួលបាន New State ដូចគ្នាជានិច្ច។ គ្មាន Side-effects (គ្មាន API calls, គ្មាន `setTimeout`, និងគ្មាន `Math.random()` ឬ `Date.now()`)។
+> 2. **Each action describes a single user interaction ៖** Action ត្រូវតែពណ៌នាពី "អ្វីដែល User បានធ្វើ" មិនមែន "របៀបដែលទិន្នន័យត្រូវប្តូរ" ឡើយ។ ឧទាហរណ៍៖ ប្រសិនបើ User ចុចប៊ូតុង Reset Form ដែលត្រូវសម្អាត ៥ fields ចូរ dispatch តែ ១ Action គឺ `{ type: 'RESET_FORM' }` ជាជាង dispatch ៥ Actions ដាច់ដោយឡែកពីគ្នា។
+> 3. **Always provide a default fallback ៖** ក្នុង `switch(action.type)` ត្រូវតែមាន `default: return state;` ជានិច្ច ដើម្បីការពារកុំឱ្យ State ក្លាយជា `undefined` នៅពេលមាន Unknown Action។
 
 ---
 
@@ -524,13 +552,15 @@ function CartApp() {
 
 ## ⚖️ ៧. Comparison ៖ ពេលណាគួរប្រើ `useState` vs `useReducer`?
 
-| Criteria | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
+យោងតាមការប្រៀបធៀបផ្លូវការនៅលើ **react.dev**, `useState` និង `useReducer` មានសមត្ថភាពគ្រប់គ្រង State ដូចគ្នា ប៉ុន្តែមានចំណុច Trade-offs ដូចខាងក្រោម ៖
+
+| វិនិច្ឆ័យ (Criteria ពី react.dev) | ជ្រើសរើសប្រើ `useState` | ជ្រើសរើសប្រើ `useReducer` |
 | :--- | :--- | :--- |
-| **State Structure** | Primitive values (String, Number, Boolean) | Objects, Arrays, ឬ Nested Data Structures |
-| **Logic Complexity** | ១ ទៅ ២ Actions សាមញ្ញ (Toggle, Increment) | ច្រើន Actions ដែលមានច្បាប់ Business Logic ស្មុគស្មាញ |
-| **State Dependencies** | State fields ដំណើរការឯករាជ្យពីគ្នា | ការផ្លាស់ប្តូរ field មួយជះឥទ្ធិពលលើ field ផ្សេងទៀត |
-| **Unit Testing** | ពិបាក Test logic ដោយគ្មាន UI component | ងាយស្រួល Test ព្រោះ Reducer ជា Pure Function ដាច់ដោយឡែក |
-| **Refactoring & Debugging** | Event Handlers រាយប៉ាយពេញ JSX | Logic ទាំងអស់ប្រមូលផ្តុំនៅកន្លែងតែមួយក្នុង Reducer |
+| **១. Code Size (ទំហំកូដ)** | សរសេរកូដតិចជាងមុននៅពេលចាប់ផ្តើម (តិច boilerplate) | ត្រូវសរសេរទាំង Reducer function និង Actions ប៉ុន្តែកាត់បន្ថយបន្ទាត់កូដបានច្រើននៅពេល Event Handlers មានចំនួនច្រើន |
+| **២. Readability (ភាពងាយអាន)** | ងាយអានពេល State សាមញ្ញ ប៉ុន្តែពិបាកយល់ពេល Component មានទំហំធំ និងមាន setter ច្រើន | បំបែកយ៉ាងដាច់ស្រឡះរវាង "អ្វីដែលបានកើតឡើង (Intent/Action)" និង "របៀបធ្វើបច្ចុប្បន្នភាព State (Update Logic)" |
+| **៣. Debugging (ការដោះស្រាយបញ្ហា)** | ពិបាកដឹងថាតើ `setState` មួយណាបានបង្ក Error ប្រសិនបើមាន Event ច្រើនក្នុងពេលតែមួយ | ងាយស្រួលបំផុត! គ្រាន់តែ `console.log(action)` ក្នុង Reducer អ្នកនឹងឃើញប្រវត្តិ Action និង State Transition គ្រប់ជំហាន |
+| **៤. Testing (ការធ្វើតេស្តកូដ)** | ពិបាកសរសេរ Unit Test ដោយគ្មាន React Component ឬ DOM environment | ងាយស្រួល Test ១០០%! Reducer ជា Pure Function ធម្មតា អាច Export ទៅសរសេរ Unit Test (Jest/Vitest) ដោយមិនបាច់ Render Component |
+| **៥. State Structure (ទម្រង់ទិន្នន័យ)** | សមស្របសម្រាប់ Primitive values (String, Number, Boolean) | សមស្របសម្រាប់ Objects, Arrays, ឬ Nested Data Structures ដែល Sub-values អាស្រ័យគ្នាទៅវិញទៅមក |
 
 ---
 

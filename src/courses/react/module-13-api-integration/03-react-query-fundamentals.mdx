@@ -41,8 +41,8 @@ quiz:
 ## 🧠 ១. Server State vs Client State Mental Model
 
 > [!IMPORTANT]
-> **និយមន័យ TanStack Query (React Query) ៖**  
-> **TanStack Query** (ពីមុនហៅថា React Query) គឺជាបណ្ណាល័យគ្រប់គ្រង **Server State** និង Asynchronous Data សម្រាប់ Web Applications។ វាជួយដោះស្រាយបញ្ហាស្មុគស្មាញនៃ Data Fetching ដោយផ្តល់នូវការ Caching ដោយស្វ័យប្រវត្តិ, Background Data Synchronization, Auto-Refetching ពេល Stale, Request Deduplication, និង Pagination/Infinite Scroll។
+> **និយមន័យ TanStack Query / React Query v5 (Definition) ៖**  
+> យោងតាមគេហទំព័រផ្លូវការ (**tanstack.com/query**), **TanStack Query** (ពីមុនហៅថា React Query) គឺជាបណ្ណាល័យគ្រប់គ្រង **Server State** និង Asynchronous Data ដ៏មានឥទ្ធិពលបំផុតសម្រាប់ React។ វាជួយដោះស្រាយបញ្ហាស្មុគស្មាញនៃ Data Fetching ដោយផ្តល់នូវ Auto-Caching, Background Stale Synchronization, Request Deduplication, និង Declarative Mutations ដោយមិនចាំបាច់សរសេរ Redux ឬ Boilerplate ច្រើនឡើយ។
 
 ```mermaid
 flowchart LR
@@ -104,7 +104,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 
 ---
 
-## 🔍 ៣. ការទាញយកទិន្នន័យដោយប្រើ `useQuery`
+## 🔍 ៣. Data Fetching ជាមួយ `useQuery` Hook
 
 លែងត្រូវការសរសេរ `useEffect` + `useState(data)` + `useState(loading)` + `useState(error)` ទៀតហើយ!
 

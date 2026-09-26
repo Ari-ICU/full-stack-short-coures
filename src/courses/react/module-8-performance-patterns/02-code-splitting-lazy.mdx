@@ -127,7 +127,7 @@ function Dashboard() {
 
 វិធីសាស្ត្រដែលពេញនិយមនិងមានប្រសិទ្ធភាពបំផុតក្នុងការបំបែកកូដ គឺបំបែកតាម Route (ទំព័រនីមួយៗ) ៖
 
-### ជំហានទី ១ ៖ ប្តូរពី Static Import ទៅជា `React.lazy()`
+### Step 1 ៖ Replacing Static Imports with `React.lazy()`
 ទាញយកកូដនៃទំព័រនីមួយៗតាមតម្រូវការ (On-Demand) ៖
 
 ```javascript
@@ -143,7 +143,7 @@ const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
 
 ---
 
-### ជំហានទី ២ ៖ បង្កើត Fallback Loading Component
+### Step 2 ៖ Creating Fallback Loading Component
 ផ្ទាំង UI បណ្តោះអាសន្នសម្រាប់បង្ហាញជូន User អំឡុងពេល Browser កំពុងទាញយក Chunk តាម Network ៖
 
 ```jsx
@@ -160,7 +160,7 @@ export function PageLoader() {
 
 ---
 
-### ជំហានទី ៣ ៖ រុំព័ទ្ធ `<Suspense>` ជុំវិញ `<Routes>`
+### Step 3 ៖ Wrapping `<Routes>` with `<Suspense>`
 ផ្គុំ Navigation និង Routes ដោយរុំព័ទ្ធដោយ `<Suspense fallback={<PageLoader />}>` ៖
 
 ```jsx

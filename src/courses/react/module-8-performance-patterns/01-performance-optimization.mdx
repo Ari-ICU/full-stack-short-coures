@@ -97,7 +97,7 @@ flowchart TD
 
 ដើម្បីងាយស្រួលយល់ និងរៀបចំកូដឱ្យមានរបៀប យើងបំបែកការអនុវត្ត `React.memo`, `useMemo`, និង `useCallback` ជាជំហានៗ ដោយភ្ជាប់ Logic ជាមួយ HTML/JSX ជាក់ស្តែង ៖
 
-### ជំហានទី ១ ៖ ការពារ Child Component ដោយ `React.memo`
+### Step 1 ៖ Memoizing Child Components with `React.memo`
 រុំព័ទ្ធ Child Component ជាមួយ `memo()` ដើម្បីកុំឱ្យវា Re-render នៅពេល State របស់ Parent ផ្លាស់ប្តូរ (ដរាបណា Props `items` និង `onExport` នៅដដែល) ៖
 
 ```jsx
@@ -127,7 +127,7 @@ export const HeavyChart = memo(function HeavyChart({ items, onExport }) {
 
 ---
 
-### ជំហានទី ២ ៖ Cache ការគណនាធ្ងន់ៗដោយ `useMemo`
+### Step 2 ៖ Caching Expensive Calculations with `useMemo`
 ប្រើ `useMemo` ដើម្បីការពារការច្រោះ (Filter) ទិន្នន័យ ៥,០០០ ជួរឡើងវិញ នៅពេល Parent Re-render ដោយសារ State ផ្សេង ៖
 
 ```javascript
@@ -160,7 +160,7 @@ const filteredRecords = useMemo(() => {
 
 ---
 
-### ជំហានទី ៣ ៖ រក្សា Function Reference ឱ្យនៅដដែលដោយ `useCallback`
+### Step 3 ៖ Stabilizing Function References with `useCallback`
 ប្រើ `useCallback` ដើម្បីកុំឱ្យ Parent បង្កើត Function Reference ថ្មីរាល់ Render (ការពារកុំឱ្យ `React.memo` លើ `HeavyChart` ច្រឡំថា Prop ផ្លាស់ប្តូរ) ៖
 
 ```javascript
@@ -177,7 +177,7 @@ const handleExportData = useCallback(() => {
 
 ---
 
-### ជំហានទី ៤ ៖ Component ពេញលេញ (Clean & Semantic JSX)
+### Step 4 ៖ Complete Optimized Component (Clean & Semantic JSX)
 ការផ្គុំបញ្ចូលគ្នារវាង `useState`, `useMemo`, `useCallback`, និង `HeavyChart` ៖
 
 ```jsx

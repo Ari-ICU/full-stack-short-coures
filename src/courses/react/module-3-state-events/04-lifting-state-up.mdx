@@ -18,7 +18,7 @@ quiz:
     explanation: "នៅក្នុង React ទិន្នន័យមិនអាចបញ្ជូនពីបងប្អូន (Sibling) ទៅបងប្អូនដោយផ្ទាល់បានទេ។ យើងត្រូវលើក State ទៅ Parent រួម ហើយ pass State ចុះទៅ Child A និង pass Setter/Callback ចុះទៅ Child B។"
 ---
 
-## ⬆️ 1. អ្វីទៅជា Lifting State Up?
+## ⬆️ 1. The Lifting State Up Pattern (Single Source of Truth)
 
 > [!IMPORTANT]
 > **និយមន័យ Lifting State Up (Definition) ៖**  
@@ -49,7 +49,7 @@ flowchart TD
 
 ---
 
-## 🛠️ 2. កូដគំរូអនុវត្តជាក់ស្តែង
+## 🛠️ 2. Practical Implementation (Parent-Child Sibling Communication)
 
 ```jsx
 import { useState } from 'react';

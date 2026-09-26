@@ -18,7 +18,7 @@ quiz:
     explanation: "React ប្រើ Shallow Equality Check (`prev === next`)។ នៅពេលអ្នក mutate array ជាមួយ `push()`, reference របស់ array មិនបានផ្លាស់ប្តូរទេ ដូច្នេះ React នឹង skip ការ re-render។ ត្រូវបង្កើត array ថ្មីជានិច្ច ដូចជា `setTodos([...todos, newItem])`។"
 ---
 
-## 🛡️ 1. ហេតុអ្វីត្រូវតែ Immutable?
+## 🛡️ 1. Why State Immutability Matters (Memory Reference & Diffing)
 
 > [!IMPORTANT]
 > **និយមន័យ State Immutability (Definition) ៖**  
@@ -30,7 +30,7 @@ quiz:
 
 ---
 
-## 🛠️ 2. វិធីសាស្ត្រ Update Objects & Arrays ត្រឹមត្រូវ
+## 🛠️ 2. Updating Objects & Arrays Without Mutation (react.dev Patterns)
 
 ### ក. Updating Objects:
 ```javascript

@@ -21,6 +21,14 @@ quiz:
 
 ## 🗺️ 1. Portal Application Architecture
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Multi-Page Portal Mini Project នេះអនុវត្តតាមស្តង់ដារ **React Router v6 Architecture** (យោងតាម reactrouter.com):
+> 1. **Layout Hierarchy ៖** ប្រើប្រាស់ `<AppLayout>` រួមជាមួយ `<Outlet />` សម្រាប់រក្សា persistent UI (Header & Sidebar) ដោយមិនបាច់ Re-mount រាល់ពេលប្តូរទំព័រ។
+> 2. **Declarative & Dynamic Routes ៖** គ្រប់គ្រង Index Route, Dynamic Segment Route (`/courses/:id`), និង Catch-all 404 Route (`*`)។
+> 3. **Active NavLink Styling ៖** បង្ហាញ Active Tab Indicator ដោយស្វ័យប្រវត្តិតាមរយៈ `isActive` function នៃ React Router។
+
+
 ```mermaid
 graph TD
     App["<AppLayout> (Header & Sidebar)"]

@@ -31,6 +31,14 @@ quiz:
 
 ## 🏛️ ១. ស្ថាបត្យកម្ម Optimistic Mutation Lifecycle
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Enterprise Product & Inventory Mini Project នេះអនុវត្តតាមស្តង់ដារ **TanStack Query v5 Optimistic Updates & Cache Synchronization**:
+> 1. **Optimistic Mutations (0ms UX) ៖** ធ្វើបច្ចុប្បន្នភាព UI ភ្លាមៗមុនពេល Server ឆ្លើយតប ដោយប្រើ `onMutate` Snapshot & Cache Replacement។
+> 2. **Bulletproof Rollback ៖** ស្ដារ State ចាស់មកវិញដោយស្វ័យប្រវត្តិក្នង `onError` ប្រសិនបើ Network ឬ Server បរាជ័យ។
+> 3. **True Server Sync ៖** ហៅ `invalidateQueries` ក្នុង `onSettled` ដើម្បីធានាភាពស៊ីសង្វាក់គ្នានៃ Central Server State។
+
+
 ```mermaid
 sequenceDiagram
     autonumber

@@ -31,6 +31,14 @@ quiz:
 
 ## 🎯 ១. ស្ថាបត្យកម្មគម្រោង (Separation of Concerns)
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Focus Studio Mini Project នេះអនុវត្តតាមគោលការណ៍ **Separation of Concerns for Side Effects** យោងតាមគេហទំព័រផ្លូវការរបស់ React (**react.dev**):
+> 1. **Isolated Effects ៖** បំបែក Side Effects ជា ៤ មុខងារឯករាជ្យ (Timer, Key Listener, Tab Title, LocalStorage)។
+> 2. **Bulletproof Cleanup ៖** គ្រប់គ្រង Memory Leak ដោយធានាថា `clearInterval` និង `removeEventListener` ត្រូវបានដំណើរការក្នុង Cleanup Functions ជានិច្ច។
+> 3. **Synchronizing with External Systems ៖** ធ្វើសមកាលកម្មទិន្នន័យ State ជាមួយ Browser DOM API និង Web Storage យ៉ាងត្រឹមត្រូវ។
+
+
 នៅក្នុងកម្មវិធីជាក់ស្តែង យើងមិនត្រូវញាត់កូដ Side Effects ទាំងអស់ចូលក្នុង `useEffect` តែមួយឡើយ។ យើងបែងចែកវាជា **៤ Effects តូចៗ** ដាច់ដោយឡែកពីគ្នា៖
 
 ```mermaid

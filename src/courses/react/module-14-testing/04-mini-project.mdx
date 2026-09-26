@@ -31,6 +31,14 @@ quiz:
 
 ## 🏛️ ១. ស្ថាបត្យកម្មប្រព័ន្ធ Checkout & Test Boundaries
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Enterprise Checkout Test Suite Mini Project នេះអនុវត្តតាមស្តង់ដារ **React Testing Library & Vitest Best Practices**:
+> 1. **User-Centric Testing Philosophy ៖** តេស្ត Component ពីទស្សនៈរបស់អ្នកប្រើប្រាស់ជាក់ស្តែង (`getByRole`, `userEvent`) ដោយមិនពឹងផ្អែកលើ Implementation Details។
+> 2. **Comprehensive Test Coverage ៖** គ្របដណ្តប់លើ Rendering, Form Validation, Dynamic Coupon Discounts, និង Async Mock API Submissions។
+> 3. **Async Lifecycle Assertions ៖** ប្រើ `waitFor` និង Spy Mocks (`vi.fn()`) សម្រាប់ផ្ទៀងផ្ទាត់ Request Payloads និង Error Handling។
+
+
 ```mermaid
 flowchart TD
     subgraph UI_Component["<CheckoutForm /> Component"]

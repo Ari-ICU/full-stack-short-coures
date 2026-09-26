@@ -31,6 +31,14 @@ quiz:
 
 ## 🏛️ ១. ស្ថាបត្យកម្មពេញលេញនៃ Production Release Pipeline
 
+> [!IMPORTANT]
+> **ស្ថាបត្យកម្ម និងគោលបំណងគម្រោង (Project Architecture & Objectives) ៖**  
+> គម្រោង Enterprise Production Release & CI/CD Mini Project នេះអនុវត្តតាមស្តង់ដារ **Modern Frontend DevOps Pipeline**:
+> 1. **Automated CI Workflow ៖** រៀបចំ GitHub Actions Pipeline ដំណើរការ Linting, Vitest Test Suite, និង Production Build ដោយស្វ័យប្រវត្តិក្នងរាល់ Pull Request។
+> 2. **Zero-Downtime Deployment ៖** Deploy ទៅកាន់ Vercel / Netlify Edge Networks ជាមួយ SPA Fallback Routing Rules (`/* /index.html 200`)។
+> 3. **Environment Security ៖** គ្រប់គ្រង Production Environment Variables ជាមួយ Schema Validation និង Type Safety។
+
+
 ```mermaid
 flowchart TD
     subgraph Local_Dev["១. Local Development"]

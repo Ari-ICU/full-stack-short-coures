@@ -38,7 +38,7 @@ quiz:
     explanation: "ការបង្កើត Component ដូចជា `<AppProviders>` ឬការប្រើ Array Reduce Pattern ជួយចងក្រង Providers ជាច្រើនជាន់ឱ្យនៅសល់តែ Wrapper តែមួយគត់យ៉ាងស្រស់ស្អាត។"
 ---
 
-## 💡 ១. ហេតុអ្វីបានជាត្រូវរៀនមេរៀននេះ? (The Big Picture)
+## 💡 ១. Architecture Overview ៖ Integrating `useReducer` with Context API
 
 > [!IMPORTANT]
 > **និយមន័យ Custom Context Provider Pattern (Definition) ៖**  
@@ -55,7 +55,7 @@ quiz:
 
 ---
 
-## 🏛️ ២. បញ្ហាធំៗ ២ ដែលយើងត្រូវដោះស្រាយក្នុងមេរៀននេះ
+## 🏛️ ២. The 2 Architecture Challenges (Spaghetti Code & Unnecessary Re-renders)
 
 ```
 ┌──────────────────────────────────────────────┐
@@ -118,8 +118,8 @@ flowchart TD
 
 ដើម្បីឱ្យកូដមានរបៀបរៀបរយតាមស្តង់ដារ Enterprise យើងបំបែកការបង្កើត `AuthContext.jsx` ជាជំហានៗ ៖
 
-### ជំហានទី ១ ៖ បង្កើត Split Context Objects & Initial State
-បង្កើត Private Context ចំនួន ២ (State & Dispatch) រួមជាមួយ Initial State ៖
+### Step 1 ៖ Creating Split Context Objects & Initial State
+បំបែក Private Context ចំនួន ២ (State & Dispatch) រួមជាមួយ Initial State ៖
 
 ```javascript
 // src/context/AuthContext.jsx
@@ -141,7 +141,7 @@ const initialAuthState = {
 
 ---
 
-### ជំហានទី ២ ៖ បង្កើត Pure Auth Reducer Function
+### Step 2 ៖ Creating Pure Auth Reducer Function
 គ្រប់គ្រងការផ្លាស់ប្តូរ State ទៅតាម Action Types នីមួយៗ ៖
 
 ```javascript
@@ -209,7 +209,7 @@ function authReducer(state, action) {
 
 ---
 
-### ជំហានទី ៣ ៖ បង្កើត `<AuthProvider>` Component
+### Step 3 ៖ Creating `<AuthProvider>` Component
 ផ្គត់ផ្គង់ State និង Dispatch ដាច់ដោយឡែកពីគ្នា (Split Provider) ៖
 
 ```jsx
@@ -250,7 +250,7 @@ export function AuthProvider({ children }) {
 
 ---
 
-### ជំហានទី ៤ ៖ បង្កើត Custom Hooks ជាមួយ Fail-Safe Guards
+### Step 4 ៖ Custom Hooks with Fail-Safe Runtime Guards
 
 ```javascript
 // src/context/AuthContext.jsx
