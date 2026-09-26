@@ -1,75 +1,180 @@
 ---
 title: State Immutability (Updating Primitives, Arrays & Objects)
-description: សិក្សាពីគោលការណ៍ Immutability ក្នុង React, របៀប Update Objects ជាមួយ Spread Operator, និង Array Operations (add, filter, map)។
+description: សិក្សាស៊ីជម្រៅពីគោលការណ៍ Immutability ក្នុង React, របៀប Update Objects ជាមួយ Spread Operator, ការគ្រប់គ្រង Arrays (Add, Remove, Update) ដោយមិនធ្វើ Mutation, និង Line-by-Line Breakdown យោងតាម react.dev។
 objectives:
-  - យល់ពីមូលហេតុដែល React ទាមទារ Immutability
-  - ចេះ Update Nested Objects ដោយប្រើ Spread Operator `...`
-  - ចេះ Update Arrays ដោយប្រើ `.concat()`, `.filter()`, និង `.map()` (ជៀសវាង `push`/`splice`)
+  - យល់ច្បាស់ពីមូលហេតុបច្ចេកទេសដែល React ទាមទារ Immutability (Memory Reference & Shallow Equality)
+  - ចេះ Update Objects ដោយប្រើ Spread Operator `...` (Shallow Copy)
+  - ចេះ Update Arrays ដោយប្រើប្រាស់ Non-mutating Methods (`.concat()`, `.filter()`, `.map()`)
+  - យល់ដឹងពីគ្រោះថ្នាក់នៃ Mutating Methods (`push`, `pop`, `splice`, `reverse`) ក្នុង React State
 module: module-3-state-events
 order: 3
 quiz:
   - question: "ហេតុអ្វីបានជាការសរសេរ `todos.push(newItem)` រួចហៅ `setTodos(todos)` មិនធ្វើឱ្យ React Re-render?"
     options:
-      - "ព្រោះ `push()` ធ្វើការ Mutate array ចាស់ផ្ទាល់ ធ្វើឱ្យ Object Reference នៅដដែល React គិតថាគ្មានការប្រែប្រួល"
+      - "ព្រោះ `push()` ធ្វើការ Mutate array ចាស់ផ្ទាល់ ធ្វើឱ្យ Object Memory Reference នៅដដែល React គិតថាគ្មានការប្រែប្រួល"
       - "ព្រោះ Array មិនអាចផ្ទុក Object បាន"
       - "ព្រោះ push មិនមែនជា JavaScript method"
       - "ព្រោះ React មិនគាំទ្រ Todo list"
     correctAnswer: 1
     explanation: "React ប្រើ Shallow Equality Check (`prev === next`)។ នៅពេលអ្នក mutate array ជាមួយ `push()`, reference របស់ array មិនបានផ្លាស់ប្តូរទេ ដូច្នេះ React នឹង skip ការ re-render។ ត្រូវបង្កើត array ថ្មីជានិច្ច ដូចជា `setTodos([...todos, newItem])`។"
+
+  - question: "តើ Method មួយណាខាងក្រោមដែលជា Non-mutating Method សុវត្ថិភាពសម្រាប់កែប្រែ State ក្នុង React?"
+    options:
+      - "`items.filter(...)` និង `items.map(...)` — បង្កើត Array ថ្មីមួយដាច់ដោយឡែកពីគេ"
+      - "`items.splice(...)`"
+      - "`items.push(...)`"
+      - "`items.reverse()`"
+    correctAnswer: 1
+    explanation: "`.map()` និង `.filter()` មិនប៉ះពាល់ array ដើមឡើយ គឺវា return ចេញនូវ New Array Instance ដែលមាន Memory Reference ថ្មី ដែលជួយឱ្យ React ដឹងថា State ផ្លាស់ប្តូរ និង Re-render UI ភ្លាមៗ។"
 ---
 
-## 🛡️ 1. Why State Immutability Matters (Memory Reference & Diffing)
+## 🛡️ ១. Why State Immutability Matters (Memory Reference & Diffing)
 
 > [!IMPORTANT]
 > **និយមន័យ State Immutability (Definition) ៖**  
-> **State Immutability** គឺជាគោលការណ៍គ្រឹះក្នុង React ដែលចែងថា State មិនត្រូវកែប្រែដោយផ្ទាល់ (Never Mutate Directly) លើ Object ឬ Array ដែលមានស្រាប់ឡើយ។ រាល់ពេលធ្វើបច្ចុប្បន្នភាព State យើងត្រូវតែបង្កើត Copy ថ្មីមួយ (Shallow Copy តាមរយៈ Spread Operator `...` ឬ Non-mutating Methods ដូចជា `.map()`, `.filter()`) ដើម្បីឱ្យ React ដឹងថា Memory Reference បានផ្លាស់ប្តូរ និង Trigger Re-render បានត្រឹមត្រូវ។
+> យោងតាមគេហទំព័រផ្លូវការរបស់ React (**react.dev**), **State Immutability** គឺជាគោលការណ៍គ្រឹះដែលចែងថា State របស់ React ត្រូវតែចាត់ទុកដូចជា **Read-Only**។  
+> 
+> អ្នកមិនត្រូវធ្វើ **Direct Mutation** (ដូចជា `user.age = 26` ឬ `items.push(...)`) លើ Objects ឬ Arrays ដែលមានស្រាប់ឡើយ។ រាល់ពេលធ្វើបច្ចុប្បន្នភាព State អ្នកត្រូវតែបង្កើត **New Object / New Array Reference (Copy ថ្មី)** ជានិច្ច តាមរយៈ Spread Operator (`...`) ឬ Immutable Array Methods (`.map()`, `.filter()`) ដើម្បីឱ្យ React Shallow Equality Check (`oldState === newState`) វាយតម្លៃថា `false` និងធ្វើការ Re-render UI។
 
-នៅក្នុង JavaScript, Objects និង Arrays ត្រូវបានរក្សាទុកតាមរយៈ **Memory Reference**។ 
+```mermaid
+flowchart TD
+    subgraph MutationBug["❌ Direct Mutation (Why React Fails)"]
+        direction TB
+        M1["State in Memory: Address 0x001 [A, B]"] -->|items.push(C)| M2["Same Memory: Address 0x001 [A, B, C]"]
+        M2 --> M3["React Checks: 0x001 === 0x001 (True) ➔ SKIP Re-render! 😱 UI Stale!"]
+    end
 
-ប្រសិនបើអ្នក mutate properties របស់វាក្នុង memory ចាស់ (`user.name = "ថ្មី"`) នោះ `oldState === newState` នឹងនៅតែស្មើ `true` ជានិច្ច ដែលធ្វើឱ្យ React **មិនដឹងថាទិន្នន័យបានផ្លាស់ប្តូរឡើយ**។
+    subgraph ImmutabilityPattern["✅ Immutable Update (The React Way)"]
+        direction TB
+        I1["State in Memory: Address 0x001 [A, B]"] -->|setItems([...items, C])| I2["New Memory: Address 0x002 [A, B, C]"]
+        I2 --> I3["React Checks: 0x001 === 0x002 (False) ➔ TRIGGER Re-render! 🚀 UI Updates!"]
+    end
+
+    style MutationBug fill:#fff5f5,stroke:#e53e3e,stroke-width:2px,color:#7f1d1d
+    style ImmutabilityPattern fill:#f0fff4,stroke:#38a169,stroke-width:2px,color:#14532d
+```
 
 ---
 
-## 🛠️ 2. Updating Objects & Arrays Without Mutation (react.dev Patterns)
+## 🛠️ ២. ឧទាហរណ៍ជាក់ស្តែង ៖ Profile & Skills Manager
 
-### ក. Updating Objects:
-```javascript
-const [user, setUser] = useState({ name: 'រដ្ឋា', age: 25, role: 'Developer' });
+```jsx
+// src/components/ProfileManager.jsx
+import React, { useState } from 'react';
 
-// ❌ ខុស (Direct Mutation)
-user.age = 26;
-setUser(user);
+export default function ProfileManager() {
+  // 1. Object State
+  const [profile, setProfile] = useState({
+    name: 'រដ្ឋា',
+    role: 'Frontend Developer',
+    level: 1,
+  });
 
-// ✅ ត្រូវ (Spread Operator បង្កើត Object ថ្មី)
-setUser({
-  ...user,
-  age: 26,
-});
-```
+  // 2. Array of Objects State
+  const [skills, setSkills] = useState([
+    { id: 1, name: 'HTML & CSS', mastered: true },
+    { id: 2, name: 'React 19', mastered: false },
+  ]);
 
-### ខ. Updating Arrays (Add, Remove, Edit):
-```javascript
-const [items, setItems] = useState([
-  { id: 1, text: 'រៀន JSX', done: false },
-  { id: 2, text: 'រៀន State', done: false },
-]);
+  // A. Update Object ដោយប្រើ Spread Operator
+  const handleLevelUp = () => {
+    setProfile({
+      ...profile,          // Copy properties ចាស់ៗ
+      level: profile.level + 1, // Overwrite property ជាក់លាក់
+    });
+  };
 
-// 1. បន្ថែម Item ថ្មី (Add)
-const addItem = (newItem) => {
-  setItems([...items, newItem]);
-};
+  // B. Add to Array ដោយប្រើ Spread Operator
+  const handleAddSkill = (skillName) => {
+    const newSkill = { id: Date.now(), name: skillName, mastered: false };
+    setSkills([...skills, newSkill]); // បង្កើត Array ថ្មីមួយ
+  };
 
-// 2. លុប Item (Delete ដោយប្រើ filter)
-const deleteItem = (idToDelete) => {
-  setItems(items.filter((item) => item.id !== idToDelete));
-};
+  // C. Toggle Item ក្នុង Array ដោយប្រើ .map()
+  const handleToggleSkill = (skillId) => {
+    setSkills(
+      skills.map((s) =>
+        s.id === skillId ? { ...s, mastered: !s.mastered } : s
+      )
+    );
+  };
 
-// 3. កែប្រែ Item (Toggle/Edit ដោយប្រើ map)
-const toggleItem = (idToToggle) => {
-  setItems(
-    items.map((item) => 
-      item.id === idToToggle ? { ...item, done: !item.done } : item
-    )
+  // D. Delete Item ពី Array ដោយប្រើ .filter()
+  const handleDeleteSkill = (skillId) => {
+    setSkills(skills.filter((s) => s.id !== skillId));
+  };
+
+  return (
+    <div className="p-6 max-w-md mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-lg space-y-5">
+      {/* Profile Header */}
+      <div className="flex justify-between items-center border-b pb-3">
+        <div>
+          <h2 className="font-black text-lg text-slate-800 dark:text-white">{profile.name}</h2>
+          <p className="text-xs text-slate-500">{profile.role} • Level {profile.level}</p>
+        </div>
+        <button
+          onClick={handleLevelUp}
+          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition"
+        >
+          +1 Level Up
+        </button>
+      </div>
+
+      {/* Skills List */}
+      <div>
+        <h3 className="font-bold text-sm text-slate-700 dark:text-slate-300 mb-2">ជំនាញបច្ចេកទេស ៖</h3>
+        <ul className="space-y-2">
+          {skills.map((skill) => (
+            <li 
+              key={skill.id} 
+              className="flex justify-between items-center p-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs"
+            >
+              <span 
+                onClick={() => handleToggleSkill(skill.id)}
+                className={`cursor-pointer font-bold ${skill.mastered ? 'text-emerald-600 line-through' : 'text-slate-700 dark:text-slate-300'}`}
+              >
+                {skill.mastered ? '✓ ' : '○ '} {skill.name}
+              </span>
+              <button
+                onClick={() => handleDeleteSkill(skill.id)}
+                className="text-rose-500 hover:text-rose-700 font-bold px-2 py-0.5"
+              >
+                លុប
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <button
+        onClick={() => handleAddSkill('TypeScript Mastery')}
+        className="w-full py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl transition"
+      >
+        + បន្ថែមជំនាញ TypeScript
+      </button>
+    </div>
   );
-};
+}
 ```
+
+---
+
+## 🔍 ៣. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+| ផ្នែកនៃកូដ (Code Section) | បន្ទាត់កូដគន្លឹះ (Key Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **Object State** | `setProfile({ ...profile, level: profile.level + 1 })` | **Object Spread (`...profile`) ៖** ចម្លងរាល់ keys ទាំងអស់ (`name`, `role`) ចូលទៅក្នុង Object ថ្មី រួចកែប្រែតែ `level`។ នេះធានាថា Object Reference ថ្មីត្រូវបានបង្កើតឡើង។ |
+| **Array Add** | `setSkills([...skills, newSkill])` | **Array Spread (`[...skills, newItem]`) ៖** ជំនួសឱ្យការប្រើ `push()`, Spread Operator នឹងបង្កើត Array ថ្មីមួយដែលមានធាតុចាស់ៗទាំងអស់ និងថែម `newSkill` នៅចុងបញ្ចប់។ |
+| **Array Update (Toggle)** | `skills.map(s => s.id === skillId ? { ...s, mastered: !s.mastered } : s)` | **Non-mutating Map ៖** បើ ID ត្រូវគ្នា បង្កើត Object Copy ថ្មី `{ ...s, mastered: !s.mastered }`។ បើមិនត្រូវគ្នា ត្រឡប់ object ដដែល។ នេះធានាភាពសុក្រឹតនៃ Immutability។ |
+| **Array Delete** | `skills.filter(s => s.id !== skillId)` | **Non-mutating Filter ៖** បង្កើត Array ថ្មីមួយដែលមិនរាប់បញ្ចូល item ណាដែលមាន ID ស្មើនឹង item ដែលត្រូវលុប។ |
+
+---
+
+## 📋 ៤. តារាងសង្ខេប Array Methods (Safe vs Unsafe in React)
+
+| ប្រតិបត្តិការ | ❌ ហាមដាច់ខាត (Mutates State) | ✅ វិធីស្តង់ដារ (Immutable Copy) |
+| :--- | :--- | :--- |
+| **បន្ថែម (Add)** | `arr.push(item)`, `arr.unshift(item)` | `[...arr, item]`, `[item, ...arr]` |
+| **លុប (Delete)** | `arr.pop()`, `arr.shift()`, `arr.splice(idx, 1)` | `arr.filter(item => item.id !== id)` |
+| **កែប្រែ (Update)** | `arr[idx] = newItem`, `item.done = true` | `arr.map(item => item.id === id ? { ...item, ...updates } : item)` |
+| **តម្រៀប (Sort/Reverse)** | `arr.sort()`, `arr.reverse()` | `[...arr].sort()`, `[...arr].reverse()` (ចម្លងមុនសិន) |

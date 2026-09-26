@@ -196,12 +196,22 @@ export default function ResponsiveNavbar() {
 
 ---
 
-## 🔍 ៥. ការវិភាគចំណុចគន្លឹះ
+## 🔍 ៥. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
 
-1. **Clean Separation of Concerns:**  
-   Component `ResponsiveNavbar` មិនចាំបាច់ដឹងពីរបៀប register `window.addEventListener('resize')` ឬលុប `removeEventListener` ឡើយ — វាគ្រាន់តែអាន `{ isMobile }` ហើយ Render UI ភ្លាមៗ។
-2. **Derived Properties ក្នុង Return Object:**  
-   នៅក្នុង `useWindowSize` យើងមិនត្រឹមតែ return `width` ទេ ថែមទាំងផ្តល់នូវ boolean helpers ស្រាប់ (`isMobile`, `isTablet`, `isDesktop`) ដែលជួយសម្រួលការសរសេរកូដក្នុង UI Components យ៉ាងច្រើន។
+#### 📋 តារាងពន្យល់ Hook `useWindowSize.js` ៖
+| បន្ទាត់ (Line) | កូដ (Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **Line 113** | `export function useWindowSize() {` | **Custom Hook Convention ៖** ឈ្មោះត្រូវតែចាប់ផ្តើមដោយពាក្យបុព្វបទ `use` ជានិច្ច ដើម្បីឱ្យ React Linter អាចត្រួតពិនិត្យ Rules of Hooks ដោយស្វ័យប្រវត្តិ។ |
+| **Line 115-118** | `const [windowSize, setWindowSize] = useState(...)` | **SSR-Safe Initial State ៖** ពិនិត្យ `typeof window !== 'undefined'` ដើម្បីការពារ Server-Side Rendering Crash (Next.js/Node environment) មុនពេលអាន `window.innerWidth`។ |
+| **Line 120-136** | `useEffect(() => { ... }, []);` | **Event Listener & Cleanup ៖** ចុះឈ្មោះ `resize` event listener តែមួយដងគត់ពេល Mount (`[]`) និង Return **Cleanup Function** `removeEventListener` ដើម្បីការពារ Memory Leak ពេល Component Unmount។ |
+| **Line 138-144** | `return { width, height, isMobile, isTablet, isDesktop };` | **Returned Object API ៖** ផ្តល់ត្រឡប់នូវ Object ដែលផ្ទុកទាំង Dimension និង Booleans (`isMobile`, `isDesktop`) ដែលជួយឱ្យ UI component មិនបាច់សរសេរ Logic ប្រៀបធៀបដោយខ្លួនឯងឡើយ។ |
+
+#### 📋 តារាងពន្យល់ Component `ResponsiveNavbar.jsx` ៖
+| បន្ទាត់ (Line) | កូដ (Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **Line 158** | `const { width, isMobile, isDesktop } = useWindowSize();` | **Hook Consumption ៖** ហៅប្រើ Custom Hook ត្រឹម ១ បន្ទាត់ — Component នឹង Re-render ដោយស្វ័យប្រវត្តិតែនៅពេលទំហំ Screen ផ្លាស់ប្តូរឆ្លងកាត់ Breakpoint។ |
+| **Line 168** | `{width}px` | បង្ហាញទំហំទទឹងអេក្រង់បច្ចុប្បន្នលើ Badge។ |
+| **Line 173-191** | `{isMobile ? (<button>🍔 Menu</button>) : (<nav>...</nav>)}` | **Declarative Responsive UI ៖** ប្តូររវាង Mobile Hamburger Menu និង Desktop Navigation Bar យ៉ាងរលូន ដោយមិនបាច់ពឹងផ្អែកលើ CSS Media Query តែមួយមុខ។ |
 
 ---
 

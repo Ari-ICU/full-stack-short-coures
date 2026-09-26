@@ -284,9 +284,26 @@ export function TaskList() {
 }
 ```
 
+## 🔍 ៤. ការពន្យល់កូដមួយជួរៗ (Line-by-Line Breakdown)
+
+#### 📋 តារាងពន្យល់ Zustand Store `src/store/taskStore.js` ៖
+| បន្ទាត់ (Line) | កូដ (Code) | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **Store Creation** | `export const useTaskStore = create((set, get) => ({ ... }));` | **Zustand `create` Function ៖** បង្កើត React Hook ផ្ទាល់ខ្លួន (`useTaskStore`)។ ទទួល callback parameters `(set, get)` សម្រាប់ mutate state និង read state។ |
+| **Shallow Merge** | `set((state) => ({ tasks: [...state.tasks, newTask] }));` | **Automatic Shallow Merge ៖** Zustand ធ្វើ shallow merge ដោយស្វ័យប្រវត្តិ — អ្នកកែប្រែតែ property `tasks` នោះ properties ផ្សេងទៀត (`filter`, `isLoading`) នៅរក្សាដដែល។ |
+| **Getter via `get()`** | `getActiveTaskCount: () => get().tasks.filter(...).length` | **Store Getter ៖** ប្រើ `get()` ដើម្បីអាន State ក្នុង Store ដោយមិនបាច់ pass state ជា parameters ឡើយ។ |
+| **Async Action** | `fetchSampleTasks: async () => { set({ isLoading: true }); ... }` | **Built-in Async Support ៖** មិនបាច់ប្រើ Redux Thunk ឬ Middleware ឡើយ — អាចសរសេរ `async/await` ផ្ទាល់ក្នុង action និងហៅ `set()` តាមដំណាក់កាល។ |
+
+#### 📋 តារាងពន្យល់ Components ប្រើប្រាស់ Granular Selectors ៖
+| Component | កូដ Selector | ការពន្យល់លម្អិតបច្ចេកទេស |
+| :--- | :--- | :--- |
+| **`TaskHeader`** | `useTaskStore(s => s.getActiveTaskCount())` | Subscribe តែលើចំនួន Tasks ដែលសេសសល់ — ពេល User វាយអក្សរក្នុង Input គឺ `TaskHeader` មិន Re-render ឡើយ។ |
+| **`TaskInput`** | `useTaskStore(s => s.addTask)` | **Zero-Render Action Selector ៖** `addTask` គឺជា Function Reference ថេរ ដូច្នេះ `TaskInput` នឹងមិន Re-render ឡើយ ទោះបីជា List ខាងក្រោមមានការ Add/Delete រាប់ពាន់ដងក៏ដោយ! |
+| **`TaskList`** | `useTaskStore(s => s.tasks)` | Subscribe លើ `tasks` array — Re-render តែពេល array នេះមានការប្រែប្រួលធាតុប៉ុណ្ណោះ។ |
+
 ---
 
-## 🧠 ៤. សង្ខេប Mental Model ងាយចាំ
+## 🧠 ៥. សង្ខេប Mental Model ងាយចាំ
 
 | គោលការណ៍ | កូដសរសេរ | អត្ថប្រយោជន៍ |
 | :--- | :--- | :--- |
